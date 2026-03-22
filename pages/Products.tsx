@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useToast } from "../components/Toast";
 import { EmptyState, ErrorState, LoadingState } from "../components/AsyncState";
 import { useAuth } from "../App";
@@ -12,11 +12,26 @@ import {
 import type { Pagination, Product } from "../src/types/domain";
 
 const asCurrency = (value: number) =>
-  (Number(value || 0)).toLocaleString("pt-BR", {
+  Number(value || 0).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
     minimumFractionDigits: 2,
   });
+
+function calculatePreview(price: string, cost: string) {
+  const priceValue = Number(price || 0);
+  const costValue = Number(cost || 0);
+  const grossProfit = Number((priceValue - costValue).toFixed(2));
+  const netMargin = priceValue > 0 ? Number(((grossProfit / priceValue) * 100).toFixed(2)) : 0;
+  const warningLevel =
+    netMargin <= 0 ? "CRITICAL" : netMargin < 10 ? "WARNING" : "HEALTHY";
+
+  return {
+    grossProfit,
+    netMargin,
+    warningLevel,
+  } as Product["financials"];
+}
 
 const Products = () => {
   const { selectedCompanyId } = useAuth();
@@ -43,6 +58,14 @@ const Products = () => {
     price: "",
     cost: "",
   });
+
+  const preview = useMemo(() => calculatePreview(form.price, form.cost), [form.cost, form.price]);
+  const previewClassName =
+    preview?.warningLevel === "CRITICAL"
+      ? "border-red-500/40 bg-red-500/10 text-red-200"
+      : preview?.warningLevel === "WARNING"
+        ? "border-amber-400/40 bg-amber-400/10 text-amber-200"
+        : "border-lime-400/30 bg-lime-400/5 text-lime-300";
 
   const loadProducts = async () => {
     if (!selectedCompanyId) {
@@ -91,7 +114,7 @@ const Products = () => {
       addToast("Nome e obrigatorio.", "info");
       return;
     }
-    if (!form.price.trim() || Number.isNaN(Number(form.price))) {
+    if (!form.price.trim() || Number.isNaN(Number(form.price)) || Number(form.price) <= 0) {
       addToast("Preco invalido.", "info");
       return;
     }
@@ -157,8 +180,8 @@ const Products = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+    <main className="space-y-6">
+      <section className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Fase A · Dados completos</p>
           <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Produtos</h1>
@@ -182,14 +205,11 @@ const Products = () => {
             Atualizar
           </button>
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 lg:col-span-3">
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 gap-3 md:grid-cols-6"
-          >
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <article className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 lg:col-span-3">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-6">
             <input
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
@@ -227,9 +247,25 @@ const Products = () => {
               {editingId ? "Salvar alteracoes" : "Adicionar"}
             </button>
           </form>
-        </div>
 
-        <div className="space-y-2 rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
+          <div className={`mt-4 rounded-2xl border p-4 ${previewClassName}`}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em]">Margem em tempo real</p>
+                <p className="mt-2 text-2xl font-black">
+                  {preview?.netMargin?.toFixed(2) || "0.00"}%
+                </p>
+              </div>
+              <div className="text-sm">
+                <p>Lucro bruto: {asCurrency(preview?.grossProfit || 0)}</p>
+                {preview?.warningLevel === "WARNING" ? <p className="mt-1">⚠️ Margem abaixo de 10%.</p> : null}
+                {preview?.warningLevel === "CRITICAL" ? <p className="mt-1 font-bold">Prejuizo</p> : null}
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside className="space-y-2 rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
           <p className="text-sm font-semibold text-zinc-300">Filtros</p>
           <input
             value={search}
@@ -255,8 +291,8 @@ const Products = () => {
               ))}
             </select>
           </div>
-        </div>
-      </div>
+        </aside>
+      </section>
 
       {loading ? (
         <LoadingState label="Carregando produtos..." />
@@ -273,7 +309,7 @@ const Products = () => {
           description="Cadastre produtos para destravar margens, precificacao e LTV."
         />
       ) : (
-        <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 shadow-sm">
+        <section className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
             <div>
               <p className="text-sm font-semibold text-zinc-200">
@@ -316,10 +352,14 @@ const Products = () => {
               </thead>
               <tbody className="divide-y divide-zinc-900 text-zinc-100">
                 {items.map((product) => {
-                  const margin =
-                    product.cost !== null && product.cost !== undefined && product.price
-                      ? ((product.price - product.cost) / (product.price || 1)) * 100
-                      : null;
+                  const financials = product.financials || calculatePreview(String(product.price || 0), String(product.cost || 0));
+                  const financialClassName =
+                    financials.warningLevel === "CRITICAL"
+                      ? "bg-red-500/10 text-red-200"
+                      : financials.warningLevel === "WARNING"
+                        ? "border border-amber-400/30 bg-amber-400/5 text-amber-200"
+                        : "text-lime-300";
+
                   return (
                     <tr key={product.id} className="hover:bg-zinc-900/60">
                       <td className="px-3 py-2">
@@ -334,10 +374,14 @@ const Products = () => {
                       <td className="px-3 py-2 text-right text-zinc-200">
                         {product.cost !== null && product.cost !== undefined ? asCurrency(product.cost) : "—"}
                       </td>
-                      <td className="px-3 py-2 text-right text-sm">
-                        {margin !== null ? `${margin.toFixed(1)}%` : "—"}
+                      <td className="px-3 py-2 text-right">
+                        <div className={`inline-flex rounded-xl px-3 py-1 text-sm font-semibold ${financialClassName}`}>
+                          {financials.warningLevel === "CRITICAL"
+                            ? "Prejuizo"
+                            : `${financials.netMargin.toFixed(1)}%`}
+                        </div>
                       </td>
-                      <td className="px-3 py-2 text-right space-x-2">
+                      <td className="space-x-2 px-3 py-2 text-right">
                         <button
                           type="button"
                           className="rounded-lg border border-zinc-800 px-2 py-1 text-xs text-zinc-200 hover:border-lime-400"
@@ -359,9 +403,9 @@ const Products = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       )}
-    </div>
+    </main>
   );
 };
 

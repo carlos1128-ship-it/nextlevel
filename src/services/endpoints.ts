@@ -11,6 +11,7 @@ import type {
   TransactionItem,
   UserProfile,
   IntegrationStatus,
+  IntegrationDiagnostic,
   IntegrationProvider,
   ForecastResponse,
   StrategicAction,
@@ -55,6 +56,13 @@ function normalizeProduct(product: any): Product {
     category: product?.category ?? null,
     price: Number(product?.price ?? 0),
     cost: product?.cost === undefined || product?.cost === null ? null : Number(product.cost),
+    financials: product?.financials
+      ? {
+          grossProfit: Number(product.financials?.grossProfit ?? 0),
+          netMargin: Number(product.financials?.netMargin ?? 0),
+          warningLevel: product.financials?.warningLevel || "HEALTHY",
+        }
+      : undefined,
     createdAt: createdAt,
     updatedAt: updatedAt,
   } as Product;
@@ -635,7 +643,7 @@ export async function connectIntegration(
   payload: {
     provider: IntegrationProvider;
     accessToken: string;
-    externalId: string;
+    externalId?: string;
     status?: string;
   }
 ) {
@@ -644,6 +652,16 @@ export async function connectIntegration(
     companyId,
   });
   return data;
+}
+
+export async function getIntegrationDiagnostic(provider: string, companyId?: string | null) {
+  const { data } = await api.get<IntegrationDiagnostic>(`/integrations/status/${provider}`, {
+    params: companyId ? { companyId } : undefined,
+  });
+  return {
+    status: data?.status || "INACTIVE",
+    lastEventReceived: data?.lastEventReceived || null,
+  } as IntegrationDiagnostic;
 }
 
 export async function getForecast(params: {

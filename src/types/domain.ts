@@ -64,6 +64,11 @@ export interface Product {
   category?: string | null;
   price: number;
   cost?: number | null;
+  financials?: {
+    grossProfit: number;
+    netMargin: number;
+    warningLevel: "HEALTHY" | "WARNING" | "CRITICAL";
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -97,6 +102,11 @@ export interface IntegrationStatus {
   connected: boolean;
   externalId: string | null;
   updatedAt?: string | null;
+}
+
+export interface IntegrationDiagnostic {
+  status: "ACTIVE" | "INACTIVE" | "DORMANT";
+  lastEventReceived: string | null;
 }
 
 export interface ForecastPoint {
