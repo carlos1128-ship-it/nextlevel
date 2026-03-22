@@ -64,6 +64,8 @@ export interface Product {
   category?: string | null;
   price: number;
   cost?: number | null;
+  tax?: number | null;
+  shipping?: number | null;
   financials?: {
     grossProfit: number;
     netMargin: number;

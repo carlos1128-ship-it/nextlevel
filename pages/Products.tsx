@@ -10,6 +10,7 @@ import {
   updateProduct,
 } from "../src/services/endpoints";
 import type { Pagination, Product } from "../src/types/domain";
+import { calculateFinancialHealth } from "../src/utils/calculate-financial-health";
 
 const asCurrency = (value: number) =>
   Number(value || 0).toLocaleString("pt-BR", {
@@ -18,20 +19,15 @@ const asCurrency = (value: number) =>
     minimumFractionDigits: 2,
   });
 
-function calculatePreview(price: string, cost: string) {
-  const priceValue = Number(price || 0);
-  const costValue = Number(cost || 0);
-  const grossProfit = Number((priceValue - costValue).toFixed(2));
-  const netMargin = priceValue > 0 ? Number(((grossProfit / priceValue) * 100).toFixed(2)) : 0;
-  const warningLevel =
-    netMargin <= 0 ? "CRITICAL" : netMargin < 10 ? "WARNING" : "HEALTHY";
-
-  return {
-    grossProfit,
-    netMargin,
-    warningLevel,
-  } as Product["financials"];
-}
+const emptyForm = () => ({
+  name: "",
+  sku: "",
+  category: "",
+  price: "",
+  cost: "",
+  tax: "",
+  shipping: "",
+});
 
 const Products = () => {
   const { selectedCompanyId } = useAuth();
@@ -51,21 +47,24 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "",
-    sku: "",
-    category: "",
-    price: "",
-    cost: "",
-  });
+  const [form, setForm] = useState(emptyForm);
 
-  const preview = useMemo(() => calculatePreview(form.price, form.cost), [form.cost, form.price]);
+  const preview = useMemo(
+    () =>
+      calculateFinancialHealth(
+        Number(form.cost || 0),
+        Number(form.tax || 0),
+        Number(form.shipping || 0),
+        Number(form.price || 0),
+      ),
+    [form.cost, form.price, form.shipping, form.tax],
+  );
   const previewClassName =
-    preview?.warningLevel === "CRITICAL"
-      ? "border-red-500/40 bg-red-500/10 text-red-200"
-      : preview?.warningLevel === "WARNING"
-        ? "border-amber-400/40 bg-amber-400/10 text-amber-200"
-        : "border-lime-400/30 bg-lime-400/5 text-lime-300";
+    preview.warningLevel === "CRITICAL"
+      ? "border-red-500/50 bg-red-600/30 text-red-50"
+      : preview.warningLevel === "WARNING"
+        ? "border-amber-400/50 bg-amber-500/20 text-amber-50"
+        : "border-lime-400/40 bg-lime-500/15 text-lime-100";
 
   const loadProducts = async () => {
     if (!selectedCompanyId) {
@@ -127,6 +126,8 @@ const Products = () => {
           category: form.category || undefined,
           price: Number(form.price),
           cost: form.cost ? Number(form.cost) : undefined,
+          tax: form.tax ? Number(form.tax) : undefined,
+          shipping: form.shipping ? Number(form.shipping) : undefined,
         });
         addToast("Produto atualizado.", "success");
       } else {
@@ -136,10 +137,12 @@ const Products = () => {
           category: form.category || undefined,
           price: Number(form.price),
           cost: form.cost ? Number(form.cost) : undefined,
+          tax: form.tax ? Number(form.tax) : undefined,
+          shipping: form.shipping ? Number(form.shipping) : undefined,
         });
         addToast("Produto criado.", "success");
       }
-      setForm({ name: "", sku: "", category: "", price: "", cost: "" });
+      setForm(emptyForm());
       setEditingId(null);
       await loadProducts();
     } catch (err) {
@@ -155,6 +158,11 @@ const Products = () => {
       category: product.category || "",
       price: String(product.price ?? ""),
       cost: product.cost !== null && product.cost !== undefined ? String(product.cost) : "",
+      tax: product.tax !== null && product.tax !== undefined ? String(product.tax) : "",
+      shipping:
+        product.shipping !== null && product.shipping !== undefined
+          ? String(product.shipping)
+          : "",
     });
   };
 
@@ -191,7 +199,7 @@ const Products = () => {
             type="button"
             onClick={() => {
               setEditingId(null);
-              setForm({ name: "", sku: "", category: "", price: "", cost: "" });
+              setForm(emptyForm());
             }}
             className="rounded-xl border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-lime-400"
           >
@@ -209,57 +217,76 @@ const Products = () => {
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
         <article className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 lg:col-span-3">
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-6">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-12">
             <input
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="Nome do produto"
-              className="col-span-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="md:col-span-3 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             <input
               value={form.sku}
               onChange={(e) => setForm((prev) => ({ ...prev, sku: e.target.value }))}
               placeholder="SKU"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             <input
               value={form.category}
               onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
               placeholder="Categoria"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             <input
               value={form.price}
               onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
-              placeholder="Preco (BRL)"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              placeholder="Preco venda (BRL)"
+              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             <input
               value={form.cost}
               onChange={(e) => setForm((prev) => ({ ...prev, cost: e.target.value }))}
-              placeholder="Custo (opcional)"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              placeholder="Custo"
+              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            />
+            <input
+              value={form.tax}
+              onChange={(e) => setForm((prev) => ({ ...prev, tax: e.target.value }))}
+              placeholder="Impostos"
+              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            />
+            <input
+              value={form.shipping}
+              onChange={(e) => setForm((prev) => ({ ...prev, shipping: e.target.value }))}
+              placeholder="Frete"
+              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-xl bg-lime-400 px-3 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
+              className="md:col-span-1 rounded-xl bg-lime-400 px-3 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
             >
-              {editingId ? "Salvar alteracoes" : "Adicionar"}
+              {editingId ? "Salvar" : "Add"}
             </button>
           </form>
 
-          <div className={`mt-4 rounded-2xl border p-4 ${previewClassName}`}>
+          <div
+            className={`mt-4 rounded-2xl border p-4 transition-colors ${previewClassName}`}
+            role="status"
+            aria-live="polite"
+            aria-label={`Margem ${preview.netMargin.toFixed(1)} por cento, lucro ${asCurrency(preview.grossProfit)}`}
+          >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.2em]">Margem em tempo real</p>
-                <p className="mt-2 text-2xl font-black">
-                  {preview?.netMargin?.toFixed(2) || "0.00"}%
-                </p>
+                <p className="mt-2 text-2xl font-black">{preview.netMargin.toFixed(2)}%</p>
               </div>
               <div className="text-sm">
-                <p>Lucro bruto: {asCurrency(preview?.grossProfit || 0)}</p>
-                {preview?.warningLevel === "WARNING" ? <p className="mt-1">⚠️ Margem abaixo de 10%.</p> : null}
-                {preview?.warningLevel === "CRITICAL" ? <p className="mt-1 font-bold">Prejuizo</p> : null}
+                <p>Lucro liquido (estim.): {asCurrency(preview.grossProfit)}</p>
+                {preview.warningLevel === "WARNING" ? (
+                  <p className="mt-1">⚠️ Margem abaixo de 10%.</p>
+                ) : null}
+                {preview.warningLevel === "CRITICAL" ? (
+                  <p className="mt-1 font-bold">Prejuizo ou margem zero</p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -352,13 +379,20 @@ const Products = () => {
               </thead>
               <tbody className="divide-y divide-zinc-900 text-zinc-100">
                 {items.map((product) => {
-                  const financials = product.financials || calculatePreview(String(product.price || 0), String(product.cost || 0));
+                  const financials =
+                    product.financials ??
+                    calculateFinancialHealth(
+                      Number(product.cost ?? 0),
+                      Number(product.tax ?? 0),
+                      Number(product.shipping ?? 0),
+                      Number(product.price ?? 0),
+                    );
                   const financialClassName =
                     financials.warningLevel === "CRITICAL"
-                      ? "bg-red-500/10 text-red-200"
+                      ? "border border-red-500/50 bg-red-500/25 text-red-100"
                       : financials.warningLevel === "WARNING"
-                        ? "border border-amber-400/30 bg-amber-400/5 text-amber-200"
-                        : "text-lime-300";
+                        ? "border border-amber-400/40 bg-amber-400/15 text-amber-100"
+                        : "border border-lime-400/25 bg-lime-400/10 text-lime-200";
 
                   return (
                     <tr key={product.id} className="hover:bg-zinc-900/60">

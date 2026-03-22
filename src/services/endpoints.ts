@@ -56,6 +56,11 @@ function normalizeProduct(product: any): Product {
     category: product?.category ?? null,
     price: Number(product?.price ?? 0),
     cost: product?.cost === undefined || product?.cost === null ? null : Number(product.cost),
+    tax: product?.tax === undefined || product?.tax === null ? null : Number(product.tax),
+    shipping:
+      product?.shipping === undefined || product?.shipping === null
+        ? null
+        : Number(product.shipping),
     financials: product?.financials
       ? {
           grossProfit: Number(product.financials?.grossProfit ?? 0),
@@ -497,7 +502,15 @@ export async function getProducts(params?: {
 
 export async function createProduct(
   companyId: string,
-  payload: { name: string; price: number; sku?: string; category?: string; cost?: number }
+  payload: {
+    name: string;
+    price: number;
+    sku?: string;
+    category?: string;
+    cost?: number;
+    tax?: number;
+    shipping?: number;
+  },
 ) {
   const { data } = await api.post<Product>("/products", { ...payload, companyId });
   return normalizeProduct(data);
@@ -506,7 +519,15 @@ export async function createProduct(
 export async function updateProduct(
   companyId: string,
   id: string,
-  payload: Partial<{ name: string; price: number; sku?: string; category?: string; cost?: number }>
+  payload: Partial<{
+    name: string;
+    price: number;
+    sku?: string;
+    category?: string;
+    cost?: number;
+    tax?: number;
+    shipping?: number;
+  }>,
 ) {
   const { data } = await api.put<Product>(`/products/${id}`, { ...payload, companyId });
   return normalizeProduct(data);
