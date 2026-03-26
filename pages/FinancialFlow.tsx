@@ -12,6 +12,7 @@ import { useToast } from "../components/Toast";
 import { createTransaction, getTransactions } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
 import { EmptyState, ErrorState, LoadingState } from "../components/AsyncState";
+import MarginCalculator from "../components/MarginCalculator";
 import type { TransactionItem } from "../src/types/domain";
 import { useAuth } from "../App";
 
@@ -172,6 +173,8 @@ const FinancialFlow = () => {
           <p className="mt-2 text-sm font-bold text-lime-400">+2.1% vs. periodo anterior</p>
         </div>
       </div>
+
+      <MarginCalculator freeUsesLeft={7} />
 
       {loadingPage ? (
         <LoadingState label="Carregando transacoes..." />

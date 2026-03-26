@@ -239,6 +239,13 @@ const App = () => {
 
 const AppContent = () => {
   const { isLoggedIn } = useAuth();
+  const dashboardShell = (
+    <ProtectedRoute>
+      <Layout>
+        <Dashboard />
+      </Layout>
+    </ProtectedRoute>
+  );
 
   return (
     <BrowserRouter>
@@ -253,17 +260,8 @@ const AppContent = () => {
         </div>
       }>
         <Routes>
-          <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <LoginPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
+          <Route path="/" element={isLoggedIn ? dashboardShell : <LoginPage />} />
           <Route
             path="/dashboard"
             element={

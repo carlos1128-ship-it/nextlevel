@@ -125,6 +125,67 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.sales-float {
+  animation: salesFloat 6s ease-in-out infinite;
+}
+
+@keyframes salesFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.sales-border {
+  box-shadow:
+    0 0 0 1px rgba(190, 242, 100, 0.18),
+    0 18px 44px rgba(0, 0, 0, 0.35),
+    0 0 28px rgba(163, 230, 53, 0.12);
+  animation: salesBorderPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes salesBorderPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(190, 242, 100, 0.18),
+      0 18px 44px rgba(0, 0, 0, 0.35),
+      0 0 28px rgba(163, 230, 53, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(190, 242, 100, 0.34),
+      0 22px 54px rgba(0, 0, 0, 0.42),
+      0 0 42px rgba(163, 230, 53, 0.22);
+  }
+}
+
+.sales-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  transform: translateX(-130%);
+  animation: salesSheen 4.8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes salesSheen {
+  to {
+    transform: translateX(130%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

@@ -1,0 +1,32 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" rx="36" fill="#07111F"/>
+  <circle cx="181" cy="126" r="220" fill="url(#paint0_radial)" fill-opacity="0.9"/>
+  <circle cx="1008" cy="533" r="250" fill="url(#paint1_radial)" fill-opacity="0.7"/>
+  <rect x="64" y="72" width="1072" height="486" rx="32" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)"/>
+  <rect x="96" y="104" width="92" height="92" rx="24" fill="#B6FF00"/>
+  <path d="M128 126H145.5C160.688 126 173 138.312 173 153.5V172" stroke="#07111F" stroke-width="10" stroke-linecap="round"/>
+  <path d="M128 174V126L173 174V126" stroke="#07111F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="224" y="170" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="0.08em">NEXT LEVEL PLATFORM</text>
+  <text x="96" y="272" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="900">SaaS de Automacao</text>
+  <text x="96" y="348" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="900">de Vendas com IA</text>
+  <text x="96" y="430" fill="#B9C2CF" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="500">
+    Automatize atendimento, acompanhe margem e use Inteligencia Artificial
+  </text>
+  <text x="96" y="470" fill="#B9C2CF" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="500">
+    para vender mais com menos atrito operacional.
+  </text>
+  <rect x="96" y="504" width="248" height="58" rx="20" fill="#B6FF00"/>
+  <text x="128" y="542" fill="#07111F" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800">Automacao de Vendas</text>
+  <rect x="362" y="504" width="218" height="58" rx="20" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.12)"/>
+  <text x="393" y="542" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700">Inteligencia Artificial</text>
+  <defs>
+    <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(181 126) rotate(90) scale(220)">
+      <stop stop-color="#B6FF00"/>
+      <stop offset="1" stop-color="#B6FF00" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="paint1_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1008 533) rotate(90) scale(250)">
+      <stop stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

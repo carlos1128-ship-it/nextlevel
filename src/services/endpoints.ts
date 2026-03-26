@@ -685,6 +685,26 @@ export async function getIntegrationDiagnostic(provider: string, companyId?: str
   } as IntegrationDiagnostic;
 }
 
+export async function getIntegrationOAuthSession(
+  provider: string,
+  companyId?: string | null,
+  returnTo?: string,
+) {
+  const { data } = await api.get<{
+    provider: string;
+    authUrl: string;
+    callbackUrl: string;
+    mode: "oauth" | "mock";
+  }>(`/auth/${provider}`, {
+    params: {
+      companyId: companyId || undefined,
+      returnTo: returnTo || undefined,
+    },
+  });
+
+  return data;
+}
+
 export async function getForecast(params: {
   companyId?: string | null;
   type: "SALES" | "DEMAND" | "REVENUE";
