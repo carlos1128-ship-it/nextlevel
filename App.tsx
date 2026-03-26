@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext, useContext, ReactNode, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
@@ -8,11 +8,13 @@ import Integrations from './pages/Integrations';
 import Companies from './pages/Companies';
 import LoginPage from './pages/LoginPage';
 import { ToastProvider } from './components/Toast';
+import AppErrorBoundary from './src/components/AppErrorBoundary';
 import { useDetailLevel } from './src/hooks/useDetailLevel';
 import { useTheme } from './src/hooks/useTheme';
-import type { DetailLevel } from './src/types/domain';
+import type { Company, DetailLevel, UserNiche } from './src/types/domain';
+import NotFound from './src/app/not-found';
+import { applyMetadata, resolveMetadata } from './src/app/layout';
 import { getCompanies, getUserProfile } from './src/services/endpoints';
-import type { Company } from './src/types/domain';
 import api from './src/services/api';
 
 // Lazy load pages with heavy dependencies
@@ -36,13 +38,15 @@ interface AuthContextType {
   isProfileReady: boolean;
   username: string | null;
   email: string | null;
+  niche: UserNiche | null;
   selectedCompanyId: string | null;
   detailLevel: DetailLevel;
   theme: 'dark' | 'light';
   setSelectedCompanyId: (value: string | null) => void;
+  setNiche: (value: UserNiche | null) => void;
   setDetailLevel: (value: DetailLevel) => void;
   setTheme: (value: 'dark' | 'light') => void;
-  login: (user: { name?: string | null; email?: string | null; admin?: boolean }) => void;
+  login: (user: { name?: string | null; email?: string | null; admin?: boolean; niche?: UserNiche | null }) => void;
   logout: () => void;
 }
 
@@ -51,18 +55,32 @@ const COMPANY_ID_STORAGE_KEY = "selectedCompanyId";
 const AUTH_USER_STORAGE_KEY = "auth_user";
 const getCompanyId = (company: Partial<Company> | null | undefined) => company?.id || company?._id || null;
 
+type StoredAuthUser = {
+  name: string | null;
+  email: string | null;
+  admin: boolean;
+  niche: UserNiche | null;
+};
+
+function writeStoredUser(user: StoredAuthUser) {
+  localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
+}
+
 function readStoredUser() {
   const raw = localStorage.getItem(AUTH_USER_STORAGE_KEY);
-  if (!raw) return { name: null as string | null, email: null as string | null, admin: false };
+  if (!raw) {
+    return { name: null as string | null, email: null as string | null, admin: false, niche: null as UserNiche | null };
+  }
   try {
-    const parsed = JSON.parse(raw) as { name?: string | null; email?: string | null; admin?: boolean };
+    const parsed = JSON.parse(raw) as { name?: string | null; email?: string | null; admin?: boolean; niche?: UserNiche | null };
     return {
       name: parsed.name || null,
       email: parsed.email || null,
       admin: Boolean(parsed.admin),
+      niche: parsed.niche || null,
     };
   } catch {
-    return { name: null as string | null, email: null as string | null, admin: false };
+    return { name: null as string | null, email: null as string | null, admin: false, niche: null as UserNiche | null };
   }
 }
 
@@ -83,6 +101,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const [isProfileReady, setIsProfileReady] = useState(!hasStoredToken);
   const [username, setUsername] = useState<string | null>(storedUser.name);
   const [email, setEmail] = useState<string | null>(storedUser.email);
+  const [niche, setNicheState] = useState<UserNiche | null>(storedUser.niche);
   const [selectedCompanyId, setSelectedCompanyIdState] = useState<string | null>(null);
   const { detailLevel, setDetailLevel } = useDetailLevel();
   const { theme, setTheme } = useTheme();
@@ -105,16 +124,29 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     localStorage.removeItem(COMPANY_ID_STORAGE_KEY);
   };
 
-  const login = (user: { name?: string | null; email?: string | null; admin?: boolean }) => {
+  const setNiche = (value: UserNiche | null) => {
+    setNicheState(value);
+    writeStoredUser({
+      name: username,
+      email,
+      admin: isAdmin,
+      niche: value,
+    });
+  };
+
+  const login = (user: { name?: string | null; email?: string | null; admin?: boolean; niche?: UserNiche | null }) => {
     setIsLoggedIn(true);
     setIsAdmin(Boolean(user.admin));
     setIsProfileReady(true);
     setUsername(user.name || null);
     setEmail(user.email || null);
-    localStorage.setItem(
-      AUTH_USER_STORAGE_KEY,
-      JSON.stringify({ name: user.name || null, email: user.email || null, admin: Boolean(user.admin) })
-    );
+    setNicheState(user.niche || null);
+    writeStoredUser({
+      name: user.name || null,
+      email: user.email || null,
+      admin: Boolean(user.admin),
+      niche: user.niche || null,
+    });
   };
 
   const logout = () => {
@@ -130,6 +162,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     setIsProfileReady(true);
     setUsername(null);
     setEmail(null);
+    setNicheState(null);
     setSelectedCompanyId(null);
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -148,14 +181,13 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
         if (typeof profile?.admin === 'boolean') setIsAdmin(profile.admin);
         if (profile?.detailLevel) setDetailLevel(profile.detailLevel);
         if (profile?.theme) setTheme(profile.theme);
-        localStorage.setItem(
-          AUTH_USER_STORAGE_KEY,
-          JSON.stringify({
-            name: profile?.name || null,
-            email: profile?.email || null,
-            admin: Boolean(profile?.admin),
-          })
-        );
+        setNicheState(profile?.niche || null);
+        writeStoredUser({
+          name: profile?.name || null,
+          email: profile?.email || null,
+          admin: Boolean(profile?.admin),
+          niche: profile?.niche || null,
+        });
       })
       .catch(() => {
         // ignore profile bootstrap errors to avoid blocking app load
@@ -199,10 +231,12 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     isProfileReady,
     username,
     email,
+    niche,
     selectedCompanyId,
     detailLevel,
     theme,
     setSelectedCompanyId,
+    setNiche,
     setDetailLevel,
     setTheme,
     login,
@@ -231,10 +265,23 @@ const App = () => {
   return (
     <AuthProvider>
       <ToastProvider>
-        <AppContent />
+        <AppErrorBoundary>
+          <AppContent />
+        </AppErrorBoundary>
       </ToastProvider>
     </AuthProvider>
   );
+};
+
+const MetadataSync = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const pathname = location.pathname === "*" ? "/404" : location.pathname;
+    applyMetadata(resolveMetadata(pathname));
+  }, [location.pathname]);
+
+  return null;
 };
 
 const AppContent = () => {
@@ -249,6 +296,7 @@ const AppContent = () => {
 
   return (
     <BrowserRouter>
+      <MetadataSync />
       <Suspense fallback={
         <div className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen flex items-center justify-center">
           <div className="text-center">
@@ -285,7 +333,7 @@ const AppContent = () => {
           <Route path="/admin/system-health" element={<AdminRoute><Layout><SystemHealth /></Layout></AdminRoute>} />
           <Route path="/command-center" element={<ProtectedRoute><Layout><CommandCenter /></Layout></ProtectedRoute>} />
           <Route path="/plans" element={<ProtectedRoute><Layout><Plans /></Layout></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

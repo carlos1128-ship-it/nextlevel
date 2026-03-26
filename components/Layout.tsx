@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import type { NavItem } from "../types";
 import {
@@ -20,30 +20,69 @@ import {
   ShieldIcon,
 } from "./icons";
 import { useAuth } from "../App";
+import { useToast } from "./Toast";
+import { updateUserProfile } from "../src/services/endpoints";
+import { getErrorMessage } from "../src/services/error";
+import type { UserNiche } from "../src/types/domain";
+import NicheModal from "../src/components/onboarding/NicheModal";
 
-const navItems: NavItem[] = [
-  { path: "/", name: "Inicio", icon: HomeIcon, isPrimary: true },
-  { path: "/reports", name: "Relatorios", icon: BarChartIcon, isPrimary: true },
-  { path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
-  { path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
-  { path: "/market-intel", name: "Mercado", icon: RadarIcon, isPrimary: true },
-  { path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon },
-  { path: "/products", name: "Produtos", icon: PackageIcon },
-  { path: "/customers", name: "Clientes", icon: UsersIcon },
-  { path: "/costs", name: "Custos", icon: ReceiptIcon },
-  { path: "/plans", name: "Planos", icon: CreditCardIcon },
-  { path: "/settings", name: "Configuracoes", icon: SettingsIcon },
-  { path: "/profile", name: "Perfil", icon: UserIcon },
-  { path: "/integrations", name: "Integracoes", icon: PuzzleIcon },
-  { path: "/companies", name: "Empresas", icon: BuildingIcon },
-  { path: "/financial-flow", name: "Fluxo Financeiro", icon: DollarSignIcon },
+type SidebarNavItem = NavItem & { id: string };
+
+const navItems: SidebarNavItem[] = [
+  { id: "home", path: "/", name: "Inicio", icon: HomeIcon, isPrimary: true },
+  { id: "reports", path: "/reports", name: "Relatorios", icon: BarChartIcon, isPrimary: true },
+  { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
+  { id: "insights", path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
+  { id: "market", path: "/market-intel", name: "Mercado", icon: RadarIcon, isPrimary: true },
+  { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
+  { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon },
+  { id: "products", path: "/products", name: "Produtos", icon: PackageIcon },
+  { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
+  { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
+  { id: "plans", path: "/plans", name: "Planos", icon: CreditCardIcon },
+  { id: "settings", path: "/settings", name: "Configuracoes", icon: SettingsIcon },
+  { id: "profile", path: "/profile", name: "Perfil", icon: UserIcon },
+  { id: "integrations", path: "/integrations", name: "Integracoes", icon: PuzzleIcon },
+  { id: "companies", path: "/companies", name: "Empresas", icon: BuildingIcon },
+  { id: "financial-flow", path: "/financial-flow", name: "Fluxo Financeiro", icon: DollarSignIcon },
 ];
 
-const adminNavItem: NavItem = { path: "/admin/system-health", name: "System Health", icon: ShieldIcon };
+const adminNavItem: SidebarNavItem = {
+  id: "admin-system-health",
+  path: "/admin/system-health",
+  name: "System Health",
+  icon: ShieldIcon,
+};
+
+function moveItemsToFront(items: SidebarNavItem[], ids: string[]) {
+  const front = ids
+    .map((id) => items.find((item) => item.id === id))
+    .filter((item): item is SidebarNavItem => Boolean(item));
+  const remaining = items.filter((item) => !ids.includes(item.id));
+  return [...front, ...remaining];
+}
+
+function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavItem[] {
+  let items = navItems.map((item) =>
+    item.id === "products" && niche === "MEDICINA"
+      ? { ...item, name: "Servicos/Consultas" }
+      : item,
+  );
+
+  if (niche === "MEDICINA") {
+    items = moveItemsToFront(items, ["attendant"]);
+  }
+
+  if (niche === "SERVICOS") {
+    items = moveItemsToFront(items, ["costs", "projects"]);
+  }
+
+  return isAdmin ? [...items, adminNavItem] : items;
+}
 
 const Sidebar = () => {
-  const { username, isAdmin } = useAuth();
-  const items = isAdmin ? [...navItems, adminNavItem] : navItems;
+  const { username, isAdmin, niche } = useAuth();
+  const items = useMemo(() => resolveNavItems(isAdmin, niche), [isAdmin, niche]);
   return (
     <aside className="fixed left-0 top-0 z-50 hidden h-full w-64 flex-col justify-between border-r border-zinc-900 bg-[#080b10] p-6 text-zinc-100 lg:flex">
       <div>
@@ -114,9 +153,9 @@ const Header = () => {
   );
 };
 
-const BottomNav = () => (
+const BottomNav = ({ items }: { items: SidebarNavItem[] }) => (
   <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around border-t border-zinc-200 bg-white/95 p-2 backdrop-blur lg:hidden dark:border-zinc-800 dark:bg-zinc-950/95" aria-label="Menu Mobile">
-    {(Array.isArray(navItems) ? navItems : []).filter((item) => item.isPrimary).map((item) => (
+    {(Array.isArray(items) ? items : []).filter((item) => item.isPrimary).map((item) => (
       <NavLink
         key={item.path}
         to={item.path}
@@ -174,16 +213,52 @@ const FloatingActionButton = () => {
   );
 };
 
-const Layout = ({ children }: { children: ReactNode }) => (
-  <div className="min-h-screen overflow-x-hidden bg-[#040507] text-zinc-100">
-    <Sidebar />
-    <main className="min-h-screen min-h-0 flex-col lg:pl-64">
-      <Header />
-      <div className="mx-auto w-full max-w-7xl flex-1 min-h-0 overflow-x-hidden p-4 md:p-8">{children}</div>
-    </main>
-    <BottomNav />
-    <FloatingActionButton />
-  </div>
-);
+const Layout = ({ children }: { children: ReactNode }) => {
+  const { isAdmin, niche, setNiche } = useAuth();
+  const { addToast } = useToast();
+  const [selectedNiche, setSelectedNiche] = useState<UserNiche | null>(niche);
+  const [savingNiche, setSavingNiche] = useState(false);
+  const items = useMemo(() => resolveNavItems(isAdmin, niche), [isAdmin, niche]);
+  const showNicheModal = niche === null;
+
+  const handleConfirmNiche = async () => {
+    if (!selectedNiche) return;
+
+    try {
+      setSavingNiche(true);
+      const updatedProfile = await updateUserProfile({ niche: selectedNiche });
+      setNiche(updatedProfile.niche || selectedNiche);
+      addToast("Painel personalizado com sucesso.", "success");
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel salvar o nicho agora."), "error");
+    } finally {
+      setSavingNiche(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-[#040507] text-zinc-100">
+      <Sidebar />
+      <main className="min-h-screen min-h-0 flex-col lg:pl-64">
+        <Header />
+        <div className="mx-auto w-full max-w-7xl flex-1 min-h-0 overflow-x-hidden p-4 md:p-8">{children}</div>
+      </main>
+      <BottomNav items={items} />
+      <FloatingActionButton />
+
+      {showNicheModal ? (
+        <>
+          <div className="fixed inset-0 z-[60] bg-[#020408]/55 backdrop-blur-[8px]" />
+          <NicheModal
+            selectedNiche={selectedNiche}
+            onSelect={setSelectedNiche}
+            onConfirm={handleConfirmNiche}
+            loading={savingNiche}
+          />
+        </>
+      ) : null}
+    </div>
+  );
+};
 
 export default Layout;

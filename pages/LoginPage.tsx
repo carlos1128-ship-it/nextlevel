@@ -12,6 +12,8 @@ import {
   PuzzleIcon,
 } from "../components/icons";
 import { api } from "../services/api";
+import PricingCard, { type PricingPlan } from "../src/components/pricing/PricingCard";
+import type { UserNiche } from "../src/types/domain";
 
 function getFirstString(values: unknown[]): string | null {
   for (const value of values) {
@@ -56,25 +58,27 @@ const featureItems: Array<{
   },
 ];
 
-const pricingPlans = [
+const pricingPlans: PricingPlan[] = [
   {
     name: "Start",
-    price: "R$ 0",
-    cadence: "/mes",
-    summary: "Perfeito para validar a operacao e provar valor em poucos dias.",
+    eyebrow: "Plano Start",
+    priceDisplay: "R$ 0,00 - 7 Dias Gratis",
+    summary: "Perfeito para validar a operacao com onboarding rapido e risco quase zero.",
     features: [
       "Calculadora de margem",
       "1 canal conectado",
       "Painel financeiro essencial",
       "Suporte por base de conhecimento",
     ],
-    cta: "Comecar gratis",
+    cta: "Ativar trial gratis",
     recommended: false,
+    microcopy:
+      "Cartao obrigatorio para validacao. Cobranca apenas apos o 7o dia. Cancele com um clique.",
   },
   {
     name: "Pro",
-    price: "R$ 147",
-    cadence: "/mes",
+    eyebrow: "Plano Pro",
+    priceDisplay: "R$ 147/mes",
     summary: "Plano para quem quer automatizar vendas e enxergar ROI de verdade.",
     features: [
       "WhatsApp e Instagram automatizados",
@@ -87,8 +91,8 @@ const pricingPlans = [
   },
   {
     name: "Scale",
-    price: "R$ 297",
-    cadence: "/mes",
+    eyebrow: "Plano Scale",
+    priceDisplay: "R$ 297/mes",
     summary: "Escala com mais controle, mais canais e menos operacao manual.",
     features: [
       "Tudo do plano Pro",
@@ -164,7 +168,7 @@ const LoginPage = () => {
         access_token?: string;
         refreshToken?: string;
         refresh_token?: string;
-        user?: { name?: string; admin?: boolean };
+        user?: { name?: string; admin?: boolean; niche?: UserNiche | null };
       }>("/auth/login", {
         email,
         password,
@@ -202,6 +206,7 @@ const LoginPage = () => {
         name: response.data.user?.name || email,
         email,
         admin: Boolean(response.data.user?.admin),
+        niche: response.data.user?.niche || null,
       });
       navigate("/", { replace: true });
     } catch (err: unknown) {
@@ -305,16 +310,16 @@ const LoginPage = () => {
         <section className="grid gap-10 pb-12 pt-12 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:items-start">
           <div className="space-y-8">
             <div className="inline-flex items-center rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-lime-200">
-              Maquina de vendas para operacoes que querem crescer
+              Plataforma premium para vender com margem de verdade
             </div>
 
             <div>
-              <h1 className="max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="hero-display max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Domine Seu Negocio com um Clique
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-300 sm:text-lg">
-                Automatize atendimento, enxergue margem real e conecte canais que trazem dinheiro.
-                Cada acao da plataforma foi desenhada para devolver tempo, previsibilidade e ROI.
+                A Next Level e o Cerebro Tatico que conecta suas vendas a margem real,
+                automatiza atendimento e transforma rotina operacional em decisao rapida.
               </p>
             </div>
 
@@ -324,7 +329,7 @@ const LoginPage = () => {
                 onClick={focusRegister}
                 className="inline-flex animate-pulse items-center justify-center gap-3 rounded-2xl bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-zinc-950 shadow-[0_0_34px_rgba(163,230,53,0.32)] transition hover:-translate-y-0.5 hover:brightness-105"
               >
-                Assine Agora
+                Ativar 7 Dias Gratis
                 <ArrowUpRightIcon className="h-4 w-4" />
               </button>
               <button
@@ -493,7 +498,7 @@ const LoginPage = () => {
                   {loading
                     ? "Processando"
                     : isRegisterView
-                      ? "Criar conta e testar"
+                      ? "Criar conta e iniciar trial"
                       : "Entrar no painel"}
                 </button>
               </form>
@@ -577,55 +582,7 @@ const LoginPage = () => {
 
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {pricingPlans.map((plan) => (
-              <article
-                key={plan.name}
-                className={`relative overflow-hidden rounded-[32px] border p-6 transition duration-200 hover:-translate-y-1 ${
-                  plan.recommended
-                    ? "sales-border sales-sheen border-lime-400/40 bg-[linear-gradient(180deg,rgba(163,230,53,0.12),rgba(9,9,11,0.98))]"
-                    : "border-white/10 bg-white/5"
-                }`}
-              >
-                {plan.recommended ? (
-                  <span className="absolute right-5 top-5 rounded-full bg-lime-400 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-950 shadow-[0_0_20px_rgba(163,230,53,0.4)]">
-                    Recomendado
-                  </span>
-                ) : null}
-
-                <div className="pr-24">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                    {plan.name}
-                  </p>
-                  <div className="mt-4 flex items-end gap-2">
-                    <span className="text-4xl font-black tracking-tight text-white">{plan.price}</span>
-                    <span className="pb-1 text-sm text-zinc-500">{plan.cadence}</span>
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-zinc-400">{plan.summary}</p>
-                </div>
-
-                <div className="mt-6 space-y-3">
-                  {plan.features.map((feature) => (
-                    <div
-                      key={feature}
-                      className="flex items-start gap-3 rounded-2xl border border-white/10 bg-zinc-950/40 px-4 py-3"
-                    >
-                      <span className="mt-1 h-2.5 w-2.5 rounded-full bg-lime-300 shadow-[0_0_12px_rgba(190,242,100,0.65)]" />
-                      <span className="text-sm text-zinc-200">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={focusRegister}
-                  className={`mt-6 inline-flex w-full items-center justify-center gap-3 rounded-2xl px-4 py-4 text-sm font-black uppercase tracking-[0.16em] transition ${
-                    plan.recommended
-                      ? "bg-lime-400 text-zinc-950 hover:brightness-105"
-                      : "border border-white/10 bg-white/5 text-zinc-100 hover:border-lime-400/30 hover:bg-white/10"
-                  }`}
-                >
-                  {plan.cta}
-                </button>
-              </article>
+              <PricingCard key={plan.name} plan={plan} onSelect={focusRegister} />
             ))}
           </div>
         </section>

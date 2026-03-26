@@ -1,7 +1,9 @@
 import axios, { AxiosError, AxiosHeaders, InternalAxiosRequestConfig } from 'axios';
+import { getErrorMessage } from './error';
 
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
+const GLOBAL_FEEDBACK_EVENT = 'nextlevel:error-feedback';
 
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
@@ -89,6 +91,30 @@ function shouldAttachAuthHeader(config: InternalAxiosRequestConfig) {
   return !(url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh'));
 }
 
+function dispatchFriendlyApiError(error: AxiosError) {
+  if (typeof window === 'undefined') return;
+
+  const config = error.config;
+  const url = config?.url || '';
+  if (url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')) {
+    return;
+  }
+
+  const message = getErrorMessage(
+    error,
+    'Algo saiu do fluxo esperado, mas sua operacao continua protegida.',
+  );
+
+  window.dispatchEvent(
+    new CustomEvent(GLOBAL_FEEDBACK_EVENT, {
+      detail: {
+        message,
+        type: 'error',
+      },
+    }),
+  );
+}
+
 const api = axios.create({
   baseURL,
 });
@@ -110,6 +136,7 @@ api.interceptors.response.use(
     const originalConfig = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 
     if (!originalConfig || error.response?.status !== 401 || originalConfig._retry || shouldSkipAuthRetry(originalConfig)) {
+      dispatchFriendlyApiError(error);
       return Promise.reject(error);
     }
 
@@ -123,6 +150,7 @@ api.interceptors.response.use(
 
     const nextToken = await refreshPromise;
     if (!nextToken) {
+      dispatchFriendlyApiError(error);
       return Promise.reject(error);
     }
 

@@ -1,4 +1,5 @@
 export type DetailLevel = "low" | "medium" | "high";
+export type UserNiche = "ECOMMERCE" | "MEDICINA" | "SERVICOS" | "EDUCACAO" | "OUTROS";
 export type DashboardPeriod = "today" | "yesterday" | "week" | "month" | "year";
 
 export interface DashboardSummary {
@@ -40,6 +41,7 @@ export interface UserProfile {
   email?: string;
   admin?: boolean;
   detailLevel?: DetailLevel;
+  niche?: UserNiche | null;
   theme?: "light" | "dark";
   companyCount?: number;
 }

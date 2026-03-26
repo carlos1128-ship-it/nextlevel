@@ -12,6 +12,7 @@ interface ToastContextType {
 }
 
 const ToastContext = createContext<ToastContextType | null>(null);
+const GLOBAL_FEEDBACK_EVENT = 'nextlevel:error-feedback';
 
 export const useToast = () => {
   const context = useContext(ToastContext);
@@ -24,13 +25,31 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts(prev => {
+      if (prev.some(toast => toast.message === message && toast.type === type)) {
+        return prev;
+      }
+      return [...prev, { id, message, type }];
+    });
     setTimeout(() => removeToast(id), 3500);
   };
 
   const removeToast = (id: number) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
+
+  useEffect(() => {
+    const handleGlobalFeedback = (event: Event) => {
+      const detail = (event as CustomEvent<{ message?: string; type?: Toast['type'] }>).detail;
+      if (!detail?.message) return;
+      addToast(detail.message, detail.type || 'error');
+    };
+
+    window.addEventListener(GLOBAL_FEEDBACK_EVENT, handleGlobalFeedback);
+    return () => {
+      window.removeEventListener(GLOBAL_FEEDBACK_EVENT, handleGlobalFeedback);
+    };
+  }, []);
 
   return (
     <ToastContext.Provider value={{ addToast }}>
