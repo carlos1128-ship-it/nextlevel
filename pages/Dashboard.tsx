@@ -186,7 +186,6 @@ const Dashboard = () => {
   }, [summary.pieData]);
 
   const hasChartData = summary.lineData.length > 0 || summary.pieData.length > 0;
-  const hasForecast = forecast?.status === "ok" && forecastChartData.length > 0;
 
   const forecastChartData = useMemo(() => {
     if (!forecast || forecast.status !== "ok") return [];
@@ -203,6 +202,8 @@ const Dashboard = () => {
       };
     });
   }, [forecast]);
+
+  const hasForecast = forecast?.status === "ok" && forecastChartData.length > 0;
 
   const forecastStatusMessage = useMemo(() => {
     if (!forecast) return "Carregando previsões...";

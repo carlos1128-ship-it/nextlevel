@@ -265,8 +265,8 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050816] text-zinc-100">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(181,255,0,0.16),_transparent_28%),radial-gradient(circle_at_85%_10%,_rgba(34,197,94,0.12),_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.14),_transparent_30%)]" />
-      <div className="absolute inset-x-0 top-0 h-[520px] bg-[linear-gradient(180deg,rgba(9,9,11,0)_0%,rgba(5,8,22,0.92)_84%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(36,72,46,0.22)_0%,_rgba(12,18,17,0.82)_38%,_rgba(4,6,10,1)_78%),radial-gradient(circle_at_top_left,_rgba(181,255,0,0.08),_transparent_26%),radial-gradient(circle_at_82%_14%,_rgba(52,211,153,0.08),_transparent_24%)]" />
+      <div className="absolute inset-x-0 top-0 h-[560px] bg-[linear-gradient(180deg,rgba(4,6,10,0)_0%,rgba(4,6,10,0.9)_84%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-6 sm:px-6 lg:px-8">
         <nav className="rounded-full border border-white/10 bg-white/5 px-4 py-3 backdrop-blur md:px-6">
@@ -314,7 +314,7 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <h1 className="hero-display max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="hero-display max-w-4xl text-4xl font-black tracking-[-0.04em] leading-[0.92] text-white sm:text-5xl lg:text-6xl">
                 Domine Seu Negocio com um Clique
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-300 sm:text-lg">
@@ -327,7 +327,7 @@ const LoginPage = () => {
               <button
                 type="button"
                 onClick={focusRegister}
-                className="inline-flex animate-pulse items-center justify-center gap-3 rounded-2xl bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-zinc-950 shadow-[0_0_34px_rgba(163,230,53,0.32)] transition hover:-translate-y-0.5 hover:brightness-105"
+                className="inline-flex animate-pulse items-center justify-center gap-3 rounded-2xl bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-zinc-950 shadow-[0_0_34px_rgba(163,230,53,0.24),0_20px_48px_rgba(0,0,0,0.32)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-105 hover:shadow-[0_0_48px_rgba(163,230,53,0.44),0_26px_60px_rgba(163,230,53,0.14)]"
               >
                 Ativar 7 Dias Gratis
                 <ArrowUpRightIcon className="h-4 w-4" />

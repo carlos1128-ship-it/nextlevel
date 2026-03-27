@@ -17,7 +17,7 @@ type PricingCardProps = {
   onSelect: () => void;
 };
 
-const PricingCard = ({ plan, onSelect }: PricingCardProps) => {
+const PricingCard: React.FC<PricingCardProps> = ({ plan, onSelect }) => {
   return (
     <article
       className={`relative overflow-hidden rounded-[32px] border p-6 transition duration-200 hover:-translate-y-1 ${

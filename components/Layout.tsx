@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import type { NavItem } from "../types";
 import {
@@ -24,7 +24,7 @@ import { useToast } from "./Toast";
 import { updateUserProfile } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
 import type { UserNiche } from "../src/types/domain";
-import NicheModal from "../src/components/onboarding/NicheModal";
+import NicheModal, { type CompanyStage } from "../src/components/onboarding/NicheModal";
 
 type SidebarNavItem = NavItem & { id: string };
 
@@ -53,6 +53,16 @@ const adminNavItem: SidebarNavItem = {
   name: "System Health",
   icon: ShieldIcon,
 };
+const COMPANY_STAGE_STORAGE_KEY = "nextlevel:onboarding-company-stage";
+const DEFAULT_COMPANY_STAGE: CompanyStage = "ESCALANDO";
+
+function readStoredCompanyStage(): CompanyStage {
+  const raw = localStorage.getItem(COMPANY_STAGE_STORAGE_KEY);
+  if (raw === "INICIANTE" || raw === "ESCALANDO" || raw === "ENTERPRISE") {
+    return raw;
+  }
+  return DEFAULT_COMPANY_STAGE;
+}
 
 function moveItemsToFront(items: SidebarNavItem[], ids: string[]) {
   const front = ids
@@ -217,9 +227,14 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const { isAdmin, niche, setNiche } = useAuth();
   const { addToast } = useToast();
   const [selectedNiche, setSelectedNiche] = useState<UserNiche | null>(niche);
+  const [selectedStage, setSelectedStage] = useState<CompanyStage>(() => readStoredCompanyStage());
   const [savingNiche, setSavingNiche] = useState(false);
   const items = useMemo(() => resolveNavItems(isAdmin, niche), [isAdmin, niche]);
   const showNicheModal = niche === null;
+
+  useEffect(() => {
+    setSelectedNiche(niche);
+  }, [niche]);
 
   const handleConfirmNiche = async () => {
     if (!selectedNiche) return;
@@ -227,6 +242,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     try {
       setSavingNiche(true);
       const updatedProfile = await updateUserProfile({ niche: selectedNiche });
+      localStorage.setItem(COMPANY_STAGE_STORAGE_KEY, selectedStage);
       setNiche(updatedProfile.niche || selectedNiche);
       addToast("Painel personalizado com sucesso.", "success");
     } catch (error) {
@@ -238,20 +254,28 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#040507] text-zinc-100">
-      <Sidebar />
-      <main className="min-h-screen min-h-0 flex-col lg:pl-64">
-        <Header />
-        <div className="mx-auto w-full max-w-7xl flex-1 min-h-0 overflow-x-hidden p-4 md:p-8">{children}</div>
-      </main>
-      <BottomNav items={items} />
-      <FloatingActionButton />
+      <div
+        id="dashboard-main"
+        aria-hidden={showNicheModal || undefined}
+        className={`transition duration-500 ${showNicheModal ? "pointer-events-none blur-[15px] saturate-[0.8] brightness-[0.76]" : ""}`}
+      >
+        <Sidebar />
+        <main className="min-h-screen min-h-0 flex-col lg:pl-64">
+          <Header />
+          <div className="mx-auto w-full max-w-7xl flex-1 min-h-0 overflow-x-hidden p-4 md:p-8">{children}</div>
+        </main>
+        <BottomNav items={items} />
+        <FloatingActionButton />
+      </div>
 
       {showNicheModal ? (
         <>
-          <div className="fixed inset-0 z-[60] bg-[#020408]/55 backdrop-blur-[8px]" />
+          <div className="fixed inset-0 z-[60] bg-[radial-gradient(circle_at_center,rgba(36,76,52,0.12)_0%,rgba(4,9,10,0.72)_52%,rgba(2,4,8,0.92)_100%)]" />
           <NicheModal
             selectedNiche={selectedNiche}
-            onSelect={setSelectedNiche}
+            selectedStage={selectedStage}
+            onSelectNiche={setSelectedNiche}
+            onSelectStage={setSelectedStage}
             onConfirm={handleConfirmNiche}
             loading={savingNiche}
           />

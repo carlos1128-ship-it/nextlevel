@@ -241,7 +241,7 @@ const SystemHealth = () => {
             <ServiceStatusCard title="AI" status={health.services.ai.status} latency={health.services.ai.avgLatencyMs} />
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
-            {Object.entries(health.providers).map(([provider, status]) => (
+            {Object.entries(health.providers as Record<string, string>).map(([provider, status]) => (
               <span key={provider} className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider ${statusClassName(status)}`}>
                 {provider}: {status}
               </span>
