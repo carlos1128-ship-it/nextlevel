@@ -73,8 +73,8 @@ const nicheOptions: NicheOption[] = [
   },
   {
     value: "SERVICOS",
-    title: "Servicos",
-    description: "Custos, projetos e entregas mais acessiveis desde o primeiro acesso.",
+    title: "Servicos e Engenharia",
+    description: "Custos, metragem, projetos e entregas mais acessiveis desde o primeiro acesso.",
     accentClassName: "text-amber-300 border-amber-400/20 bg-amber-400/10",
     Icon: ServicesIcon,
   },

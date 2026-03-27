@@ -28,24 +28,24 @@ const defaultSiteUrl =
     .replace(/\/+$/, "");
 
 export const metadata: Metadata = {
-  title: "Next Level | Domine Seu Negocio",
+  title: "Next Level | Lucro Real ou Colapso",
   description:
-    "O Cerebro Tatico que conecta suas vendas a margem real, automatiza atendimento e simplifica a operacao.",
+    "A linha que separa sua empresa do lucro real ou do colapso. Automatize vendas, conecte canais e enxergue margem verdadeira antes de perder dinheiro.",
   canonicalUrl: defaultSiteUrl,
   keywords: [
-    "SaaS",
+    "Lucro Real",
+    "Margem Verdadeira",
     "Automacao de Vendas",
-    "Inteligencia Artificial",
     "WhatsApp",
-    "CRM",
-    "ROI",
-    "Margem de lucro",
+    "Mercado Livre",
+    "Shopee",
+    "Operacao Tatica",
     "Next Level",
   ],
   openGraph: {
-    title: "Next Level | Domine Seu Negocio",
+    title: "Next Level | Lucro Real ou Colapso",
     description:
-      "Compartilhe uma operacao mais inteligente com a plataforma que conecta vendas, margem real e automacao.",
+      "O cerebro tatico do seu negocio para enxergar a margem que sua operacao queima sem saber.",
     image: `${defaultSiteUrl}/og-sales-ai.svg`,
     url: defaultSiteUrl,
     type: "website",
@@ -53,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Next Level | Domine Seu Negocio",
+    title: "Next Level | Lucro Real ou Colapso",
     description:
-      "O Cerebro Tatico que conecta suas vendas a margem real e acelera sua operacao.",
+      "Automatize vendas, conecte canais e enxergue margem verdadeira antes de perder dinheiro.",
     image: `${defaultSiteUrl}/og-sales-ai.svg`,
   },
 };
@@ -63,8 +63,8 @@ export const metadata: Metadata = {
 export function resolveMetadata(pathname: string): Metadata {
   const normalizedPath = pathname.trim() || "/";
   const pageTitleMap: Record<string, string> = {
-    "/": "Next Level | Domine Seu Negocio",
-    "/login": "Next Level | Domine Seu Negocio",
+    "/": "Next Level | Lucro Real ou Colapso",
+    "/login": "Next Level | Lucro Real ou Colapso",
     "/dashboard": "Dashboard | Next Level",
     "/reports": "Relatorios | Next Level",
     "/chat": "Chat IA | Next Level",
@@ -91,7 +91,7 @@ export function resolveMetadata(pathname: string): Metadata {
 
   const title =
     pageTitleMap[normalizedPath] ||
-    (isNotFoundRoute ? "404 | Next Level" : "Next Level | Domine Seu Negocio");
+    (isNotFoundRoute ? "404 | Next Level" : "Next Level | Lucro Real ou Colapso");
 
   const description =
     isNotFoundRoute

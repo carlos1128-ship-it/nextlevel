@@ -76,6 +76,10 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
   let items = navItems.map((item) =>
     item.id === "products" && niche === "MEDICINA"
       ? { ...item, name: "Servicos/Consultas" }
+      : item.id === "projects" && niche === "SERVICOS"
+        ? { ...item, name: "Projetos/Metragem" }
+        : item.id === "costs" && niche === "SERVICOS"
+          ? { ...item, name: "Custos/Metragem" }
       : item,
   );
 
@@ -85,6 +89,10 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
 
   if (niche === "SERVICOS") {
     items = moveItemsToFront(items, ["costs", "projects"]);
+  }
+
+  if (niche === "ECOMMERCE") {
+    items = moveItemsToFront(items, ["products", "market", "financial-flow"]);
   }
 
   return isAdmin ? [...items, adminNavItem] : items;

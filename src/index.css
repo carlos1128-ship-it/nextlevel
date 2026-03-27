@@ -14,9 +14,9 @@
 }
 
 body {
-  font-family: "Inter", sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+  background-color: #030507;
+  color: #f4f4f5;
   overflow-x: hidden;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -130,6 +130,68 @@ body {
   text-wrap: balance;
 }
 
+.tactical-display {
+  font-family: "Archivo", sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.065em;
+  text-wrap: balance;
+}
+
+.text-shadow-neon {
+  text-shadow:
+    0 0 14px rgba(182, 255, 0, 0.22),
+    0 0 34px rgba(182, 255, 0, 0.12);
+}
+
+.shield-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(circle at center, black 42%, transparent 88%);
+}
+
+.chrome-shield-stage::after {
+  content: "";
+  position: absolute;
+  inset: 10% 12%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 45px rgba(255, 255, 255, 0.03),
+    0 0 65px rgba(182, 255, 0, 0.06);
+  pointer-events: none;
+}
+
+.life-line {
+  animation: pulseLine 3.4s ease-in-out infinite;
+}
+
+.shield-float {
+  transform-origin: center;
+  animation: shieldFloat 7s ease-in-out infinite;
+}
+
+.chart-line {
+  stroke-dasharray: 620;
+  stroke-dashoffset: 620;
+  animation: chartReveal 2.4s ease forwards;
+}
+
+.chart-line-delayed {
+  animation-delay: 0.35s;
+}
+
+.chart-node {
+  opacity: 0;
+  transform-origin: center;
+  animation: nodeReveal 0.45s ease forwards 1.8s;
+}
+
+.chart-node-delayed {
+  animation-delay: 2.1s;
+}
+
 .dark .glass {
   background: rgba(24, 24, 27, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -193,6 +255,45 @@ body {
 @keyframes salesSheen {
   to {
     transform: translateX(130%);
+  }
+}
+
+@keyframes pulseLine {
+  0%,
+  100% {
+    opacity: 0.55;
+    box-shadow: 0 0 16px rgba(182, 255, 0, 0.18);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 26px rgba(182, 255, 0, 0.34);
+  }
+}
+
+@keyframes shieldFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes chartReveal {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes nodeReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

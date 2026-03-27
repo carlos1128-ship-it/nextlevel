@@ -69,7 +69,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, onSelect }) => {
       {plan.microcopy ? (
         <div className="mt-4 flex items-start gap-3 rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-4 py-3 text-left">
           <CreditCardIcon className="mt-0.5 h-4 w-4 flex-none text-emerald-300" />
-          <p className="text-xs leading-5 text-zinc-400">{plan.microcopy}</p>
+          <p className="text-xs leading-5 text-zinc-300">{plan.microcopy}</p>
         </div>
       ) : null}
     </article>
