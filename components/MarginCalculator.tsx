@@ -59,22 +59,33 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
   const [productName, setProductName] = useState("");
   const [sellingPriceInput, setSellingPriceInput] = useState("");
   const [costPriceInput, setCostPriceInput] = useState("");
+  
+  // Novas variáveis
+  const [taxesInput, setTaxesInput] = useState("");
+  const [shippingInput, setShippingInput] = useState("");
+
   const [idealCostInput, setIdealCostInput] = useState("");
   const [desiredMarginInput, setDesiredMarginInput] = useState("");
 
   const normalizedProductName = productName.trim() || "este produto";
+  
   const sellingPrice = parseCurrencyInput(sellingPriceInput);
   const costPrice = parseCurrencyInput(costPriceInput);
-  const profit = sellingPrice - costPrice;
+  const taxes = parseCurrencyInput(taxesInput);
+  const shipping = parseCurrencyInput(shippingInput);
+
+  const profit = sellingPrice - costPrice - taxes - shipping;
   const margin = sellingPrice > 0 ? (profit / sellingPrice) * 100 : 0;
 
   const desiredMargin = Math.max(0, Number(desiredMarginInput.replace(",", ".")) || 0);
   const idealCost = parseCurrencyInput(idealCostInput);
+  // Custo Total Ideal = Custo Base + Impostos e Frete globais da base do lucro (podemos zerar na visualização simplificada, ou computar caso digitado)
+  const totalCostIdeal = idealCost + taxes + shipping;
   const suggestedPrice =
-    idealCost > 0 && desiredMargin < 100 ? idealCost / (1 - desiredMargin / 100) : 0;
+    totalCostIdeal > 0 && desiredMargin < 100 ? totalCostIdeal / (1 - desiredMargin / 100) : 0;
 
-  const hasProfitInputs = Boolean(productName.trim() || sellingPriceInput || costPriceInput);
-  const hasIdealInputs = Boolean(idealCostInput || desiredMarginInput);
+  const hasProfitInputs = Boolean(productName.trim() || sellingPriceInput || costPriceInput || taxesInput || shippingInput);
+  const hasIdealInputs = Boolean(idealCostInput || desiredMarginInput || taxesInput || shippingInput);
   const isIdealMarginValid = desiredMargin < 100;
   const profitToneClass =
     profit > 0
@@ -95,15 +106,14 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
                 <CalculatorIcon className="h-4 w-4" />
-                Calculadora Minimalista
+                Inteligência Comercial
               </div>
 
               <h2 className="mt-4 text-3xl font-black tracking-tight text-zinc-50 sm:text-4xl">
-                Descubra o lucro ideal sem ruído
+                Cálculo de Margem Real
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">
-                Digite so o essencial. A resposta aparece na hora, com foco em lucro real e
-                precificacao inteligente.
+                Evasão de lucro dói. Calcule a sua Margem Real blindada considerando taxas táticas e operacionais logísticas de frete.
               </p>
             </div>
 
@@ -123,7 +133,7 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                     : "hover:text-zinc-200"
                 }`}
               >
-                Lucro do Produto
+                Lucro Líquido Real
               </button>
               <button
                 type="button"
@@ -136,31 +146,31 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                     : "hover:text-zinc-200"
                 }`}
               >
-                Gerador de Preco Ideal
+                Precificação Tática
               </button>
             </div>
           </div>
 
           {mode === "profit" ? (
-            <div className="grid gap-4 md:grid-cols-3">
-              <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
-                <span className="text-sm font-semibold text-zinc-100">Nome do produto</span>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+              <label className="lg:col-span-2 rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
+                <span className="text-sm font-semibold text-zinc-100">Produto Operacional</span>
                 <span className="mt-1 block text-xs text-zinc-500">
-                  Para personalizar o resultado final.
+                  Defina o nome de identificação.
                 </span>
                 <input
                   type="text"
                   value={productName}
                   onChange={(event) => setProductName(event.target.value)}
-                  placeholder="Ex.: Kit Premium"
+                  placeholder="Ex.: Kit Premium Tático"
                   className="mt-3 w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base font-medium text-zinc-50 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500"
                 />
               </label>
 
               <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
-                <span className="text-sm font-semibold text-zinc-100">Preco de venda</span>
+                <span className="text-sm font-semibold text-zinc-100">Preço de Venda Base</span>
                 <span className="mt-1 block text-xs text-zinc-500">
-                  Quanto entra no caixa por venda.
+                  Preço final praticado ao cliente.
                 </span>
                 <input
                   type="text"
@@ -173,9 +183,9 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
               </label>
 
               <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
-                <span className="text-sm font-semibold text-zinc-100">Custo do produto</span>
+                <span className="text-sm font-semibold text-zinc-100">Custo Absoluto</span>
                 <span className="mt-1 block text-xs text-zinc-500">
-                  O valor que sai do seu bolso.
+                  Custo base de aquisição ou confecção.
                 </span>
                 <input
                   type="text"
@@ -186,13 +196,43 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                   className="mt-3 w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base font-semibold text-zinc-50 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500"
                 />
               </label>
+
+              <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
+                <span className="text-sm font-semibold text-zinc-100">Impostos / Taxas (R$)</span>
+                <span className="mt-1 block text-xs text-zinc-500">
+                  Gateway, plataformas, emissão.
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={taxesInput}
+                  onChange={(event) => setTaxesInput(formatCurrencyInput(event.target.value))}
+                  placeholder="R$ 8,00"
+                  className="mt-3 w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base font-semibold text-zinc-50 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500"
+                />
+              </label>
+
+              <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
+                <span className="text-sm font-semibold text-zinc-100">Frete Embutido (R$)</span>
+                <span className="mt-1 block text-xs text-zinc-500">
+                  Parcela de logística do seu bolso.
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={shippingInput}
+                  onChange={(event) => setShippingInput(formatCurrencyInput(event.target.value))}
+                  placeholder="R$ 15,00"
+                  className="mt-3 w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base font-semibold text-zinc-50 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500"
+                />
+              </label>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
-                <span className="text-sm font-semibold text-zinc-100">Custo base</span>
+                <span className="text-sm font-semibold text-zinc-100">Custo Base Agregado</span>
                 <span className="mt-1 block text-xs text-zinc-500">
-                  Comece pelo valor real do produto.
+                  Soma de confecção e matéria-prima.
                 </span>
                 <input
                   type="text"
@@ -205,9 +245,9 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
               </label>
 
               <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
-                <span className="text-sm font-semibold text-zinc-100">Margem desejada (%)</span>
+                <span className="text-sm font-semibold text-zinc-100">Margem Desejada (%)</span>
                 <span className="mt-1 block text-xs text-zinc-500">
-                  Informe a meta de margem que voce quer atingir.
+                  Meta líquida por operação faturada.
                 </span>
                 <input
                   type="number"
@@ -221,31 +261,61 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                   className="mt-3 w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base font-semibold text-zinc-50 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500"
                 />
               </label>
+
+              <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
+                <span className="text-sm font-semibold text-zinc-100">Impostos / Taxas Estimados (R$)</span>
+                <span className="mt-1 block text-xs text-zinc-500">
+                  Estimativa a subtrair do fechamento.
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={taxesInput}
+                  onChange={(event) => setTaxesInput(formatCurrencyInput(event.target.value))}
+                  placeholder="R$ 8,00"
+                  className="mt-3 w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base font-semibold text-zinc-50 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500"
+                />
+              </label>
+
+              <label className="rounded-[24px] border border-zinc-800 bg-zinc-950/80 p-4">
+                <span className="text-sm font-semibold text-zinc-100">Frete Fixo (R$)</span>
+                <span className="mt-1 block text-xs text-zinc-500">
+                  Média do custo logístico esperado.
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={shippingInput}
+                  onChange={(event) => setShippingInput(formatCurrencyInput(event.target.value))}
+                  placeholder="R$ 15,00"
+                  className="mt-3 w-full rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base font-semibold text-zinc-50 outline-none transition placeholder:text-zinc-500 focus:border-emerald-500"
+                />
+              </label>
             </div>
           )}
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-[22px] border border-zinc-800 bg-zinc-950/70 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                {mode === "profit" ? "Preco de venda" : "Custo base"}
+                {mode === "profit" ? "Preço Operacional" : "Custo Pleno"}
               </p>
               <p className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
-                {mode === "profit" ? formatCurrency(sellingPrice) : formatCurrency(idealCost)}
+                {mode === "profit" ? formatCurrency(sellingPrice) : formatCurrency(totalCostIdeal)}
               </p>
             </div>
 
             <div className="rounded-[22px] border border-zinc-800 bg-zinc-950/70 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                {mode === "profit" ? "Custo do produto" : "Margem desejada"}
+                {mode === "profit" ? "Despesas Totais" : "Margem Alvo"}
               </p>
               <p className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
-                {mode === "profit" ? formatCurrency(costPrice) : formatPercent(desiredMargin)}
+                {mode === "profit" ? formatCurrency(costPrice + taxes + shipping) : formatPercent(desiredMargin)}
               </p>
             </div>
 
             <div className="rounded-[22px] border border-zinc-800 bg-zinc-950/70 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                {mode === "profit" ? "Margem atual" : "Preco sugerido"}
+                {mode === "profit" ? "Margem Real" : "Preço Otimizado"}
               </p>
               <p className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
                 {mode === "profit" ? formatPercent(margin) : formatCurrency(suggestedPrice)}
@@ -259,21 +329,21 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
             !hasProfitInputs ? (
               <div className="flex min-h-[320px] flex-col justify-center rounded-[24px] border border-dashed border-zinc-800 bg-zinc-950/60 px-6 text-center">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300/70">
-                  Resultado ao vivo
+                  Auditoria de Operação
                 </p>
                 <h3 className="mt-4 text-2xl font-black tracking-tight text-zinc-50">
-                  Seu lucro vai aparecer aqui
+                  Lucro Real pendente
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-zinc-500">
-                  Preencha nome, preco de venda e custo para ver o lucro por produto com clareza.
+                  Preencha o preço e os custos implícitos na venda tática para calcular a saúde líquida.
                 </p>
               </div>
             ) : (
               <div className="space-y-5">
                 <div className="rounded-[24px] border border-emerald-500/20 bg-emerald-500/10 p-5">
                   <p className="text-sm font-medium leading-6 text-emerald-50">
-                    Seu lucro no produto{" "}
-                    <span className="font-black text-white">{normalizedProductName}</span> e:
+                    Lucro líquido em {" "}
+                    <span className="font-black text-white">{normalizedProductName}</span> é de:
                   </p>
                   <p className={`mt-4 text-5xl font-black tracking-tight ${profitToneClass}`}>
                     {formatCurrency(profit)}
@@ -282,45 +352,86 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
 
                 <div className="grid gap-3">
                   <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
-                    <span className="text-sm text-zinc-400">Margem do produto</span>
+                    <span className="text-sm text-zinc-400">Margem Real</span>
                     <strong className="text-zinc-100">{formatPercent(margin)}</strong>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
-                    <span className="text-sm text-zinc-400">Preco de venda</span>
+                    <span className="text-sm text-zinc-400">Preço de Fechamento</span>
                     <strong className="text-zinc-100">{formatCurrency(sellingPrice)}</strong>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
-                    <span className="text-sm text-zinc-400">Custo do produto</span>
-                    <strong className="text-zinc-100">{formatCurrency(costPrice)}</strong>
+                    <span className="text-sm text-zinc-400">Despesas Totais</span>
+                    <strong className="text-zinc-100">{formatCurrency(costPrice + taxes + shipping)}</strong>
                   </div>
                 </div>
 
                 <p className="text-sm leading-6 text-zinc-400">
                   {profit > 0
-                    ? "Voce ja tem margem positiva. Agora vale testar escala com seguranca."
+                    ? "Margem verde. A operação possui viabilidade tática para injeção de Ads."
                     : profit < 0
-                      ? "Esse preco esta abaixo do ideal. Revise custo ou reposicione a oferta."
-                      : "Ajuste os valores para sair do zero e descobrir a margem real."}
+                      ? "Atenção Crítica: O LTV do produto sofre deságio. Replano na estruturação base sugerido!"
+                      : "Operação neutra (Break-even). Ajuste alavancas de ticket para extrair lucro."}
                 </p>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const token = localStorage.getItem("@next-level:token");
+                    if (!token) return alert("Você precisa estar logado para exportar o relatório.");
+                    try {
+                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/report/margin-pdf`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                          companyName: "Minha Empresa", // Podia puxar do estado global/perfil
+                          productName: normalizedProductName,
+                          sellingPrice,
+                          costPrice,
+                          taxes,
+                          shipping,
+                          profit,
+                          margin
+                        })
+                      });
+                      if (!res.ok) throw new Error("Erro ao gerar PDF");
+                      const blob = await res.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `relatorio-margem-${Date.now()}.pdf`;
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                    } catch (err) {
+                      console.error(err);
+                      alert("Falha ao exportar relatório. " + (err instanceof Error ? err.message : String(err)));
+                    }
+                  }}
+                  className="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-zinc-50 outline-none transition hover:bg-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#09090b]"
+                >
+                  Download Relatório Integrado (PDF)
+                </button>
               </div>
             )
           ) : !hasIdealInputs ? (
             <div className="flex min-h-[320px] flex-col justify-center rounded-[24px] border border-dashed border-zinc-800 bg-zinc-950/60 px-6 text-center">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300/70">
-                Preco ideal
+                Alvo Tático
               </p>
               <h3 className="mt-4 text-2xl font-black tracking-tight text-zinc-50">
-                Gere um preco sugerido em segundos
+                Gere métricas em tempo real
               </h3>
               <p className="mt-3 text-sm leading-6 text-zinc-500">
-                Informe custo e margem desejada para receber a sugestao de preco na hora.
+                Posicione os custos diretos e a margem percentual pretendida.
               </p>
             </div>
           ) : (
             <div className="space-y-5">
               <div className="rounded-[24px] border border-emerald-500/20 bg-emerald-500/10 p-5">
                 <p className="text-sm font-medium leading-6 text-emerald-50">
-                  Preco sugerido para bater sua meta:
+                  Preço Sugerido (Target):
                 </p>
                 <p className="mt-4 text-5xl font-black tracking-tight text-emerald-500">
                   {isIdealMarginValid ? formatCurrency(suggestedPrice) : "--"}
@@ -329,19 +440,19 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
 
               <div className="grid gap-3">
                 <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
-                  <span className="text-sm text-zinc-400">Custo base</span>
-                  <strong className="text-zinc-100">{formatCurrency(idealCost)}</strong>
+                  <span className="text-sm text-zinc-400">Despesas Integradas</span>
+                  <strong className="text-zinc-100">{formatCurrency(totalCostIdeal)}</strong>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
-                  <span className="text-sm text-zinc-400">Margem desejada</span>
+                  <span className="text-sm text-zinc-400">Margem Alvo</span>
                   <strong className="text-zinc-100">{formatPercent(desiredMargin)}</strong>
                 </div>
               </div>
 
               <p className="text-sm leading-6 text-zinc-400">
                 {isIdealMarginValid
-                  ? "Use esse valor como ponto de partida e ajuste conforme mercado, frete e posicionamento."
-                  : "A margem desejada precisa ser menor que 100% para gerar um preco valido."}
+                  ? "Este target incorpora custo de mercadoria, operação fiscal e logística de envio sem degradar o seu net profit."
+                  : "Calibragem inviável. A margem deve ser inferior a 100% para não acionar um preço teoricamente infinito."}
               </p>
             </div>
           )}
