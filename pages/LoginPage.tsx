@@ -299,7 +299,11 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
 
       {/* Google OAuth */}
       <button type="button"
-        onClick={() => { window.location.href = `${(import.meta as Record<string,Record<string,string>>).env?.VITE_API_URL ?? ""}/api/auth/google`; }}
+        onClick={() => {
+          const raw = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+          const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
+          window.location.href = `${base}/auth/google`;
+        }}
         className="mt-4 flex w-full items-center justify-center gap-3 rounded-[20px] border border-white/10 bg-white/[0.04] py-3 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.08]">
         <GoogleIcon /> Continuar com Google
       </button>
