@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext, useContext, ReactNode, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
@@ -284,6 +284,42 @@ const MetadataSync = () => {
   return null;
 };
 
+const GoogleAuthCallback = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const refreshToken = searchParams.get('refresh_token');
+    const name = searchParams.get('name');
+    const email = searchParams.get('email');
+    const admin = searchParams.get('admin') === 'true';
+
+    if (token) {
+      localStorage.setItem('access_token', token);
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken);
+      }
+      login({ name, email, admin, niche: null });
+      navigate('/', { replace: true });
+    } else {
+      navigate('/login?error=google_auth_failed', { replace: true });
+    }
+  }, [searchParams, navigate, login]);
+
+  return (
+    <div className="bg-zinc-950 text-zinc-100 min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-[#B6FF00] tracking-widest animate-pulse">
+          NEXT LEVEL
+        </h1>
+        <p className="mt-2 text-zinc-400 text-xs tracking-widest uppercase">Autenticando com Google...</p>
+      </div>
+    </div>
+  );
+};
+
 const AppContent = () => {
   const { isLoggedIn } = useAuth();
   const dashboardShell = (
@@ -308,6 +344,7 @@ const AppContent = () => {
         </div>
       }>
         <Routes>
+          <Route path="/auth/callback" element={<GoogleAuthCallback />} />
           <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
           <Route path="/" element={isLoggedIn ? dashboardShell : <LoginPage />} />
           <Route
