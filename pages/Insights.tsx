@@ -8,11 +8,13 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { AxiosError } from "axios";
 import { api } from "../services/api";
 import { getErrorMessage } from "../src/services/error";
 import { useToast } from "../components/Toast";
 import { LoadingState } from "../components/AsyncState";
 import { useAuth } from "../App";
+import { analyzeData, getDashboardSummary, getFinancialReport } from "../src/services/endpoints";
 
 interface InsightCardProps {
   title: string;
@@ -45,16 +47,31 @@ function compactText(value: string): string {
 
 function sanitizeInsight(value: string): string {
   let text = value || "";
-  // remove markdown bold markers and headings
   text = text.replace(/\*\*/g, "");
-  // drop JSON blobs after "Dados:"
   const dadosIdx = text.toLowerCase().indexOf("dados:");
   if (dadosIdx >= 0) {
     text = text.slice(0, dadosIdx).trim();
   }
-  // collapse multiple newlines
   text = text.replace(/\n{2,}/g, "\n");
   return text.trim();
+}
+
+function getAiErrorDetails(error: unknown) {
+  if (error instanceof AxiosError) {
+    const payload = error.response?.data as { message?: string; error?: string; detail?: string } | string | undefined;
+    return {
+      status: error.response?.status,
+      message:
+        typeof payload === "string"
+          ? payload
+          : payload?.message || payload?.error || payload?.detail || error.message,
+    };
+  }
+
+  return {
+    status: undefined,
+    message: error instanceof Error ? error.message : "Erro desconhecido ao gerar insights.",
+  };
 }
 
 const InsightCard: React.FC<InsightCardProps> = ({ title, description, category, color }) => {
@@ -83,33 +100,6 @@ const InsightCard: React.FC<InsightCardProps> = ({ title, description, category,
   );
 };
 
-const fallbackCards: InsightCardProps[] = [
-  {
-    title: "Mercado Sustentavel em Alta",
-    description: "O mercado de moda sustentavel cresceu 25% no ultimo trimestre. Considere adicionar uma linha de produtos ecologicos.",
-    category: "Oportunidade",
-    color: "green",
-  },
-  {
-    title: "Busca por Produtos Customizaveis",
-    description: "Houve um aumento de 40% nas buscas por produtos customizaveis. Ferramentas de personalizacao podem elevar o LTV.",
-    category: "Tendencia",
-    color: "blue",
-  },
-  {
-    title: "Horario de pico: 20h-22h",
-    description: "Seu engajamento e maior no inicio da noite. Recomendamos programar anuncios estrategicos para este intervalo.",
-    category: "Sugestao da IA",
-    color: "purple",
-  },
-  {
-    title: "Campanha Frete Gratis da Concorrencia",
-    description: "Monitore o impacto da nova politica do seu principal concorrente. Considere uma campanha de cashback como resposta.",
-    category: "Ameaca",
-    color: "red",
-  },
-];
-
 const benchmarkData = [
   { name: "E-commerce", total: 18 },
   { name: "Industria", total: 7 },
@@ -122,51 +112,70 @@ const Insights = () => {
   const { selectedCompanyId, detailLevel } = useAuth();
   const [historyInsights, setHistoryInsights] = useState<InsightCardProps[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshingAi, setRefreshingAi] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const isOfflineInsight = (text: string) =>
     text.toLowerCase().includes("modo offline") || text.toLowerCase().includes("heuristica");
 
   const generateFreshAiInsight = async (): Promise<InsightCardProps[]> => {
-    try {
-      const { data: summary } = await api.get("/dashboard/summary", {
-        params: { companyId: selectedCompanyId || undefined },
-      });
+    if (!selectedCompanyId) return [];
 
-      const { data } = await api.post("/ai/analyze", {
-        data: summary,
-        detailLevel,
-      });
+    const [summary, financialReport] = await Promise.all([
+      getDashboardSummary({ companyId: selectedCompanyId }),
+      getFinancialReport(selectedCompanyId),
+    ]);
 
-      const text =
-        typeof data === "string"
-          ? data
-          : data.analysis || data.insight || data.message || JSON.stringify(data);
-
-      const cleaned = compactText(sanitizeInsight(text));
-      if (!cleaned) return [];
-
-      return [
-        {
-          title: "Insight da IA",
-          description: cleaned,
-          category: "Sugestao da IA",
-          color: "purple",
+    const response = await analyzeData(
+      {
+        companyId: selectedCompanyId,
+        summary,
+        financialData: {
+          income: financialReport?.income || 0,
+          expenses: financialReport?.expense || 0,
+          balance: financialReport?.balance || 0,
         },
-      ];
-    } catch (error) {
-      console.warn("AI analyze failed, falling back to analytics insights", error);
-      return [];
-    }
+        goals: [],
+      },
+      detailLevel
+    );
+
+    const text =
+      typeof response === "string"
+        ? response
+        : response.analysis || response.insight || response.message || JSON.stringify(response);
+
+    const cleaned = compactText(sanitizeInsight(text));
+    if (!cleaned) return [];
+
+    const chunks = cleaned
+      .split(/\n+/)
+      .map((item) => item.replace(/^[-*•]\s*/, "").trim())
+      .filter(Boolean)
+      .slice(0, 4);
+
+    return (chunks.length ? chunks : [cleaned]).map((item, index) => {
+      const category = inferCategory(item);
+      return {
+        title: chunks.length > 1 ? `Insight Estrategico ${index + 1}` : "Insight da IA",
+        description: compactText(item),
+        category,
+        color: inferColor(category),
+      };
+    });
   };
 
-  const loadInsights = async () => {
+  const loadInsights = async (forceFreshAi = false) => {
     try {
       setLoading(true);
-      // 1) tentar histórico de IA (LLM)
-      const aiHistory = await api
-        .get("/ai/history")
-        .then((res) => (Array.isArray(res.data) ? res.data : []))
-        .catch(() => []);
+      setAiError(null);
+
+      const aiHistory = forceFreshAi
+        ? []
+        : await api
+            .get("/ai/history")
+            .then((res) => (Array.isArray(res.data) ? res.data : []))
+            .catch(() => []);
 
       const normalizedAi = aiHistory
         .map((item: any) => {
@@ -187,13 +196,24 @@ const Insights = () => {
         return;
       }
 
-      const freshAi = await generateFreshAiInsight();
-      if (freshAi.length) {
-        setHistoryInsights(freshAi);
-        return;
+      try {
+        const freshAi = await generateFreshAiInsight();
+        if (freshAi.length) {
+          setHistoryInsights(freshAi);
+          return;
+        }
+      } catch (error) {
+        const details = getAiErrorDetails(error);
+        const message = `Falha ao gerar insights com IA${details.status ? ` (${details.status})` : ""}: ${details.message}`;
+        console.error("Strategic insights AI request failed", {
+          status: details.status,
+          message: details.message,
+          companyId: selectedCompanyId,
+          detailLevel,
+        });
+        setAiError(message);
       }
 
-      // 2) fallback para insights analíticos do backend
       const { data } = await api.get("/insights", {
         params: { companyId: selectedCompanyId || undefined },
       });
@@ -218,7 +238,7 @@ const Insights = () => {
                           ? "Alerta"
                           : item?.type === "info"
                             ? "Info"
-                            : inferCategory(String(baseDescription));
+                            : inferCategory(baseDescription);
 
               const colorMap: Record<string, InsightCardProps["color"]> = {
                 Metrica: "blue",
@@ -250,27 +270,61 @@ const Insights = () => {
 
   useEffect(() => {
     void loadInsights();
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, detailLevel]);
 
-  const cards = useMemo(() => {
-    if (historyInsights.length >= 4) return historyInsights.slice(0, 4);
-    return fallbackCards;
-  }, [historyInsights]);
+  const cards = useMemo(() => historyInsights.slice(0, 4), [historyInsights]);
+
+  const handleGenerateInsights = async () => {
+    try {
+      setRefreshingAi(true);
+      await loadInsights(true);
+      addToast("Insights atualizados.", "success");
+    } finally {
+      setRefreshingAi(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Insights</h1>
-        <p className="mt-2 text-sm text-zinc-400 md:text-base">Analise orientada por dados e monitoramento competitivo.</p>
+      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Insights</h1>
+          <p className="mt-2 text-sm text-zinc-400 md:text-base">Analise orientada por dados e monitoramento competitivo.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] ${aiError ? "bg-red-500/10 text-red-400" : "bg-lime-400/15 text-lime-400"}`}>
+            {aiError ? "IA com erro" : "IA ativa"}
+          </span>
+          <button
+            type="button"
+            onClick={handleGenerateInsights}
+            disabled={refreshingAi || loading}
+            className="rounded-2xl bg-lime-400 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-900 transition hover:opacity-90 disabled:opacity-50"
+          >
+            {refreshingAi ? "Gerando..." : "Gerar Insights"}
+          </button>
+        </div>
       </header>
 
       {loading ? <LoadingState label="Carregando insights..." /> : null}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {cards.map((insight) => (
-          <InsightCard key={`${insight.title}-${insight.category}`} {...insight} />
-        ))}
-      </div>
+      {aiError ? (
+        <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-200">
+          {aiError}
+        </div>
+      ) : null}
+
+      {cards.length ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {cards.map((insight) => (
+            <InsightCard key={`${insight.title}-${insight.category}`} {...insight} />
+          ))}
+        </div>
+      ) : !loading ? (
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-sm text-zinc-400">
+          Nenhum insight dinamico foi retornado no momento. Gere novamente apos revisar a conectividade da IA e os dados financeiros da empresa.
+        </div>
+      ) : null}
 
       <div className="rounded-3xl border border-zinc-900 bg-zinc-950 p-8">
         <div className="mb-8 flex items-center justify-between">
