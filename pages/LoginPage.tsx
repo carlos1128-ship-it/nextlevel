@@ -90,25 +90,25 @@ const tacticalCards = [
 
 const pricingPlans = [
   {
-    eyebrow: "Start Free", price: "7 dias gratis",
-    summary: "Entre, conecte canais e valide sua margem real antes de qualquer desconto acontecer.",
-    features: ["Trial de 7 dias com acesso ao painel", "Calculadora de margem e preco ideal", "1 operacao conectada para validar o fluxo", "Onboarding tatico ja no primeiro acesso"],
-    cta: "Ativar trial gratis", recommended: false, isContact: false,
-    microcopy: "Cartao obrigatorio para validacao, mas o desconto so ocorre apos o 7o dia. Cancele com um clique no painel.",
+    eyebrow: "Plano Common", price: "R$ 97/mes",
+    summary: "A base para organizar sua operacao, conectar canais e enxergar margem real desde o primeiro acesso.",
+    features: ["Calculadora de margem e preco ideal", "1 operacao conectada para validar o fluxo", "Painel tatico com leitura de lucro real", "Onboarding pratico para entrar operando"],
+    cta: "Assinar agora", recommended: false, isContact: false,
+    microcopy: "Assinatura mensal com acesso imediato ao painel e configuracao inicial guiada.",
   },
   {
-    eyebrow: "Plano Tatico", price: "R$ 147/mes",
+    eyebrow: "Plano Premium", price: "R$ 137/mes",
     summary: "A camada que organiza vendas, margem e atendimento no ritmo real da operacao.",
     features: ["WhatsApp, Instagram e alertas de margem", "Visao de lucro real por produto e canal", "Recomendacoes praticas da IA tatica", "Automacao pronta para operar sem atrito"],
-    cta: "Entrar no lucro real", recommended: true, isContact: false,
+    cta: "Assinar agora", recommended: true, isContact: false,
     microcopy: "Pensado para quem nao quer escalar faturamento queimando lucro no processo.",
   },
   {
-    eyebrow: "Operacao de Escala", price: "R$ 297/mes",
+    eyebrow: "Plano Pro", price: "R$ 247/mes",
     summary: "Para quando a empresa precisa de mais previsibilidade, mais canais e menos improviso no comando.",
-    features: ["Tudo do Pro com operacao multicanal", "Mercado Livre, Mercado Pago e camadas extras", "Mais contexto para time e rotinas de decisao", "Acompanhamento prioritario para expansao"],
-    cta: "Falar com vendas", recommended: false, isContact: true,
-    microcopy: undefined,
+    features: ["Tudo do Premium com operacao multicanal", "Mercado Livre, Mercado Pago e camadas extras", "Mais contexto para time e rotinas de decisao", "Acompanhamento prioritario para expansao"],
+    cta: "Comecar agora", recommended: false, isContact: false,
+    microcopy: "Acesso completo para operacoes em expansao que precisam de visibilidade e velocidade.",
   },
 ];
 
@@ -272,18 +272,18 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-lime-200/75">Ponto de entrada</p>
           <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-white">
-            {isRegisterView ? "Ative o trial e assuma o controle" : "Entre e recupere a visao"}
+            {isRegisterView ? "Crie sua conta e assuma o controle" : "Entre e recupere a visao"}
           </h2>
         </div>
         <div className="shrink-0 rounded-2xl border border-lime-400/20 bg-lime-400/10 px-3 py-2 text-right">
-          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-lime-200/70">Validacao</p>
-          <p className="mt-1 text-sm font-black text-lime-100">7 dias</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-lime-200/70">Acesso</p>
+          <p className="mt-1 text-sm font-black text-lime-100">Pago</p>
         </div>
       </div>
 
       <div className="mt-4 rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">Trial com cartao validado</p>
-        <p className="mt-2 text-sm leading-6 text-zinc-300">O desconto so acontece depois do 7o dia. Se nao fizer sentido, cancele com um clique.</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">Assinatura com acesso imediato</p>
+        <p className="mt-2 text-sm leading-6 text-zinc-300">Escolha seu plano, conclua a assinatura e entre direto no painel com a configuracao inicial pronta.</p>
       </div>
 
       <div className="mt-5 grid grid-cols-2 rounded-[22px] border border-white/10 bg-white/[0.04] p-1">
@@ -293,7 +293,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
         </button>
         <button type="button" onClick={() => { setIsRegisterView(true); setError(""); }}
           className={`rounded-[18px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.14em] transition ${isRegisterView ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
-          Trial
+          Assinar
         </button>
       </div>
 
@@ -348,7 +348,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
         <button type="submit" disabled={loading}
           className="inline-flex w-full items-center justify-center gap-3 rounded-[22px] border border-lime-300/10 bg-lime-300 px-4 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 transition duration-300 hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-60">
           {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" />}
-          {loading ? "Processando..." : isRegisterView ? "Ativar Trial Gratis" : "Entrar no Painel"}
+          {loading ? "Processando..." : isRegisterView ? "Assinar agora" : "Entrar no Painel"}
         </button>
       </form>
 
@@ -455,7 +455,7 @@ const LoginPage: React.FC = () => {
               <button type="button" onClick={() => scrollToSection("tactical-content")} className="rounded-full px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">O que fazemos</button>
               <button type="button" onClick={() => scrollToSection("pricing")} className="rounded-full px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Planos</button>
               <button type="button" onClick={focusLogin} className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 font-semibold text-zinc-100 transition hover:border-lime-400/30 hover:text-lime-100">Entrar</button>
-              <button type="button" onClick={focusRegister} className="rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 font-black uppercase tracking-[0.18em] text-lime-100 shadow-[0_0_30px_rgba(182,255,0,0.12)] transition hover:brightness-110">Trial de 7 dias</button>
+              <button type="button" onClick={focusRegister} className="rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 font-black uppercase tracking-[0.18em] text-lime-100 shadow-[0_0_30px_rgba(182,255,0,0.12)] transition hover:brightness-110">Assinar agora</button>
             </div>
           </div>
         </nav>
@@ -478,7 +478,7 @@ const LoginPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <button type="button" onClick={focusRegister} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-lime-300/20 bg-lime-300 px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-zinc-950 shadow-[0_0_34px_rgba(182,255,0,0.24)] transition hover:-translate-y-0.5 hover:brightness-105">
-                Ativar Trial Gratis (7 Dias) <ArrowUpRight />
+                Assinar Agora <ArrowUpRight />
               </button>
               <button type="button" onClick={() => scrollToSection("life-demo")} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-7 py-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.08]">
                 Ver Demonstracao Tatica
@@ -574,11 +574,11 @@ const LoginPage: React.FC = () => {
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-200/70">Novo funil de entrada</p>
               <h2 className="mt-3 max-w-4xl text-4xl font-black leading-[0.94] tracking-[-0.04em] text-white sm:text-5xl">
-                Entre no trial, valide a margem e avance para a camada de lucro real.
+                Escolha seu plano, entre no painel e avance para a camada de lucro real.
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-7 text-zinc-400">
-              Estrutura de tres planos, mas com uma promessa clara: o trial vira decisao real sem pegadinha escondida.
+              Estrutura de tres planos pagos com a mesma experiencia Next Level, focada em margem, clareza e execucao imediata.
             </p>
           </div>
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
@@ -621,7 +621,7 @@ const LoginPage: React.FC = () => {
                   Se a sua linha de lucro ainda depende de sorte, ela ja esta em risco.
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-200/80 sm:text-base">
-                  Entre agora, valide com 7 dias de trial e transforme crescimento bruto em lucro verdadeiro.
+                  Assine agora e transforme crescimento bruto em lucro verdadeiro com visibilidade tatico-financeira desde o primeiro acesso.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
