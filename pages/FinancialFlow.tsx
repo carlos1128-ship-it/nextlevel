@@ -22,6 +22,15 @@ const asCurrency = (value: number) =>
     maximumFractionDigits: 2,
   })}`;
 
+type TransactionsUpdatedDetail = {
+  companyId: string;
+  transaction?: TransactionItem;
+  totalIncome?: number;
+  totalExpense?: number;
+  balance?: number;
+  transactionsCount?: number;
+};
+
 const FinancialFlow = () => {
   const { addToast } = useToast();
   const { selectedCompanyId } = useAuth();
@@ -98,8 +107,8 @@ const FinancialFlow = () => {
   const balance = totalIncome - totalExpense;
   const margin = totalIncome > 0 ? (balance / totalIncome) * 100 : 0;
 
-  const notifyDashboardUpdate = () => {
-    window.dispatchEvent(new Event("transactions:updated"));
+  const notifyDashboardUpdate = (detail: TransactionsUpdatedDetail) => {
+    window.dispatchEvent(new CustomEvent("transactions:updated", { detail }));
   };
 
   const submitTransaction = async (e: React.FormEvent) => {
@@ -114,7 +123,7 @@ const FinancialFlow = () => {
       if (!selectedCompanyId) {
         throw new Error("Selecione uma empresa para continuar.");
       }
-      await createTransaction({
+      const result = await createTransaction({
         companyId: selectedCompanyId,
         type,
         amount: parsedAmount,
@@ -127,7 +136,14 @@ const FinancialFlow = () => {
       setCategory("");
       setDate(new Date().toISOString().slice(0, 16));
       await loadTransactions();
-      notifyDashboardUpdate();
+      notifyDashboardUpdate({
+        companyId: selectedCompanyId,
+        transaction: result.transaction,
+        totalIncome: result.totalIncome,
+        totalExpense: result.totalExpense,
+        balance: result.balance,
+        transactionsCount: result.transactionsCount,
+      });
       addToast("Transacao criada.", "success");
     } catch (error) {
       addToast(getErrorMessage(error, "Falha ao criar transacao."), "error");

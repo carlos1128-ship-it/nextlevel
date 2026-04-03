@@ -32,8 +32,9 @@ import {
   getDashboardSummary,
   getForecast,
   getAttendantRoi,
+  getTransactions,
 } from "../src/services/endpoints";
-import type { DashboardPeriod, DashboardSummary, ForecastResponse, AttendantRoi } from "../src/types/domain";
+import type { DashboardPeriod, DashboardSummary, ForecastResponse, AttendantRoi, TransactionItem } from "../src/types/domain";
 
 const EMPTY_SUMMARY: DashboardSummary = {
   revenue: 0,
@@ -78,6 +79,107 @@ const normalizeAiText = (raw: string) => {
     .filter(Boolean);
   const unique = Array.from(new Set(lines));
   return unique.join("\n");
+};
+
+type TransactionsUpdatedDetail = {
+  companyId?: string;
+  transaction?: TransactionItem;
+  totalIncome?: number;
+  totalExpense?: number;
+  balance?: number;
+  transactionsCount?: number;
+};
+
+const isSameCalendarDay = (left: Date, right: Date) =>
+  left.getFullYear() === right.getFullYear() &&
+  left.getMonth() === right.getMonth() &&
+  left.getDate() === right.getDate();
+
+const isTransactionInPeriod = (value: string | undefined, period: DashboardPeriod) => {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  if (period === "today") return isSameCalendarDay(target, today);
+  if (period === "yesterday") {
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    return isSameCalendarDay(target, yesterday);
+  }
+  if (period === "week") {
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - 6);
+    return target >= weekStart && target <= today;
+  }
+  if (period === "month") {
+    return target.getFullYear() === today.getFullYear() && target.getMonth() === today.getMonth();
+  }
+  return target.getFullYear() === today.getFullYear();
+};
+
+const buildLineDataFromTransactions = (transactions: TransactionItem[], period: DashboardPeriod) => {
+  const grouped = new Map<string, { name: string; Receitas: number; Saidas: number }>();
+
+  transactions.forEach((tx, index) => {
+    const txDate = new Date(tx.date || tx.createdAt);
+    if (Number.isNaN(txDate.getTime())) return;
+
+    let key = "";
+    if (period === "today" || period === "yesterday") {
+      key = `${String(txDate.getHours()).padStart(2, "0")}:00`;
+    } else if (period === "year") {
+      key = txDate.toLocaleDateString("pt-BR", { month: "short" });
+    } else {
+      key = txDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    }
+
+    if (!grouped.has(key)) {
+      grouped.set(key, { name: key || `Ponto ${index + 1}`, Receitas: 0, Saidas: 0 });
+    }
+
+    const row = grouped.get(key);
+    if (!row) return;
+    if (tx.type === "income") row.Receitas += Number(tx.amount || 0);
+    if (tx.type === "expense") row.Saidas += Number(tx.amount || 0);
+  });
+
+  return Array.from(grouped.values());
+};
+
+const buildSummaryFromTransactions = (
+  transactions: TransactionItem[],
+  period: DashboardPeriod,
+  currentSummary: DashboardSummary
+): DashboardSummary => {
+  const filtered = transactions.filter((tx) => isTransactionInPeriod(tx.date || tx.createdAt, period));
+  const revenue = filtered
+    .filter((tx) => tx.type === "income")
+    .reduce((acc, tx) => acc + Number(tx.amount || 0), 0);
+  const losses = filtered
+    .filter((tx) => tx.type === "expense")
+    .reduce((acc, tx) => acc + Number(tx.amount || 0), 0);
+  const profit = revenue - losses;
+
+  return {
+    ...currentSummary,
+    revenue,
+    losses,
+    profit,
+    cashflow: profit,
+    period,
+    lineData: buildLineDataFromTransactions(filtered, period),
+    pieData:
+      revenue > 0 || losses > 0
+        ? [
+            { name: "RECEITA", value: revenue },
+            { name: "SAIDAS", value: losses },
+          ]
+        : [],
+  };
 };
 
 const hasUsefulSummaryData = (summary: DashboardSummary) => {
@@ -294,6 +396,20 @@ const Dashboard = () => {
     }
   };
 
+  const refreshSummaryFromTransactions = async () => {
+    if (!selectedCompanyId) {
+      setSummary(EMPTY_SUMMARY);
+      return;
+    }
+
+    try {
+      const transactions = await getTransactions(selectedCompanyId);
+      setSummary((current) => buildSummaryFromTransactions(transactions, activePeriod, current));
+    } catch {
+      // Keep the last rendered dashboard state and let the canonical summary request reconcile.
+    }
+  };
+
   useEffect(() => {
     void loadSummary();
   }, [detailLevel, selectedCompanyId, activePeriod]);
@@ -303,8 +419,15 @@ const Dashboard = () => {
   }, [selectedCompanyId]);
 
   useEffect(() => {
-    const onTransactionsUpdated = () => {
+    const onTransactionsUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<TransactionsUpdatedDetail>).detail;
+      if (detail?.companyId && selectedCompanyId && detail.companyId !== selectedCompanyId) {
+        return;
+      }
+
+      void refreshSummaryFromTransactions();
       void loadSummary();
+      void loadForecast(forecastHorizon);
     };
     window.addEventListener("transactions:updated", onTransactionsUpdated);
     window.addEventListener("companies:updated", onTransactionsUpdated);
@@ -312,7 +435,7 @@ const Dashboard = () => {
       window.removeEventListener("transactions:updated", onTransactionsUpdated);
       window.removeEventListener("companies:updated", onTransactionsUpdated);
     };
-  }, [detailLevel, selectedCompanyId, activePeriod]);
+  }, [selectedCompanyId, activePeriod, forecastHorizon]);
 
   useEffect(() => {
     const loadRoi = async () => {
