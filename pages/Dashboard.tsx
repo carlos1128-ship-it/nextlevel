@@ -338,6 +338,12 @@ const Dashboard = () => {
     } catch (error) {
       const status = error instanceof AxiosError ? error.response?.status : undefined;
       const message = getErrorMessage(error, "").toLowerCase();
+      console.error("Dashboard AI analyze failed", {
+        status,
+        message: error instanceof Error ? error.message : String(error),
+        companyId: selectedCompanyId,
+        detailLevel,
+      });
       if (status === 429 || message.includes("limite da ia") || message.includes("quota")) {
         localStorage.setItem(ANALYZE_COOLDOWN_KEY, String(Date.now() + ANALYZE_COOLDOWN_MS));
       }
