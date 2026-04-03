@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -114,6 +114,7 @@ const Insights = () => {
   const [loading, setLoading] = useState(true);
   const [refreshingAi, setRefreshingAi] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const latestRequestRef = useRef(0);
 
   const isOfflineInsight = (text: string) =>
     text.toLowerCase().includes("modo offline") || text.toLowerCase().includes("heuristica");
@@ -166,6 +167,9 @@ const Insights = () => {
   };
 
   const loadInsights = async (forceFreshAi = false) => {
+    const requestId = latestRequestRef.current + 1;
+    latestRequestRef.current = requestId;
+
     try {
       setLoading(true);
       setAiError(null);
@@ -192,15 +196,17 @@ const Insights = () => {
         .filter(Boolean) as InsightCardProps[];
 
       if (normalizedAi.length && normalizedAi.some((item) => !isOfflineInsight(item.description))) {
+        if (latestRequestRef.current !== requestId) return { source: "stale" as const };
         setHistoryInsights(normalizedAi.slice(0, 4));
-        return;
+        return { source: "history" as const };
       }
 
       try {
         const freshAi = await generateFreshAiInsight();
         if (freshAi.length) {
+          if (latestRequestRef.current !== requestId) return { source: "stale" as const };
           setHistoryInsights(freshAi);
-          return;
+          return { source: "ai" as const };
         }
       } catch (error) {
         const details = getAiErrorDetails(error);
@@ -211,6 +217,7 @@ const Insights = () => {
           companyId: selectedCompanyId,
           detailLevel,
         });
+        if (latestRequestRef.current !== requestId) return { source: "stale" as const };
         setAiError(message);
       }
 
@@ -259,12 +266,18 @@ const Insights = () => {
             .filter(Boolean) as InsightCardProps[]
         : [];
 
+      if (latestRequestRef.current !== requestId) return { source: "stale" as const };
       setHistoryInsights(parsed);
+      return { source: "analytics" as const };
     } catch (error) {
+      if (latestRequestRef.current !== requestId) return { source: "stale" as const };
       setHistoryInsights([]);
       addToast(getErrorMessage(error, "Nao foi possivel carregar os insights."), "error");
+      return { source: "error" as const };
     } finally {
-      setLoading(false);
+      if (latestRequestRef.current === requestId) {
+        setLoading(false);
+      }
     }
   };
 
@@ -275,10 +288,15 @@ const Insights = () => {
   const cards = useMemo(() => historyInsights.slice(0, 4), [historyInsights]);
 
   const handleGenerateInsights = async () => {
+    if (refreshingAi || loading) return;
     try {
       setRefreshingAi(true);
-      await loadInsights(true);
-      addToast("Insights atualizados.", "success");
+      const result = await loadInsights(true);
+      if (result?.source === "ai") {
+        addToast("Insights atualizados com IA.", "success");
+      } else if (result?.source === "analytics") {
+        addToast("Insights atualizados com dados analiticos. A IA continua indisponivel.", "info");
+      }
     } finally {
       setRefreshingAi(false);
     }
