@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React from "react";
 import {
   BarChart,
   Bar,
@@ -8,110 +8,12 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { AxiosError } from "axios";
-import { api } from "../services/api";
-import { getErrorMessage } from "../src/services/error";
 import { useToast } from "../components/Toast";
 import { LoadingState } from "../components/AsyncState";
 import { useAuth } from "../App";
-import { analyzeData, getDashboardSummary, getFinancialReport } from "../src/services/endpoints";
+import { useStrategicInsights, type StrategicInsightCard } from "../src/hooks/useStrategicInsights";
 
-interface InsightCardProps {
-  title: string;
-  description: string;
-  category: string;
-  color: "green" | "blue" | "purple" | "red";
-}
-
-const INSIGHT_MAX_CHARS = 120;
-
-function inferCategory(content: string): string {
-  const text = content.toLowerCase();
-  if (text.includes("risco") || text.includes("ameaca")) return "Risco";
-  if (text.includes("oportunidade")) return "Oportunidade";
-  if (text.includes("recomend")) return "Recomendacao";
-  if (text.includes("padrao") || text.includes("tendencia")) return "Padrao";
-  return "Sugestao da IA";
-}
-
-function inferColor(category: string): InsightCardProps["color"] {
-  if (category === "Risco") return "red";
-  if (category === "Oportunidade") return "green";
-  if (category === "Recomendacao") return "purple";
-  return "blue";
-}
-
-function compactText(value: string): string {
-  const clean = value.replace(/\s+/g, " ").trim();
-  if (clean.length <= INSIGHT_MAX_CHARS) return clean;
-  return `${clean.slice(0, INSIGHT_MAX_CHARS - 3)}...`;
-}
-
-function sanitizeInsight(value: string): string {
-  let text = value || "";
-  text = text.replace(/\*\*/g, "");
-  const dadosIdx = text.toLowerCase().indexOf("dados:");
-  if (dadosIdx >= 0) {
-    text = text.slice(0, dadosIdx).trim();
-  }
-  text = text.replace(/\n{2,}/g, "\n");
-  return text.trim();
-}
-
-function stripInsightLead(value: string): string {
-  return value
-    .replace(/^(baseado nos seus dados[:,]?\s*)/i, "")
-    .replace(/^(com base nos seus dados[:,]?\s*)/i, "")
-    .replace(/^(eu recomendo que\s*)/i, "")
-    .replace(/^(eu recomendo\s*)/i, "")
-    .replace(/^(recomendo que\s*)/i, "")
-    .replace(/^(recomendo\s*)/i, "")
-    .replace(/^(sugiro que\s*)/i, "")
-    .replace(/^(sugiro\s*)/i, "")
-    .replace(/^(considere\s*)/i, "")
-    .trim();
-}
-
-function normalizeInsightLine(value: string): string {
-  const compact = sanitizeInsight(value)
-    .replace(/^(padroes|riscos|oportunidades|recomendacoes)\s*:\s*/i, "")
-    .replace(/^[-*•]\s*/, "")
-    .split(/[.!?](?:\s|$)/)
-    .map((sentence) => sentence.trim())
-    .filter(Boolean)
-    .slice(0, 2)
-    .join(". ");
-
-  return compactText(stripInsightLead(compact).replace(/\s+/g, " ").trim());
-}
-
-function parseInsightLines(value: string): string[] {
-  return sanitizeInsight(value)
-    .split(/\n+/)
-    .map((item) => normalizeInsightLine(item))
-    .filter(Boolean)
-    .slice(0, 4);
-}
-
-function getAiErrorDetails(error: unknown) {
-  if (error instanceof AxiosError) {
-    const payload = error.response?.data as { message?: string; error?: string; detail?: string } | string | undefined;
-    return {
-      status: error.response?.status,
-      message:
-        typeof payload === "string"
-          ? payload
-          : payload?.message || payload?.error || payload?.detail || error.message,
-    };
-  }
-
-  return {
-    status: undefined,
-    message: error instanceof Error ? error.message : "Erro desconhecido ao gerar insights.",
-  };
-}
-
-const InsightCard: React.FC<InsightCardProps> = ({ title, description, category, color }) => {
+const InsightCard: React.FC<StrategicInsightCard> = ({ title, description, category, color }) => {
   const colorClasses = {
     green: "border-green-500/40 bg-green-500/5",
     blue: "border-blue-500/40 bg-blue-500/5",
@@ -149,210 +51,35 @@ const benchmarkData = [
 const Insights = () => {
   const { addToast } = useToast();
   const { selectedCompanyId, detailLevel } = useAuth();
-  const [historyInsights, setHistoryInsights] = useState<InsightCardProps[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshingAi, setRefreshingAi] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
-  const latestRequestRef = useRef(0);
-
-  const isOfflineInsight = (text: string) =>
-    text.toLowerCase().includes("modo offline") || text.toLowerCase().includes("heuristica");
-
-  const generateFreshAiInsight = async (): Promise<InsightCardProps[]> => {
-    if (!selectedCompanyId) return [];
-
-    const [summary, financialReport] = await Promise.all([
-      getDashboardSummary({ companyId: selectedCompanyId }),
-      getFinancialReport(selectedCompanyId),
-    ]);
-
-    const response = await analyzeData(
-      {
-        companyId: selectedCompanyId,
-        summary,
-        financialData: {
-          income: financialReport?.income || 0,
-          expenses: financialReport?.expense || 0,
-          balance: financialReport?.balance || 0,
-        },
-        goals: [],
-      },
-      detailLevel
-    );
-
-    const text =
-      typeof response === "string"
-        ? response
-        : response.analysis || response.insight || response.message || JSON.stringify(response);
-
-    const parsedLines = parseInsightLines(text);
-    if (parsedLines.length) {
-      return parsedLines.map((item, index) => {
-        const category = inferCategory(item);
-        return {
-          title: parsedLines.length > 1 ? `Insight ${index + 1}` : "Insight",
-          description: item,
-          category,
-          color: inferColor(category),
-        };
-      });
-    }
-
-    const cleaned = compactText(sanitizeInsight(text));
-    if (!cleaned) return [];
-
-    const chunks = cleaned
-      .split(/\n+/)
-      .map((item) => item.replace(/^[-*•]\s*/, "").trim())
-      .filter(Boolean)
-      .slice(0, 4);
-
-    return (chunks.length ? chunks : [cleaned]).map((item, index) => {
-      const category = inferCategory(item);
-      return {
-        title: chunks.length > 1 ? `Insight Estrategico ${index + 1}` : "Insight da IA",
-        description: compactText(item),
-        category,
-        color: inferColor(category),
-      };
-    });
-  };
-
-  const loadInsights = async (forceFreshAi = false) => {
-    const requestId = latestRequestRef.current + 1;
-    latestRequestRef.current = requestId;
-
-    try {
-      setLoading(true);
-      setAiError(null);
-
-      const aiHistory = forceFreshAi
-        ? []
-        : await api
-            .get("/ai/history")
-            .then((res) => (Array.isArray(res.data) ? res.data : []))
-            .catch(() => []);
-
-      const normalizedAi = aiHistory
-        .flatMap((item: any) => {
-          const baseTitle = item?.title || "Insight";
-          return parseInsightLines(String(item?.description ?? item?.content ?? "")).map((line, index) => {
-            const category = item?.category || inferCategory(line);
-            return {
-              title: index === 0 ? baseTitle : `${baseTitle} ${index + 1}`,
-              description: line,
-              category,
-              color: inferColor(category),
-            } as InsightCardProps;
-          });
-        })
-        .filter(Boolean) as InsightCardProps[];
-
-      if (normalizedAi.length && normalizedAi.some((item) => !isOfflineInsight(item.description))) {
-        if (latestRequestRef.current !== requestId) return { source: "stale" as const };
-        setHistoryInsights(normalizedAi.slice(0, 4));
-        return { source: "history" as const };
-      }
-
-      try {
-        const freshAi = await generateFreshAiInsight();
-        if (freshAi.length) {
-          if (latestRequestRef.current !== requestId) return { source: "stale" as const };
-          setHistoryInsights(freshAi);
-          return { source: "ai" as const };
-        }
-      } catch (error) {
-        const details = getAiErrorDetails(error);
-        const message = `Falha ao gerar insights com IA${details.status ? ` (${details.status})` : ""}: ${details.message}`;
-        console.error("Strategic insights AI request failed", {
-          status: details.status,
-          message: details.message,
-          companyId: selectedCompanyId,
-          detailLevel,
-        });
-        if (latestRequestRef.current !== requestId) return { source: "stale" as const };
-        setAiError(message);
-      }
-
-      const { data } = await api.get("/insights", {
-        params: { companyId: selectedCompanyId || undefined },
-      });
-
-      const parsed = Array.isArray(data)
-        ? data
-            .map((item: any) => {
-              const baseDescription = normalizeInsightLine(String(item?.description ?? ""));
-              if (!baseDescription) return null;
-              const description =
-                item?.value != null ? `${baseDescription} • ${item.value}` : baseDescription;
-              const category =
-                item?.type === "metric"
-                  ? "Metrica"
-                  : item?.type === "peak"
-                    ? "Pico"
-                    : item?.type === "product"
-                      ? "Produto"
-                      : item?.type === "growth"
-                        ? "Crescimento"
-                        : item?.type === "alert"
-                          ? "Alerta"
-                          : item?.type === "info"
-                            ? "Info"
-                            : inferCategory(baseDescription);
-
-              const colorMap: Record<string, InsightCardProps["color"]> = {
-                Metrica: "blue",
-                Pico: "purple",
-                Produto: "green",
-                Crescimento: "green",
-                Alerta: "red",
-                Info: "blue",
-              };
-
-              return {
-                title: item?.title ?? "Insight",
-                description: compactText(description),
-                category,
-                color: colorMap[category] || inferColor(category),
-              };
-            })
-            .filter(Boolean) as InsightCardProps[]
-        : [];
-
-      if (latestRequestRef.current !== requestId) return { source: "stale" as const };
-      setHistoryInsights(parsed);
-      return { source: "analytics" as const };
-    } catch (error) {
-      if (latestRequestRef.current !== requestId) return { source: "stale" as const };
-      setHistoryInsights([]);
-      addToast(getErrorMessage(error, "Nao foi possivel carregar os insights."), "error");
-      return { source: "error" as const };
-    } finally {
-      if (latestRequestRef.current === requestId) {
-        setLoading(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    void loadInsights();
-  }, [selectedCompanyId, detailLevel]);
-
-  const cards = useMemo(() => historyInsights.slice(0, 4), [historyInsights]);
+  const {
+    cards,
+    loading,
+    refreshing,
+    error,
+    source,
+    reload,
+  } = useStrategicInsights({
+    companyId: selectedCompanyId,
+    detailLevel,
+    enabled: Boolean(selectedCompanyId),
+  });
 
   const handleGenerateInsights = async () => {
-    if (refreshingAi || loading) return;
-    try {
-      setRefreshingAi(true);
-      const result = await loadInsights(true);
-      if (result?.source === "ai") {
-        addToast("Insights atualizados com IA.", "success");
-      } else if (result?.source === "analytics") {
-        addToast("Insights atualizados com dados analiticos. A IA continua indisponivel.", "info");
-      }
-    } finally {
-      setRefreshingAi(false);
+    if (refreshing || loading) return;
+    const result = await reload({ forceFresh: true });
+    if (!result) return;
+
+    if (result.source === "ai") {
+      addToast("Insights atualizados com IA.", "success");
+      return;
     }
+
+    if (result.source === "cache") {
+      addToast("Cache recente reutilizado para evitar novas chamadas de IA.", "info");
+      return;
+    }
+
+    addToast("Insights atualizados com dados analiticos. A IA segue protegida por cache/retry.", "info");
   };
 
   return (
@@ -363,32 +90,42 @@ const Insights = () => {
           <p className="mt-2 text-sm text-zinc-400 md:text-base">Analise orientada por dados e monitoramento competitivo.</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] ${aiError ? "bg-red-500/10 text-red-400" : "bg-lime-400/15 text-lime-400"}`}>
-            {aiError ? "IA com erro" : "IA ativa"}
+          <span
+            className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] ${
+              error
+                ? "bg-amber-500/10 text-amber-300"
+                : source === "cache"
+                  ? "bg-blue-500/10 text-blue-300"
+                  : "bg-lime-400/15 text-lime-400"
+            }`}
+          >
+            {error ? "IA em retry/fallback" : source === "cache" ? "Cache ativo" : "IA ativa"}
           </span>
           <button
             type="button"
             onClick={handleGenerateInsights}
-            disabled={refreshingAi || loading}
-            className="rounded-2xl bg-lime-400 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-900 transition hover:opacity-90 disabled:opacity-50"
+            disabled={refreshing || loading}
+            className="rounded-2xl bg-lime-400 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {refreshingAi ? "Gerando..." : "Gerar Insights"}
+            {refreshing ? "Gerando..." : "Gerar Insights"}
           </button>
         </div>
       </header>
 
       {loading ? <LoadingState label="Carregando insights..." /> : null}
 
-      {aiError ? (
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-200">
-          {aiError}
+      {error ? (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
+          {source === "cache"
+            ? `IA indisponivel no momento. Exibindo cache recente. ${error}`
+            : `IA indisponivel no momento. Aplicado retry automatico e fallback. ${error}`}
         </div>
       ) : null}
 
       {cards.length ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {cards.map((insight) => (
-            <InsightCard key={`${insight.title}-${insight.category}`} {...insight} />
+            <InsightCard key={`${insight.title}-${insight.category}-${insight.description}`} {...insight} />
           ))}
         </div>
       ) : !loading ? (

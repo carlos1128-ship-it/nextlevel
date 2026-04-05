@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { AxiosError } from "axios";
 import {
   LineChart,
   Line,
@@ -27,13 +26,13 @@ import {
 import { useToast } from "../components/Toast";
 import { getErrorMessage } from "../src/services/error";
 import {
-  analyzeData,
   exportFinancialCsv,
   getDashboardSummary,
   getForecast,
   getAttendantRoi,
   getTransactions,
 } from "../src/services/endpoints";
+import { useStrategicInsights } from "../src/hooks/useStrategicInsights";
 import type { DashboardPeriod, DashboardSummary, ForecastResponse, AttendantRoi, TransactionItem } from "../src/types/domain";
 
 const EMPTY_SUMMARY: DashboardSummary = {
@@ -56,8 +55,6 @@ const PERIODS: Array<{ label: string; value: DashboardPeriod }> = [
   { label: "Ano", value: "year" },
 ];
 const FORECAST_HORIZONS: Array<7 | 15 | 30> = [7, 15, 30];
-const ANALYZE_COOLDOWN_KEY = "dashboard_ai_analyze_cooldown_until";
-const ANALYZE_COOLDOWN_MS = 5 * 60 * 1000;
 
 const asCurrency = (value: number) =>
   `R$ ${Number(value || 0).toLocaleString("pt-BR", {
@@ -250,15 +247,24 @@ const Dashboard = () => {
   const { username, detailLevel, selectedCompanyId } = useAuth();
   const { addToast } = useToast();
   const [summary, setSummary] = useState<DashboardSummary>(EMPTY_SUMMARY);
-  const [aiInsight, setAiInsight] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [activePeriod, setActivePeriod] = useState<DashboardPeriod>("today");
   const [forecast, setForecast] = useState<ForecastResponse | null>(null);
   const [forecastHorizon, setForecastHorizon] = useState<7 | 15 | 30>(30);
   const [isForecastLoading, setIsForecastLoading] = useState(false);
   const [attendantRoi, setAttendantRoi] = useState<AttendantRoi>({ iaSalesCount: 0, iaRevenue: 0 });
+  const shouldLoadStrategicInsights = selectedCompanyId !== null && hasUsefulSummaryData(summary);
+  const {
+    rawText: sharedInsightText,
+    error: strategicInsightError,
+  } = useStrategicInsights({
+    companyId: selectedCompanyId,
+    detailLevel,
+    enabled: shouldLoadStrategicInsights,
+    summary,
+  });
 
-  const formattedInsight = useMemo(() => normalizeAiText(aiInsight), [aiInsight]);
+  const formattedInsight = useMemo(() => normalizeAiText(sharedInsightText), [sharedInsightText]);
 
   const chartData = useMemo(() => {
     if (!summary.lineData.length) {
@@ -323,34 +329,6 @@ const Dashboard = () => {
     return "Previsão pronta";
   }, [forecast]);
 
-  const runAnalyze = async (payload: DashboardSummary) => {
-    const cooldownUntil = Number(localStorage.getItem(ANALYZE_COOLDOWN_KEY) || 0);
-    if (cooldownUntil > Date.now()) return;
-
-    try {
-      const response = await analyzeData(payload, detailLevel);
-      const text =
-        typeof response === "string"
-          ? response
-          : response.analysis || response.insight || response.message || "";
-      localStorage.removeItem(ANALYZE_COOLDOWN_KEY);
-      setAiInsight(normalizeAiText(text));
-    } catch (error) {
-      const status = error instanceof AxiosError ? error.response?.status : undefined;
-      const message = getErrorMessage(error, "").toLowerCase();
-      console.error("Dashboard AI analyze failed", {
-        status,
-        message: error instanceof Error ? error.message : String(error),
-        companyId: selectedCompanyId,
-        detailLevel,
-      });
-      if (status === 429 || message.includes("limite da ia") || message.includes("quota")) {
-        localStorage.setItem(ANALYZE_COOLDOWN_KEY, String(Date.now() + ANALYZE_COOLDOWN_MS));
-      }
-      setAiInsight("");
-    }
-  };
-
   const loadSummary = async () => {
     setIsUpdating(true);
     try {
@@ -366,14 +344,8 @@ const Dashboard = () => {
         pieData: Array.isArray(data?.pieData) ? data.pieData : [],
       };
       setSummary(normalized);
-      if (hasUsefulSummaryData(normalized)) {
-        await runAnalyze(normalized);
-      } else {
-        setAiInsight("");
-      }
     } catch (error) {
       setSummary(EMPTY_SUMMARY);
-      setAiInsight("");
       addToast(getErrorMessage(error, "Nao foi possivel carregar o dashboard."), "error");
     } finally {
       setIsUpdating(false);
@@ -785,6 +757,11 @@ const Dashboard = () => {
               <LightbulbIcon className="h-5 w-5" />
             </div>
             <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Insight Estrategico</h3>
+            {strategicInsightError ? (
+              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
+                Cache/Retry ativo
+              </span>
+            ) : null}
           </div>
           <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-300 md:text-base">
             {formattedInsight || "Ainda nao ha volume suficiente para um diagnostico automatico robusto. Cadastre movimentacoes financeiras, vendas e custos para liberar analises mais profundas."}
