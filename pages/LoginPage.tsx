@@ -17,6 +17,10 @@ function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function parsePtBrNumber(value: string): number {
+  return parseFloat(value.replace(",", ".")) || 0;
+}
+
 /* ─────────────────────────────────────────────────────────────
    Inline SVG Icons
 ───────────────────────────────────────────────────────────── */
@@ -120,12 +124,17 @@ const MarginCalculatorSection: React.FC = () => {
   const [productName, setProductName] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [cost, setCost] = useState("");
+  const [desiredMargin, setDesiredMargin] = useState("");
 
-  const sale = parseFloat(salePrice.replace(",", ".")) || 0;
-  const c = parseFloat(cost.replace(",", ".")) || 0;
+  const sale = parsePtBrNumber(salePrice);
+  const c = parsePtBrNumber(cost);
+  const desiredMarginValue = parsePtBrNumber(desiredMargin);
   const profit = sale - c;
   const margin = sale > 0 ? (profit / sale) * 100 : 0;
-  const hasResult = sale > 0 && c > 0;
+  const hasProfitResult = sale > 0 && c > 0;
+  const hasIdealPrice = c > 0 && desiredMarginValue > 0 && desiredMarginValue < 100;
+  const idealPrice = hasIdealPrice ? c / (1 - desiredMarginValue / 100) : 0;
+  const idealProfit = idealPrice - c;
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -147,62 +156,119 @@ const MarginCalculatorSection: React.FC = () => {
 
           <div className="mt-6 flex rounded-2xl border border-white/10 bg-white/[0.03] p-1">
             {(["lucro", "preco"] as const).map((t) => (
-              <button key={t} type="button" onClick={() => setTab(t)}
-                className={`flex-1 rounded-[14px] py-2.5 text-sm font-bold uppercase tracking-[0.14em] transition ${tab === t ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={`flex-1 rounded-[14px] py-2.5 text-sm font-bold uppercase tracking-[0.14em] transition ${tab === t ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}
+              >
                 {t === "lucro" ? "Lucro do Produto" : "Gerador de Preco Ideal"}
               </button>
             ))}
           </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="md:col-span-3">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Nome do produto</p>
-              <input value={productName} onChange={(e) => setProductName(e.target.value)} className={fieldCls} placeholder="Ex.: Kit Premium" />
-            </div>
-            <div>
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Preco de venda</p>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
-                <input value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className={`${fieldCls} pl-10`} placeholder="149,90" inputMode="decimal" />
+          {tab === "lucro" ? (
+            <>
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
+                <div className="md:col-span-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Nome do produto</p>
+                  <input value={productName} onChange={(e) => setProductName(e.target.value)} className={fieldCls} placeholder="Nome do produto" />
+                </div>
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Preco de venda</p>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
+                    <input value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className={`${fieldCls} pl-10`} placeholder="0,00" inputMode="decimal" />
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Custo do produto</p>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
+                    <input value={cost} onChange={(e) => setCost(e.target.value)} className={`${fieldCls} pl-10`} placeholder="0,00" inputMode="decimal" />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Custo do produto</p>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
-                <input value={cost} onChange={(e) => setCost(e.target.value)} className={`${fieldCls} pl-10`} placeholder="89,90" inputMode="decimal" />
-              </div>
-            </div>
-          </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            {[
-              { label: "Preco de venda", value: sale > 0 ? fmt(sale) : "R$ 0,00" },
-              { label: "Custo do produto", value: c > 0 ? fmt(c) : "R$ 0,00" },
-              { label: "Margem atual", value: `${margin.toFixed(1)}%` },
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">{item.label}</p>
-                <p className="mt-2 text-lg font-black tracking-tight text-white">{item.value}</p>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {[
+                  { label: "Preco de venda", value: sale > 0 ? fmt(sale) : "R$ 0,00" },
+                  { label: "Custo do produto", value: c > 0 ? fmt(c) : "R$ 0,00" },
+                  { label: "Margem atual", value: `${margin.toFixed(1)}%` },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">{item.label}</p>
+                    <p className="mt-2 text-lg font-black tracking-tight text-white">{item.value}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Custo do produto</p>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
+                    <input value={cost} onChange={(e) => setCost(e.target.value)} className={`${fieldCls} pl-10`} placeholder="0,00" inputMode="decimal" />
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Margem desejada</p>
+                  <div className="relative">
+                    <input value={desiredMargin} onChange={(e) => setDesiredMargin(e.target.value)} className={`${fieldCls} pr-10`} placeholder="30" inputMode="decimal" />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {[
+                  { label: "Custo base", value: c > 0 ? fmt(c) : "R$ 0,00" },
+                  { label: "Margem desejada", value: desiredMarginValue > 0 ? `${desiredMarginValue.toFixed(1)}%` : "0,0%" },
+                  { label: "Lucro embutido", value: hasIdealPrice ? fmt(idealProfit) : "R$ 0,00" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">{item.label}</p>
+                    <p className="mt-2 text-lg font-black tracking-tight text-white">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="min-w-[260px] rounded-[28px] border border-lime-400/15 bg-[linear-gradient(160deg,rgba(182,255,0,0.06),transparent_60%)] p-6">
+        <div className="min-w-[260px] rounded-[28px] border border-lime-400/15 bg-[linear-gradient(160deg,rgba(182,255,0,0.06),transparent_60%)] p-6 shadow-[0_0_40px_rgba(182,255,0,0.08)]">
           <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-lime-200/70">Resultado ao vivo</p>
-          {hasResult ? (
-            <>
-              <p className="mt-4 text-2xl font-black tracking-[-0.04em] text-white">{productName || "Produto"}</p>
-              <p className="mt-2 text-sm text-zinc-400">Lucro por unidade vendida</p>
-              <p className={`mt-6 text-5xl font-black tracking-[-0.04em] ${profit >= 0 ? "text-lime-300" : "text-red-400"}`}>{fmt(profit)}</p>
-              <p className={`mt-2 text-sm font-semibold ${margin >= 20 ? "text-lime-400" : margin >= 10 ? "text-yellow-400" : "text-red-400"}`}>
-                Margem: {margin.toFixed(1)}% {margin >= 20 ? "✓ Saudavel" : margin >= 10 ? "⚠ Atencao" : "✗ Critica"}
+          {tab === "lucro" ? (
+            hasProfitResult ? (
+              <>
+                <p className="mt-4 text-2xl font-black tracking-[-0.04em] text-white">{productName || "Produto"}</p>
+                <p className="mt-2 text-sm text-zinc-400">Lucro por unidade vendida</p>
+                <p className={`mt-6 text-5xl font-black tracking-[-0.04em] ${profit >= 0 ? "text-lime-300" : "text-red-400"}`}>{fmt(profit)}</p>
+                <p className={`mt-2 text-sm font-semibold ${margin >= 20 ? "text-lime-400" : margin >= 10 ? "text-yellow-400" : "text-red-400"}`}>
+                  Margem: {margin.toFixed(1)}% {margin >= 20 ? "Saudavel" : margin >= 10 ? "Atencao" : "Critica"}
+                </p>
+              </>
+            ) : (
+              <p className="mt-6 text-sm leading-7 text-zinc-500">
+                Preencha nome, preco de venda e custo para ver o lucro por produto com clareza.
               </p>
+            )
+          ) : hasIdealPrice ? (
+            <>
+              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-zinc-400">Preco ideal de venda</p>
+              <div className="mt-5 rounded-[24px] border border-lime-300/20 bg-[#0a1207] px-5 py-6 shadow-[0_0_34px_rgba(182,255,0,0.16)]">
+                <p className="text-5xl font-black tracking-[-0.04em] text-lime-300">{fmt(idealPrice)}</p>
+                <p className="mt-3 text-sm leading-6 text-lime-100/75">
+                  Para custo de {fmt(c)} com margem desejada de {desiredMarginValue.toFixed(1)}%.
+                </p>
+              </div>
+              <p className="mt-4 text-sm font-semibold text-lime-300">Lucro estimado por unidade: {fmt(idealProfit)}</p>
             </>
           ) : (
             <p className="mt-6 text-sm leading-7 text-zinc-500">
-              Preencha nome, preco de venda e custo para ver o lucro por produto com clareza.
+              Informe um custo maior que zero e uma margem entre 0% e 99,9% para gerar o preco ideal em tempo real.
             </p>
           )}
         </div>
