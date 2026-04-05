@@ -155,12 +155,14 @@ function writeCachedResult(result: CachedStrategicInsightsResult) {
 function getAiErrorDetails(error: unknown) {
   if (error instanceof AxiosError) {
     const payload = error.response?.data as { message?: string; error?: string; detail?: string } | string | undefined;
+    const status = error.response?.status;
+    const message =
+      typeof payload === "string"
+        ? payload
+        : payload?.message || payload?.error || payload?.detail || error.message;
     return {
-      status: error.response?.status,
-      message:
-        typeof payload === "string"
-          ? payload
-          : payload?.message || payload?.error || payload?.detail || error.message,
+      status,
+      message: status ? `[${status}] ${message}` : message,
     };
   }
 

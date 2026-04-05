@@ -116,9 +116,8 @@ const Insights = () => {
 
       {error ? (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
-          {source === "cache"
-            ? `IA indisponivel no momento. Exibindo cache recente. ${error}`
-            : `IA indisponivel no momento. Aplicado retry automatico e fallback. ${error}`}
+          <span className="font-bold">Erro da IA: </span>{error}
+          {source === "cache" ? " (exibindo cache recente)" : ""}
         </div>
       ) : null}
 
