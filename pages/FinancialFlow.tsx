@@ -15,6 +15,12 @@ import { EmptyState, ErrorState, LoadingState } from "../components/AsyncState";
 import MarginCalculator from "../components/MarginCalculator";
 import type { TransactionItem } from "../src/types/domain";
 import { useAuth } from "../App";
+import {
+  formatTransactionDate,
+  formatTransactionDateTime,
+  getTransactionDateValue,
+  toDateTimeLocalValue,
+} from "../src/utils/datetime";
 
 const asCurrency = (value: number) =>
   `R$ ${Number(value || 0).toLocaleString("pt-BR", {
@@ -43,7 +49,7 @@ const FinancialFlow = () => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 16));
+  const [date, setDate] = useState(() => toDateTimeLocalValue());
 
   const loadTransactions = async () => {
     if (!selectedCompanyId) {
@@ -77,7 +83,7 @@ const FinancialFlow = () => {
   const chartData = useMemo(() => {
     const grouped = new Map<string, { name: string; Entradas: number; Saidas: number }>();
     safeTransactions.forEach((tx, index) => {
-      const day = new Date(tx.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+      const day = formatTransactionDate(getTransactionDateValue(tx), { month: "short" });
       if (!grouped.has(day)) grouped.set(day, { name: day || `Sem ${index + 1}`, Entradas: 0, Saidas: 0 });
       const row = grouped.get(day);
       if (!row) return;
@@ -134,7 +140,7 @@ const FinancialFlow = () => {
       setAmount("");
       setDescription("");
       setCategory("");
-      setDate(new Date().toISOString().slice(0, 16));
+      setDate(toDateTimeLocalValue());
       await loadTransactions();
       notifyDashboardUpdate({
         companyId: selectedCompanyId,
@@ -277,7 +283,32 @@ const FinancialFlow = () => {
               title="Sem transacoes cadastradas"
               description="Use o formulario acima para registrar sua primeira movimentacao."
             />
-          ) : null}
+          ) : (
+            <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
+              <h3 className="mb-4 text-xl font-black tracking-tight text-zinc-100">Ultimas transacoes</h3>
+              <div className="space-y-3">
+                {safeTransactions.slice(0, 12).map((tx) => {
+                  const transactionDate = getTransactionDateValue(tx);
+                  return (
+                    <div
+                      key={tx.id}
+                      className="flex flex-col gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div>
+                        <p className="font-bold text-zinc-100">{tx.description}</p>
+                        <p className="text-xs text-zinc-400">
+                          {tx.category || "Sem categoria"} · {formatTransactionDateTime(transactionDate)}
+                        </p>
+                      </div>
+                      <div className={`text-sm font-black ${tx.type === "income" ? "text-lime-400" : "text-red-400"}`}>
+                        {tx.type === "income" ? "+" : "-"} {asCurrency(Number(tx.amount || 0))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

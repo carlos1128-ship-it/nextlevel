@@ -34,6 +34,7 @@ import {
 } from "../src/services/endpoints";
 import { useStrategicInsights } from "../src/hooks/useStrategicInsights";
 import type { DashboardPeriod, DashboardSummary, ForecastResponse, AttendantRoi, TransactionItem } from "../src/types/domain";
+import { getTransactionDateValue } from "../src/utils/datetime";
 
 const EMPTY_SUMMARY: DashboardSummary = {
   revenue: 0,
@@ -122,7 +123,7 @@ const buildLineDataFromTransactions = (transactions: TransactionItem[], period: 
   const grouped = new Map<string, { name: string; Receitas: number; Saidas: number }>();
 
   transactions.forEach((tx, index) => {
-    const txDate = new Date(tx.date || tx.createdAt);
+    const txDate = new Date(getTransactionDateValue(tx));
     if (Number.isNaN(txDate.getTime())) return;
 
     let key = "";
@@ -152,7 +153,7 @@ const buildSummaryFromTransactions = (
   period: DashboardPeriod,
   currentSummary: DashboardSummary
 ): DashboardSummary => {
-  const filtered = transactions.filter((tx) => isTransactionInPeriod(tx.date || tx.createdAt, period));
+  const filtered = transactions.filter((tx) => isTransactionInPeriod(getTransactionDateValue(tx), period));
   const revenue = filtered
     .filter((tx) => tx.type === "income")
     .reduce((acc, tx) => acc + Number(tx.amount || 0), 0);

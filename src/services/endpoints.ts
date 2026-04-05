@@ -41,6 +41,7 @@ function normalizeTransaction(transaction: any): TransactionItem {
     type: rawType === "income" ? "income" : "expense",
     amount: Number(transaction?.amount || 0),
     date: normalizedDate,
+    occurredAt: transaction?.occurredAt || normalizedDate,
     createdAt: transaction?.createdAt || normalizedDate,
   } as TransactionItem;
 }

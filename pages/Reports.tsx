@@ -19,6 +19,7 @@ import { EmptyState, ErrorState, LoadingState } from "../components/AsyncState";
 import { exportFinancialCsv, getFinancialReport, getTransactions } from "../src/services/endpoints";
 import type { TransactionItem } from "../src/types/domain";
 import { useAuth } from "../App";
+import { formatTransactionDate, getTransactionDateValue } from "../src/utils/datetime";
 
 const asCurrency = (value: number) =>
   `R$ ${Number(value || 0).toLocaleString("pt-BR", {
@@ -82,7 +83,9 @@ const Reports = () => {
   const chartData = useMemo(() => {
     const map = new Map<string, { name: string; Receita: number; Despesa: number }>();
     safeTransactions.forEach((tx) => {
-      const key = new Date(tx.createdAt).toLocaleDateString("pt-BR");
+      const key = formatTransactionDate(getTransactionDateValue(tx), {
+        year: "numeric",
+      });
       if (!map.has(key)) map.set(key, { name: key, Receita: 0, Despesa: 0 });
       const row = map.get(key);
       if (!row) return;

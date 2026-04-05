@@ -19,6 +19,7 @@ export interface TransactionItem {
   description: string;
   amount: number;
   date?: string;
+  occurredAt?: string;
   createdAt: string;
   category?: string;
 }
