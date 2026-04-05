@@ -23,6 +23,8 @@ interface InsightCardProps {
   color: "green" | "blue" | "purple" | "red";
 }
 
+const INSIGHT_MAX_CHARS = 120;
+
 function inferCategory(content: string): string {
   const text = content.toLowerCase();
   if (text.includes("risco") || text.includes("ameaca")) return "Risco";
@@ -41,8 +43,8 @@ function inferColor(category: string): InsightCardProps["color"] {
 
 function compactText(value: string): string {
   const clean = value.replace(/\s+/g, " ").trim();
-  if (clean.length <= 280) return clean;
-  return `${clean.slice(0, 280)}...`;
+  if (clean.length <= INSIGHT_MAX_CHARS) return clean;
+  return `${clean.slice(0, INSIGHT_MAX_CHARS - 3)}...`;
 }
 
 function sanitizeInsight(value: string): string {
@@ -54,6 +56,41 @@ function sanitizeInsight(value: string): string {
   }
   text = text.replace(/\n{2,}/g, "\n");
   return text.trim();
+}
+
+function stripInsightLead(value: string): string {
+  return value
+    .replace(/^(baseado nos seus dados[:,]?\s*)/i, "")
+    .replace(/^(com base nos seus dados[:,]?\s*)/i, "")
+    .replace(/^(eu recomendo que\s*)/i, "")
+    .replace(/^(eu recomendo\s*)/i, "")
+    .replace(/^(recomendo que\s*)/i, "")
+    .replace(/^(recomendo\s*)/i, "")
+    .replace(/^(sugiro que\s*)/i, "")
+    .replace(/^(sugiro\s*)/i, "")
+    .replace(/^(considere\s*)/i, "")
+    .trim();
+}
+
+function normalizeInsightLine(value: string): string {
+  const compact = sanitizeInsight(value)
+    .replace(/^(padroes|riscos|oportunidades|recomendacoes)\s*:\s*/i, "")
+    .replace(/^[-*•]\s*/, "")
+    .split(/[.!?](?:\s|$)/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(". ");
+
+  return compactText(stripInsightLead(compact).replace(/\s+/g, " ").trim());
+}
+
+function parseInsightLines(value: string): string[] {
+  return sanitizeInsight(value)
+    .split(/\n+/)
+    .map((item) => normalizeInsightLine(item))
+    .filter(Boolean)
+    .slice(0, 4);
 }
 
 function getAiErrorDetails(error: unknown) {
@@ -90,12 +127,14 @@ const InsightCard: React.FC<InsightCardProps> = ({ title, description, category,
   };
 
   return (
-    <div className={`rounded-2xl border p-5 ${colorClasses[color]}`}>
+    <div className={`rounded-2xl border p-4 ${colorClasses[color]}`}>
       <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${textColors[color]}`}>
         {category}
       </span>
-      <h3 className="mt-2 text-lg font-black tracking-tight text-zinc-100 md:text-xl">{title}</h3>
-      <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300">{description}</p>
+      <h3 className="mt-1 text-base font-black tracking-tight text-zinc-100 md:text-lg">{title}</h3>
+      <ul className="mt-2 space-y-1 text-sm leading-5 text-zinc-300">
+        <li className="ml-4 list-disc">{description}</li>
+      </ul>
     </div>
   );
 };
@@ -146,6 +185,19 @@ const Insights = () => {
         ? response
         : response.analysis || response.insight || response.message || JSON.stringify(response);
 
+    const parsedLines = parseInsightLines(text);
+    if (parsedLines.length) {
+      return parsedLines.map((item, index) => {
+        const category = inferCategory(item);
+        return {
+          title: parsedLines.length > 1 ? `Insight ${index + 1}` : "Insight",
+          description: item,
+          category,
+          color: inferColor(category),
+        };
+      });
+    }
+
     const cleaned = compactText(sanitizeInsight(text));
     if (!cleaned) return [];
 
@@ -182,16 +234,17 @@ const Insights = () => {
             .catch(() => []);
 
       const normalizedAi = aiHistory
-        .map((item: any) => {
-          const baseDescription = sanitizeInsight(String(item?.description ?? item?.content ?? ""));
-          if (!baseDescription) return null;
-          const category = item?.category || inferCategory(baseDescription);
-          return {
-            title: item?.title || "Insight da IA",
-            description: compactText(baseDescription),
-            category,
-            color: inferColor(category),
-          } as InsightCardProps;
+        .flatMap((item: any) => {
+          const baseTitle = item?.title || "Insight";
+          return parseInsightLines(String(item?.description ?? item?.content ?? "")).map((line, index) => {
+            const category = item?.category || inferCategory(line);
+            return {
+              title: index === 0 ? baseTitle : `${baseTitle} ${index + 1}`,
+              description: line,
+              category,
+              color: inferColor(category),
+            } as InsightCardProps;
+          });
         })
         .filter(Boolean) as InsightCardProps[];
 
@@ -228,7 +281,7 @@ const Insights = () => {
       const parsed = Array.isArray(data)
         ? data
             .map((item: any) => {
-              const baseDescription = sanitizeInsight(String(item?.description ?? ""));
+              const baseDescription = normalizeInsightLine(String(item?.description ?? ""));
               if (!baseDescription) return null;
               const description =
                 item?.value != null ? `${baseDescription} • ${item.value}` : baseDescription;
@@ -257,7 +310,7 @@ const Insights = () => {
               };
 
               return {
-                title: item?.title ?? "Insight da IA",
+                title: item?.title ?? "Insight",
                 description: compactText(description),
                 category,
                 color: colorMap[category] || inferColor(category),
