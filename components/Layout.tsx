@@ -102,10 +102,10 @@ const Sidebar = () => {
   const { username, isAdmin, niche } = useAuth();
   const items = useMemo(() => resolveNavItems(isAdmin, niche), [isAdmin, niche]);
   return (
-    <aside className="fixed left-0 top-0 z-50 hidden h-full w-64 flex-col justify-between border-r border-zinc-900 bg-[#080b10] p-6 text-zinc-100 lg:flex">
+    <aside className="fixed left-0 top-0 z-50 hidden h-full w-64 flex-col justify-between border-r border-zinc-200 bg-white p-6 text-zinc-800 dark:border-zinc-900 dark:bg-[#080b10] dark:text-zinc-100 lg:flex">
       <div>
-        <div className="mb-8 text-4xl font-black tracking-tight text-lime-400">NEXT LEVEL</div>
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Operacao Segura</p>
+        <div className="mb-8 text-4xl font-black tracking-tight text-lime-500 dark:text-lime-400">NEXT LEVEL</div>
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operacao Segura</p>
         <nav aria-label="Menu Principal">
           <ul className="space-y-1">
             {(Array.isArray(items) ? items : []).map((item) => (
@@ -115,8 +115,8 @@ const Sidebar = () => {
                   className={({ isActive }) =>
                     `group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                       isActive
-                        ? "bg-lime-400/20 text-lime-300"
-                        : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                        ? "bg-lime-100 text-lime-700 dark:bg-lime-400/20 dark:text-lime-300"
+                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
                     }`
                   }
                 >
@@ -129,13 +129,13 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      <Link to="/profile" className="group flex items-center gap-3 border-t border-zinc-900 pt-6" aria-label="Acessar perfil">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 font-bold text-zinc-200 transition-all group-hover:border-lime-400">
+      <Link to="/profile" className="group flex items-center gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-900" aria-label="Acessar perfil">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 font-bold text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
           {username?.charAt(0).toUpperCase() || "U"}
         </div>
         <div>
-          <p className="text-sm font-bold text-zinc-100">{username || "Usuario"}</p>
-          <p className="text-[10px] uppercase tracking-widest text-zinc-500">Ver Perfil</p>
+          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{username || "Usuario"}</p>
+          <p className="text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ver Perfil</p>
         </div>
       </Link>
     </aside>
@@ -146,23 +146,23 @@ const Header = () => {
   const { username, isAdmin } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-900 bg-[#101218]/95 px-6 backdrop-blur lg:justify-end lg:px-8">
-      <div className="text-lg font-black text-lime-400 lg:hidden">NEXT LEVEL</div>
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-200 bg-white/95 px-6 backdrop-blur dark:border-zinc-900 dark:bg-[#101218]/95 lg:justify-end lg:px-8">
+      <div className="text-lg font-black text-lime-500 dark:text-lime-400 lg:hidden">NEXT LEVEL</div>
       <div className="flex items-center gap-4">
         {isAdmin ? (
-          <Link to="/admin/system-health" className="p-2 text-zinc-500 transition-colors hover:text-lime-400" aria-label="Painel admin">
+          <Link to="/admin/system-health" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Painel admin">
             <ShieldIcon className="h-5 w-5" />
           </Link>
         ) : null}
-        <Link to="/settings" className="p-2 text-zinc-500 transition-colors hover:text-lime-400" aria-label="Configuracoes">
+        <Link to="/settings" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Configuracoes">
           <SettingsIcon className="h-5 w-5" />
         </Link>
         <Link to="/profile" className="group flex items-center gap-2.5" aria-label="Menu do usuario">
           <div className="hidden text-right sm:block">
-            <p className="text-xs font-bold text-zinc-100 transition-colors group-hover:text-lime-400">{username || "Usuario"}</p>
-            <p className="text-[9px] uppercase tracking-tighter text-zinc-500">Estrategico</p>
+            <p className="text-xs font-bold text-zinc-800 transition-colors group-hover:text-lime-500 dark:text-zinc-100 dark:group-hover:text-lime-400">{username || "Usuario"}</p>
+            <p className="text-[9px] uppercase tracking-tighter text-zinc-400 dark:text-zinc-500">Estrategico</p>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-xs font-black text-zinc-200 transition-all group-hover:border-lime-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 text-xs font-black text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
             {username?.charAt(0).toUpperCase() || "U"}
           </div>
         </Link>
@@ -261,7 +261,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#040507] text-zinc-100">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F9FA] text-zinc-800 dark:bg-[#040507] dark:text-zinc-100">
       <div
         id="dashboard-main"
         aria-hidden={showNicheModal || undefined}
