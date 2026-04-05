@@ -891,3 +891,34 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
   });
   return data;
 }
+
+// ─── Evolution API / WhatsApp Instance ───────────────────────────────────────
+
+export async function createWhatsappInstance(companyId?: string | null) {
+  const { data } = await api.post<{ instanceName: string; qrCode?: string; status: string }>(
+    "/attendant/whatsapp/instance",
+    null,
+    { params: companyId ? { companyId } : undefined },
+  );
+  return data;
+}
+
+export async function getWhatsappQRCode(companyId?: string | null) {
+  const { data } = await api.get<{ instanceName?: string; qrCode?: string; status: string }>(
+    "/attendant/whatsapp/qrcode",
+    { params: companyId ? { companyId } : undefined },
+  );
+  return data;
+}
+
+export async function getWhatsappStatus(companyId?: string | null) {
+  const { data } = await api.get<{
+    instanceName?: string;
+    status: string;
+    quotaUsed?: number;
+    quotaLimit?: number;
+  }>("/attendant/whatsapp/status", {
+    params: companyId ? { companyId } : undefined,
+  });
+  return data;
+}

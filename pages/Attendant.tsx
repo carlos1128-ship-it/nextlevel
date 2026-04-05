@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
 import {
@@ -7,6 +7,9 @@ import {
   getAttendantRoi,
   interveneLead,
   updateBotConfig,
+  createWhatsappInstance,
+  getWhatsappQRCode,
+  getWhatsappStatus,
 } from "../src/services/endpoints";
 import type { BotConfig, Lead } from "../src/types/domain";
 import { getErrorMessage } from "../src/services/error";
@@ -68,6 +71,15 @@ const Attendant = () => {
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingLeads, setLoadingLeads] = useState(false);
+
+  // WhatsApp / QR code state
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [waStatus, setWaStatus] = useState<string>("not_created");
+  const [quotaUsed, setQuotaUsed] = useState<number | null>(null);
+  const [quotaLimit, setQuotaLimit] = useState<number | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadConfig = async () => {
     if (!selectedCompanyId) return;
@@ -139,6 +151,78 @@ const Attendant = () => {
     }
   };
 
+  const loadWaStatus = async () => {
+    if (!selectedCompanyId) return;
+    try {
+      const s = await getWhatsappStatus(selectedCompanyId);
+      setWaStatus(s.status);
+      if (s.quotaUsed != null) setQuotaUsed(s.quotaUsed);
+      if (s.quotaLimit != null) setQuotaLimit(s.quotaLimit);
+    } catch {
+      // silently fail
+    }
+  };
+
+  const stopPoll = () => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  };
+
+  const startPolling = () => {
+    stopPoll();
+    pollRef.current = setInterval(async () => {
+      if (!selectedCompanyId) return;
+      try {
+        const res = await getWhatsappQRCode(selectedCompanyId);
+        if (res.status === "open") {
+          stopPoll();
+          setWaStatus("open");
+          setQrModalOpen(false);
+          addToast("WhatsApp conectado com sucesso!", "success");
+          void loadWaStatus();
+        } else if (res.qrCode) {
+          setQrCode(res.qrCode);
+        }
+      } catch {
+        // ignore poll errors
+      }
+    }, 4000);
+  };
+
+  const handleConnectWhatsapp = async () => {
+    if (!selectedCompanyId) return;
+    setQrLoading(true);
+    try {
+      const res = await createWhatsappInstance(selectedCompanyId);
+      setQrCode(res.qrCode ?? null);
+      setWaStatus(res.status);
+      if (res.status !== "open") {
+        setQrModalOpen(true);
+        startPolling();
+      } else {
+        addToast("WhatsApp já está conectado!", "success");
+        setWaStatus("open");
+        void loadWaStatus();
+      }
+    } catch (error) {
+      addToast(getErrorMessage(error, "Falha ao conectar WhatsApp"), "error");
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const handleCloseQrModal = () => {
+    stopPoll();
+    setQrModalOpen(false);
+  };
+
+  useEffect(() => {
+    void loadWaStatus();
+    return () => stopPoll();
+  }, [selectedCompanyId]);
+
   const liveFeed = useMemo(() => leads.slice(0, 10), [leads]);
   const hotLeads = useMemo(() => leads.filter((l) => l.score >= 80), [leads]);
 
@@ -189,6 +273,123 @@ const Attendant = () => {
               <p className={`mt-1 text-2xl font-black ${kpi.color}`}>{kpi.value}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── Conectar Canais ── */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* WhatsApp via Evolution API */}
+        <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-700/40">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#25D366]/15 text-lg">
+                📱
+              </div>
+              <div>
+                <p className="font-bold text-white text-sm">WhatsApp</p>
+                <p className="text-[11px] text-zinc-500">via Evolution API (self-hosted)</p>
+              </div>
+            </div>
+            <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${
+              waStatus === "open"
+                ? "border-lime-500/40 bg-lime-500/10 text-lime-300"
+                : waStatus === "connecting"
+                  ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                  : "border-zinc-700/40 bg-zinc-900/60 text-zinc-500"
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${waStatus === "open" ? "animate-pulse bg-lime-400" : waStatus === "connecting" ? "animate-pulse bg-amber-400" : "bg-zinc-600"}`} />
+              {waStatus === "open" ? "Conectado" : waStatus === "connecting" ? "Conectando" : "Desconectado"}
+            </span>
+          </div>
+
+          {quotaUsed != null && quotaLimit != null && (
+            <div className="mt-3">
+              <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
+                <span>Mensagens utilizadas</span>
+                <span className={quotaUsed >= quotaLimit ? "text-red-400 font-bold" : "text-zinc-400"}>
+                  {quotaUsed}/{quotaLimit}
+                </span>
+              </div>
+              <div className="h-1 w-full rounded-full bg-zinc-800">
+                <div
+                  className={`h-1 rounded-full transition-all ${quotaUsed >= quotaLimit ? "bg-red-400" : quotaUsed / quotaLimit > 0.7 ? "bg-amber-400" : "bg-lime-400"}`}
+                  style={{ width: `${Math.min(100, (quotaUsed / quotaLimit) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => void handleConnectWhatsapp()}
+            disabled={qrLoading || waStatus === "open"}
+            className="mt-4 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#25D366] transition hover:bg-[#25D366]/20 active:scale-95 disabled:opacity-50"
+          >
+            {qrLoading ? "Gerando QR Code..." : waStatus === "open" ? "Conectado ✓" : "Conectar WhatsApp"}
+          </button>
+        </div>
+
+        {/* Instagram via Meta OAuth */}
+        <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-700/40">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E1306C]/15 text-lg">
+                📸
+              </div>
+              <div>
+                <p className="font-bold text-white text-sm">Instagram</p>
+                <p className="text-[11px] text-zinc-500">via Meta Graph API</p>
+              </div>
+            </div>
+            <span className="flex items-center gap-1.5 rounded-full border border-zinc-700/40 bg-zinc-900/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-zinc-600" />
+              Não configurado
+            </span>
+          </div>
+          <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed">
+            Conecte sua conta Business do Instagram para receber DMs e responder automaticamente com IA.
+          </p>
+          <a
+            href="/integrations"
+            className="mt-4 flex w-full items-center justify-center rounded-xl border border-[#E1306C]/30 bg-[#E1306C]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#E1306C] transition hover:bg-[#E1306C]/20 active:scale-95"
+          >
+            Ir para Integrações
+          </a>
+        </div>
+      </div>
+
+      {/* ── QR Code Modal ── */}
+      {qrModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={handleCloseQrModal}>
+          <div
+            className="relative w-full max-w-sm rounded-2xl border border-zinc-700/60 bg-zinc-900 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={handleCloseQrModal}
+              className="absolute right-4 top-4 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-white transition"
+            >
+              ✕
+            </button>
+            <h3 className="text-base font-bold text-white">Conectar WhatsApp</h3>
+            <p className="mt-1 text-xs text-zinc-400">Abra o WhatsApp → Dispositivos Conectados → Conectar Dispositivo</p>
+            <div className="mt-5 flex justify-center">
+              {qrCode ? (
+                <img
+                  src={qrCode}
+                  alt="QR Code WhatsApp"
+                  className="h-56 w-56 rounded-xl border border-zinc-700 bg-white p-2"
+                />
+              ) : (
+                <div className="flex h-56 w-56 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800">
+                  <p className="text-xs text-zinc-500 animate-pulse">Gerando QR Code...</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-zinc-500">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
+              Aguardando leitura do QR Code...
+            </div>
+          </div>
         </div>
       )}
 
