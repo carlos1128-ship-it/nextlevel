@@ -132,8 +132,8 @@ const MarginCalculatorSection: React.FC = () => {
   const profit = sale - c;
   const margin = sale > 0 ? (profit / sale) * 100 : 0;
   const hasProfitResult = sale > 0 && c > 0;
-  const hasIdealPrice = c > 0 && desiredMarginValue > 0 && desiredMarginValue < 100;
-  const idealPrice = hasIdealPrice ? c / (1 - desiredMarginValue / 100) : 0;
+  const hasIdealPrice = c > 0 && desiredMarginValue > 0;
+  const idealPrice = hasIdealPrice ? c * (1 + desiredMarginValue / 100) : 0;
   const idealProfit = idealPrice - c;
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -268,7 +268,7 @@ const MarginCalculatorSection: React.FC = () => {
             </>
           ) : (
             <p className="mt-6 text-sm leading-7 text-zinc-500">
-              Informe um custo maior que zero e uma margem entre 0% e 99,9% para gerar o preco ideal em tempo real.
+              Informe um custo maior que zero e uma margem maior que zero para gerar o preco ideal em tempo real.
             </p>
           )}
         </div>
