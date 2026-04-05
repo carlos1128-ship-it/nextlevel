@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { PlusIcon } from "../components/icons";
+import { PlusIcon, TrashIcon, XIcon } from "../components/icons";
 import { useToast } from "../components/Toast";
 import { EmptyState, ErrorState, LoadingState } from "../components/AsyncState";
 import { getErrorMessage } from "../src/services/error";
-import { createCompany, getCompanies } from "../src/services/endpoints";
+import { createCompany, deleteCompany, getCompanies } from "../src/services/endpoints";
 import type { Company } from "../src/types/domain";
 import { useAuth } from "../App";
 
@@ -46,6 +46,8 @@ const Companies = () => {
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
+  const [deletingCompanyId, setDeletingCompanyId] = useState<string | null>(null);
 
   const loadCompanies = async () => {
     setLoadingPage(true);
@@ -155,6 +157,38 @@ const Companies = () => {
     if (!companyId) return;
     setSelectedCompanyId(companyId);
     addToast("Empresa ativa atualizada.", "success");
+  };
+
+  const askDeleteCompany = (company: Company) => {
+    setCompanyToDelete(company);
+  };
+
+  const handleDeleteCompany = async () => {
+    const targetId = getCompanyId(companyToDelete);
+    if (!companyToDelete || !targetId) return;
+
+    const remainingCompanies = companies.filter((company) => getCompanyId(company) !== targetId);
+    const nextSelectedCompanyId =
+      selectedCompanyId === targetId ? getCompanyId(remainingCompanies[0]) : selectedCompanyId;
+
+    try {
+      setDeletingCompanyId(targetId);
+      setCompanies(remainingCompanies);
+      setCompanyToDelete(null);
+      setSelectedCompanyId(nextSelectedCompanyId || null);
+      await deleteCompany(targetId);
+      window.dispatchEvent(new Event("companies:updated"));
+      addToast("Empresa removida com sucesso.", "success");
+    } catch (error) {
+      setCompanies(companies);
+      if (selectedCompanyId) {
+        setSelectedCompanyId(selectedCompanyId);
+      }
+      addToast(getErrorMessage(error, "Nao foi possivel remover a empresa."), "error");
+      await loadCompanies();
+    } finally {
+      setDeletingCompanyId(null);
+    }
   };
 
   const summaryText = useMemo(() => {
@@ -278,13 +312,24 @@ const Companies = () => {
                       </span>
                     </td>
                     <td className="p-4">
-                      <button
-                        type="button"
-                        onClick={() => selectCompany(getCompanyId(company))}
-                        className="text-lime-400 transition hover:text-lime-300"
-                      >
-                        Selecionar
-                      </button>
+                      <div className="flex items-center gap-4">
+                        <button
+                          type="button"
+                          onClick={() => selectCompany(getCompanyId(company))}
+                          className="text-lime-400 transition hover:text-lime-300"
+                        >
+                          Selecionar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => askDeleteCompany(company)}
+                          disabled={deletingCompanyId === getCompanyId(company)}
+                          className="inline-flex items-center gap-2 text-red-400 transition hover:text-red-300 disabled:opacity-50"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          Excluir
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -293,6 +338,54 @@ const Companies = () => {
           </table>
         </div>
       )}
+
+      {companyToDelete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl rounded-3xl border border-lime-400/20 bg-zinc-950 p-6 shadow-[0_0_50px_rgba(182,255,0,0.08)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-400">Exclusao Permanente</p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-100">Excluir empresa?</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCompanyToDelete(null)}
+                className="rounded-xl border border-zinc-800 p-2 text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-zinc-900 bg-zinc-900/60 p-4 text-sm text-zinc-300">
+              <p>
+                Tem certeza que deseja excluir <span className="font-bold text-zinc-100">{companyToDelete.name}</span>?
+              </p>
+              <p className="mt-2 text-zinc-400">
+                Esta acao nao pode ser desfeita e removera dados associados, incluindo transacoes, produtos,
+                clientes, custos, leads, insights e configuracoes ligadas a esta empresa.
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 md:flex-row md:justify-end">
+              <button
+                type="button"
+                onClick={() => setCompanyToDelete(null)}
+                className="rounded-2xl border border-zinc-800 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-200 transition hover:border-zinc-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteCompany}
+                disabled={Boolean(deletingCompanyId)}
+                className="rounded-2xl border border-red-500/40 bg-red-500/10 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-red-300 transition hover:bg-red-500/15 disabled:opacity-50"
+              >
+                {deletingCompanyId ? "Excluindo..." : "Confirmar Exclusao"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

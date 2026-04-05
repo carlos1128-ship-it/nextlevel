@@ -418,6 +418,16 @@ export async function createCompany(payload: {
   return normalizedData as Company;
 }
 
+export async function deleteCompany(id: string) {
+  const { data } = await api.delete<{
+    success: boolean;
+    companyId: string;
+    companyName: string;
+    deletedCounts?: Record<string, number>;
+  }>(`/company/${id}`);
+  return data;
+}
+
 export async function analyzeData(payload: unknown, detailLevel: DetailLevel) {
   const { data } = await api.post<{ analysis?: string; insight?: string; message?: string } | string>(
     "/ai/analyze",
