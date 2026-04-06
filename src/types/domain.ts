@@ -181,8 +181,18 @@ export interface BotConfig {
   toneOfVoice: string;
   instructions: string | null;
   isActive: boolean;
+  evolutionInstanceName?: string | null;
+  evolutionConnectionStatus?: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface WhatsappConnectionSnapshot {
+  instanceName?: string | null;
+  qrCode?: string | null;
+  status: string;
+  quotaUsed?: number | null;
+  quotaLimit?: number | null;
 }
 
 export interface ChatConversation {

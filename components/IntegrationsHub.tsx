@@ -2,8 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../App";
 import { useToast } from "./Toast";
 import {
+  createWhatsappInstance,
   getIntegrationOAuthSession,
   getIntegrationStatuses,
+  getWhatsappQRCode,
+  getWhatsappStatus,
 } from "../src/services/endpoints";
 import type { IntegrationProvider } from "../src/types/domain";
 
@@ -169,6 +172,11 @@ function formatUpdatedAt(value: string | null) {
   });
 }
 
+function normalizeWhatsappConnected(status: string | null | undefined) {
+  const normalized = String(status || "").trim().toLowerCase();
+  return normalized === "connected" || normalized === "open";
+}
+
 function StatusPulse({ connected }: { connected: boolean }) {
   return (
     <span
@@ -308,6 +316,9 @@ const IntegrationsHub = () => {
   const [statuses, setStatuses] = useState<Record<HubProvider, HubStatus>>(buildDefaultStatuses);
   const [loadingProvider, setLoadingProvider] = useState<HubProvider | null>(null);
   const [bootstrapping, setBootstrapping] = useState(true);
+  const [whatsappQrCode, setWhatsappQrCode] = useState<string | null>(null);
+  const [whatsappInstanceName, setWhatsappInstanceName] = useState<string | null>(null);
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
   const connectedCount = useMemo(
     () => (Object.values(statuses) as HubStatus[]).filter((status) => status.connected).length,
@@ -326,8 +337,21 @@ const IntegrationsHub = () => {
     }
 
     try {
-      const apiStatuses = await getIntegrationStatuses(selectedCompanyId);
+      const [apiStatuses, whatsappStatus] = await Promise.all([
+        getIntegrationStatuses(selectedCompanyId),
+        getWhatsappStatus(selectedCompanyId).catch(() => null),
+      ]);
       const next = mergeStatuses(apiStatuses, persisted);
+      if (whatsappStatus) {
+        next.whatsapp = {
+          provider: "whatsapp",
+          connected: normalizeWhatsappConnected(whatsappStatus.status),
+          status: normalizeWhatsappConnected(whatsappStatus.status) ? "connected" : "disconnected",
+          updatedAt: new Date().toISOString(),
+          source: "api",
+        };
+        setWhatsappInstanceName(whatsappStatus.instanceName || null);
+      }
       setStatuses(next);
       persistStatuses(selectedCompanyId, next);
     } catch {
@@ -401,6 +425,103 @@ const IntegrationsHub = () => {
       persistStatuses(selectedCompanyId, next);
       return next;
     });
+  };
+
+  useEffect(() => {
+    if (!selectedCompanyId || !whatsappModalOpen) return;
+
+    const interval = window.setInterval(async () => {
+      try {
+        const response = await getWhatsappQRCode(selectedCompanyId);
+        if (response.instanceName) setWhatsappInstanceName(response.instanceName);
+        if (response.qrCode) setWhatsappQrCode(response.qrCode);
+
+        const connected = normalizeWhatsappConnected(response.status);
+        setStatuses((current) => {
+          const next = {
+            ...current,
+            whatsapp: {
+              ...current.whatsapp,
+              connected,
+              status: connected ? "connected" : "disconnected",
+              updatedAt: new Date().toISOString(),
+              source: "api" as const,
+            },
+          };
+          persistStatuses(selectedCompanyId, next);
+          return next;
+        });
+
+        if (connected) {
+          setWhatsappModalOpen(false);
+          addToast("WhatsApp conectado com sucesso.", "success");
+        }
+      } catch {
+        // ignora polling transiente
+      }
+    }, 4000);
+
+    return () => window.clearInterval(interval);
+  }, [addToast, selectedCompanyId, whatsappModalOpen]);
+
+  const handleWhatsappConnect = async () => {
+    if (!selectedCompanyId) {
+      addToast("Selecione uma empresa antes de conectar canais.", "info");
+      return;
+    }
+
+    setLoadingProvider("whatsapp");
+    try {
+      const currentStatus = await getWhatsappStatus(selectedCompanyId).catch(() => null);
+      const connectedNow = normalizeWhatsappConnected(currentStatus?.status);
+
+      if (connectedNow) {
+        setWhatsappInstanceName(currentStatus?.instanceName || null);
+        setStatuses((current) => {
+          const next = {
+            ...current,
+            whatsapp: {
+              ...current.whatsapp,
+              connected: true,
+              status: "connected" as const,
+              updatedAt: new Date().toISOString(),
+              source: "api" as const,
+            },
+          };
+          persistStatuses(selectedCompanyId, next);
+          return next;
+        });
+        addToast("Essa instância já está conectada.", "success");
+        return;
+      }
+
+      const response =
+        currentStatus?.instanceName
+          ? await getWhatsappQRCode(selectedCompanyId)
+          : await createWhatsappInstance(selectedCompanyId);
+
+      setWhatsappInstanceName(response.instanceName || currentStatus?.instanceName || null);
+      setWhatsappQrCode(response.qrCode || null);
+      setWhatsappModalOpen(true);
+      setStatuses((current) => {
+        const next = {
+          ...current,
+          whatsapp: {
+            ...current.whatsapp,
+            connected: false,
+            status: "syncing" as const,
+            updatedAt: new Date().toISOString(),
+            source: "api" as const,
+          },
+        };
+        persistStatuses(selectedCompanyId, next);
+        return next;
+      });
+    } catch {
+      addToast("Nao foi possivel gerar o QR Code da Evolution agora.", "error");
+    } finally {
+      setLoadingProvider(null);
+    }
   };
 
   const handleOAuthConnect = async (provider: HubProvider) => {
@@ -489,11 +610,18 @@ const IntegrationsHub = () => {
           {PROVIDERS.map((provider) => {
             const status = statuses[provider.id];
             const isLoading = loadingProvider === provider.id || status.status === "syncing";
+            const isWhatsapp = provider.id === "whatsapp";
             const buttonLabel = isLoading
-              ? "Conectando..."
+              ? isWhatsapp
+                ? "Gerando QR..."
+                : "Conectando..."
               : status.connected
-                ? "Revalidar acesso"
-                : "Conectar em 1 clique";
+                ? isWhatsapp
+                  ? "WhatsApp conectado"
+                  : "Revalidar acesso"
+                : isWhatsapp
+                  ? "Conectar e exibir QR"
+                  : "Conectar em 1 clique";
 
             return (
               <article
@@ -524,8 +652,12 @@ const IntegrationsHub = () => {
 
                   <button
                     type="button"
-                    onClick={() => void handleOAuthConnect(provider.id)}
-                    disabled={!selectedCompanyId || isLoading}
+                    onClick={() =>
+                      void (isWhatsapp
+                        ? handleWhatsappConnect()
+                        : handleOAuthConnect(provider.id))
+                    }
+                    disabled={!selectedCompanyId || isLoading || (isWhatsapp && status.connected)}
                     className={`mt-5 inline-flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition ${
                       !selectedCompanyId
                         ? "cursor-not-allowed bg-zinc-800 text-zinc-500"
@@ -544,6 +676,58 @@ const IntegrationsHub = () => {
             );
           })}
         </div>
+
+        {whatsappModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+            onClick={() => setWhatsappModalOpen(false)}
+          >
+            <div
+              className="w-full max-w-md rounded-[28px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
+                    Evolution QR
+                  </p>
+                  <h3 className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
+                    Conecte o WhatsApp
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">
+                    Abra o WhatsApp, entre em Dispositivos conectados e escaneie o QR Code abaixo.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setWhatsappModalOpen(false)}
+                  className="rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <div className="mt-6 flex justify-center">
+                {whatsappQrCode ? (
+                  <img
+                    src={whatsappQrCode}
+                    alt="QR Code oficial do WhatsApp"
+                    className="h-64 w-64 rounded-3xl bg-white p-3"
+                  />
+                ) : (
+                  <div className="flex h-64 w-64 items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-900 text-sm text-zinc-500">
+                    Carregando QR Code...
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-300">
+                <p>Status: {statuses.whatsapp.connected ? "Connected" : "Waiting for scan"}</p>
+                {whatsappInstanceName ? <p className="mt-1 text-zinc-500">Instância: {whatsappInstanceName}</p> : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );

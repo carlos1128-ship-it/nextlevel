@@ -76,7 +76,7 @@ const Attendant = () => {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
-  const [waStatus, setWaStatus] = useState<string>("not_created");
+  const [waStatus, setWaStatus] = useState<string>("Disconnected");
   const [quotaUsed, setQuotaUsed] = useState<number | null>(null);
   const [quotaLimit, setQuotaLimit] = useState<number | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -176,9 +176,9 @@ const Attendant = () => {
       if (!selectedCompanyId) return;
       try {
         const res = await getWhatsappQRCode(selectedCompanyId);
-        if (res.status === "open") {
+        if (res.status === "Connected") {
           stopPoll();
-          setWaStatus("open");
+          setWaStatus("Connected");
           setQrModalOpen(false);
           addToast("WhatsApp conectado com sucesso!", "success");
           void loadWaStatus();
@@ -198,12 +198,12 @@ const Attendant = () => {
       const res = await createWhatsappInstance(selectedCompanyId);
       setQrCode(res.qrCode ?? null);
       setWaStatus(res.status);
-      if (res.status !== "open") {
+      if (res.status !== "Connected") {
         setQrModalOpen(true);
         startPolling();
       } else {
         addToast("WhatsApp já está conectado!", "success");
-        setWaStatus("open");
+        setWaStatus("Connected");
         void loadWaStatus();
       }
     } catch (error) {
@@ -291,14 +291,14 @@ const Attendant = () => {
               </div>
             </div>
             <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${
-              waStatus === "open"
+              waStatus === "Connected"
                 ? "border-lime-500/40 bg-lime-500/10 text-lime-300"
-                : waStatus === "connecting"
+                : waStatus === "Connecting"
                   ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
                   : "border-zinc-700/40 bg-zinc-900/60 text-zinc-500"
             }`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${waStatus === "open" ? "animate-pulse bg-lime-400" : waStatus === "connecting" ? "animate-pulse bg-amber-400" : "bg-zinc-600"}`} />
-              {waStatus === "open" ? "Conectado" : waStatus === "connecting" ? "Conectando" : "Desconectado"}
+              <span className={`h-1.5 w-1.5 rounded-full ${waStatus === "Connected" ? "animate-pulse bg-lime-400" : waStatus === "Connecting" ? "animate-pulse bg-amber-400" : "bg-zinc-600"}`} />
+              {waStatus === "Connected" ? "Conectado" : waStatus === "Connecting" ? "Conectando" : "Desconectado"}
             </span>
           </div>
 
@@ -321,10 +321,10 @@ const Attendant = () => {
 
           <button
             onClick={() => void handleConnectWhatsapp()}
-            disabled={qrLoading || waStatus === "open"}
+            disabled={qrLoading || waStatus === "Connected"}
             className="mt-4 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#25D366] transition hover:bg-[#25D366]/20 active:scale-95 disabled:opacity-50"
           >
-            {qrLoading ? "Gerando QR Code..." : waStatus === "open" ? "Conectado ✓" : "Conectar WhatsApp"}
+            {qrLoading ? "Gerando QR Code..." : waStatus === "Connected" ? "Conectado ✓" : "Conectar WhatsApp"}
           </button>
         </div>
 

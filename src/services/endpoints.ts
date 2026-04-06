@@ -18,6 +18,7 @@ import type {
   MarketComparison,
   MarketTrend,
   BotConfig,
+  WhatsappConnectionSnapshot,
   Lead,
   LeadStatus,
   AdminErrorLog,
@@ -137,6 +138,8 @@ function normalizeBotConfig(data: any): BotConfig {
     toneOfVoice: data?.toneOfVoice || "amigavel",
     instructions: data?.instructions ?? null,
     isActive: Boolean(data?.isActive ?? true),
+    evolutionInstanceName: data?.evolutionInstanceName ?? null,
+    evolutionConnectionStatus: data?.evolutionConnectionStatus ?? null,
     createdAt: data?.createdAt || new Date().toISOString(),
     updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
   };
@@ -895,7 +898,7 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
 // ─── Evolution API / WhatsApp Instance ───────────────────────────────────────
 
 export async function createWhatsappInstance(companyId?: string | null) {
-  const { data } = await api.post<{ instanceName: string; qrCode?: string; status: string }>(
+  const { data } = await api.post<WhatsappConnectionSnapshot>(
     "/attendant/whatsapp/instance",
     null,
     { params: companyId ? { companyId } : undefined },
@@ -904,7 +907,7 @@ export async function createWhatsappInstance(companyId?: string | null) {
 }
 
 export async function getWhatsappQRCode(companyId?: string | null) {
-  const { data } = await api.get<{ instanceName?: string; qrCode?: string; status: string }>(
+  const { data } = await api.get<WhatsappConnectionSnapshot>(
     "/attendant/whatsapp/qrcode",
     { params: companyId ? { companyId } : undefined },
   );
@@ -912,12 +915,7 @@ export async function getWhatsappQRCode(companyId?: string | null) {
 }
 
 export async function getWhatsappStatus(companyId?: string | null) {
-  const { data } = await api.get<{
-    instanceName?: string;
-    status: string;
-    quotaUsed?: number;
-    quotaLimit?: number;
-  }>("/attendant/whatsapp/status", {
+  const { data } = await api.get<WhatsappConnectionSnapshot>("/attendant/whatsapp/status", {
     params: companyId ? { companyId } : undefined,
   });
   return data;
