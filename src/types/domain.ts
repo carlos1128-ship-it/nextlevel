@@ -181,8 +181,6 @@ export interface BotConfig {
   toneOfVoice: string;
   instructions: string | null;
   isActive: boolean;
-  evolutionInstanceName?: string | null;
-  evolutionConnectionStatus?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

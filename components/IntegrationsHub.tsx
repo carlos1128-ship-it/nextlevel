@@ -10,7 +10,7 @@ import {
 } from "../src/services/endpoints";
 import type { IntegrationProvider } from "../src/types/domain";
 
-type HubProvider = "whatsapp" | "instagram" | "mercadolivre" | "mercadopago";
+type HubProvider = "whatsapp" | "instagram" | "mercadolivre";
 type HubConnectionStatus = "connected" | "disconnected" | "syncing";
 
 interface HubStatus {
@@ -33,7 +33,7 @@ const PROVIDERS: Array<{
 }> = [
   {
     id: "whatsapp",
-    name: "WhatsApp",
+    name: "WhatsApp NEXT",
     description: "Converse, cobre e feche vendas em segundos.",
     accentClass: "text-emerald-300",
     surfaceClass: "from-emerald-500/20 via-emerald-400/5 to-transparent",
@@ -54,13 +54,6 @@ const PROVIDERS: Array<{
     accentClass: "text-amber-200",
     surfaceClass: "from-amber-300/25 via-yellow-200/5 to-transparent",
     backendProvider: "MERCADOLIVRE",
-  },
-  {
-    id: "mercadopago",
-    name: "Mercado Pago",
-    description: "Receba pagamento e acompanhe aprovacao sem planilha.",
-    accentClass: "text-cyan-200",
-    surfaceClass: "from-cyan-400/25 via-sky-400/5 to-transparent",
   },
 ];
 
@@ -88,13 +81,6 @@ function buildDefaultStatuses(): Record<HubProvider, HubStatus> {
     },
     mercadolivre: {
       provider: "mercadolivre",
-      connected: false,
-      status: "disconnected",
-      updatedAt: null,
-      source: "oauth",
-    },
-    mercadopago: {
-      provider: "mercadopago",
       connected: false,
       status: "disconnected",
       updatedAt: null,
@@ -317,7 +303,6 @@ const IntegrationsHub = () => {
   const [loadingProvider, setLoadingProvider] = useState<HubProvider | null>(null);
   const [bootstrapping, setBootstrapping] = useState(true);
   const [whatsappQrCode, setWhatsappQrCode] = useState<string | null>(null);
-  const [whatsappInstanceName, setWhatsappInstanceName] = useState<string | null>(null);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
   const connectedCount = useMemo(
@@ -350,7 +335,6 @@ const IntegrationsHub = () => {
           updatedAt: new Date().toISOString(),
           source: "api",
         };
-        setWhatsappInstanceName(whatsappStatus.instanceName || null);
       }
       setStatuses(next);
       persistStatuses(selectedCompanyId, next);
@@ -433,7 +417,6 @@ const IntegrationsHub = () => {
     const interval = window.setInterval(async () => {
       try {
         const response = await getWhatsappQRCode(selectedCompanyId);
-        if (response.instanceName) setWhatsappInstanceName(response.instanceName);
         if (response.qrCode) setWhatsappQrCode(response.qrCode);
 
         const connected = normalizeWhatsappConnected(response.status);
@@ -476,7 +459,6 @@ const IntegrationsHub = () => {
       const connectedNow = normalizeWhatsappConnected(currentStatus?.status);
 
       if (connectedNow) {
-        setWhatsappInstanceName(currentStatus?.instanceName || null);
         setStatuses((current) => {
           const next = {
             ...current,
@@ -496,11 +478,10 @@ const IntegrationsHub = () => {
       }
 
       const response =
-        currentStatus?.instanceName
+        currentStatus?.status === "Connecting" || currentStatus?.status === "WAITING_QR"
           ? await getWhatsappQRCode(selectedCompanyId)
           : await createWhatsappInstance(selectedCompanyId);
 
-      setWhatsappInstanceName(response.instanceName || currentStatus?.instanceName || null);
       setWhatsappQrCode(response.qrCode || null);
       setWhatsappModalOpen(true);
       setStatuses((current) => {
@@ -518,7 +499,7 @@ const IntegrationsHub = () => {
         return next;
       });
     } catch {
-      addToast("Nao foi possivel gerar o QR Code da Evolution agora.", "error");
+      addToast("Nao foi possivel gerar o QR Code do WhatsApp agora.", "error");
     } finally {
       setLoadingProvider(null);
     }
@@ -589,7 +570,7 @@ const IntegrationsHub = () => {
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-950/75 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Canais ativos</p>
-              <p className="mt-2 text-2xl font-black text-zinc-100">{connectedCount}/4</p>
+              <p className="mt-2 text-2xl font-black text-zinc-100">{connectedCount}/3</p>
             </div>
             <div className="rounded-2xl border border-lime-400/20 bg-lime-400/10 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.18em] text-lime-200/70">UX prometida</p>
@@ -620,7 +601,7 @@ const IntegrationsHub = () => {
                   ? "WhatsApp conectado"
                   : "Revalidar acesso"
                 : isWhatsapp
-                  ? "Conectar e exibir QR"
+                  ? "Gerar QR Code"
                   : "Conectar em 1 clique";
 
             return (
@@ -689,7 +670,7 @@ const IntegrationsHub = () => {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
-                    Evolution QR
+                    WhatsApp NEXT
                   </p>
                   <h3 className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
                     Conecte o WhatsApp
@@ -723,7 +704,6 @@ const IntegrationsHub = () => {
 
               <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-300">
                 <p>Status: {statuses.whatsapp.connected ? "Connected" : "Waiting for scan"}</p>
-                {whatsappInstanceName ? <p className="mt-1 text-zinc-500">Instância: {whatsappInstanceName}</p> : null}
               </div>
             </div>
           </div>

@@ -138,8 +138,6 @@ function normalizeBotConfig(data: any): BotConfig {
     toneOfVoice: data?.toneOfVoice || "amigavel",
     instructions: data?.instructions ?? null,
     isActive: Boolean(data?.isActive ?? true),
-    evolutionInstanceName: data?.evolutionInstanceName ?? null,
-    evolutionConnectionStatus: data?.evolutionConnectionStatus ?? null,
     createdAt: data?.createdAt || new Date().toISOString(),
     updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
   };
@@ -895,7 +893,7 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
   return data;
 }
 
-// ─── Evolution API / WhatsApp Instance ───────────────────────────────────────
+// ─── WhatsApp Instance ───────────────────────────────────────
 
 export async function createWhatsappInstance(companyId?: string | null) {
   const { data } = await api.post<WhatsappConnectionSnapshot>(

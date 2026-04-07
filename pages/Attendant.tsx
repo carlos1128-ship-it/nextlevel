@@ -278,7 +278,7 @@ const Attendant = () => {
 
       {/* ── Conectar Canais ── */}
       <div className="grid gap-4 sm:grid-cols-2">
-        {/* WhatsApp via Evolution API */}
+        {/* WhatsApp */}
         <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-700/40">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -287,7 +287,7 @@ const Attendant = () => {
               </div>
               <div>
                 <p className="font-bold text-white text-sm">WhatsApp</p>
-                <p className="text-[11px] text-zinc-500">via Evolution API (self-hosted)</p>
+                <p className="text-[11px] text-zinc-500">via WPPConnect / Meta API</p>
               </div>
             </div>
             <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${
