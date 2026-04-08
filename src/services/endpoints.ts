@@ -918,3 +918,8 @@ export async function getWhatsappStatus(companyId?: string | null) {
   });
   return data;
 }
+
+export async function terminateWhatsappSession(companyId: string) {
+  const { data } = await api.delete<{ success: boolean }>(`/attendant/whatsapp/session/${companyId}`);
+  return data;
+}

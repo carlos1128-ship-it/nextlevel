@@ -7,6 +7,7 @@ import {
   getIntegrationStatuses,
   getWhatsappQRCode,
   getWhatsappStatus,
+  terminateWhatsappSession,
 } from "../src/services/endpoints";
 import type { IntegrationProvider } from "../src/types/domain";
 
@@ -548,6 +549,13 @@ const IntegrationsHub = () => {
     }
   };
 
+  const handleCloseWhatsappModal = () => {
+    if (selectedCompanyId) {
+      void terminateWhatsappSession(selectedCompanyId).catch(() => null);
+    }
+    setWhatsappModalOpen(false);
+  };
+
   return (
     <section className="relative overflow-hidden rounded-[30px] border border-zinc-800 bg-[#09090b] shadow-lg shadow-black/30">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(181,255,0,0.12),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.12),_transparent_32%)]" />
@@ -661,7 +669,7 @@ const IntegrationsHub = () => {
         {whatsappModalOpen ? (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
-            onClick={() => setWhatsappModalOpen(false)}
+            onClick={handleCloseWhatsappModal}
           >
             <div
               className="w-full max-w-md rounded-[28px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
@@ -681,7 +689,7 @@ const IntegrationsHub = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setWhatsappModalOpen(false)}
+                  onClick={handleCloseWhatsappModal}
                   className="rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
                 >
                   Fechar
