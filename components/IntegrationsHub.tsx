@@ -11,7 +11,7 @@ import {
 } from "../src/services/endpoints";
 import type { IntegrationProvider } from "../src/types/domain";
 
-type HubProvider = "whatsapp" | "instagram" | "mercadolivre";
+type HubProvider = "whatsapp" | "instagram" | "mercadolivre" | "shopee";
 type HubConnectionStatus = "connected" | "disconnected" | "syncing";
 
 interface HubStatus {
@@ -32,31 +32,39 @@ const PROVIDERS: Array<{
   surfaceClass: string;
   backendProvider?: IntegrationProvider;
 }> = [
-  {
-    id: "whatsapp",
-    name: "WhatsApp NEXT",
-    description: "Converse, cobre e feche vendas em segundos.",
-    accentClass: "text-emerald-300",
-    surfaceClass: "from-emerald-500/20 via-emerald-400/5 to-transparent",
-    backendProvider: "WHATSAPP",
-  },
-  {
-    id: "instagram",
-    name: "Instagram",
-    description: "Puxe DMs e transforme comentario em oportunidade.",
-    accentClass: "text-pink-300",
-    surfaceClass: "from-pink-500/20 via-fuchsia-500/5 to-transparent",
-    backendProvider: "INSTAGRAM",
-  },
-  {
-    id: "mercadolivre",
-    name: "Mercado Livre",
-    description: "Sincronize vendas, mensagens e reputacao sem atrito.",
-    accentClass: "text-amber-200",
-    surfaceClass: "from-amber-300/25 via-yellow-200/5 to-transparent",
-    backendProvider: "MERCADOLIVRE",
-  },
-];
+    {
+      id: "whatsapp",
+      name: "WhatsApp NEXT",
+      description: "Converse, cobre e feche vendas em segundos.",
+      accentClass: "text-emerald-300",
+      surfaceClass: "from-emerald-500/20 via-emerald-400/5 to-transparent",
+      backendProvider: "WHATSAPP",
+    },
+    {
+      id: "instagram",
+      name: "Instagram",
+      description: "Puxe DMs e transforme comentario em oportunidade.",
+      accentClass: "text-pink-300",
+      surfaceClass: "from-pink-500/20 via-fuchsia-500/5 to-transparent",
+      backendProvider: "INSTAGRAM",
+    },
+    {
+      id: "mercadolivre",
+      name: "Mercado Livre",
+      description: "Sincronize vendas, mensagens e reputacao sem atrito.",
+      accentClass: "text-amber-200",
+      surfaceClass: "from-amber-300/25 via-yellow-200/5 to-transparent",
+      backendProvider: "MERCADOLIVRE",
+    },
+    {
+      id: "shopee",
+      name: "Shopee NEXT",
+      description: "Sincronize pedidos, rastreio e chat da Shopee em um só lugar.",
+      accentClass: "text-orange-400",
+      surfaceClass: "from-orange-500/20 via-orange-400/5 to-transparent",
+      backendProvider: "SHOPEE",
+    },
+  ];
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
@@ -82,6 +90,13 @@ function buildDefaultStatuses(): Record<HubProvider, HubStatus> {
     },
     mercadolivre: {
       provider: "mercadolivre",
+      connected: false,
+      status: "disconnected",
+      updatedAt: null,
+      source: "oauth",
+    },
+    shopee: {
+      provider: "shopee",
       connected: false,
       status: "disconnected",
       updatedAt: null,
@@ -167,16 +182,14 @@ function normalizeWhatsappConnected(status: string | null | undefined) {
 function StatusPulse({ connected }: { connected: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
-        connected
-          ? "border-lime-400/30 bg-lime-400/10 text-lime-200"
-          : "border-zinc-700 bg-zinc-800/80 text-zinc-300"
-      }`}
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${connected
+        ? "border-lime-400/30 bg-lime-400/10 text-lime-200"
+        : "border-zinc-700 bg-zinc-800/80 text-zinc-300"
+        }`}
     >
       <span
-        className={`h-2.5 w-2.5 rounded-full ${
-          connected ? "bg-lime-300 shadow-[0_0_12px_rgba(190,242,100,0.65)]" : "bg-zinc-500"
-        }`}
+        className={`h-2.5 w-2.5 rounded-full ${connected ? "bg-lime-300 shadow-[0_0_12px_rgba(190,242,100,0.65)]" : "bg-zinc-500"
+          }`}
       />
       {connected ? "Conectado" : "Desconectado"}
     </span>
@@ -260,6 +273,44 @@ function BrandLogo({ provider }: { provider: HubProvider }) {
             strokeWidth="1.6"
             strokeLinecap="round"
             strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+    );
+  }
+
+  if (provider === "shopee") {
+    return (
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/20 text-orange-400">
+        <svg
+          className="h-8 w-8"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 3H18L19 7H5L6 3Z"
+            fill="currentColor"
+          />
+          <path
+            d="M4 9H20L18.5 19H5.5L4 9Z"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M8 12H16"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M9 15H15"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
           />
         </svg>
       </div>
@@ -380,9 +431,9 @@ const IntegrationsHub = () => {
 
     addToast(
       message ||
-        (status === "connected"
-          ? "Integracao concluida com sucesso."
-          : "Nao foi possivel concluir a integracao."),
+      (status === "connected"
+        ? "Integracao concluida com sucesso."
+        : "Nao foi possivel concluir a integracao."),
       status === "connected" ? "success" : "error",
     );
 
@@ -595,7 +646,7 @@ const IntegrationsHub = () => {
           </div>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {PROVIDERS.map((provider) => {
             const status = statuses[provider.id];
             const isLoading = loadingProvider === provider.id || status.status === "syncing";
@@ -647,16 +698,14 @@ const IntegrationsHub = () => {
                         : handleOAuthConnect(provider.id))
                     }
                     disabled={!selectedCompanyId || isLoading || (isWhatsapp && status.connected)}
-                    className={`mt-5 inline-flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition ${
-                      !selectedCompanyId
-                        ? "cursor-not-allowed bg-zinc-800 text-zinc-500"
-                        : "bg-lime-400 text-zinc-950 hover:-translate-y-0.5 hover:brightness-105 active:scale-[0.99]"
-                    }`}
+                    className={`mt-5 inline-flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition ${!selectedCompanyId
+                      ? "cursor-not-allowed bg-zinc-800 text-zinc-500"
+                      : "bg-lime-400 text-zinc-950 hover:-translate-y-0.5 hover:brightness-105 active:scale-[0.99]"
+                      }`}
                   >
                     <span
-                      className={`h-4 w-4 rounded-full border-2 border-zinc-950/25 border-t-zinc-950 ${
-                        isLoading ? "animate-spin" : ""
-                      }`}
+                      className={`h-4 w-4 rounded-full border-2 border-zinc-950/25 border-t-zinc-950 ${isLoading ? "animate-spin" : ""
+                        }`}
                     />
                     {buttonLabel}
                   </button>
@@ -698,20 +747,32 @@ const IntegrationsHub = () => {
 
               <div className="mt-6 flex justify-center">
                 {whatsappQrCode ? (
-                  <img
-                    src={whatsappQrCode}
-                    alt="QR Code oficial do WhatsApp"
-                    className="h-64 w-64 rounded-3xl bg-white p-3"
-                  />
+                  <div className="rounded-3xl bg-white p-4 shadow-lg">
+                    <img
+                      src={whatsappQrCode}
+                      alt="QR Code oficial do WhatsApp"
+                      className="h-64 w-64"
+                      style={{
+                        imageRendering: 'pixelated',
+                        background: '#ffffff',
+                      }}
+                    />
+                  </div>
                 ) : (
                   <div className="flex h-64 w-64 items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-900 text-sm text-zinc-500">
-                    Carregando QR Code...
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-600 border-t-emerald-400" />
+                      Gerando QR Code...
+                    </div>
                   </div>
                 )}
               </div>
 
               <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-300">
-                <p>Status: {statuses.whatsapp.connected ? "Connected" : "Waiting for scan"}</p>
+                <p className="flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${statuses.whatsapp.connected ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                  Status: {statuses.whatsapp.connected ? "Conectado" : "Aguardando leitura do QR Code..."}
+                </p>
               </div>
             </div>
           </div>

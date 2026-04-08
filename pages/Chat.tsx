@@ -117,15 +117,23 @@ const Chat = () => {
       ]);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao consultar IA.";
+      const isGeminiError = message.toLowerCase().includes('gemini') ||
+        message.toLowerCase().includes('overloaded') ||
+        message.toLowerCase().includes('rate limit') ||
+        message.toLowerCase().includes('503') ||
+        message.toLowerCase().includes('529');
+
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
-          text: "Nao consegui responder agora. Tente novamente em alguns segundos.",
+          text: isGeminiError
+            ? "⚠️ A IA está sobrecarregada no momento. Tente novamente em alguns segundos ou minutos."
+            : "Não consegui responder agora. Tente novamente em alguns segundos.",
           sender: "ai",
         },
       ]);
-      addToast(message, "error");
+      addToast(isGeminiError ? "Aviso: IA sobrecarregada, tente novamente em alguns segundos" : message, "error");
     } finally {
       setIsTyping(false);
     }
@@ -195,11 +203,10 @@ const Chat = () => {
                 </div>
               ) : null}
               <div
-                className={`max-w-[88%] rounded-3xl p-4 shadow-md md:max-w-[70%] ${
-                  msg.sender === "user"
+                className={`max-w-[88%] rounded-3xl p-4 shadow-md md:max-w-[70%] ${msg.sender === "user"
                     ? "rounded-br-md bg-lime-400 text-zinc-900"
                     : "rounded-bl-md border border-zinc-800 bg-zinc-900 text-zinc-100"
-                }`}
+                  }`}
               >
                 <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{msg.text}</p>
               </div>

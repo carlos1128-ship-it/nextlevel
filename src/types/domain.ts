@@ -99,7 +99,7 @@ export interface OperationalCost {
   updatedAt: string;
 }
 
-export type IntegrationProvider = "WHATSAPP" | "INSTAGRAM" | "MERCADOLIVRE";
+export type IntegrationProvider = "WHATSAPP" | "INSTAGRAM" | "MERCADOLIVRE" | "SHOPEE";
 
 export interface IntegrationStatus {
   provider: IntegrationProvider;
