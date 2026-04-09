@@ -8,6 +8,8 @@ import {
   getWhatsappQRCode,
   getWhatsappStatus,
   terminateWhatsappSession,
+  initializeShopeeLogin,
+  verifyShopeeOtp,
 } from "../src/services/endpoints";
 import type { IntegrationProvider } from "../src/types/domain";
 
@@ -368,6 +370,12 @@ const IntegrationsHub = () => {
   const [bootstrapping, setBootstrapping] = useState(true);
   const [whatsappQrCode, setWhatsappQrCode] = useState<string | null>(null);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [shopeeModalOpen, setShopeeModalOpen] = useState(false);
+  const [shopeeUser, setShopeeUser] = useState("");
+  const [shopeePass, setShopeePass] = useState("");
+  const [shopeeOtpModalOpen, setShopeeOtpModalOpen] = useState(false);
+  const [shopeeOtp, setShopeeOtp] = useState("");
+  const [shopeeVerifying, setShopeeVerifying] = useState(false);
 
   const connectedCount = useMemo(
     () => (Object.values(statuses) as HubStatus[]).filter((status) => status.connected).length,
@@ -569,7 +577,63 @@ const IntegrationsHub = () => {
     }
   };
 
+  const handleShopeeConnect = async () => {
+    if (!selectedCompanyId) {
+      addToast("Selecione uma empresa antes de conectar canais.", "info");
+      return;
+    }
+
+    // Se o modal de credenciais não estiver aberto e não tivermos user/pass, abre o modal
+    if (!shopeeModalOpen && !shopeeUser) {
+      setShopeeModalOpen(true);
+      return;
+    }
+
+    setLoadingProvider("shopee");
+    try {
+      const response = await initializeShopeeLogin(selectedCompanyId, {
+        user: shopeeUser || undefined,
+        pass: shopeePass || undefined
+      });
+
+      if (response.status === "OTP_REQUIRED") {
+        setShopeeModalOpen(false);
+        setShopeeOtpModalOpen(true);
+        addToast("Codigo de verificacao solicitado pela Shopee.", "info");
+      } else if (response.status === "SUCCESS") {
+        setShopeeModalOpen(false);
+        markLocalConnection("shopee", true);
+        addToast("Shopee conectada com sucesso!", "success");
+      }
+    } catch (err: any) {
+      addToast(err.response?.data?.message || "Erro ao iniciar conexao com a Shopee.", "error");
+    } finally {
+      setLoadingProvider(null);
+    }
+  };
+
+  const handleShopeeVerifyOtp = async () => {
+    if (!selectedCompanyId || !shopeeOtp) return;
+
+    setShopeeVerifying(true);
+    try {
+      await verifyShopeeOtp(selectedCompanyId, shopeeOtp);
+      markLocalConnection("shopee", true);
+      setShopeeOtpModalOpen(false);
+      setShopeeOtp("");
+      addToast("Shopee autenticada com sucesso!", "success");
+    } catch (err: any) {
+      addToast(err.response?.data?.message || "Codigo invalido ou erro na verificacao.", "error");
+    } finally {
+      setShopeeVerifying(false);
+    }
+  };
+
   const handleOAuthConnect = async (provider: HubProvider) => {
+    if (provider === "shopee") {
+      return handleShopeeConnect();
+    }
+
     const currentProvider = PROVIDERS.find((item) => item.id === provider);
     if (!currentProvider) return;
 
@@ -727,6 +791,82 @@ const IntegrationsHub = () => {
           })}
         </div>
 
+        {shopeeModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+            onClick={() => setShopeeModalOpen(false)}
+          >
+            <div
+              className="w-full max-w-md rounded-[28px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#EE4D2D]">
+                    Shopee NEXT
+                  </p>
+                  <h3 className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
+                    Conectar Conta
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">
+                    Insira as credenciais do seu Seller Center para iniciar a integração automática.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShopeeModalOpen(false)}
+                  className="rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Usuário / E-mail</label>
+                  <input
+                    type="text"
+                    placeholder="ex@email.com"
+                    value={shopeeUser}
+                    onChange={(e) => setShopeeUser(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-[#EE4D2D] focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Senha</label>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={shopeePass}
+                    onChange={(e) => setShopeePass(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-[#EE4D2D] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleShopeeConnect}
+                disabled={loadingProvider === "shopee" || !shopeeUser || !shopeePass}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#EE4D2D] py-3.5 text-sm font-black text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+              >
+                {loadingProvider === "shopee" ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
+                    Iniciando Login...
+                  </>
+                ) : (
+                  "Conectar Agora"
+                )}
+              </button>
+              
+              <p className="mt-4 text-center text-[10px] uppercase tracking-widest text-zinc-500">
+                Segurança ponta-a-ponta via Puppeteer Stealth
+              </p>
+            </div>
+          </div>
+        ) : null}
+
         {whatsappModalOpen ? (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
@@ -786,6 +926,65 @@ const IntegrationsHub = () => {
                   Status: {statuses.whatsapp.connected ? "Conectado" : "Aguardando leitura do QR Code..."}
                 </p>
               </div>
+            </div>
+          </div>
+        ) : null}
+
+        {shopeeOtpModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+            onClick={() => setShopeeOtpModalOpen(false)}
+          >
+            <div
+              className="w-full max-w-md rounded-[28px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#EE4D2D]">
+                    Shopee NEXT
+                  </p>
+                  <h3 className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
+                    Verificação Shopee
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">
+                    A Shopee enviou um código de verificação. Digite-o abaixo para concluir a integração.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShopeeOtpModalOpen(false)}
+                  className="rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+                >
+                  Cancelar
+                </button>
+              </div>
+
+              <div className="mt-6">
+                <input
+                  type="text"
+                  placeholder="000000"
+                  value={shopeeOtp}
+                  onChange={(e) => setShopeeOtp(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-center text-2xl font-black tracking-[0.5em] text-white focus:border-[#EE4D2D] focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleShopeeVerifyOtp}
+                disabled={shopeeVerifying || shopeeOtp.length < 4}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-zinc-100 py-3.5 text-sm font-black text-zinc-950 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+              >
+                {shopeeVerifying ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-400 border-t-zinc-950" />
+                    Verificando...
+                  </>
+                ) : (
+                  "Confirmar Código"
+                )}
+              </button>
             </div>
           </div>
         ) : null}

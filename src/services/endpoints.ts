@@ -923,3 +923,30 @@ export async function terminateWhatsappSession(companyId: string) {
   const { data } = await api.delete<{ success: boolean }>(`/attendant/whatsapp/session/${companyId}`);
   return data;
 }
+
+// ─── Shopee Scraper ──────────────────────────────────────────
+
+export async function initializeShopeeLogin(companyId: string, credentials?: { user?: string, pass?: string }) {
+  const { data } = await api.post("/integrations/shopee/initialize-login", credentials || {}, {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function verifyShopeeOtp(companyId: string, code: string) {
+  const { data } = await api.post(
+    "/integrations/shopee/verify-otp",
+    { code },
+    {
+      params: { companyId },
+    },
+  );
+  return data;
+}
+
+export async function getShopeeOrders(companyId: string) {
+  const { data } = await api.get("/integrations/shopee/orders", {
+    params: { companyId },
+  });
+  return data;
+}
