@@ -52,15 +52,15 @@ const PROVIDERS: Array<{
       id: "mercadolivre",
       name: "Mercado Livre",
       description: "Sincronize vendas, mensagens e reputacao sem atrito.",
-      accentClass: "text-amber-200",
-      surfaceClass: "from-amber-300/25 via-yellow-200/5 to-transparent",
+      accentClass: "text-[#FFE600]",
+      surfaceClass: "from-yellow-400/20 via-yellow-300/5 to-transparent",
       backendProvider: "MERCADOLIVRE",
     },
     {
       id: "shopee",
       name: "Shopee NEXT",
       description: "Sincronize pedidos, rastreio e chat da Shopee em um só lugar.",
-      accentClass: "text-orange-400",
+      accentClass: "text-[#EE4D2D]",
       surfaceClass: "from-orange-500/20 via-orange-400/5 to-transparent",
       backendProvider: "SHOPEE",
     },
@@ -251,29 +251,42 @@ function BrandLogo({ provider }: { provider: HubProvider }) {
 
   if (provider === "mercadolivre") {
     return (
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-300/20 text-amber-100">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl text-[#FFE600]">
         <svg
-          className="h-8 w-8"
+          className="h-9 w-9"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
-          <ellipse cx="12" cy="12" rx="9" ry="6.5" stroke="currentColor" strokeWidth="1.6" />
+          {/* Ícone de aperto de mãos - Mercado Livre */}
           <path
-            d="M7.4 12.6L9.4 10.7C10 10.1 10.96 10.1 11.56 10.7L12 11.14L12.44 10.7C13.04 10.1 14 10.1 14.6 10.7L16.6 12.6"
+            d="M7.5 13.5L9 12L12 15L15 12L16.5 13.5"
             stroke="currentColor"
             strokeWidth="1.6"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
-            d="M8.2 13.2L10.1 15.1C10.8 15.8 11.94 15.8 12.64 15.1L13.06 14.68C13.74 14 14.84 14 15.52 14.68L15.8 14.96"
+            d="M10 11L12 9L14 11"
             stroke="currentColor"
             strokeWidth="1.6"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+          <path
+            d="M9 15C7.34315 15 6 13.6569 6 12C6 10.3431 7.34315 9 9 9"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M15 15C16.6569 15 18 13.6569 18 12C18 10.3431 16.6569 9 15 9"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.4" />
         </svg>
       </div>
     );
@@ -281,35 +294,34 @@ function BrandLogo({ provider }: { provider: HubProvider }) {
 
   if (provider === "shopee") {
     return (
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/20 text-orange-400">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl text-[#EE4D2D]">
         <svg
-          className="h-8 w-8"
+          className="h-9 w-9"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
+          {/* Sacola de compras com 'S' - Shopee */}
           <path
-            d="M6 3H18L19 7H5L6 3Z"
-            fill="currentColor"
-          />
-          <path
-            d="M4 9H20L18.5 19H5.5L4 9Z"
+            d="M6 8H18L19.5 20H4.5L6 8Z"
             stroke="currentColor"
             strokeWidth="1.6"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
-            d="M8 12H16"
+            d="M9 8V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V8"
             stroke="currentColor"
             strokeWidth="1.6"
             strokeLinecap="round"
+            strokeLinejoin="round"
           />
+          {/* Letra S estilizada */}
           <path
-            d="M9 15H15"
+            d="M9.5 13.5C9.5 12.6716 10.1716 12 11 12H13C13.8284 12 14.5 12.6716 14.5 13.5C14.5 14.3284 13.8284 15 13 15H11C10.1716 15 9.5 15.6716 9.5 16.5C9.5 17.3284 10.1716 18 11 18H13C13.8284 18 14.5 17.3284 14.5 16.5"
             stroke="currentColor"
-            strokeWidth="1.6"
+            strokeWidth="1.5"
             strokeLinecap="round"
           />
         </svg>
