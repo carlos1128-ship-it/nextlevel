@@ -65,10 +65,10 @@ function normalizeProduct(product: any): Product {
         : Number(product.shipping),
     financials: product?.financials
       ? {
-          grossProfit: Number(product.financials?.grossProfit ?? 0),
-          netMargin: Number(product.financials?.netMargin ?? 0),
-          warningLevel: product.financials?.warningLevel || "HEALTHY",
-        }
+        grossProfit: Number(product.financials?.grossProfit ?? 0),
+        netMargin: Number(product.financials?.netMargin ?? 0),
+        warningLevel: product.financials?.warningLevel || "HEALTHY",
+      }
       : undefined,
     createdAt: createdAt,
     updatedAt: updatedAt,
@@ -146,12 +146,12 @@ function normalizeBotConfig(data: any): BotConfig {
 function normalizeLead(data: any): Lead {
   const conversations = Array.isArray(data?.conversations)
     ? data.conversations.map((c: any) => ({
-        id: c?.id || "",
-        leadId: c?.leadId || data?.id || "",
-        role: (c?.role as Lead["conversations"][number]["role"]) || "USER",
-        content: c?.content || "",
-        createdAt: c?.createdAt || new Date().toISOString(),
-      }))
+      id: c?.id || "",
+      leadId: c?.leadId || data?.id || "",
+      role: (c?.role as Lead["conversations"][number]["role"]) || "USER",
+      content: c?.content || "",
+      createdAt: c?.createdAt || new Date().toISOString(),
+    }))
     : [];
 
   return {
@@ -194,11 +194,11 @@ function normalizeAdminHealth(data: any): AdminHealth {
     },
     requestTimeline: Array.isArray(data?.requestTimeline)
       ? data.requestTimeline.map((point: any) => ({
-          label: point?.label || "",
-          avgResponseTime: Number(point?.avgResponseTime || 0),
-          success: Number(point?.success || 0),
-          failure: Number(point?.failure || 0),
-        }))
+        label: point?.label || "",
+        avgResponseTime: Number(point?.avgResponseTime || 0),
+        success: Number(point?.success || 0),
+        failure: Number(point?.failure || 0),
+      }))
       : [],
     successVsFailure: {
       success: Number(data?.successVsFailure?.success || 0),
@@ -219,16 +219,16 @@ function normalizeAdminUsageStats(data: any): AdminUsageStats {
     },
     companies: Array.isArray(data?.companies)
       ? data.companies.map((item: any) => ({
-          companyId: item?.companyId || "",
-          companyName: item?.companyName || "Empresa",
-          currentTier: (item?.currentTier as SubscriptionTier) || "FREE",
-          llmTokensUsed: Number(item?.llmTokensUsed || 0),
-          whatsappMessagesSent: Number(item?.whatsappMessagesSent || 0),
-          billingCycleEnd: item?.billingCycleEnd || new Date().toISOString(),
-          monthlyRevenue: Number(item?.monthlyRevenue || 0),
-          aiCostEstimate: Number(item?.aiCostEstimate || 0),
-          profitEstimate: Number(item?.profitEstimate || 0),
-        }))
+        companyId: item?.companyId || "",
+        companyName: item?.companyName || "Empresa",
+        currentTier: (item?.currentTier as SubscriptionTier) || "FREE",
+        llmTokensUsed: Number(item?.llmTokensUsed || 0),
+        whatsappMessagesSent: Number(item?.whatsappMessagesSent || 0),
+        billingCycleEnd: item?.billingCycleEnd || new Date().toISOString(),
+        monthlyRevenue: Number(item?.monthlyRevenue || 0),
+        aiCostEstimate: Number(item?.aiCostEstimate || 0),
+        profitEstimate: Number(item?.profitEstimate || 0),
+      }))
       : [],
   };
 }
@@ -262,9 +262,9 @@ function normalizeAdminErrorLog(data: any): AdminErrorLog {
     createdAt: data?.createdAt || new Date().toISOString(),
     company: data?.company
       ? {
-          id: data.company.id || "",
-          name: data.company.name || "Empresa",
-        }
+        id: data.company.id || "",
+        name: data.company.name || "Empresa",
+      }
       : null,
   };
 }
@@ -280,9 +280,9 @@ function normalizeAuditFeedItem(data: any): AuditFeedItem {
     createdAt: data?.createdAt || new Date().toISOString(),
     company: data?.company
       ? {
-          id: data.company.id || "",
-          name: data.company.name || "Empresa",
-        }
+        id: data.company.id || "",
+        name: data.company.name || "Empresa",
+      }
       : null,
   };
 }
@@ -921,6 +921,45 @@ export async function getWhatsappStatus(companyId?: string | null) {
 
 export async function terminateWhatsappSession(companyId: string) {
   const { data } = await api.delete<{ success: boolean }>(`/attendant/whatsapp/session/${companyId}`);
+  return data;
+}
+
+/**
+ * MELHORIA v2.0: Health check detalhado — verifica estado REAL com WPPConnect
+ */
+export async function getWhatsappHealth(companyId?: string | null) {
+  const { data } = await api.get<{
+    companyId: string;
+    status: string;
+    connected: boolean;
+    qrCode: string | null;
+    phoneNumber: string | null;
+    pushname: string | null;
+    hasClient: boolean;
+    hasInitialization: boolean;
+    hasRetryTimer: boolean;
+    lastError: string | null;
+    dbStatus: string;
+    dbEnabled: boolean;
+    dbLastConnected: string | null;
+    healthy: boolean;
+    needsReconnect: boolean;
+    awaitingQR: boolean;
+  }>("/attendant/whatsapp/health", {
+    params: companyId ? { companyId } : undefined,
+  });
+  return data;
+}
+
+/**
+ * MELHORIA v2.0: Cleanup forçado ao trocar de empresa
+ */
+export async function cleanupWhatsappSession(companyId?: string | null) {
+  const { data } = await api.post<{ success: boolean; companyId: string; status: string }>(
+    "/attendant/whatsapp/cleanup",
+    null,
+    { params: companyId ? { companyId } : undefined },
+  );
   return data;
 }
 

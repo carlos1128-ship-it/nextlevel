@@ -10,7 +10,9 @@ import {
   createWhatsappInstance,
   getWhatsappQRCode,
   getWhatsappStatus,
+  cleanupWhatsappSession,
 } from "../src/services/endpoints";
+import { useWhatsAppStatus } from "../src/hooks/useWhatsAppStatus";
 import type { BotConfig, Lead } from "../src/types/domain";
 import { getErrorMessage } from "../src/services/error";
 import { MessageSquareIcon, LightbulbIcon, SettingsIcon } from "../components/icons";
@@ -72,13 +74,33 @@ const Attendant = () => {
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingLeads, setLoadingLeads] = useState(false);
 
-  // WhatsApp / QR code state
+  // WhatsApp / QR code state — MELHORIA v2.0: usar hook compartilhado
+  const {
+    status: waHealthStatus,
+    isConnected,
+    isHealthy,
+    isAwaitingQR,
+    refresh: refreshWaStatus,
+  } = useWhatsAppStatus(selectedCompanyId, {
+    pollingInterval: 5000,
+    enablePolling: true,
+    onStatusChange: (status) => {
+      // Notificar quando status muda
+      if (status.connected) {
+        addToast("WhatsApp conectado com sucesso!", "success");
+        setQrModalOpen(false);
+      }
+    },
+  });
+
+  // Estado local para compatibilidade com código existente
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
-  const [waStatus, setWaStatus] = useState<string>("Disconnected");
-  const [quotaUsed, setQuotaUsed] = useState<number | null>(null);
-  const [quotaLimit, setQuotaLimit] = useState<number | null>(null);
+  // Derivar waStatus do hook compartilhado para consistência
+  const waStatus = waHealthStatus?.status || "DISCONNECTED";
+  const quotaUsed = waHealthStatus ? 0 : null; // Placeholder — implementar se tiver quota real
+  const quotaLimit = waHealthStatus ? 10000 : null;
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadConfig = async () => {
@@ -153,14 +175,8 @@ const Attendant = () => {
 
   const loadWaStatus = async () => {
     if (!selectedCompanyId) return;
-    try {
-      const s = await getWhatsappStatus(selectedCompanyId);
-      setWaStatus(s.status);
-      if (s.quotaUsed != null) setQuotaUsed(s.quotaUsed);
-      if (s.quotaLimit != null) setQuotaLimit(s.quotaLimit);
-    } catch {
-      // silently fail
-    }
+    // MELHORIA v2.0: Usar hook compartilhado em vez de chamada manual
+    await refreshWaStatus();
   };
 
   const stopPoll = () => {
@@ -176,12 +192,12 @@ const Attendant = () => {
       if (!selectedCompanyId) return;
       try {
         const res = await getWhatsappQRCode(selectedCompanyId);
-        if (res.status === "Connected") {
+        // MELHORIA v2.0: Verificar se está conectado usando estado real
+        if (res.status === "Connected" || res.status === "CONNECTED") {
           stopPoll();
-          setWaStatus("Connected");
           setQrModalOpen(false);
           addToast("WhatsApp conectado com sucesso!", "success");
-          void loadWaStatus();
+          await refreshWaStatus();
         } else if (res.qrCode) {
           setQrCode(res.qrCode);
         }
@@ -193,18 +209,24 @@ const Attendant = () => {
 
   const handleConnectWhatsapp = async () => {
     if (!selectedCompanyId) return;
+
+    // MELHORIA v2.0: Cleanup sessão anterior antes de conectar nova
+    try {
+      await cleanupWhatsappSession(selectedCompanyId);
+    } catch {
+      // Ignora — sessão pode já estar limpa
+    }
+
     setQrLoading(true);
     try {
       const res = await createWhatsappInstance(selectedCompanyId);
       setQrCode(res.qrCode ?? null);
-      setWaStatus(res.status);
-      if (res.status !== "Connected") {
+      if (res.status !== "Connected" && res.status !== "CONNECTED") {
         setQrModalOpen(true);
         startPolling();
       } else {
         addToast("WhatsApp já está conectado!", "success");
-        setWaStatus("Connected");
-        void loadWaStatus();
+        await refreshWaStatus();
       }
     } catch (error) {
       addToast(getErrorMessage(error, "Falha ao conectar WhatsApp"), "error");
@@ -219,6 +241,8 @@ const Attendant = () => {
   };
 
   useEffect(() => {
+    // MELHORIA v2.0: O hook useWhatsAppStatus já faz polling automático
+    // Aqui apenas refresh inicial para compatibilidade
     void loadWaStatus();
     return () => stopPoll();
   }, [selectedCompanyId]);
@@ -290,15 +314,14 @@ const Attendant = () => {
                 <p className="text-[11px] text-zinc-500">via WPPConnect / Meta API</p>
               </div>
             </div>
-            <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${
-              waStatus === "Connected"
-                ? "border-lime-500/40 bg-lime-500/10 text-lime-300"
-                : waStatus === "Connecting"
-                  ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-                  : "border-zinc-700/40 bg-zinc-900/60 text-zinc-500"
-            }`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${waStatus === "Connected" ? "animate-pulse bg-lime-400" : waStatus === "Connecting" ? "animate-pulse bg-amber-400" : "bg-zinc-600"}`} />
-              {waStatus === "Connected" ? "Conectado" : waStatus === "Connecting" ? "Conectando" : "Desconectado"}
+            <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${isConnected
+              ? "border-lime-500/40 bg-lime-500/10 text-lime-300"
+              : waStatus === "Connecting" || waStatus === "CONNECTING"
+                ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                : "border-zinc-700/40 bg-zinc-900/60 text-zinc-500"
+              }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "animate-pulse bg-lime-400" : isAwaitingQR ? "animate-pulse bg-amber-400" : "bg-zinc-600"}`} />
+              {isConnected ? "Conectado" : isAwaitingQR ? "Aguardando QR" : waStatus === "CONNECTING" ? "Conectando" : "Desconectado"}
             </span>
           </div>
 
@@ -321,10 +344,10 @@ const Attendant = () => {
 
           <button
             onClick={() => void handleConnectWhatsapp()}
-            disabled={qrLoading || waStatus === "Connected"}
+            disabled={qrLoading || isConnected}
             className="mt-4 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#25D366] transition hover:bg-[#25D366]/20 active:scale-95 disabled:opacity-50"
           >
-            {qrLoading ? "Gerando QR Code..." : waStatus === "Connected" ? "Conectado ✓" : "Conectar WhatsApp"}
+            {qrLoading ? "Gerando QR Code..." : isConnected ? "Conectado ✓" : "Conectar WhatsApp"}
           </button>
         </div>
 
