@@ -2,14 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../App";
 import { useToast } from "./Toast";
 import {
-  createWhatsappInstance,
   getIntegrationOAuthSession,
   getIntegrationStatuses,
-  getWhatsappQRCode,
   getWhatsappStatus,
-  terminateWhatsappSession,
   initializeShopeeLogin,
   verifyShopeeOtp,
+  saveMetaAPIConfig,
 } from "../src/services/endpoints";
 import type { IntegrationProvider } from "../src/types/domain";
 
@@ -368,8 +366,12 @@ const IntegrationsHub = () => {
   const [statuses, setStatuses] = useState<Record<HubProvider, HubStatus>>(buildDefaultStatuses);
   const [loadingProvider, setLoadingProvider] = useState<HubProvider | null>(null);
   const [bootstrapping, setBootstrapping] = useState(true);
-  const [whatsappQrCode, setWhatsappQrCode] = useState<string | null>(null);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [metaAccessToken, setMetaAccessToken] = useState("");
+  const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
+  const [webhookVerifyToken, setWebhookVerifyToken] = useState("");
+  const [isSavingMeta, setIsSavingMeta] = useState(false);
+
   const [shopeeModalOpen, setShopeeModalOpen] = useState(false);
   const [shopeeUser, setShopeeUser] = useState("");
   const [shopeePass, setShopeePass] = useState("");
@@ -483,41 +485,7 @@ const IntegrationsHub = () => {
     });
   };
 
-  useEffect(() => {
-    if (!selectedCompanyId || !whatsappModalOpen) return;
-
-    const interval = window.setInterval(async () => {
-      try {
-        const response = await getWhatsappQRCode(selectedCompanyId);
-        if (response.qrCode) setWhatsappQrCode(response.qrCode);
-
-        const connected = normalizeWhatsappConnected(response.status);
-        setStatuses((current) => {
-          const next = {
-            ...current,
-            whatsapp: {
-              ...current.whatsapp,
-              connected,
-              status: connected ? "connected" : "disconnected",
-              updatedAt: new Date().toISOString(),
-              source: "api" as const,
-            },
-          };
-          persistStatuses(selectedCompanyId, next);
-          return next;
-        });
-
-        if (connected) {
-          setWhatsappModalOpen(false);
-          addToast("WhatsApp conectado com sucesso.", "success");
-        }
-      } catch {
-        // ignora polling transiente
-      }
-    }, 4000);
-
-    return () => window.clearInterval(interval);
-  }, [addToast, selectedCompanyId, whatsappModalOpen]);
+  // Removido useEffect de polling do WhatsApp QR code
 
   const handleWhatsappConnect = async () => {
     if (!selectedCompanyId) {
@@ -525,44 +493,32 @@ const IntegrationsHub = () => {
       return;
     }
 
-    setLoadingProvider("whatsapp");
+    setWhatsappModalOpen(true);
+  };
+
+  const handleSaveMetaConfig = async () => {
+    if (!selectedCompanyId || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken) {
+      addToast("Preencha todos os campos obrigatórios.", "error");
+      return;
+    }
+
+    setIsSavingMeta(true);
     try {
-      const currentStatus = await getWhatsappStatus(selectedCompanyId).catch(() => null);
-      const connectedNow = normalizeWhatsappConnected(currentStatus?.status);
-
-      if (connectedNow) {
-        setStatuses((current) => {
-          const next = {
-            ...current,
-            whatsapp: {
-              ...current.whatsapp,
-              connected: true,
-              status: "connected" as const,
-              updatedAt: new Date().toISOString(),
-              source: "api" as const,
-            },
-          };
-          persistStatuses(selectedCompanyId, next);
-          return next;
-        });
-        addToast("Essa instância já está conectada.", "success");
-        return;
-      }
-
-      const response =
-        currentStatus?.status === "Connecting" || currentStatus?.status === "WAITING_QR"
-          ? await getWhatsappQRCode(selectedCompanyId)
-          : await createWhatsappInstance(selectedCompanyId);
-
-      setWhatsappQrCode(response.qrCode || null);
-      setWhatsappModalOpen(true);
+      await saveMetaAPIConfig(selectedCompanyId, {
+        metaAccessToken,
+        metaPhoneNumberId,
+        webhookVerifyToken
+      });
+      addToast("Configuração do Meta salva com sucesso!", "success");
+      setWhatsappModalOpen(false);
+      
       setStatuses((current) => {
         const next = {
           ...current,
           whatsapp: {
             ...current.whatsapp,
-            connected: false,
-            status: "syncing" as const,
+            connected: true,
+            status: "connected" as const,
             updatedAt: new Date().toISOString(),
             source: "api" as const,
           },
@@ -570,10 +526,10 @@ const IntegrationsHub = () => {
         persistStatuses(selectedCompanyId, next);
         return next;
       });
-    } catch {
-      addToast("Nao foi possivel gerar o QR Code do WhatsApp agora.", "error");
+    } catch (error) {
+      addToast("Erro ao salvar configuração.", "error");
     } finally {
-      setLoadingProvider(null);
+      setIsSavingMeta(false);
     }
   };
 
@@ -677,9 +633,6 @@ const IntegrationsHub = () => {
   };
 
   const handleCloseWhatsappModal = () => {
-    if (selectedCompanyId) {
-      void terminateWhatsappSession(selectedCompanyId).catch(() => null);
-    }
     setWhatsappModalOpen(false);
   };
 
@@ -729,14 +682,14 @@ const IntegrationsHub = () => {
             const isWhatsapp = provider.id === "whatsapp";
             const buttonLabel = isLoading
               ? isWhatsapp
-                ? "Gerando QR..."
+                ? "Carregando..."
                 : "Conectando..."
               : status.connected
                 ? isWhatsapp
-                  ? "WhatsApp conectado"
+                  ? "Configurado"
                   : "Revalidar acesso"
                 : isWhatsapp
-                  ? "Gerar QR Code"
+                  ? "Configurar Meta"
                   : "Conectar em 1 clique";
 
             return (
@@ -882,10 +835,10 @@ const IntegrationsHub = () => {
                     WhatsApp NEXT
                   </p>
                   <h3 className="mt-2 text-2xl font-black tracking-tight text-zinc-50">
-                    Conecte o WhatsApp
+                    Configurar Meta Cloud API
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Abra o WhatsApp, entre em Dispositivos conectados e escaneie o QR Code abaixo.
+                    Insira as credenciais oficiais da Meta para enviar e receber mensagens.
                   </p>
                 </div>
                 <button
@@ -897,33 +850,59 @@ const IntegrationsHub = () => {
                 </button>
               </div>
 
-              <div className="mt-6 flex justify-center">
-                {whatsappQrCode ? (
-                  <div className="rounded-3xl bg-white p-4 shadow-lg">
-                    <img
-                      src={whatsappQrCode}
-                      alt="QR Code oficial do WhatsApp"
-                      className="h-64 w-64"
-                      style={{
-                        imageRendering: 'pixelated',
-                        background: '#ffffff',
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-64 w-64 items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-900 text-sm text-zinc-500">
-                    <div className="flex flex-col items-center gap-2">
-                      <span className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-600 border-t-emerald-400" />
-                      Gerando QR Code...
-                    </div>
-                  </div>
-                )}
+              <div className="mt-6 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Access Token (Permanente)</label>
+                  <input
+                    type="password"
+                    placeholder="EAA..."
+                    value={metaAccessToken}
+                    onChange={(e) => setMetaAccessToken(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-emerald-400 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Business Phone Number ID</label>
+                  <input
+                    type="text"
+                    placeholder="1234567890"
+                    value={metaPhoneNumberId}
+                    onChange={(e) => setMetaPhoneNumberId(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-emerald-400 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Webhook Verify Token</label>
+                  <input
+                    type="text"
+                    placeholder="seu_token_secreto_aqui"
+                    value={webhookVerifyToken}
+                    onChange={(e) => setWebhookVerifyToken(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-emerald-400 focus:outline-none"
+                  />
+                </div>
               </div>
 
+              <button
+                type="button"
+                onClick={handleSaveMetaConfig}
+                disabled={isSavingMeta || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-black text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+              >
+                {isSavingMeta ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
+                    Salvando...
+                  </>
+                ) : (
+                  "Salvar Configuração"
+                )}
+              </button>
+              
               <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-300">
                 <p className="flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${statuses.whatsapp.connected ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
-                  Status: {statuses.whatsapp.connected ? "Conectado" : "Aguardando leitura do QR Code..."}
+                  <span className={`h-2 w-2 rounded-full ${statuses.whatsapp.connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                  Status: {statuses.whatsapp.connected ? "Configurado" : "Pendente"}
                 </p>
               </div>
             </div>

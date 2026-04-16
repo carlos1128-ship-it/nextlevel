@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
 import {
@@ -7,12 +7,8 @@ import {
   getAttendantRoi,
   interveneLead,
   updateBotConfig,
-  createWhatsappInstance,
-  getWhatsappQRCode,
-  getWhatsappStatus,
-  cleanupWhatsappSession,
+  saveMetaAPIConfig,
 } from "../src/services/endpoints";
-import { useWhatsAppStatus } from "../src/hooks/useWhatsAppStatus";
 import type { BotConfig, Lead } from "../src/types/domain";
 import { getErrorMessage } from "../src/services/error";
 import { MessageSquareIcon, LightbulbIcon, SettingsIcon } from "../components/icons";
@@ -74,34 +70,14 @@ const Attendant = () => {
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingLeads, setLoadingLeads] = useState(false);
 
-  // WhatsApp / QR code state — MELHORIA v2.0: usar hook compartilhado
-  const {
-    status: waHealthStatus,
-    isConnected,
-    isHealthy,
-    isAwaitingQR,
-    refresh: refreshWaStatus,
-  } = useWhatsAppStatus(selectedCompanyId, {
-    pollingInterval: 5000,
-    enablePolling: true,
-    onStatusChange: (status) => {
-      // Notificar quando status muda
-      if (status.connected) {
-        addToast("WhatsApp conectado com sucesso!", "success");
-        setQrModalOpen(false);
-      }
-    },
-  });
-
-  // Estado local para compatibilidade com código existente
-  const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [qrCode, setQrCode] = useState<string | null>(null);
-  const [qrLoading, setQrLoading] = useState(false);
-  // Derivar waStatus do hook compartilhado para consistência
-  const waStatus = waHealthStatus?.status || "DISCONNECTED";
-  const quotaUsed = waHealthStatus ? 0 : null; // Placeholder — implementar se tiver quota real
-  const quotaLimit = waHealthStatus ? 10000 : null;
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // ── Meta API Config state ──────────────────────────────────────────────
+  const [metaConfigOpen, setMetaConfigOpen] = useState(false);
+  const [metaAccessToken, setMetaAccessToken] = useState("");
+  const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
+  const [webhookVerifyToken, setWebhookVerifyToken] = useState("");
+  const [instagramAccountId, setInstagramAccountId] = useState("");
+  const [isSavingMeta, setIsSavingMeta] = useState(false);
+  const [metaConfigured, setMetaConfigured] = useState(false);
 
   const loadConfig = async () => {
     if (!selectedCompanyId) return;
@@ -145,6 +121,7 @@ const Attendant = () => {
     void loadRoi();
     const interval = setInterval(() => void loadLeads(), 10000);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompanyId]);
 
   const handleConfigSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -173,79 +150,27 @@ const Attendant = () => {
     }
   };
 
-  const loadWaStatus = async () => {
-    if (!selectedCompanyId) return;
-    // MELHORIA v2.0: Usar hook compartilhado em vez de chamada manual
-    await refreshWaStatus();
-  };
-
-  const stopPoll = () => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
+  const handleSaveMetaConfig = async () => {
+    if (!selectedCompanyId || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken) {
+      addToast("Preencha Access Token, Phone Number ID e Webhook Token.", "error");
+      return;
     }
-  };
-
-  const startPolling = () => {
-    stopPoll();
-    pollRef.current = setInterval(async () => {
-      if (!selectedCompanyId) return;
-      try {
-        const res = await getWhatsappQRCode(selectedCompanyId);
-        // MELHORIA v2.0: Verificar se está conectado usando estado real
-        if (res.status === "Connected" || res.status === "CONNECTED") {
-          stopPoll();
-          setQrModalOpen(false);
-          addToast("WhatsApp conectado com sucesso!", "success");
-          await refreshWaStatus();
-        } else if (res.qrCode) {
-          setQrCode(res.qrCode);
-        }
-      } catch {
-        // ignore poll errors
-      }
-    }, 4000);
-  };
-
-  const handleConnectWhatsapp = async () => {
-    if (!selectedCompanyId) return;
-
-    // MELHORIA v2.0: Cleanup sessão anterior antes de conectar nova
+    setIsSavingMeta(true);
     try {
-      await cleanupWhatsappSession(selectedCompanyId);
-    } catch {
-      // Ignora — sessão pode já estar limpa
-    }
-
-    setQrLoading(true);
-    try {
-      const res = await createWhatsappInstance(selectedCompanyId);
-      setQrCode(res.qrCode ?? null);
-      if (res.status !== "Connected" && res.status !== "CONNECTED") {
-        setQrModalOpen(true);
-        startPolling();
-      } else {
-        addToast("WhatsApp já está conectado!", "success");
-        await refreshWaStatus();
-      }
+      await saveMetaAPIConfig(selectedCompanyId, {
+        metaAccessToken,
+        metaPhoneNumberId,
+        webhookVerifyToken,
+      });
+      setMetaConfigured(true);
+      setMetaConfigOpen(false);
+      addToast("Meta Cloud API configurada com sucesso!", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Falha ao conectar WhatsApp"), "error");
+      addToast(getErrorMessage(error, "Erro ao salvar configuracao Meta"), "error");
     } finally {
-      setQrLoading(false);
+      setIsSavingMeta(false);
     }
   };
-
-  const handleCloseQrModal = () => {
-    stopPoll();
-    setQrModalOpen(false);
-  };
-
-  useEffect(() => {
-    // MELHORIA v2.0: O hook useWhatsAppStatus já faz polling automático
-    // Aqui apenas refresh inicial para compatibilidade
-    void loadWaStatus();
-    return () => stopPoll();
-  }, [selectedCompanyId]);
 
   const liveFeed = useMemo(() => leads.slice(0, 10), [leads]);
   const hotLeads = useMemo(() => leads.filter((l) => l.score >= 80), [leads]);
@@ -257,7 +182,7 @@ const Attendant = () => {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(163,230,53,0.08)_0%,transparent_60%)]" />
         <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-zinc-500">Omnichannel · WhatsApp & Instagram</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-zinc-500">Omnichannel · WhatsApp & Instagram · Meta Cloud API</p>
             <h1 className="mt-1 text-3xl font-black tracking-tight text-white md:text-4xl">
               Meus Agentes
             </h1>
@@ -300,7 +225,7 @@ const Attendant = () => {
         </div>
       )}
 
-      {/* ── Conectar Canais ── */}
+      {/* ── Canais (Meta Cloud API) ── */}
       <div className="grid gap-4 sm:grid-cols-2">
         {/* WhatsApp */}
         <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-700/40">
@@ -310,48 +235,28 @@ const Attendant = () => {
                 📱
               </div>
               <div>
-                <p className="font-bold text-white text-sm">WhatsApp</p>
-                <p className="text-[11px] text-zinc-500">via WPPConnect / Meta API</p>
+                <p className="font-bold text-white text-sm">WhatsApp Business</p>
+                <p className="text-[11px] text-zinc-500">via Meta Cloud API (Oficial)</p>
               </div>
             </div>
-            <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${isConnected
+            <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${metaConfigured
               ? "border-lime-500/40 bg-lime-500/10 text-lime-300"
-              : waStatus === "Connecting" || waStatus === "CONNECTING"
-                ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-                : "border-zinc-700/40 bg-zinc-900/60 text-zinc-500"
-              }`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "animate-pulse bg-lime-400" : isAwaitingQR ? "animate-pulse bg-amber-400" : "bg-zinc-600"}`} />
-              {isConnected ? "Conectado" : isAwaitingQR ? "Aguardando QR" : waStatus === "CONNECTING" ? "Conectando" : "Desconectado"}
+              : "border-zinc-700/40 bg-zinc-900/60 text-zinc-500"
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${metaConfigured ? "animate-pulse bg-lime-400" : "bg-zinc-600"}`} />
+              {metaConfigured ? "Configurado ✓" : "Não configurado"}
             </span>
           </div>
 
-          {quotaUsed != null && quotaLimit != null && (
-            <div className="mt-3">
-              <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
-                <span>Mensagens utilizadas</span>
-                <span className={quotaUsed >= quotaLimit ? "text-red-400 font-bold" : "text-zinc-400"}>
-                  {quotaUsed}/{quotaLimit}
-                </span>
-              </div>
-              <div className="h-1 w-full rounded-full bg-zinc-800">
-                <div
-                  className={`h-1 rounded-full transition-all ${quotaUsed >= quotaLimit ? "bg-red-400" : quotaUsed / quotaLimit > 0.7 ? "bg-amber-400" : "bg-lime-400"}`}
-                  style={{ width: `${Math.min(100, (quotaUsed / quotaLimit) * 100)}%` }}
-                />
-              </div>
-            </div>
-          )}
-
           <button
-            onClick={() => void handleConnectWhatsapp()}
-            disabled={qrLoading || isConnected}
-            className="mt-4 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#25D366] transition hover:bg-[#25D366]/20 active:scale-95 disabled:opacity-50"
+            onClick={() => setMetaConfigOpen(true)}
+            className="mt-4 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#25D366] transition hover:bg-[#25D366]/20 active:scale-95"
           >
-            {qrLoading ? "Gerando QR Code..." : isConnected ? "Conectado ✓" : "Conectar WhatsApp"}
+            {metaConfigured ? "Atualizar Credenciais" : "Configurar Meta API"}
           </button>
         </div>
 
-        {/* Instagram via Meta OAuth */}
+        {/* Instagram */}
         <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-700/40">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -359,58 +264,132 @@ const Attendant = () => {
                 📸
               </div>
               <div>
-                <p className="font-bold text-white text-sm">Instagram</p>
+                <p className="font-bold text-white text-sm">Instagram DMs</p>
                 <p className="text-[11px] text-zinc-500">via Meta Graph API</p>
               </div>
             </div>
             <span className="flex items-center gap-1.5 rounded-full border border-zinc-700/40 bg-zinc-900/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
               <span className="h-1.5 w-1.5 rounded-full bg-zinc-600" />
-              Não configurado
+              Mesmo webhook
             </span>
           </div>
           <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed">
-            Conecte sua conta Business do Instagram para receber DMs e responder automaticamente com IA.
+            DMs do Instagram chegam pelo mesmo webhook Meta. Cadastre o <span className="text-zinc-300 font-semibold">Instagram Account ID</span> na configuração da empresa.
           </p>
-          <a
-            href="/integrations"
+          <button
+            onClick={() => setMetaConfigOpen(true)}
             className="mt-4 flex w-full items-center justify-center rounded-xl border border-[#E1306C]/30 bg-[#E1306C]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#E1306C] transition hover:bg-[#E1306C]/20 active:scale-95"
           >
-            Ir para Integrações
-          </a>
+            Configurar Instagram ID
+          </button>
         </div>
       </div>
 
-      {/* ── QR Code Modal ── */}
-      {qrModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={handleCloseQrModal}>
+      {/* ── Meta Config Modal ── */}
+      {metaConfigOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+          onClick={() => setMetaConfigOpen(false)}
+        >
           <div
-            className="relative w-full max-w-sm rounded-2xl border border-zinc-700/60 bg-zinc-900 p-6 shadow-2xl"
+            className="w-full max-w-md rounded-[28px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={handleCloseQrModal}
-              className="absolute right-4 top-4 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-white transition"
-            >
-              ✕
-            </button>
-            <h3 className="text-base font-bold text-white">Conectar WhatsApp</h3>
-            <p className="mt-1 text-xs text-zinc-400">Abra o WhatsApp → Dispositivos Conectados → Conectar Dispositivo</p>
-            <div className="mt-5 flex justify-center">
-              {qrCode ? (
-                <img
-                  src={qrCode}
-                  alt="QR Code WhatsApp"
-                  className="h-56 w-56 rounded-xl border border-zinc-700 bg-white p-2"
-                />
-              ) : (
-                <div className="flex h-56 w-56 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800">
-                  <p className="text-xs text-zinc-500 animate-pulse">Gerando QR Code...</p>
-                </div>
-              )}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
+                  Meta Cloud API
+                </p>
+                <h3 className="mt-2 text-xl font-black tracking-tight text-zinc-50">
+                  Credenciais do Agente
+                </h3>
+                <p className="mt-1 text-xs leading-6 text-zinc-400">
+                  Token permanente + IDs do Meta Developer Portal.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMetaConfigOpen(false)}
+                className="rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+              >
+                Fechar
+              </button>
             </div>
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-zinc-500">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
-              Aguardando leitura do QR Code...
+
+            <div className="mt-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  Access Token <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="EAA..."
+                  value={metaAccessToken}
+                  onChange={(e) => setMetaAccessToken(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  Phone Number ID <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="123456789012345"
+                  value={metaPhoneNumberId}
+                  onChange={(e) => setMetaPhoneNumberId(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  Webhook Verify Token <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="seu_token_secreto (igual ao META_VERIFY_TOKEN no Render)"
+                  value={webhookVerifyToken}
+                  onChange={(e) => setWebhookVerifyToken(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  Instagram Account ID <span className="text-zinc-600">(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="ID da conta Business do Instagram"
+                  value={instagramAccountId}
+                  onChange={(e) => setInstagramAccountId(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void handleSaveMetaConfig()}
+              disabled={isSavingMeta || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-black text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+            >
+              {isSavingMeta ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Configuração"
+              )}
+            </button>
+
+            <div className="mt-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 px-4 py-3">
+              <p className="text-[11px] text-zinc-400 leading-5">
+                <span className="font-semibold text-zinc-300">Webhook URL:</span>{" "}
+                <code className="font-mono text-emerald-400">https://sua-api.render.com/webhooks/meta</code>
+                <br />
+                <span className="font-semibold text-zinc-300">Campos:</span> assine <code className="font-mono text-zinc-300">messages</code> no painel Meta.
+              </p>
             </div>
           </div>
         </div>
@@ -426,7 +405,7 @@ const Attendant = () => {
             </div>
             <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Identidade e Tom</span>
           </div>
-          <form className="space-y-4" onSubmit={handleConfigSubmit}>
+          <form className="space-y-4" onSubmit={(e) => void handleConfigSubmit(e)}>
             <div className="grid gap-4 md:grid-cols-2">
               <label className="space-y-1.5 text-sm">
                 <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">Nome do Agente</span>
@@ -513,7 +492,7 @@ const Attendant = () => {
               <div className="py-8 text-center">
                 <MessageSquareIcon className="mx-auto mb-2 h-8 w-8 text-zinc-700" />
                 <p className="text-sm text-zinc-500">Nenhum chat ativo ainda.</p>
-                <p className="mt-1 text-xs text-zinc-600">Conecte WhatsApp ou Instagram para começar.</p>
+                <p className="mt-1 text-xs text-zinc-600">Configure a Meta Cloud API para começar a receber mensagens.</p>
               </div>
             ) : (
               liveFeed.map((lead) => {

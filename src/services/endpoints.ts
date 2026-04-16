@@ -989,3 +989,26 @@ export async function getShopeeOrders(companyId: string) {
   });
   return data;
 }
+
+export async function saveMetaAPIConfig(
+  companyId: string,
+  payload: {
+    metaAccessToken: string;
+    metaPhoneNumberId: string;
+    webhookVerifyToken: string;
+    instagramAccountId?: string;
+  }
+) {
+  // Map frontend field names → DTO field names expected by the backend
+  const { data } = await api.post(
+    "/integrations/whatsapp/config",
+    {
+      accessToken: payload.metaAccessToken,
+      phoneNumberId: payload.metaPhoneNumberId,
+      webhookVerifyToken: payload.webhookVerifyToken,
+      ...(payload.instagramAccountId && { instagramAccountId: payload.instagramAccountId }),
+    },
+    { params: { companyId } },
+  );
+  return data;
+}
