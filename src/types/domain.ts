@@ -181,6 +181,9 @@ export interface BotConfig {
   toneOfVoice: string;
   instructions: string | null;
   isActive: boolean;
+  metaPhoneNumberId?: string | null;
+  metaWabaId?: string | null;
+  phoneNumber?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

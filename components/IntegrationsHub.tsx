@@ -5,10 +5,14 @@ import {
   getIntegrationOAuthSession,
   getIntegrationStatuses,
   getWhatsappStatus,
+  getMetaWhatsappStatus,
   initializeShopeeLogin,
   verifyShopeeOtp,
   saveMetaAPIConfig,
+  disconnectMetaAPIConfig,
 } from "../src/services/endpoints";
+import { WhatsAppStatus } from "./WhatsAppStatus";
+import { WhatsAppConnectButton } from "./WhatsAppConnectButton";
 import type { IntegrationProvider } from "../src/types/domain";
 
 type HubProvider = "whatsapp" | "instagram" | "mercadolivre" | "shopee";
@@ -19,7 +23,7 @@ interface HubStatus {
   connected: boolean;
   status: HubConnectionStatus;
   updatedAt: string | null;
-  source: "api" | "oauth";
+  source: "api" | "oauth" | "meta" | "legacy";
 }
 
 const HUB_STORAGE_PREFIX = "next_level_integrations_hub";
@@ -368,9 +372,9 @@ const IntegrationsHub = () => {
   const [bootstrapping, setBootstrapping] = useState(true);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [metaAccessToken, setMetaAccessToken] = useState("");
-  const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
-  const [webhookVerifyToken, setWebhookVerifyToken] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isSavingMeta, setIsSavingMeta] = useState(false);
+  const [showTokenHelp, setShowTokenHelp] = useState(false);
 
   const [shopeeModalOpen, setShopeeModalOpen] = useState(false);
   const [shopeeUser, setShopeeUser] = useState("");
@@ -396,20 +400,25 @@ const IntegrationsHub = () => {
     }
 
     try {
-      const [apiStatuses, whatsappStatus] = await Promise.all([
+      const [apiStatuses, whatsappStatus, metaStatus] = await Promise.all([
         getIntegrationStatuses(selectedCompanyId),
         getWhatsappStatus(selectedCompanyId).catch(() => null),
+        getMetaWhatsappStatus(selectedCompanyId).catch(() => null),
       ]);
       const next = mergeStatuses(apiStatuses, persisted);
-      if (whatsappStatus) {
-        next.whatsapp = {
-          provider: "whatsapp",
-          connected: normalizeWhatsappConnected(whatsappStatus.status),
-          status: normalizeWhatsappConnected(whatsappStatus.status) ? "connected" : "disconnected",
-          updatedAt: new Date().toISOString(),
-          source: "api",
-        };
-      }
+      
+      // Prefer Meta Cloud API status if connected
+      const isMetaConnected = metaStatus?.connected || false;
+      const isLegacyConnected = whatsappStatus ? normalizeWhatsappConnected(whatsappStatus.status) : false;
+      
+      next.whatsapp = {
+        provider: "whatsapp",
+        connected: isMetaConnected || isLegacyConnected,
+        status: (isMetaConnected || isLegacyConnected) ? "connected" : "disconnected",
+        updatedAt: new Date().toISOString(),
+        source: isMetaConnected ? "meta" : "legacy",
+      };
+
       setStatuses(next);
       persistStatuses(selectedCompanyId, next);
     } catch {
@@ -430,6 +439,21 @@ const IntegrationsHub = () => {
     if (!selectedCompanyId) return;
 
     const params = new URLSearchParams(window.location.search);
+    const whatsappStatusParam = params.get("whatsapp");
+    if (whatsappStatusParam) {
+      if (whatsappStatusParam === "connected") {
+        addToast("WhatsApp conectado com sucesso!", "success");
+        void syncFromBackend();
+      } else if (whatsappStatusParam === "error") {
+        addToast("Erro ao conectar WhatsApp via Meta.", "error");
+      }
+      params.delete("whatsapp");
+      const cleanedQuery = params.toString();
+      const cleanedUrl = `${window.location.pathname}${cleanedQuery ? `?${cleanedQuery}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", cleanedUrl);
+      return;
+    }
+
     const provider = params.get("integration_provider");
     const status = params.get("integration_status");
     const message = params.get("integration_message");
@@ -497,7 +521,7 @@ const IntegrationsHub = () => {
   };
 
   const handleSaveMetaConfig = async () => {
-    if (!selectedCompanyId || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken) {
+    if (!selectedCompanyId || !metaAccessToken || !phoneNumber) {
       addToast("Preencha todos os campos obrigatórios.", "error");
       return;
     }
@@ -506,8 +530,7 @@ const IntegrationsHub = () => {
     try {
       await saveMetaAPIConfig(selectedCompanyId, {
         metaAccessToken,
-        metaPhoneNumberId,
-        webhookVerifyToken
+        phoneNumber,
       });
       addToast("Configuração do Meta salva com sucesso!", "success");
       setWhatsappModalOpen(false);
@@ -528,6 +551,23 @@ const IntegrationsHub = () => {
       });
     } catch (error) {
       addToast("Erro ao salvar configuração.", "error");
+    } finally {
+      setIsSavingMeta(false);
+    }
+  };
+
+  const handleDisconnectMeta = async () => {
+    if (!selectedCompanyId || !window.confirm("Deseja realmente desconectar o WhatsApp? Isso limpará suas credenciais.")) return;
+    setIsSavingMeta(true);
+    try {
+      await disconnectMetaAPIConfig(selectedCompanyId);
+      addToast("Meta Cloud API desconectada.", "success");
+      setWhatsappModalOpen(false);
+      setMetaAccessToken("");
+      setPhoneNumber("");
+      await syncFromBackend();
+    } catch (error) {
+      addToast("Erro ao desconectar.", "error");
     } finally {
       setIsSavingMeta(false);
     }
@@ -702,7 +742,11 @@ const IntegrationsHub = () => {
                 <div className="relative flex h-full flex-col">
                   <div className="flex items-start justify-between gap-3">
                     <BrandLogo provider={provider.id} />
-                    <StatusPulse connected={status.connected} />
+                    {isWhatsapp ? (
+                      <WhatsAppStatus companyId={selectedCompanyId} />
+                    ) : (
+                      <StatusPulse connected={status.connected} />
+                    )}
                   </div>
 
                   <div className="mt-5">
@@ -726,7 +770,7 @@ const IntegrationsHub = () => {
                         ? handleWhatsappConnect()
                         : handleOAuthConnect(provider.id))
                     }
-                    disabled={!selectedCompanyId || isLoading || (isWhatsapp && status.connected)}
+                    disabled={!selectedCompanyId || isLoading}
                     className={`mt-5 inline-flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition ${!selectedCompanyId
                       ? "cursor-not-allowed bg-zinc-800 text-zinc-500"
                       : "bg-lime-400 text-zinc-950 hover:-translate-y-0.5 hover:brightness-105 active:scale-[0.99]"
@@ -850,61 +894,24 @@ const IntegrationsHub = () => {
                 </button>
               </div>
 
-              <div className="mt-6 space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Access Token (Permanente)</label>
-                  <input
-                    type="password"
-                    placeholder="EAA..."
-                    value={metaAccessToken}
-                    onChange={(e) => setMetaAccessToken(e.target.value)}
-                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-emerald-400 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Business Phone Number ID</label>
-                  <input
-                    type="text"
-                    placeholder="1234567890"
-                    value={metaPhoneNumberId}
-                    onChange={(e) => setMetaPhoneNumberId(e.target.value)}
-                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-emerald-400 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Webhook Verify Token</label>
-                  <input
-                    type="text"
-                    placeholder="seu_token_secreto_aqui"
-                    value={webhookVerifyToken}
-                    onChange={(e) => setWebhookVerifyToken(e.target.value)}
-                    className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white focus:border-emerald-400 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleSaveMetaConfig}
-                disabled={isSavingMeta || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-black text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-              >
-                {isSavingMeta ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
-                    Salvando...
-                  </>
-                ) : (
-                  "Salvar Configuração"
-                )}
-              </button>
-              
-              <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-300">
-                <p className="flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${statuses.whatsapp.connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                  Status: {statuses.whatsapp.connected ? "Configurado" : "Pendente"}
+              <div className="mt-8 flex flex-col items-center justify-center space-y-4 text-center">
+                <WhatsAppConnectButton companyId={selectedCompanyId} />
+                <p className="max-w-[280px] text-[10px] uppercase tracking-widest text-zinc-500">
+                  Clique para abrir o popup seguro da Meta e selecionar sua conta business.
                 </p>
               </div>
+
+              {statuses.whatsapp.connected && (
+                <div className="mt-8 border-t border-zinc-900 pt-6">
+                  <button
+                    type="button"
+                    onClick={handleDisconnectMeta}
+                    className="w-full text-xs font-bold uppercase tracking-widest text-red-400/70 transition hover:text-red-400"
+                  >
+                    Desconectar conta atual
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ) : null}

@@ -138,6 +138,9 @@ function normalizeBotConfig(data: any): BotConfig {
     toneOfVoice: data?.toneOfVoice || "amigavel",
     instructions: data?.instructions ?? null,
     isActive: Boolean(data?.isActive ?? true),
+    metaPhoneNumberId: data?.metaPhoneNumberId || null,
+    metaWabaId: data?.metaWabaId || null,
+    phoneNumber: data?.phoneNumber || null,
     createdAt: data?.createdAt || new Date().toISOString(),
     updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
   };
@@ -994,21 +997,39 @@ export async function saveMetaAPIConfig(
   companyId: string,
   payload: {
     metaAccessToken: string;
-    metaPhoneNumberId: string;
-    webhookVerifyToken: string;
-    instagramAccountId?: string;
+    phoneNumber?: string;
   }
 ) {
   // Map frontend field names → DTO field names expected by the backend
   const { data } = await api.post(
-    "/integrations/whatsapp/config",
+    "/whatsapp/config", // Corrected path to match controller @Controller('whatsapp')
     {
       accessToken: payload.metaAccessToken,
-      phoneNumberId: payload.metaPhoneNumberId,
-      webhookVerifyToken: payload.webhookVerifyToken,
-      ...(payload.instagramAccountId && { instagramAccountId: payload.instagramAccountId }),
+      phoneNumber: payload.phoneNumber,
     },
     { params: { companyId } },
+  );
+  return data;
+}
+
+export async function disconnectMetaAPIConfig(companyId: string) {
+  const { data } = await api.delete("/whatsapp/config", {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function getWhatsappOAuthUrl(companyId: string): Promise<string> {
+  const { data } = await api.get<{ url: string }>("/meta/oauth/url", {
+    params: { companyId },
+  });
+  return data.url;
+}
+
+export async function getMetaWhatsappStatus(companyId: string) {
+  const { data } = await api.get<{ connected: boolean; phoneNumberId: string | null; whatsappBusinessId: string | null }>(
+    "/meta/status",
+    { params: { companyId } }
   );
   return data;
 }

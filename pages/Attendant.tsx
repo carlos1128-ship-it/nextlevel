@@ -8,10 +8,12 @@ import {
   interveneLead,
   updateBotConfig,
   saveMetaAPIConfig,
+  disconnectMetaAPIConfig,
 } from "../src/services/endpoints";
 import type { BotConfig, Lead } from "../src/types/domain";
 import { getErrorMessage } from "../src/services/error";
 import { MessageSquareIcon, LightbulbIcon, SettingsIcon } from "../components/icons";
+import { WhatsAppStatus } from "../components/WhatsAppStatus";
 
 const defaultConfig: BotConfig = {
   id: "",
@@ -73,11 +75,9 @@ const Attendant = () => {
   // ── Meta API Config state ──────────────────────────────────────────────
   const [metaConfigOpen, setMetaConfigOpen] = useState(false);
   const [metaAccessToken, setMetaAccessToken] = useState("");
-  const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
-  const [webhookVerifyToken, setWebhookVerifyToken] = useState("");
-  const [instagramAccountId, setInstagramAccountId] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isSavingMeta, setIsSavingMeta] = useState(false);
-  const [metaConfigured, setMetaConfigured] = useState(false);
+  const [showTokenHelp, setShowTokenHelp] = useState(false);
 
   const loadConfig = async () => {
     if (!selectedCompanyId) return;
@@ -151,22 +151,38 @@ const Attendant = () => {
   };
 
   const handleSaveMetaConfig = async () => {
-    if (!selectedCompanyId || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken) {
-      addToast("Preencha Access Token, Phone Number ID e Webhook Token.", "error");
+    if (!selectedCompanyId || !metaAccessToken || !phoneNumber) {
+      addToast("Preencha Access Token e Número do WhatsApp.", "error");
       return;
     }
     setIsSavingMeta(true);
     try {
       await saveMetaAPIConfig(selectedCompanyId, {
         metaAccessToken,
-        metaPhoneNumberId,
-        webhookVerifyToken,
+        phoneNumber,
       });
-      setMetaConfigured(true);
-      setMetaConfigOpen(false);
       addToast("Meta Cloud API configurada com sucesso!", "success");
+      setMetaConfigOpen(false);
+      await loadConfig(); // Reload config to update connection status
     } catch (error) {
       addToast(getErrorMessage(error, "Erro ao salvar configuracao Meta"), "error");
+    } finally {
+      setIsSavingMeta(false);
+    }
+  };
+
+  const handleDisconnectMeta = async () => {
+    if (!selectedCompanyId || !window.confirm("Deseja realmente desconectar o WhatsApp? Isso limpará suas credenciais.")) return;
+    setIsSavingMeta(true);
+    try {
+      await disconnectMetaAPIConfig(selectedCompanyId);
+      addToast("Meta Cloud API desconectada.", "success");
+      setMetaConfigOpen(false);
+      setMetaAccessToken("");
+      setPhoneNumber("");
+      // No syncFromBackend in Attendant.tsx, but WhatsAppStatus polls.
+    } catch (error) {
+      addToast("Erro ao desconectar.", "error");
     } finally {
       setIsSavingMeta(false);
     }
@@ -239,20 +255,14 @@ const Attendant = () => {
                 <p className="text-[11px] text-zinc-500">via Meta Cloud API (Oficial)</p>
               </div>
             </div>
-            <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${metaConfigured
-              ? "border-lime-500/40 bg-lime-500/10 text-lime-300"
-              : "border-zinc-700/40 bg-zinc-900/60 text-zinc-500"
-            }`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${metaConfigured ? "animate-pulse bg-lime-400" : "bg-zinc-600"}`} />
-              {metaConfigured ? "Configurado ✓" : "Não configurado"}
-            </span>
+            <WhatsAppStatus companyId={selectedCompanyId} />
           </div>
 
           <button
             onClick={() => setMetaConfigOpen(true)}
             className="mt-4 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#25D366] transition hover:bg-[#25D366]/20 active:scale-95"
           >
-            {metaConfigured ? "Atualizar Credenciais" : "Configurar Meta API"}
+            {config.metaPhoneNumberId ? "Atualizar Credenciais" : "Configurar Meta API"}
           </button>
         </div>
 
@@ -319,8 +329,29 @@ const Attendant = () => {
             <div className="mt-5 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Access Token <span className="text-red-400">*</span>
+                  Número do WhatsApp Business <span className="text-red-400">*</span>
                 </label>
+                <input
+                  type="text"
+                  placeholder="+55 11 99999-9999"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                    Access Token <span className="text-red-400">*</span>
+                  </label>
+                  <button 
+                    type="button"
+                    onClick={() => setShowTokenHelp(!showTokenHelp)}
+                    className="text-[10px] font-semibold text-emerald-400 hover:text-emerald-300"
+                  >
+                    Como encontrar meu token?
+                  </button>
+                </div>
                 <input
                   type="password"
                   placeholder="EAA..."
@@ -328,60 +359,37 @@ const Attendant = () => {
                   onChange={(e) => setMetaAccessToken(e.target.value)}
                   className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
                 />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Phone Number ID <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="123456789012345"
-                  value={metaPhoneNumberId}
-                  onChange={(e) => setMetaPhoneNumberId(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Webhook Verify Token <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="seu_token_secreto (igual ao META_VERIFY_TOKEN no Render)"
-                  value={webhookVerifyToken}
-                  onChange={(e) => setWebhookVerifyToken(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Instagram Account ID <span className="text-zinc-600">(opcional)</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="ID da conta Business do Instagram"
-                  value={instagramAccountId}
-                  onChange={(e) => setInstagramAccountId(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
-                />
+                {showTokenHelp && (
+                  <div className="mt-2 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 text-[10px] leading-relaxed text-zinc-400">
+                    <ol className="list-decimal pl-4 space-y-1">
+                      <li>Acesse o <a href="https://business.facebook.com/" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline">Facebook Business</a>.</li>
+                      <li>Vá em Configurações do Negócio &gt; Contas &gt; Usuários do Sistema.</li>
+                      <li>Gere um novo token selecionando seu app e as permissões necessárias.</li>
+                    </ol>
+                  </div>
+                )}
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => void handleSaveMetaConfig()}
-              disabled={isSavingMeta || !metaAccessToken || !metaPhoneNumberId || !webhookVerifyToken}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-black text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-            >
-              {isSavingMeta ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
-                  Salvando...
-                </>
-              ) : (
-                "Salvar Configuração"
-              )}
-            </button>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => void handleSaveMetaConfig()}
+                disabled={isSavingMeta || !metaAccessToken || !phoneNumber}
+                className="flex-1 rounded-2xl bg-emerald-500 py-3.5 text-sm font-black text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+              >
+                {isSavingMeta ? "Salvando..." : "Salvar Configuração"}
+              </button>
+              {/* Check if connected - check metaPhoneNumberId if available or just show if we have config */}
+              <button
+                type="button"
+                onClick={() => void handleDisconnectMeta()}
+                disabled={isSavingMeta}
+                className="flex-1 rounded-2xl border border-red-500/30 bg-red-500/10 py-3.5 text-sm font-black text-red-400 transition hover:bg-red-500/20 active:scale-[0.98] disabled:opacity-50"
+              >
+                Desconectar
+              </button>
+            </div>
 
             <div className="mt-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 px-4 py-3">
               <p className="text-[11px] text-zinc-400 leading-5">
