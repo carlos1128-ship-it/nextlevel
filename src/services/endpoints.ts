@@ -1013,6 +1013,8 @@ export async function getWhatsappHealth(companyId?: string | null) {
     companyId: string;
     status: string;
     connected: boolean;
+    authenticated?: boolean;
+    connectionState?: string | null;
     method?: "meta" | "wppconnect" | null;
     qrCode: string | null;
     phoneNumber: string | null;
