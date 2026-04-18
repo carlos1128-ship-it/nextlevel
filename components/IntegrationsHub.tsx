@@ -27,6 +27,7 @@ type QuickStatus = {
   connected?: boolean;
   status?: string;
   method?: "meta" | "wppconnect" | null;
+  qrCode?: string | null;
   updatedAt?: string | null;
 };
 
@@ -94,9 +95,10 @@ const IntegrationsHub = () => {
 
         setQuickStatus((current) => ({
           ...current,
-          connected: health.connected,
+          connected: health.connected && health.method === "wppconnect",
           status: health.status,
-          method: health.connected ? "wppconnect" : null,
+          method: health.method === "wppconnect" ? "wppconnect" : null,
+          qrCode: health.qrCode,
           updatedAt: health.dbLastConnected,
         }));
 
@@ -104,7 +106,7 @@ const IntegrationsHub = () => {
           setQrCode(health.qrCode);
         }
 
-        if (health.connected) {
+        if (health.connected && health.method === "wppconnect") {
           setQuickOpen(false);
           setQrCode(null);
           await loadStatus();
@@ -205,6 +207,8 @@ const IntegrationsHub = () => {
   const mercadoLivreStatus = findStatus("MERCADOLIVRE");
   const shopeeStatus = findStatus("SHOPEE");
   const whatsappConnected = Boolean(officialStatus?.connected || quickStatus?.connected);
+  const quickConnected = Boolean(quickStatus?.connected && quickStatus?.method === "wppconnect");
+  const officialConnected = Boolean(officialStatus?.connected && officialStatus?.method === "meta");
   const whatsappBadge = whatsappConnected
     ? "Conectado"
     : quickStatus?.status === "AWAITING_QR_SCAN"
@@ -287,9 +291,17 @@ const IntegrationsHub = () => {
                   </p>
                 </div>
                 <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
-                  Rapido
+                  {quickConnected ? "Conectado" : quickStatus?.status === "AWAITING_QR_SCAN" ? "Aguardando QR" : "Rapido"}
                 </span>
               </div>
+              {quickConnected ? (
+                <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                  <p className="text-sm font-bold text-emerald-300">WhatsApp conectado via QR Code</p>
+                  <p className="mt-1 text-sm text-zinc-200">
+                    {quickStatus?.status || "Sessao ativa"}
+                  </p>
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() => void handleQuickConnect()}
@@ -313,7 +325,7 @@ const IntegrationsHub = () => {
                 </span>
               </div>
 
-              {officialStatus?.connected ? (
+              {officialConnected ? (
                 <div className="mt-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-4">
                   <p className="text-sm font-bold text-lime-300">WhatsApp conectado</p>
                   <p className="mt-1 text-sm text-zinc-200">
@@ -331,7 +343,7 @@ const IntegrationsHub = () => {
                 >
                   Conectar via Meta API
                 </button>
-                {officialStatus?.connected ? (
+                {officialConnected ? (
                   <button
                     type="button"
                     onClick={() => void handleDisconnect()}
