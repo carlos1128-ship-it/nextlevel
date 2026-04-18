@@ -58,7 +58,7 @@ const IntegrationsHub = () => {
   const [integrationStatuses, setIntegrationStatuses] = useState<IntegrationStatus[]>([]);
   const [metaAccessToken, setMetaAccessToken] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [qrExpired, setQrExpired] = useState(false);
+  const [qrStatus, setQrStatus] = useState<"idle" | "generating" | "ready" | "timeout">("idle");
 
   const loadStatus = async () => {
     if (!selectedCompanyId) return;
@@ -86,16 +86,18 @@ const IntegrationsHub = () => {
   }, [selectedCompanyId]);
 
   useEffect(() => {
-    if (!quickOpen || !selectedCompanyId || qrExpired) return;
+    if (!quickOpen || !selectedCompanyId) return;
 
     let cancelled = false;
-    let timeoutRef: ReturnType<typeof setTimeout> | null = null;
+    let attempts = 0;
+    const maxAttempts = 150;
 
     const syncQuickConnect = async () => {
-      if (qrExpired) return;
-
       try {
-        const health = await getWhatsappHealth(selectedCompanyId);
+        const [qrData, health] = await Promise.all([
+          getWhatsappQRCode(selectedCompanyId),
+          getWhatsappHealth(selectedCompanyId),
+        ]);
         if (cancelled) return;
 
         setQuickStatus((current) => ({
@@ -103,18 +105,26 @@ const IntegrationsHub = () => {
           connected: health.connected && health.method === "wppconnect",
           status: health.status,
           method: health.method === "wppconnect" ? "wppconnect" : null,
-          qrCode: health.qrCode,
+          qrCode: qrData.qrcode || qrData.qrCode || health.qrCode,
           updatedAt: health.dbLastConnected,
         }));
 
-        if (health.qrCode) {
-          setQrCode(health.qrCode);
+        const nextQrCode = qrData.qrcode || qrData.qrCode || health.qrCode || null;
+        if (nextQrCode) {
+          setQrCode(nextQrCode);
+          setQrStatus("ready");
+        } else {
+          attempts += 1;
+          if (attempts >= maxAttempts) {
+            setQrCode(null);
+            setQrStatus("timeout");
+          }
         }
 
         if (health.connected && health.method === "wppconnect" && health.authenticated) {
           setQuickOpen(false);
-          setQrExpired(false);
           setQrCode(null);
+          setQrStatus("idle");
           await loadStatus();
           addToast("WhatsApp conectado com sucesso!", "success");
         }
@@ -123,23 +133,16 @@ const IntegrationsHub = () => {
       }
     };
 
+    setQrStatus((current) => (current === "ready" ? current : "generating"));
     void syncQuickConnect();
     const interval = setInterval(() => {
       void syncQuickConnect();
     }, 2000);
-    timeoutRef = setTimeout(() => {
-      if (cancelled) return;
-      setQrExpired(true);
-      setQrCode(null);
-      addToast("QR Code expirado, clique para gerar novo.", "info");
-    }, 5 * 60 * 1000);
-
     return () => {
       cancelled = true;
       clearInterval(interval);
-      if (timeoutRef) clearTimeout(timeoutRef);
     };
-  }, [addToast, qrExpired, quickOpen, selectedCompanyId]);
+  }, [addToast, quickOpen, selectedCompanyId]);
 
   const handleQuickConnect = async () => {
     if (!selectedCompanyId) {
@@ -148,20 +151,15 @@ const IntegrationsHub = () => {
     }
 
     setQuickLoading(true);
-    setQrExpired(false);
+    setQrCode(null);
+    setQrStatus("generating");
+    setQuickOpen(true);
     try {
       await createWhatsappInstance(selectedCompanyId);
-      let status = await getWhatsappQRCode(selectedCompanyId);
-
-      for (let attempt = 0; attempt < 6 && !status.qrcode && !status.qrCode; attempt += 1) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        status = await getWhatsappQRCode(selectedCompanyId);
-      }
-
-      setQrCode(status.qrcode || status.qrCode || null);
-      setQuickOpen(true);
       await loadStatus();
     } catch {
+      setQuickOpen(false);
+      setQrStatus("idle");
       addToast("Nao foi possivel abrir o QR Code agora.", "error");
     } finally {
       setQuickLoading(false);
@@ -175,6 +173,7 @@ const IntegrationsHub = () => {
     try {
       await terminateWhatsappSession(selectedCompanyId);
       setQrCode(null);
+      setQrStatus("idle");
       setQuickStatus(null);
       await loadStatus();
       await handleQuickConnect();
@@ -322,7 +321,7 @@ const IntegrationsHub = () => {
                   </p>
                 </div>
                 <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
-                  {quickConnected ? "Conectado" : quickStatus?.status === "AWAITING_QR_SCAN" ? "Aguardando QR" : "Rapido"}
+                  {quickConnected ? "Conectado" : qrStatus === "ready" || quickStatus?.status === "AWAITING_QR_SCAN" ? "Aguardando QR" : "Rapido"}
                 </span>
               </div>
               {quickConnected ? (
@@ -339,7 +338,7 @@ const IntegrationsHub = () => {
                 disabled={quickLoading || !selectedCompanyId}
                 className="mt-5 w-full rounded-2xl bg-amber-400 px-4 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
               >
-                {quickLoading ? "Abrindo QR Code..." : quickConnected ? "Gerar novo QR Code" : "Conectar via QR Code"}
+                {quickLoading ? "Gerando QR Code..." : quickConnected ? "Gerar novo QR Code" : "Conectar via QR Code"}
               </button>
               {quickConnected ? (
                 <button
@@ -453,7 +452,7 @@ const IntegrationsHub = () => {
 
             <div className="mt-6 rounded-[24px] border border-amber-400/20 bg-zinc-900/70 p-6 text-center">
               <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-3xl border border-dashed border-amber-300/40 bg-white p-3 text-center text-xs font-bold text-zinc-700">
-                {qrExpired ? (
+                {qrStatus === "timeout" ? (
                   <div className="space-y-3">
                     <p>QR Code expirado.</p>
                     <button
@@ -465,7 +464,7 @@ const IntegrationsHub = () => {
                       {quickLoading ? "Gerando..." : "Gerar novo"}
                     </button>
                   </div>
-                ) : qrCode ? (
+                ) : qrCode && qrStatus === "ready" ? (
                   <img
                     src={qrCode}
                     alt="QR Code WhatsApp"
