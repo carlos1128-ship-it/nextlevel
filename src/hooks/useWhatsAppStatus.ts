@@ -1,16 +1,9 @@
 /**
- * Hook compartilhado para verificar o status REAL do WhatsApp.
- * Usado tanto na aba "Integrações" quanto na aba "Atendente Virtual"
- * para garantir estado consistente entre componentes.
- * 
- * MELHORIA v2.0:
- * - Usa endpoint /health que verifica estado LIVE com o WPPConnect
- * - Polling de 5s para atualização automática
- * - Cleanup automático ao trocar de empresa
- * - Previne dessincronização entre abas
+ * Hook compartilhado para verificar o status real do WhatsApp.
+ * Usado para manter o estado consistente entre componentes sem recriar sessao.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../services/api';
 
 export interface WhatsAppHealthStatus {
@@ -30,37 +23,21 @@ export interface WhatsAppHealthStatus {
   healthy: boolean;
   needsReconnect: boolean;
   awaitingQR: boolean;
+  lifecycleState?: 'idle' | 'starting' | 'qr_ready' | 'connected' | 'failed';
+  failureReason?: string | null;
 }
 
 interface UseWhatsAppStatusOptions {
-  /** Intervalo de polling em ms (padrão: 5000) */
   pollingInterval?: number;
-  /** Habilitar polling automático (padrão: true) */
   enablePolling?: boolean;
-  /** Callback quando status muda */
   onStatusChange?: (status: WhatsAppHealthStatus) => void;
 }
 
 const DEFAULT_POLLING_INTERVAL = 5000;
 
-/**
- * Busca status REAL do WhatsApp via endpoint /health
- */
 async function fetchHealthStatus(companyId: string): Promise<WhatsAppHealthStatus> {
   const { data } = await api.get<WhatsAppHealthStatus>(
     `/attendant/whatsapp/health`,
-    { params: { companyId } },
-  );
-  return data;
-}
-
-/**
- * Cleanup forçado da sessão ao trocar de empresa
- */
-async function cleanupSession(companyId: string): Promise<{ success: boolean }> {
-  const { data } = await api.post<{ success: boolean }>(
-    `/attendant/whatsapp/cleanup`,
-    null,
     { params: { companyId } },
   );
   return data;
@@ -82,7 +59,6 @@ export function useWhatsAppStatus(
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const previousStatusRef = useRef<string | null>(null);
 
-  // Função para buscar status
   const fetchStatus = useCallback(async () => {
     if (!companyId) {
       setStatus(null);
@@ -96,7 +72,6 @@ export function useWhatsAppStatus(
       const healthStatus = await fetchHealthStatus(companyId);
       setStatus(healthStatus);
 
-      // Detectar mudança de status e notificar callback
       if (previousStatusRef.current !== healthStatus.status) {
         previousStatusRef.current = healthStatus.status;
         onStatusChange?.(healthStatus);
@@ -109,33 +84,27 @@ export function useWhatsAppStatus(
     }
   }, [companyId, onStatusChange]);
 
-  // Cleanup ao trocar de empresa
-  const cleanupPreviousSession = useCallback(async (previousCompanyId: string) => {
-    try {
-      await cleanupSession(previousCompanyId);
-    } catch {
-      // Ignora erros de cleanup — sessão pode já estar limpa
+  useEffect(() => {
+    setStatus(null);
+    previousStatusRef.current = null;
+    void fetchStatus();
+  }, [companyId, fetchStatus]);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
     }
   }, []);
 
-  // Watch companyId changes — cleanup antes de mudar
-  useEffect(() => {
-    const previousCompanyId = status?.companyId;
+  const startPolling = useCallback(() => {
+    stopPolling();
 
-    // Se mudou de empresa, fazer cleanup da anterior
-    if (previousCompanyId && previousCompanyId !== companyId) {
-      cleanupPreviousSession(previousCompanyId);
-    }
+    pollRef.current = setInterval(() => {
+      void fetchStatus();
+    }, pollingInterval);
+  }, [fetchStatus, pollingInterval, stopPolling]);
 
-    // Reset status ao trocar de empresa
-    setStatus(null);
-    previousStatusRef.current = null;
-
-    // Buscar novo status
-    void fetchStatus();
-  }, [companyId, cleanupPreviousSession, fetchStatus]);
-
-  // Polling automático
   useEffect(() => {
     if (!enablePolling || !companyId) {
       stopPolling();
@@ -147,24 +116,8 @@ export function useWhatsAppStatus(
     return () => {
       stopPolling();
     };
-  }, [companyId, enablePolling, pollingInterval, fetchStatus]);
+  }, [companyId, enablePolling, pollingInterval, fetchStatus, startPolling, stopPolling]);
 
-  const startPolling = useCallback(() => {
-    stopPolling();
-
-    pollRef.current = setInterval(() => {
-      void fetchStatus();
-    }, pollingInterval);
-  }, [fetchStatus, pollingInterval]);
-
-  const stopPolling = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-  }, []);
-
-  // Cleanup no unmount
   useEffect(() => {
     return () => {
       stopPolling();
@@ -175,13 +128,11 @@ export function useWhatsAppStatus(
     status,
     loading,
     error,
-    // Helpers
     isConnected: status?.connected ?? false,
     isHealthy: status?.healthy ?? false,
     needsReconnect: status?.needsReconnect ?? false,
     isAwaitingQR: status?.awaitingQR ?? false,
-    // Ações
     refresh: fetchStatus,
-    cleanup: cleanupPreviousSession,
+    cleanup: async () => undefined,
   };
 }

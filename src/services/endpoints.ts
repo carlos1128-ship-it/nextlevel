@@ -1030,6 +1030,8 @@ export async function getWhatsappHealth(companyId?: string | null) {
     needsReconnect: boolean;
     awaitingQR: boolean;
     qrRequired?: boolean;
+    lifecycleState?: "idle" | "starting" | "qr_ready" | "connected" | "failed";
+    failureReason?: string | null;
   }>("/attendant/whatsapp/health", {
     params: companyId ? { companyId } : undefined,
   });
