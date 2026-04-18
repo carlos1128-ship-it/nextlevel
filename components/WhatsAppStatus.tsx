@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { getMetaWhatsappStatus } from "../src/services/endpoints";
+import { getAttendantConnectionStatus } from "../src/services/endpoints";
 
-interface MetaWhatsappStatus {
+interface ConnectionStatus {
   connected: boolean;
-  phoneNumberId: string | null;
-  whatsappBusinessId?: string | null;
+  method?: "meta" | "wppconnect" | null;
+  phoneNumberId?: string | null;
   phoneNumber?: string | null;
 }
 
@@ -14,7 +14,7 @@ interface WhatsAppStatusProps {
 }
 
 export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatusProps) => {
-  const [status, setStatus] = useState<MetaWhatsappStatus | null>(null);
+  const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
 
     const fetchStatus = async () => {
       try {
-        const data = await getMetaWhatsappStatus(companyId);
+        const data = await getAttendantConnectionStatus(companyId);
         setStatus(data);
       } catch {
         setStatus(null);
@@ -55,9 +55,12 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
       {showDetails && isConnected ? (
         <p className="px-1 text-[10px] font-medium text-zinc-500">
           {status?.phoneNumber ? (
-            <>Número: <span className="text-zinc-400">{status.phoneNumber}</span></>
+            <>Numero: <span className="text-zinc-400">{status.phoneNumber}</span></>
           ) : (
-            <>ID: <span className="text-zinc-400">{status?.phoneNumberId}</span></>
+            <>
+              Via {status?.method === "meta" ? "Meta API" : "QR Code"}
+              {status?.phoneNumberId ? <span className="text-zinc-400"> • {status.phoneNumberId}</span> : null}
+            </>
           )}
         </p>
       ) : null}

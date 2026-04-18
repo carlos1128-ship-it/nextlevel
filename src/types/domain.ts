@@ -185,6 +185,7 @@ export interface BotConfig {
   isActive: boolean;
   isOnline?: boolean;
   isConnected?: boolean;
+  connectionMethod?: "meta" | "wppconnect" | null;
   metaPhoneNumberId?: string | null;
   metaWabaId?: string | null;
   phoneNumber?: string | null;
@@ -195,7 +196,11 @@ export interface BotConfig {
 export interface WhatsappConnectionSnapshot {
   instanceName?: string | null;
   qrCode?: string | null;
+  qrcode?: string | null;
   status: string;
+  connected?: boolean;
+  method?: "meta" | "wppconnect" | null;
+  updatedAt?: string | null;
   quotaUsed?: number | null;
   quotaLimit?: number | null;
 }

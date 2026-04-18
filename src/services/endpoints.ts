@@ -993,6 +993,13 @@ export async function getWhatsappStatus(companyId?: string | null) {
   return data;
 }
 
+export async function getAttendantConnectionStatus(companyId?: string | null) {
+  const { data } = await api.get<WhatsappConnectionSnapshot>("/attendant/connection-status", {
+    params: companyId ? { companyId } : undefined,
+  });
+  return data;
+}
+
 export async function terminateWhatsappSession(companyId: string) {
   const { data } = await api.delete<{ success: boolean }>(`/attendant/whatsapp/session/${companyId}`);
   return data;
@@ -1098,7 +1105,15 @@ export async function getWhatsappOAuthUrl(companyId: string): Promise<string> {
 }
 
 export async function getMetaWhatsappStatus(companyId: string) {
-  const { data } = await api.get<{ connected: boolean; phoneNumberId: string | null; phoneNumber: string | null; whatsappBusinessId: string | null }>(
+  const { data } = await api.get<{
+    connected: boolean;
+    method: "meta" | "wppconnect" | null;
+    status: string;
+    phoneNumberId: string | null;
+    phoneNumber: string | null;
+    whatsappBusinessId?: string | null;
+    updatedAt?: string | null;
+  }>(
     "/meta/status",
     { params: { companyId } }
   );
