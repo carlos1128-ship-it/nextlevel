@@ -6,6 +6,7 @@ import {
   disconnectMetaAPIConfig,
   getIntegrationStatuses,
   getMetaWhatsappStatus,
+  getWhatsappHealth,
   getWhatsappQRCode,
   getWhatsappStatus,
   saveMetaAPIConfig,
@@ -80,6 +81,50 @@ const IntegrationsHub = () => {
   useEffect(() => {
     void loadStatus();
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (!quickOpen || !selectedCompanyId) return;
+
+    let cancelled = false;
+
+    const syncQuickConnect = async () => {
+      try {
+        const health = await getWhatsappHealth(selectedCompanyId);
+        if (cancelled) return;
+
+        setQuickStatus((current) => ({
+          ...current,
+          connected: health.connected,
+          status: health.status,
+          method: health.connected ? "wppconnect" : null,
+          updatedAt: health.dbLastConnected,
+        }));
+
+        if (health.qrCode) {
+          setQrCode(health.qrCode);
+        }
+
+        if (health.connected) {
+          setQuickOpen(false);
+          setQrCode(null);
+          await loadStatus();
+          addToast("WhatsApp conectado com sucesso!", "success");
+        }
+      } catch {
+        // Ignora falhas transitórias de polling para não derrubar a modal.
+      }
+    };
+
+    void syncQuickConnect();
+    const interval = setInterval(() => {
+      void syncQuickConnect();
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [addToast, quickOpen, selectedCompanyId]);
 
   const handleQuickConnect = async () => {
     if (!selectedCompanyId) {
@@ -362,7 +407,12 @@ const IntegrationsHub = () => {
                     style={{ width: "100%", height: "100%", objectFit: "contain" }}
                   />
                 ) : (
-                  "QR Code"
+                  <div className="space-y-2">
+                    <p>Gerando QR Code...</p>
+                    <p className="text-[11px] font-medium text-zinc-500">
+                      Isso pode levar alguns segundos no primeiro pareamento.
+                    </p>
+                  </div>
                 )}
               </div>
               <div className="mt-4 space-y-2 text-sm text-zinc-400">
