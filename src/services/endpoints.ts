@@ -18,6 +18,7 @@ import type {
   MarketComparison,
   MarketTrend,
   BotConfig,
+  ConversationThread,
   WhatsappConnectionSnapshot,
   Lead,
   LeadStatus,
@@ -134,15 +135,45 @@ function normalizeBotConfig(data: any): BotConfig {
     id: data?.id || "",
     companyId: data?.companyId || data?.company_id || "",
     botName: data?.botName || "Atendente IA",
+    agentName: data?.agentName || data?.botName || "Atendente IA",
     welcomeMessage: data?.welcomeMessage ?? null,
     toneOfVoice: data?.toneOfVoice || "amigavel",
+    tone: data?.tone || data?.toneOfVoice || "Amigável",
     instructions: data?.instructions ?? null,
     isActive: Boolean(data?.isActive ?? true),
+    isOnline: Boolean(data?.isOnline ?? data?.isActive ?? true),
+    isConnected: Boolean(data?.isConnected ?? false),
     metaPhoneNumberId: data?.metaPhoneNumberId || null,
     metaWabaId: data?.metaWabaId || null,
     phoneNumber: data?.phoneNumber || null,
     createdAt: data?.createdAt || new Date().toISOString(),
     updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeConversationMessage(data: any) {
+  return {
+    id: data?.id || "",
+    conversationId: data?.conversationId || "",
+    content: data?.content || "",
+    role: (data?.role as "user" | "assistant" | "human") || "user",
+    timestamp: data?.timestamp || data?.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeConversation(data: any): ConversationThread {
+  return {
+    id: data?.id || "",
+    companyId: data?.companyId || "",
+    contactNumber: data?.contactNumber || "",
+    contactName: data?.contactName ?? null,
+    status: (data?.status as ConversationThread["status"]) || "Aguardando",
+    isPaused: Boolean(data?.isPaused ?? false),
+    pausedUntil: data?.pausedUntil || null,
+    lastMessageAt: data?.lastMessageAt || data?.updatedAt || new Date().toISOString(),
+    createdAt: data?.createdAt || new Date().toISOString(),
+    updatedAt: data?.updatedAt || new Date().toISOString(),
+    messages: Array.isArray(data?.messages) ? data.messages.map(normalizeConversationMessage) : [],
   };
 }
 
@@ -806,7 +837,7 @@ export async function getBotConfig(companyId?: string | null) {
 
 export async function updateBotConfig(
   companyId: string,
-  payload: Partial<Pick<BotConfig, "botName" | "welcomeMessage" | "toneOfVoice" | "instructions" | "isActive">>
+  payload: Partial<Pick<BotConfig, "botName" | "agentName" | "welcomeMessage" | "toneOfVoice" | "tone" | "instructions" | "isActive" | "isOnline">>
 ) {
   const { data } = await api.put<BotConfig>(
     "/attendant/config",
@@ -814,6 +845,46 @@ export async function updateBotConfig(
     { params: companyId ? { companyId } : undefined }
   );
   return normalizeBotConfig(data);
+}
+
+export async function getAttendantConversations(params?: { companyId?: string | null; limit?: number }) {
+  const { data } = await api.get<any[]>("/attendant/conversations", {
+    params: {
+      companyId: params?.companyId || undefined,
+      limit: params?.limit || undefined,
+    },
+  });
+  return Array.isArray(data) ? data.map(normalizeConversation) : [];
+}
+
+export async function getAttendantConversation(companyId: string, conversationId: string) {
+  const { data } = await api.get(`/attendant/conversations/${conversationId}`, {
+    params: { companyId },
+  });
+  return normalizeConversation(data);
+}
+
+export async function pauseAttendantConversation(companyId: string, conversationId: string) {
+  const { data } = await api.post(`/attendant/conversations/${conversationId}/pause`, null, {
+    params: { companyId },
+  });
+  return normalizeConversation(data);
+}
+
+export async function resumeAttendantConversation(companyId: string, conversationId: string) {
+  const { data } = await api.post(`/attendant/conversations/${conversationId}/resume`, null, {
+    params: { companyId },
+  });
+  return normalizeConversation(data);
+}
+
+export async function sendHumanAttendantMessage(companyId: string, conversationId: string, content: string) {
+  const { data } = await api.post(
+    `/attendant/conversations/${conversationId}/human-message`,
+    { content },
+    { params: { companyId } },
+  );
+  return normalizeConversation(data);
 }
 
 export async function getAttendantLeads(params?: { companyId?: string | null; limit?: number }) {
@@ -1027,7 +1098,7 @@ export async function getWhatsappOAuthUrl(companyId: string): Promise<string> {
 }
 
 export async function getMetaWhatsappStatus(companyId: string) {
-  const { data } = await api.get<{ connected: boolean; phoneNumberId: string | null; whatsappBusinessId: string | null }>(
+  const { data } = await api.get<{ connected: boolean; phoneNumberId: string | null; phoneNumber: string | null; whatsappBusinessId: string | null }>(
     "/meta/status",
     { params: { companyId } }
   );

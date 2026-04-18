@@ -177,10 +177,14 @@ export interface BotConfig {
   id: string;
   companyId: string;
   botName: string;
+  agentName?: string;
   welcomeMessage: string | null;
   toneOfVoice: string;
+  tone?: string;
   instructions: string | null;
   isActive: boolean;
+  isOnline?: boolean;
+  isConnected?: boolean;
   metaPhoneNumberId?: string | null;
   metaWabaId?: string | null;
   phoneNumber?: string | null;
@@ -202,6 +206,28 @@ export interface ChatConversation {
   role: "USER" | "ASSISTANT";
   content: string;
   createdAt: string;
+}
+
+export interface ConversationMessage {
+  id: string;
+  conversationId: string;
+  content: string;
+  role: "user" | "assistant" | "human";
+  timestamp: string;
+}
+
+export interface ConversationThread {
+  id: string;
+  companyId: string;
+  contactNumber: string;
+  contactName: string | null;
+  status: "IA respondeu" | "Aguardando" | "Humano assumiu";
+  isPaused: boolean;
+  pausedUntil: string | null;
+  lastMessageAt: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: ConversationMessage[];
 }
 
 export interface Lead {

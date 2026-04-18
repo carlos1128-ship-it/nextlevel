@@ -1,83 +1,54 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
-import {
-  getAttendantLeads,
-  getBotConfig,
-  getAttendantRoi,
-  interveneLead,
-  updateBotConfig,
-  saveMetaAPIConfig,
-  disconnectMetaAPIConfig,
-} from "../src/services/endpoints";
-import type { BotConfig, Lead } from "../src/types/domain";
-import { getErrorMessage } from "../src/services/error";
-import { MessageSquareIcon, LightbulbIcon, SettingsIcon } from "../components/icons";
 import { WhatsAppStatus } from "../components/WhatsAppStatus";
+import {
+  getAttendantConversation,
+  getAttendantConversations,
+  getAttendantRoi,
+  getBotConfig,
+  pauseAttendantConversation,
+  resumeAttendantConversation,
+  sendHumanAttendantMessage,
+  updateBotConfig,
+} from "../src/services/endpoints";
+import type { BotConfig, ConversationThread } from "../src/types/domain";
+import { getErrorMessage } from "../src/services/error";
 
 const defaultConfig: BotConfig = {
   id: "",
   companyId: "",
-  botName: "Atendente IA",
-  welcomeMessage: "Oi! Sou o assistente virtual da empresa, posso ajudar?",
-  toneOfVoice: "amigavel",
-  instructions: null,
+  botName: "Atendente Next Level",
+  agentName: "Atendente Next Level",
+  welcomeMessage: "Olá! Sou a assistente virtual da empresa. Como posso te ajudar hoje?",
+  toneOfVoice: "Amigável",
+  tone: "Amigável",
+  instructions:
+    "Sempre seja educada e prestativa. Nunca invente preços. Se o cliente pedir humano, transfira o atendimento e pause por 24h.",
   isActive: true,
+  isOnline: true,
 };
 
-type StatusBadgeProps = { status: Lead["status"]; score: number };
-const StatusBadge = ({ status, score }: StatusBadgeProps) => {
-  const map: Record<string, string> = {
-    NEW: "bg-zinc-700/60 text-zinc-300 border-zinc-600/40",
-    QUALIFIED: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-    CONVERTED: "bg-lime-500/20 text-lime-300 border-lime-500/30",
-    LOST: "bg-red-500/20 text-red-300 border-red-500/30",
-  };
-  const labels: Record<string, string> = {
-    NEW: "Novo",
-    QUALIFIED: "Qualificado",
-    CONVERTED: "Convertido",
-    LOST: "Perdido",
-  };
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${map[status] ?? map.NEW}`}>
-      {labels[status] ?? status} · {score}pts
-    </span>
-  );
-};
+const toneOptions = ["Amigável", "Profissional", "Descontraído", "Formal"];
 
-type ScoreBarProps = { score: number };
-const ScoreBar = ({ score }: ScoreBarProps) => {
-  const color = score >= 80 ? "bg-lime-400" : score >= 50 ? "bg-blue-400" : "bg-zinc-600";
-  return (
-    <div className="mt-2 h-1 w-full rounded-full bg-zinc-800">
-      <div className={`h-1 rounded-full transition-all ${color}`} style={{ width: `${score}%` }} />
-    </div>
-  );
+const statusClassMap: Record<string, string> = {
+  "IA respondeu": "border-lime-400/30 bg-lime-400/10 text-lime-300",
+  Aguardando: "border-amber-400/30 bg-amber-400/10 text-amber-300",
+  "Humano assumiu": "border-sky-400/30 bg-sky-400/10 text-sky-300",
 };
-
-const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-2xl border border-zinc-800/60 bg-zinc-950/70 shadow-xl backdrop-blur-xl dark:border-zinc-700/40 dark:bg-zinc-900/50 ${className}`}>
-    {children}
-  </div>
-);
 
 const Attendant = () => {
   const { selectedCompanyId } = useAuth();
   const { addToast } = useToast();
   const [config, setConfig] = useState<BotConfig>(defaultConfig);
-  const [leads, setLeads] = useState<Lead[]>([]);
+  const [conversations, setConversations] = useState<ConversationThread[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<ConversationThread | null>(null);
   const [roi, setRoi] = useState<{ iaSalesCount: number; iaRevenue: number } | null>(null);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
-  const [loadingLeads, setLoadingLeads] = useState(false);
-
-  // ── Meta API Config state ──────────────────────────────────────────────
-  const [metaConfigOpen, setMetaConfigOpen] = useState(false);
-  const [metaAccessToken, setMetaAccessToken] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [isSavingMeta, setIsSavingMeta] = useState(false);
-  const [showTokenHelp, setShowTokenHelp] = useState(false);
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [humanMessage, setHumanMessage] = useState("");
+  const [sendingHumanMessage, setSendingHumanMessage] = useState(false);
 
   const loadConfig = async () => {
     if (!selectedCompanyId) return;
@@ -86,22 +57,27 @@ const Attendant = () => {
       const data = await getBotConfig(selectedCompanyId);
       setConfig(data);
     } catch (error) {
-      addToast(getErrorMessage(error, "Falha ao carregar configuracao do agente"), "error");
+      addToast(getErrorMessage(error, "Falha ao carregar o agente."), "error");
     } finally {
       setLoadingConfig(false);
     }
   };
 
-  const loadLeads = async () => {
+  const loadConversations = async (keepSelection = true) => {
     if (!selectedCompanyId) return;
-    setLoadingLeads(true);
+    setLoadingConversations(true);
     try {
-      const data = await getAttendantLeads({ companyId: selectedCompanyId, limit: 20 });
-      setLeads(data);
+      const data = await getAttendantConversations({ companyId: selectedCompanyId, limit: 20 });
+      setConversations(data);
+
+      if (keepSelection && selectedConversation) {
+        const refreshed = await getAttendantConversation(selectedCompanyId, selectedConversation.id);
+        setSelectedConversation(refreshed);
+      }
     } catch {
-      // silently fail on poll
+      // polling silencioso
     } finally {
-      setLoadingLeads(false);
+      setLoadingConversations(false);
     }
   };
 
@@ -111,462 +87,405 @@ const Attendant = () => {
       const data = await getAttendantRoi(selectedCompanyId);
       setRoi(data);
     } catch {
-      // ignore
+      setRoi(null);
     }
   };
 
   useEffect(() => {
     void loadConfig();
-    void loadLeads();
+    void loadConversations(false);
     void loadRoi();
-    const interval = setInterval(() => void loadLeads(), 10000);
+    const interval = setInterval(() => void loadConversations(true), 7000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompanyId]);
 
-  const handleConfigSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const openConversation = async (conversationId: string) => {
+    if (!selectedCompanyId) return;
+    try {
+      const thread = await getAttendantConversation(selectedCompanyId, conversationId);
+      setSelectedConversation(thread);
+    } catch (error) {
+      addToast(getErrorMessage(error, "Não foi possível abrir a conversa."), "error");
+    }
+  };
+
+  const handleSaveAgent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedCompanyId) return;
     setSavingConfig(true);
     try {
-      const updated = await updateBotConfig(selectedCompanyId, config);
+      const updated = await updateBotConfig(selectedCompanyId, {
+        agentName: config.agentName || config.botName,
+        botName: config.agentName || config.botName,
+        welcomeMessage: config.welcomeMessage,
+        tone: config.tone,
+        toneOfVoice: config.tone,
+        instructions: config.instructions,
+        isOnline: config.isOnline,
+        isActive: config.isOnline,
+      });
       setConfig(updated);
-      addToast("Agente atualizado.", "success");
+      addToast("Agente salvo e ativo!", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Erro ao salvar"), "error");
+      addToast(getErrorMessage(error, "Erro ao salvar o agente."), "error");
     } finally {
       setSavingConfig(false);
     }
   };
 
-  const handleIntervene = async (lead: Lead) => {
+  const handlePause = async (conversationId: string) => {
     if (!selectedCompanyId) return;
     try {
-      await interveneLead(lead.id, selectedCompanyId);
-      addToast("Bot pausado para este lead por 24h.", "info");
-      await loadLeads();
+      await pauseAttendantConversation(selectedCompanyId, conversationId);
+      await loadConversations(true);
+      if (selectedConversation?.id === conversationId) {
+        const refreshed = await getAttendantConversation(selectedCompanyId, conversationId);
+        setSelectedConversation(refreshed);
+      }
+      addToast("Conversa assumida por humano por 24h.", "info");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel intervir"), "error");
+      addToast(getErrorMessage(error, "Não foi possível assumir a conversa."), "error");
     }
   };
 
-  const handleSaveMetaConfig = async () => {
-    if (!selectedCompanyId || !metaAccessToken || !phoneNumber) {
-      addToast("Preencha Access Token e Número do WhatsApp.", "error");
-      return;
-    }
-    setIsSavingMeta(true);
+  const handleResume = async (conversationId: string) => {
+    if (!selectedCompanyId) return;
     try {
-      await saveMetaAPIConfig(selectedCompanyId, {
-        metaAccessToken,
-        phoneNumber,
-      });
-      addToast("Meta Cloud API configurada com sucesso!", "success");
-      setMetaConfigOpen(false);
-      await loadConfig(); // Reload config to update connection status
+      await resumeAttendantConversation(selectedCompanyId, conversationId);
+      await loadConversations(true);
+      if (selectedConversation?.id === conversationId) {
+        const refreshed = await getAttendantConversation(selectedCompanyId, conversationId);
+        setSelectedConversation(refreshed);
+      }
+      addToast("Conversa devolvida para a IA.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Erro ao salvar configuracao Meta"), "error");
-    } finally {
-      setIsSavingMeta(false);
+      addToast(getErrorMessage(error, "Não foi possível devolver para a IA."), "error");
     }
   };
 
-  const handleDisconnectMeta = async () => {
-    if (!selectedCompanyId || !window.confirm("Deseja realmente desconectar o WhatsApp? Isso limpará suas credenciais.")) return;
-    setIsSavingMeta(true);
+  const handleSendHumanMessage = async () => {
+    if (!selectedCompanyId || !selectedConversation || !humanMessage.trim()) return;
+    setSendingHumanMessage(true);
     try {
-      await disconnectMetaAPIConfig(selectedCompanyId);
-      addToast("Meta Cloud API desconectada.", "success");
-      setMetaConfigOpen(false);
-      setMetaAccessToken("");
-      setPhoneNumber("");
-      // No syncFromBackend in Attendant.tsx, but WhatsAppStatus polls.
+      const updated = await sendHumanAttendantMessage(
+        selectedCompanyId,
+        selectedConversation.id,
+        humanMessage.trim(),
+      );
+      setSelectedConversation(updated);
+      setHumanMessage("");
+      await loadConversations(false);
+      addToast("Mensagem humana enviada.", "success");
     } catch (error) {
-      addToast("Erro ao desconectar.", "error");
+      addToast(getErrorMessage(error, "Não foi possível enviar a mensagem."), "error");
     } finally {
-      setIsSavingMeta(false);
+      setSendingHumanMessage(false);
     }
   };
 
-  const liveFeed = useMemo(() => leads.slice(0, 10), [leads]);
-  const hotLeads = useMemo(() => leads.filter((l) => l.score >= 80), [leads]);
+  const feed = useMemo(() => conversations.slice(0, 10), [conversations]);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <header className="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 p-7 shadow-2xl dark:border-zinc-700/40">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(163,230,53,0.08)_0%,transparent_60%)]" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <header className="rounded-[28px] border border-zinc-800 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.12),transparent_30%),#09090b] p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-zinc-500">Omnichannel · WhatsApp & Instagram · Meta Cloud API</p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight text-white md:text-4xl">
-              Meus Agentes
-            </h1>
-            <p className="mt-2 max-w-xl text-sm text-zinc-400">
-              Configure a personalidade do bot, acompanhe leads em tempo real e assuma o controle quando necessário.
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-lime-300">Atendente IA</p>
+            <h1 className="mt-2 text-3xl font-black text-zinc-50">Seu agente no WhatsApp</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+              Configure a identidade do agente, acompanhe mensagens em tempo real e assuma o controle quando quiser.
             </p>
           </div>
-          <div className="flex flex-col items-start gap-2 md:items-end">
-            <div className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] ${config.isActive ? "border-lime-500/40 bg-lime-500/10 text-lime-300" : "border-zinc-700/40 bg-zinc-900/60 text-zinc-400"}`}>
-              <span className={`h-2 w-2 rounded-full ${config.isActive ? "animate-pulse bg-lime-400" : "bg-zinc-600"}`} />
-              {config.isActive ? "Agente Online" : "Agente Offline"}
+          <div className="flex flex-col items-start gap-3 lg:items-end">
+            <WhatsAppStatus companyId={selectedCompanyId} />
+            <div className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] ${config.isOnline ? "border-lime-400/30 bg-lime-400/10 text-lime-300" : "border-zinc-700 bg-zinc-900 text-zinc-400"}`}>
+              {config.isOnline ? "Agente Online" : "Agente Offline"}
             </div>
-            {hotLeads.length > 0 && (
-              <div className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300">
-                🔥 {hotLeads.length} lead{hotLeads.length > 1 ? "s" : ""} quente{hotLeads.length > 1 ? "s" : ""}
-              </div>
-            )}
           </div>
         </div>
       </header>
 
-      {/* ROI Cards */}
-      {roi && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            { label: "Leads Ativos", value: leads.length, color: "text-blue-400" },
-            { label: "Qualificados", value: leads.filter((l) => l.status === "QUALIFIED").length, color: "text-sky-400" },
-            { label: "Convertidos pela IA", value: roi.iaSalesCount, color: "text-lime-400" },
-            {
-              label: "Receita via IA",
-              value: roi.iaRevenue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
-              color: "text-lime-300",
-            },
-          ].map((kpi) => (
-            <div key={kpi.label} className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-4 shadow-xl backdrop-blur-xl dark:border-zinc-700/40 dark:bg-zinc-900/50">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">{kpi.label}</p>
-              <p className={`mt-1 text-2xl font-black ${kpi.color}`}>{kpi.value}</p>
-            </div>
-          ))}
+      {roi ? (
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conversas ativas</p>
+            <p className="mt-2 text-3xl font-black text-zinc-50">{conversations.length}</p>
+          </div>
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Respostas da IA</p>
+            <p className="mt-2 text-3xl font-black text-lime-300">{roi.iaSalesCount}</p>
+          </div>
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">ROI visível</p>
+            <p className="mt-2 text-xl font-black text-zinc-50">Acompanhamento em tempo real</p>
+          </div>
         </div>
-      )}
+      ) : null}
 
-      {/* ── Canais (Meta Cloud API) ── */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/* WhatsApp */}
-        <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-700/40">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#25D366]/15 text-lg">
-                📱
-              </div>
-              <div>
-                <p className="font-bold text-white text-sm">WhatsApp Business</p>
-                <p className="text-[11px] text-zinc-500">via Meta Cloud API (Oficial)</p>
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <form onSubmit={(event) => void handleSaveAgent(event)} className="rounded-[28px] border border-zinc-800 bg-zinc-950/70 p-6">
+          <div className="mb-5">
+            <h2 className="text-xl font-black text-zinc-50">Configuração do Agente</h2>
+            <p className="mt-2 text-sm text-zinc-400">Tudo em linguagem simples para o cliente final.</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm">
+              <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">Nome do Agente</span>
+              <input
+                value={config.agentName || config.botName}
+                onChange={(event) => setConfig((current) => ({ ...current, agentName: event.target.value, botName: event.target.value }))}
+                placeholder="Sofia, Max, Atendente Next Level"
+                disabled={loadingConfig}
+                className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-lime-400/40"
+              />
+            </label>
+            <label className="space-y-2 text-sm">
+              <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">Tom de voz</span>
+              <select
+                value={config.tone || config.toneOfVoice}
+                onChange={(event) => setConfig((current) => ({ ...current, tone: event.target.value, toneOfVoice: event.target.value }))}
+                disabled={loadingConfig}
+                className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-lime-400/40"
+              >
+                {toneOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <label className="mt-4 block space-y-2 text-sm">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">Mensagem de boas-vindas</span>
+            <textarea
+              rows={3}
+              value={config.welcomeMessage || ""}
+              onChange={(event) => setConfig((current) => ({ ...current, welcomeMessage: event.target.value }))}
+              placeholder="Olá! Sou a Sofia, assistente virtual da [empresa]. Como posso te ajudar hoje?"
+              disabled={loadingConfig}
+              className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-lime-400/40"
+            />
+          </label>
+
+          <label className="mt-4 block space-y-2 text-sm">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">Instruções do Agente</span>
+            <textarea
+              rows={7}
+              value={config.instructions || ""}
+              onChange={(event) => setConfig((current) => ({ ...current, instructions: event.target.value }))}
+              placeholder="Você é a Sofia, atendente virtual da Loja XYZ. Sempre seja educada e prestativa. Nunca ofereça desconto acima de 10% sem autorização. Se o cliente quiser falar com humano, diga que vai transferir e pause o bot por 24h."
+              disabled={loadingConfig}
+              className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-lime-400/40"
+            />
+          </label>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-zinc-100">Agente Online</p>
+                  <p className="text-xs text-zinc-500">Quando desligado, o agente para de responder.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setConfig((current) => ({ ...current, isOnline: !current.isOnline, isActive: !current.isOnline }))}
+                  className={`relative h-7 w-12 rounded-full ${config.isOnline ? "bg-lime-400" : "bg-zinc-700"}`}
+                >
+                  <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${config.isOnline ? "left-6" : "left-1"}`} />
+                </button>
               </div>
             </div>
-            <WhatsAppStatus companyId={selectedCompanyId} />
+
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-4">
+              <p className="text-sm font-bold text-zinc-100">Pausar para atendimento humano</p>
+              <p className="mt-1 text-xs text-zinc-500">Use os botões de cada conversa para pausar por 24h.</p>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">Regras de segurança</p>
+            <div className="grid gap-3 md:grid-cols-3">
+              {[
+                "A IA nunca inventa preços — se não houver valor no contexto, informa que vai confirmar com um humano.",
+                "Sempre se identifica como assistente virtual — nunca finge ser humano.",
+                "Detecta frustração e escala automaticamente para atendimento humano, pausando o bot por 24h.",
+              ].map((rule) => (
+                <div key={rule} className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-4 text-sm text-zinc-300">
+                  <span className="mr-2">🔒</span>
+                  {rule}
+                </div>
+              ))}
+            </div>
           </div>
 
           <button
-            onClick={() => setMetaConfigOpen(true)}
-            className="mt-4 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#25D366] transition hover:bg-[#25D366]/20 active:scale-95"
+            type="submit"
+            disabled={savingConfig || loadingConfig}
+            className="mt-6 rounded-2xl bg-[#B6FF00] px-6 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
           >
-            {config.metaPhoneNumberId ? "Atualizar Credenciais" : "Configurar Meta API"}
+            {savingConfig ? "Salvando..." : "Salvar Agente"}
           </button>
-        </div>
+        </form>
 
-        {/* Instagram */}
-        <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/70 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-700/40">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E1306C]/15 text-lg">
-                📸
-              </div>
-              <div>
-                <p className="font-bold text-white text-sm">Instagram DMs</p>
-                <p className="text-[11px] text-zinc-500">via Meta Graph API</p>
-              </div>
-            </div>
-            <span className="flex items-center gap-1.5 rounded-full border border-zinc-700/40 bg-zinc-900/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-zinc-600" />
-              Mesmo webhook
-            </span>
-          </div>
-          <p className="mt-3 text-[11px] text-zinc-500 leading-relaxed">
-            DMs do Instagram chegam pelo mesmo webhook Meta. Cadastre o <span className="text-zinc-300 font-semibold">Instagram Account ID</span> na configuração da empresa.
-          </p>
-          <button
-            onClick={() => setMetaConfigOpen(true)}
-            className="mt-4 flex w-full items-center justify-center rounded-xl border border-[#E1306C]/30 bg-[#E1306C]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#E1306C] transition hover:bg-[#E1306C]/20 active:scale-95"
-          >
-            Configurar Instagram ID
-          </button>
-        </div>
-      </div>
-
-      {/* ── Meta Config Modal ── */}
-      {metaConfigOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
-          onClick={() => setMetaConfigOpen(false)}
-        >
-          <div
-            className="w-full max-w-md rounded-[28px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
-                  Meta Cloud API
-                </p>
-                <h3 className="mt-2 text-xl font-black tracking-tight text-zinc-50">
-                  Credenciais do Agente
-                </h3>
-                <p className="mt-1 text-xs leading-6 text-zinc-400">
-                  Token permanente + IDs do Meta Developer Portal.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMetaConfigOpen(false)}
-                className="rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Número do WhatsApp Business <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="+55 11 99999-9999"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                    Access Token <span className="text-red-400">*</span>
-                  </label>
-                  <button 
-                    type="button"
-                    onClick={() => setShowTokenHelp(!showTokenHelp)}
-                    className="text-[10px] font-semibold text-emerald-400 hover:text-emerald-300"
-                  >
-                    Como encontrar meu token?
-                  </button>
-                </div>
-                <input
-                  type="password"
-                  placeholder="EAA..."
-                  value={metaAccessToken}
-                  onChange={(e) => setMetaAccessToken(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white focus:border-emerald-400 focus:outline-none"
-                />
-                {showTokenHelp && (
-                  <div className="mt-2 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 text-[10px] leading-relaxed text-zinc-400">
-                    <ol className="list-decimal pl-4 space-y-1">
-                      <li>Acesse o <a href="https://business.facebook.com/" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline">Facebook Business</a>.</li>
-                      <li>Vá em Configurações do Negócio &gt; Contas &gt; Usuários do Sistema.</li>
-                      <li>Gere um novo token selecionando seu app e as permissões necessárias.</li>
-                    </ol>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={() => void handleSaveMetaConfig()}
-                disabled={isSavingMeta || !metaAccessToken || !phoneNumber}
-                className="flex-1 rounded-2xl bg-emerald-500 py-3.5 text-sm font-black text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-              >
-                {isSavingMeta ? "Salvando..." : "Salvar Configuração"}
-              </button>
-              {/* Check if connected - check metaPhoneNumberId if available or just show if we have config */}
-              <button
-                type="button"
-                onClick={() => void handleDisconnectMeta()}
-                disabled={isSavingMeta}
-                className="flex-1 rounded-2xl border border-red-500/30 bg-red-500/10 py-3.5 text-sm font-black text-red-400 transition hover:bg-red-500/20 active:scale-[0.98] disabled:opacity-50"
-              >
-                Desconectar
-              </button>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 px-4 py-3">
-              <p className="text-[11px] text-zinc-400 leading-5">
-                <span className="font-semibold text-zinc-300">Webhook URL:</span>{" "}
-                <code className="font-mono text-emerald-400">https://sua-api.render.com/webhooks/meta</code>
-                <br />
-                <span className="font-semibold text-zinc-300">Campos:</span> assine <code className="font-mono text-zinc-300">messages</code> no painel Meta.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Config Form */}
-        <GlassCard className="lg:col-span-2 p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <SettingsIcon className="h-4 w-4 text-lime-400" />
-              <h2 className="text-base font-bold text-white">Personalidade do Agente</h2>
-            </div>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Identidade e Tom</span>
-          </div>
-          <form className="space-y-4" onSubmit={(e) => void handleConfigSubmit(e)}>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="space-y-1.5 text-sm">
-                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">Nome do Agente</span>
-                <input
-                  className="w-full rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-3 py-2.5 text-sm text-white placeholder-zinc-600 backdrop-blur transition focus:border-lime-400/70 focus:outline-none focus:ring-1 focus:ring-lime-400/30"
-                  value={config.botName}
-                  onChange={(e) => setConfig((c) => ({ ...c, botName: e.target.value }))}
-                  disabled={loadingConfig}
-                  placeholder="Ex: Sara, Carlos, Max..."
-                />
-              </label>
-              <label className="space-y-1.5 text-sm">
-                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">Tom de Voz</span>
-                <select
-                  className="w-full rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-3 py-2.5 text-sm text-white backdrop-blur transition focus:border-lime-400/70 focus:outline-none focus:ring-1 focus:ring-lime-400/30"
-                  value={config.toneOfVoice}
-                  onChange={(e) => setConfig((c) => ({ ...c, toneOfVoice: e.target.value }))}
-                  disabled={loadingConfig}
-                >
-                  <option value="amigavel">Amigável</option>
-                  <option value="formal">Formal</option>
-                  <option value="agressivo-vendas">Agressivo em Vendas</option>
-                  <option value="consultivo">Consultivo</option>
-                </select>
-              </label>
-            </div>
-            <label className="block space-y-1.5 text-sm">
-              <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">Mensagem de Boas-Vindas</span>
-              <textarea
-                rows={2}
-                className="w-full rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-3 py-2.5 text-sm text-white placeholder-zinc-600 backdrop-blur transition focus:border-lime-400/70 focus:outline-none focus:ring-1 focus:ring-lime-400/30"
-                value={config.welcomeMessage || ""}
-                onChange={(e) => setConfig((c) => ({ ...c, welcomeMessage: e.target.value }))}
-                disabled={loadingConfig}
-              />
-            </label>
-            <label className="block space-y-1.5 text-sm">
-              <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">Instruções do Agente (Prompt)</span>
-              <textarea
-                rows={4}
-                className="w-full rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-3 py-2.5 text-sm text-white placeholder-zinc-600 backdrop-blur transition focus:border-lime-400/70 focus:outline-none focus:ring-1 focus:ring-lime-400/30"
-                value={config.instructions || ""}
-                onChange={(e) => setConfig((c) => ({ ...c, instructions: e.target.value }))}
-                placeholder="Ex: Nunca dê desconto maior que 5% sem autorização. Sempre ofereça o plano premium primeiro."
-                disabled={loadingConfig}
-              />
-            </label>
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex cursor-pointer items-center gap-3 text-sm">
-                <div
-                  onClick={() => setConfig((c) => ({ ...c, isActive: !c.isActive }))}
-                  className={`relative h-6 w-11 rounded-full transition-colors ${config.isActive ? "bg-lime-400" : "bg-zinc-700"}`}
-                >
-                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${config.isActive ? "translate-x-5" : "translate-x-0.5"}`} />
-                </div>
-                <span className={`font-semibold ${config.isActive ? "text-lime-300" : "text-zinc-400"}`}>
-                  {config.isActive ? "Agente Online" : "Agente Offline"}
-                </span>
-              </label>
-              <button
-                type="submit"
-                disabled={savingConfig || loadingConfig}
-                className="rounded-xl bg-lime-400 px-5 py-2 text-xs font-black uppercase tracking-[0.18em] text-zinc-900 transition hover:bg-lime-300 active:scale-95 disabled:opacity-50"
-              >
-                {savingConfig ? "Salvando..." : "Salvar Agente"}
-              </button>
-            </div>
-          </form>
-        </GlassCard>
-
-        {/* Live Feed */}
-        <GlassCard className="p-5">
+        <section className="rounded-[28px] border border-zinc-800 bg-zinc-950/70 p-5">
           <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-lime-400" />
-              <h2 className="text-base font-bold text-white">Live Feed</h2>
-            </div>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              {loadingLeads ? "Atualizando..." : "Tempo real"}
+            <h2 className="text-xl font-black text-zinc-50">Live Feed</h2>
+            <span className="text-xs uppercase tracking-[0.18em] text-zinc-500">
+              {loadingConversations ? "Atualizando..." : "Tempo real"}
             </span>
           </div>
-          <div className="space-y-3 overflow-y-auto" style={{ maxHeight: 460 }}>
-            {liveFeed.length === 0 ? (
-              <div className="py-8 text-center">
-                <MessageSquareIcon className="mx-auto mb-2 h-8 w-8 text-zinc-700" />
-                <p className="text-sm text-zinc-500">Nenhum chat ativo ainda.</p>
-                <p className="mt-1 text-xs text-zinc-600">Configure a Meta Cloud API para começar a receber mensagens.</p>
+
+          <div className="space-y-3">
+            {feed.length === 0 ? (
+              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5 text-sm text-zinc-400">
+                Nenhuma conversa ainda. Conecte o WhatsApp para começar.
               </div>
             ) : (
-              liveFeed.map((lead) => {
-                const lastMsg = lead.conversations[0]?.content || "Sem mensagens ainda.";
-                const isPaused = lead.botPausedUntil && new Date(lead.botPausedUntil) > new Date();
+              feed.map((conversation) => {
+                const lastMessage = conversation.messages[conversation.messages.length - 1];
+                const paused = conversation.isPaused && conversation.pausedUntil && new Date(conversation.pausedUntil) > new Date();
+
                 return (
-                  <div
-                    key={lead.id}
-                    className={`rounded-xl border p-3.5 transition-all ${isPaused ? "border-amber-500/30 bg-amber-500/5" : "border-zinc-800/60 bg-zinc-900/50 hover:border-zinc-700/60"}`}
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => void openConversation(conversation.id)}
+                    className="w-full rounded-3xl border border-zinc-800 bg-zinc-900/60 p-4 text-left transition hover:border-lime-400/30"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-xs font-bold text-zinc-200">
-                          {lead.name?.[0]?.toUpperCase() || lead.externalId.slice(-2)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-white">{lead.name || lead.externalId}</p>
-                          <StatusBadge status={lead.status} score={lead.score} />
-                        </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-bold text-zinc-100">{conversation.contactName || conversation.contactNumber}</p>
+                        <p className="text-xs text-zinc-500">{conversation.contactNumber}</p>
                       </div>
-                      {!isPaused && (
+                      <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${statusClassMap[conversation.status] || statusClassMap["Aguardando"]}`}>
+                        {conversation.status}
+                      </span>
+                    </div>
+                    <p className="mt-3 line-clamp-2 text-sm text-zinc-400">
+                      {lastMessage?.content || "Sem mensagens ainda."}
+                    </p>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <span className="text-xs text-zinc-500">
+                        {new Date(conversation.lastMessageAt).toLocaleString("pt-BR")}
+                      </span>
+                      {paused ? (
                         <button
-                          className="shrink-0 rounded-lg border border-amber-500/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-300 transition hover:bg-amber-500/10 active:scale-95"
-                          onClick={() => void handleIntervene(lead)}
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handleResume(conversation.id);
+                          }}
+                          className="rounded-2xl border border-sky-400/30 bg-sky-400/10 px-3 py-2 text-xs font-bold text-sky-300"
                         >
-                          Intervir
+                          Devolver para IA
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handlePause(conversation.id);
+                          }}
+                          className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-bold text-amber-300"
+                        >
+                          Assumir conversa
                         </button>
                       )}
                     </div>
-                    <ScoreBar score={lead.score} />
-                    <p className="mt-2 line-clamp-2 text-xs text-zinc-400">{lastMsg}</p>
-                    {isPaused && (
-                      <p className="mt-1.5 text-[10px] text-amber-400">
-                        ⏸ Pausado até {new Date(lead.botPausedUntil!).toLocaleString("pt-BR")}
-                      </p>
-                    )}
-                  </div>
+                  </button>
                 );
               })
             )}
           </div>
-        </GlassCard>
+        </section>
       </div>
 
-      {/* Regras de Segurança */}
-      <GlassCard className="p-5">
-        <div className="mb-3 flex items-center gap-2.5">
-          <LightbulbIcon className="h-4 w-4 text-lime-400" />
-          <h2 className="text-sm font-bold text-white">Regras de Segurança da IA</h2>
-          <span className="ml-auto text-[10px] uppercase tracking-[0.22em] text-zinc-500">Transparência Ativa</span>
+      {selectedConversation ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm" onClick={() => setSelectedConversation(null)}>
+          <div className="w-full max-w-4xl rounded-[28px] border border-zinc-800 bg-zinc-950 p-6" onClick={(event) => event.stopPropagation()}>
+            <div className="flex flex-col gap-4 border-b border-zinc-800 pb-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 className="text-2xl font-black text-zinc-50">
+                  {selectedConversation.contactName || selectedConversation.contactNumber}
+                </h3>
+                <p className="mt-1 text-sm text-zinc-500">{selectedConversation.contactNumber}</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {selectedConversation.isPaused ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleResume(selectedConversation.id)}
+                    className="rounded-2xl border border-sky-400/30 bg-sky-400/10 px-4 py-3 text-sm font-black text-sky-300"
+                  >
+                    Devolver para IA
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => void handlePause(selectedConversation.id)}
+                    className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-300"
+                  >
+                    Assumir conversa
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedConversation(null)}
+                  className="rounded-2xl border border-zinc-800 px-4 py-3 text-sm font-bold text-zinc-300"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_320px]">
+              <div className="space-y-3 rounded-[28px] border border-zinc-800 bg-zinc-900/40 p-4">
+                <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
+                  {selectedConversation.messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`rounded-3xl px-4 py-3 text-sm ${
+                        message.role === "assistant"
+                          ? "ml-10 bg-lime-400/10 text-lime-100"
+                          : message.role === "human"
+                            ? "ml-10 bg-sky-400/10 text-sky-100"
+                            : "mr-10 bg-zinc-800 text-zinc-100"
+                      }`}
+                    >
+                      <p>{message.content}</p>
+                      <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                        {message.role === "assistant" ? "IA" : message.role === "human" ? "Humano" : "Cliente"} •{" "}
+                        {new Date(message.timestamp).toLocaleString("pt-BR")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[28px] border border-zinc-800 bg-zinc-900/40 p-4">
+                <p className="text-sm font-black text-zinc-100">Responder como humano</p>
+                <textarea
+                  rows={8}
+                  value={humanMessage}
+                  onChange={(event) => setHumanMessage(event.target.value)}
+                  placeholder="Digite a resposta que será enviada para o cliente..."
+                  className="mt-3 w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-sky-400/40"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleSendHumanMessage()}
+                  disabled={sendingHumanMessage || !humanMessage.trim()}
+                  className="mt-4 w-full rounded-2xl bg-sky-400 px-4 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
+                >
+                  {sendingHumanMessage ? "Enviando..." : "Enviar como humano"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <ul className="grid gap-2 text-xs text-zinc-400 sm:grid-cols-3">
-          <li className="flex gap-2 rounded-xl border border-zinc-800/40 bg-zinc-900/40 p-3">
-            <span className="mt-0.5 text-lime-500">✓</span>
-            A IA nunca inventa preços — se não houver valor no contexto, informa que vai confirmar com um humano.
-          </li>
-          <li className="flex gap-2 rounded-xl border border-zinc-800/40 bg-zinc-900/40 p-3">
-            <span className="mt-0.5 text-lime-500">✓</span>
-            Sempre se identifica como assistente virtual da empresa — nunca finge ser humano.
-          </li>
-          <li className="flex gap-2 rounded-xl border border-zinc-800/40 bg-zinc-900/40 p-3">
-            <span className="mt-0.5 text-lime-500">✓</span>
-            Detecta frustração e escala automaticamente para atendimento humano, pausando o bot por 24h.
-          </li>
-        </ul>
-      </GlassCard>
+      ) : null}
     </div>
   );
 };
