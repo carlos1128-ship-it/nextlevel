@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { io, Socket } from "socket.io-client";
 import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
 import { WhatsAppStatus } from "../components/WhatsAppStatus";
@@ -7,6 +8,7 @@ import {
   getAttendantConversations,
   getAttendantRoi,
   getBotConfig,
+  normalizeConversation,
   pauseAttendantConversation,
   resumeAttendantConversation,
   sendHumanAttendantMessage,
@@ -36,6 +38,26 @@ const statusClassMap: Record<string, string> = {
   Aguardando: "border-amber-400/30 bg-amber-400/10 text-amber-300",
   "Humano assumiu": "border-sky-400/30 bg-sky-400/10 text-sky-300",
 };
+
+type LiveFeedPayload = {
+  companyId: string;
+  event?: string;
+  incomingMessage?: string;
+  aiResponse?: string;
+  conversation?: unknown;
+};
+
+function resolveSocketUrl() {
+  const raw = String(
+    import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || window.location.origin,
+  ).trim();
+
+  if (!raw) {
+    return window.location.origin;
+  }
+
+  return raw.replace(/\/api\/?$/i, "");
+}
 
 const Attendant = () => {
   const { selectedCompanyId } = useAuth();
@@ -95,8 +117,45 @@ const Attendant = () => {
     void loadConfig();
     void loadConversations(false);
     void loadRoi();
-    const interval = setInterval(() => void loadConversations(true), 7000);
+    const interval = setInterval(() => void loadConversations(true), 20000);
     return () => clearInterval(interval);
+  }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (!selectedCompanyId) {
+      return;
+    }
+
+    const socket: Socket = io(`${resolveSocketUrl()}/attendant`, {
+      transports: ["websocket"],
+      withCredentials: true,
+      query: { companyId: selectedCompanyId },
+    });
+
+    socket.on("conversation.updated", (payload: LiveFeedPayload) => {
+      if (!payload?.conversation) {
+        return;
+      }
+
+      const normalized = normalizeConversation(payload.conversation);
+
+      setConversations((current) => {
+        const next = current.filter((item) => item.id !== normalized.id);
+        return [normalized, ...next].slice(0, 20);
+      });
+
+      setSelectedConversation((current) =>
+        current?.id === normalized.id ? normalized : current,
+      );
+
+      if (payload.event === "ai.replied") {
+        void loadRoi();
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [selectedCompanyId]);
 
   const openConversation = async (conversationId: string) => {
@@ -344,7 +403,12 @@ const Attendant = () => {
               </div>
             ) : (
               feed.map((conversation) => {
-                const lastMessage = conversation.messages[conversation.messages.length - 1];
+                const customerMessage = [...conversation.messages]
+                  .reverse()
+                  .find((message) => message.role === "user");
+                const aiMessage = [...conversation.messages]
+                  .reverse()
+                  .find((message) => message.role === "assistant");
                 const paused = conversation.isPaused && conversation.pausedUntil && new Date(conversation.pausedUntil) > new Date();
 
                 return (
@@ -363,9 +427,25 @@ const Attendant = () => {
                         {conversation.status}
                       </span>
                     </div>
-                    <p className="mt-3 line-clamp-2 text-sm text-zinc-400">
-                      {lastMessage?.content || "Sem mensagens ainda."}
-                    </p>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Cliente</p>
+                        <p className="mt-2 line-clamp-3 text-sm text-zinc-300">
+                          {customerMessage?.content || "Aguardando mensagem."}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-lime-300">IA</p>
+                          <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-lime-300">
+                            IA respondeu
+                          </span>
+                        </div>
+                        <p className="mt-2 line-clamp-3 text-sm text-lime-100">
+                          {aiMessage?.content || "Sem resposta da IA ainda."}
+                        </p>
+                      </div>
+                    </div>
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                       <span className="text-xs text-zinc-500">
                         {new Date(conversation.lastMessageAt).toLocaleString("pt-BR")}

@@ -161,7 +161,7 @@ function normalizeConversationMessage(data: any) {
   };
 }
 
-function normalizeConversation(data: any): ConversationThread {
+export function normalizeConversation(data: any): ConversationThread {
   return {
     id: data?.id || "",
     companyId: data?.companyId || "",
