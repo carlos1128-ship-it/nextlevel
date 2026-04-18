@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getBotConfig } from "../src/services/endpoints";
-import type { BotConfig } from "../src/types/domain";
+import { getMetaWhatsappStatus } from "../src/services/endpoints";
+
+interface MetaWhatsappStatus {
+  connected: boolean;
+  phoneNumberId: string | null;
+  whatsappBusinessId?: string | null;
+}
 
 interface WhatsAppStatusProps {
   companyId: string | null;
@@ -8,14 +13,14 @@ interface WhatsAppStatusProps {
 }
 
 export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatusProps) => {
-  const [config, setConfig] = useState<BotConfig | null>(null);
+  const [status, setStatus] = useState<MetaWhatsappStatus | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchStatus = async () => {
     if (!companyId) return;
     try {
-      const data = await getBotConfig(companyId);
-      setConfig(data);
+      const data = await getMetaWhatsappStatus(companyId);
+      setStatus(data);
     } catch (error) {
       console.error("Failed to fetch WhatsApp status", error);
     }
@@ -29,9 +34,9 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
     return () => clearInterval(interval);
   }, [companyId]);
 
-  const isConnected = !!config?.metaPhoneNumberId;
+  const isConnected = Boolean(status?.connected);
 
-  if (loading && !config) {
+  if (loading && !status) {
     return (
       <div className="flex items-center gap-2 py-1">
         <span className="h-2 w-2 rounded-full bg-zinc-600 animate-pulse" />
@@ -50,9 +55,9 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
         <span className={`h-2 w-2 rounded-full ${isConnected ? "animate-pulse bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "bg-zinc-600"}`} />
         {isConnected ? "Conectado ✓" : "Desconectado"}
       </div>
-      {showDetails && isConnected && config?.phoneNumber && (
+      {showDetails && isConnected && status?.phoneNumberId && (
         <p className="px-1 text-[10px] font-medium text-zinc-500">
-          ID: <span className="text-zinc-400">{config.metaPhoneNumberId}</span>
+          ID: <span className="text-zinc-400">{status.phoneNumberId}</span>
         </p>
       )}
     </div>
