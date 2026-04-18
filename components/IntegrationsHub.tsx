@@ -34,6 +34,7 @@ type QuickStatus = {
 
 const quickSteps = [
   "Escaneie o QR Code com o celular da empresa.",
+  "Antes do teste, remova todos os aparelhos em Dispositivos conectados.",
   "Mantenha o aparelho ligado e com internet.",
   "Se o WhatsApp atualizar, talvez seja preciso reconectar.",
 ];
@@ -91,6 +92,7 @@ const IntegrationsHub = () => {
     let cancelled = false;
     let attempts = 0;
     const maxAttempts = 150;
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     const syncQuickConnect = async () => {
       try {
@@ -118,10 +120,18 @@ const IntegrationsHub = () => {
           if (attempts >= maxAttempts) {
             setQrCode(null);
             setQrStatus("timeout");
+            cancelled = true;
+            if (interval) {
+              clearInterval(interval);
+            }
           }
         }
 
         if (health.connected && health.method === "wppconnect" && health.authenticated) {
+          cancelled = true;
+          if (interval) {
+            clearInterval(interval);
+          }
           setQuickOpen(false);
           setQrCode(null);
           setQrStatus("idle");
@@ -135,12 +145,14 @@ const IntegrationsHub = () => {
 
     setQrStatus((current) => (current === "ready" ? current : "generating"));
     void syncQuickConnect();
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
       void syncQuickConnect();
     }, 2000);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      if (interval) {
+        clearInterval(interval);
+      }
     };
   }, [addToast, quickOpen, selectedCompanyId]);
 
@@ -454,14 +466,14 @@ const IntegrationsHub = () => {
               <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-3xl border border-dashed border-amber-300/40 bg-white p-3 text-center text-xs font-bold text-zinc-700">
                 {qrStatus === "timeout" ? (
                   <div className="space-y-3">
-                    <p>QR Code expirado.</p>
+                    <p>QR expirou.</p>
                     <button
                       type="button"
                       onClick={() => void handleQuickConnect()}
                       disabled={quickLoading}
                       className="rounded-2xl bg-amber-400 px-4 py-2 text-xs font-black text-zinc-950 disabled:opacity-50"
                     >
-                      {quickLoading ? "Gerando..." : "Gerar novo"}
+                      {quickLoading ? "Gerando..." : "Tentar novamente"}
                     </button>
                   </div>
                 ) : qrCode && qrStatus === "ready" ? (
@@ -472,9 +484,9 @@ const IntegrationsHub = () => {
                   />
                 ) : (
                   <div className="space-y-2">
-                    <p>Gerando QR Code...</p>
+                    <p>Aguardando QR Code...</p>
                     <p className="text-[11px] font-medium text-zinc-500">
-                      Isso pode levar alguns segundos no primeiro pareamento.
+                      Pode levar ate 30 segundos.
                     </p>
                   </div>
                 )}

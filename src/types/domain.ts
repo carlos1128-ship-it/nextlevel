@@ -197,6 +197,7 @@ export interface WhatsappConnectionSnapshot {
   instanceName?: string | null;
   qrCode?: string | null;
   qrcode?: string | null;
+  ready?: boolean;
   status: string;
   connected?: boolean;
   method?: "meta" | "wppconnect" | null;

@@ -43,9 +43,9 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
 
     setLoading(true);
     fetchStatus().finally(() => setLoading(false));
-    const interval = setInterval(fetchStatus, 8000);
+    const interval = setInterval(fetchStatus, status?.connected ? 8000 : 2000);
     return () => clearInterval(interval);
-  }, [companyId]);
+  }, [companyId, status?.connected]);
 
   const handleReconnect = async () => {
     if (!companyId) return;
@@ -136,6 +136,9 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
         <div className="space-y-3 px-1">
           <p className="text-xs leading-5 text-zinc-400">
             Seu WhatsApp foi desconectado. Clique em Reconectar para escanear o QR Code novamente.
+          </p>
+          <p className="text-[11px] leading-5 text-amber-300">
+            Antes do teste, remova todos os aparelhos em Dispositivos conectados no celular.
           </p>
           <button
             type="button"
