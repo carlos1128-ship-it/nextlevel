@@ -9,6 +9,7 @@ import { useToast } from "./Toast";
 interface ConnectionStatus {
   companyId: string;
   status: string;
+  lifecycleState?: string;
   connected: boolean;
   authenticated?: boolean;
   method?: "meta" | "wppconnect" | null;
@@ -16,6 +17,7 @@ interface ConnectionStatus {
   qrCode: string | null;
   awaitingQR: boolean;
   qrRequired?: boolean;
+  failureReason?: string | null;
 }
 
 interface WhatsAppStatusProps {
@@ -78,11 +80,16 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
   };
 
   const isConnected = Boolean(status?.connected);
+  const machineState = status?.lifecycleState || status?.status;
   const needsQr =
     Boolean(status?.qrRequired) ||
-    status?.status === "QR_REQUIRED" ||
-    status?.status === "qrRequired" ||
-    status?.status === "disconnectedMobile";
+    machineState === "needs_new_qr";
+  const isStarting =
+    machineState === "starting" ||
+    machineState === "browser_ready" ||
+    machineState === "whatsapp_loading" ||
+    machineState === "pairing";
+  const isFailed = machineState === "failed";
 
   if (loading && !status) {
     return (
@@ -113,7 +120,7 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
                 : "bg-zinc-600"
           }`}
         />
-        {isConnected ? "Conectado" : "Desconectado"}
+        {isConnected ? "Conectado" : needsQr ? "Novo QR necessario" : isStarting ? "Iniciando" : isFailed ? "Falhou" : "Desconectado"}
       </div>
 
       {isConnected ? (
@@ -163,9 +170,15 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
         </div>
       ) : null}
 
+      {!isConnected && isFailed ? (
+        <p className="px-1 text-[10px] font-medium text-red-300">
+          Falha detectada antes da estabilizacao do QR. Motivo: {status?.failureReason || "indefinido"}.
+        </p>
+      ) : null}
+
       {!isConnected && !needsQr && showDetails ? (
         <p className="px-1 text-[10px] font-medium text-zinc-500">
-          Aguardando conexao ou nova leitura do QR Code.
+          {isStarting ? "Instancia iniciando. Aguarde sem criar outra sessao." : "Aguardando conexao ou nova leitura do QR Code."}
         </p>
       ) : null}
     </div>

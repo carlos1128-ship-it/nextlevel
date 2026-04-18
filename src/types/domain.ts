@@ -199,10 +199,28 @@ export interface WhatsappConnectionSnapshot {
   qrcode?: string | null;
   ready?: boolean;
   status: string;
+  lifecycleState?: string;
   connected?: boolean;
   method?: "meta" | "wppconnect" | null;
   phoneNumber?: string | null;
   qrRequired?: boolean;
+  failureReason?: string | null;
+  diagnosticSnapshot?: {
+    companyId: string;
+    sessionName: string | null;
+    correlationId: string | null;
+    currentState: string;
+    status: string;
+    hasClient: boolean;
+    hasBrowser: boolean;
+    hasPage: boolean;
+    hasQr: boolean;
+    qrAgeMs: number | null;
+    qrExpiresAt: string | null;
+    lastEvent: string | null;
+    lastError: string | null;
+    lastTransitionAt: string;
+  };
   updatedAt?: string | null;
   quotaUsed?: number | null;
   quotaLimit?: number | null;

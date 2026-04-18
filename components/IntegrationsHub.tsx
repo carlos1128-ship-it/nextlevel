@@ -27,9 +27,11 @@ type OfficialStatus = {
 type QuickStatus = {
   connected?: boolean;
   status?: string;
+  lifecycleState?: string;
   method?: "meta" | "wppconnect" | null;
   qrCode?: string | null;
   updatedAt?: string | null;
+  failureReason?: string | null;
 };
 
 const quickSteps = [
@@ -106,9 +108,11 @@ const IntegrationsHub = () => {
           ...current,
           connected: health.connected && health.method === "wppconnect",
           status: health.status,
+          lifecycleState: health.lifecycleState,
           method: health.method === "wppconnect" ? "wppconnect" : null,
           qrCode: qrData.qrcode || qrData.qrCode || health.qrCode,
           updatedAt: health.dbLastConnected,
+          failureReason: health.failureReason,
         }));
 
         const nextQrCode = qrData.qrcode || qrData.qrCode || health.qrCode || null;
@@ -251,10 +255,13 @@ const IntegrationsHub = () => {
   const whatsappConnected = Boolean(officialStatus?.connected || quickStatus?.connected);
   const quickConnected = Boolean(quickStatus?.connected && quickStatus?.method === "wppconnect");
   const officialConnected = Boolean(officialStatus?.connected && officialStatus?.method === "meta");
+  const quickLifecycle = quickStatus?.lifecycleState || quickStatus?.status;
   const whatsappBadge = whatsappConnected
     ? "Conectado"
-    : quickStatus?.status === "AWAITING_QR_SCAN"
+    : quickLifecycle === "qr_ready"
       ? "Aguardando QR"
+      : quickLifecycle === "needs_new_qr"
+        ? "Novo QR"
       : "Desconectado";
 
   const channels = [
@@ -310,7 +317,7 @@ const IntegrationsHub = () => {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h3 className="text-xl font-black text-zinc-50">WhatsApp Business</h3>
-                <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${whatsappConnected ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : quickStatus?.status === "AWAITING_QR_SCAN" ? "border-amber-400/30 bg-amber-400/10 text-amber-300" : "border-zinc-700 bg-zinc-900 text-zinc-400"}`}>
+                <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${whatsappConnected ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : quickLifecycle === "qr_ready" ? "border-amber-400/30 bg-amber-400/10 text-amber-300" : quickLifecycle === "needs_new_qr" ? "border-red-500/30 bg-red-500/10 text-red-300" : "border-zinc-700 bg-zinc-900 text-zinc-400"}`}>
                   {whatsappBadge}
                 </span>
               </div>
@@ -333,7 +340,7 @@ const IntegrationsHub = () => {
                   </p>
                 </div>
                 <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
-                  {quickConnected ? "Conectado" : qrStatus === "ready" || quickStatus?.status === "AWAITING_QR_SCAN" ? "Aguardando QR" : "Rapido"}
+                  {quickConnected ? "Conectado" : qrStatus === "ready" || quickLifecycle === "qr_ready" ? "Aguardando QR" : quickLifecycle === "needs_new_qr" ? "Novo QR" : "Rapido"}
                 </span>
               </div>
               {quickConnected ? (
