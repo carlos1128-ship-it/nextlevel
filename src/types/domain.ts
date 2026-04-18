@@ -200,6 +200,8 @@ export interface WhatsappConnectionSnapshot {
   status: string;
   connected?: boolean;
   method?: "meta" | "wppconnect" | null;
+  phoneNumber?: string | null;
+  qrRequired?: boolean;
   updatedAt?: string | null;
   quotaUsed?: number | null;
   quotaLimit?: number | null;
