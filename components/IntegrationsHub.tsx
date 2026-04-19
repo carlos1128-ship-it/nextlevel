@@ -2,61 +2,42 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../App";
 import { useToast } from "./Toast";
 import {
-  createWhatsappInstance,
   disconnectMetaAPIConfig,
+  evolutionConnect,
+  evolutionDisconnect,
+  evolutionGetQRCode,
+  evolutionGetStatus,
   getIntegrationStatuses,
   getMetaWhatsappStatus,
-  getWhatsappHealth,
-  getWhatsappQRCode,
   saveMetaAPIConfig,
-  terminateWhatsappSession,
 } from "../src/services/endpoints";
 import type { IntegrationStatus } from "../src/types/domain";
 import { MessageSquareIcon, PackageIcon, PuzzleIcon, RadarIcon } from "./icons";
 
 type OfficialStatus = {
   connected: boolean;
-  method?: "meta" | "wppconnect" | null;
+  method?: "meta" | null;
   status?: string;
   phoneNumberId: string | null;
   phoneNumber?: string | null;
   updatedAt?: string | null;
 };
 
-type QuickStatus = {
-  connected?: boolean;
-  status?: string;
-  lifecycleState?: string;
-  method?: "meta" | "wppconnect" | null;
-  qrCode?: string | null;
-  updatedAt?: string | null;
-  failureReason?: string | null;
+type EvolutionStatus = {
+  connected: boolean;
+  state: string;
 };
-
-const quickSteps = [
-  "Escaneie o QR Code com o celular da empresa.",
-  "Antes do teste, remova todos os aparelhos em Dispositivos conectados.",
-  "Mantenha o aparelho ligado e com internet.",
-  "Se o WhatsApp atualizar, talvez seja preciso reconectar.",
-];
-
-const officialSteps = [
-  "Clique em Configuracoes > Usuarios do Sistema",
-  "Clique em Adicionar > Nome: next-level-bot > Funcao: Admin",
-  "Clique em Gerar novo token > marque whatsapp_business_messaging",
-  "Copie o token gerado (comeca com EAA...)",
-];
 
 const IntegrationsHub = () => {
   const { selectedCompanyId } = useAuth();
   const { addToast } = useToast();
-  const [quickOpen, setQuickOpen] = useState(false);
+  const [evolutionOpen, setEvolutionOpen] = useState(false);
   const [officialOpen, setOfficialOpen] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [quickLoading, setQuickLoading] = useState(false);
+  const [evolutionLoading, setEvolutionLoading] = useState(false);
   const [officialLoading, setOfficialLoading] = useState(false);
   const [officialStatus, setOfficialStatus] = useState<OfficialStatus | null>(null);
-  const [quickStatus, setQuickStatus] = useState<QuickStatus | null>(null);
+  const [evolutionStatus, setEvolutionStatus] = useState<EvolutionStatus | null>(null);
   const [integrationStatuses, setIntegrationStatuses] = useState<IntegrationStatus[]>([]);
   const [metaAccessToken, setMetaAccessToken] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -64,21 +45,24 @@ const IntegrationsHub = () => {
 
   const loadStatus = async () => {
     if (!selectedCompanyId) return;
+
     try {
-      const [metaData, quickData, integrationsData] = await Promise.all([
+      const [metaData, evolutionData, integrationsData] = await Promise.all([
         getMetaWhatsappStatus(selectedCompanyId),
-        getWhatsappHealth(selectedCompanyId),
+        evolutionGetStatus(selectedCompanyId),
         getIntegrationStatuses(selectedCompanyId),
       ]);
+
       setOfficialStatus(metaData);
-      setQuickStatus(quickData);
+      setEvolutionStatus(evolutionData);
       setIntegrationStatuses(integrationsData);
+
       if (metaData?.phoneNumber) {
         setPhoneNumber(metaData.phoneNumber);
       }
     } catch {
       setOfficialStatus(null);
-      setQuickStatus(null);
+      setEvolutionStatus(null);
       setIntegrationStatuses([]);
     }
   };
@@ -88,114 +72,103 @@ const IntegrationsHub = () => {
   }, [selectedCompanyId]);
 
   useEffect(() => {
-    if (!quickOpen || !selectedCompanyId) return;
+    if (!evolutionOpen || !selectedCompanyId) return;
 
     let cancelled = false;
     let attempts = 0;
-    const maxAttempts = 150;
     let interval: ReturnType<typeof setInterval> | null = null;
 
-    const syncQuickConnect = async () => {
+    const syncEvolution = async () => {
       try {
-        const [qrData, health] = await Promise.all([
-          getWhatsappQRCode(selectedCompanyId),
-          getWhatsappHealth(selectedCompanyId),
+        const [qrData, statusData] = await Promise.all([
+          evolutionGetQRCode(selectedCompanyId),
+          evolutionGetStatus(selectedCompanyId),
         ]);
+
         if (cancelled) return;
 
-        setQuickStatus((current) => ({
-          ...current,
-          connected: health.connected && health.method === "wppconnect",
-          status: health.status,
-          lifecycleState: health.lifecycleState,
-          method: health.method === "wppconnect" ? "wppconnect" : null,
-          qrCode: qrData.qrcode || qrData.qrCode || health.qrCode,
-          updatedAt: health.dbLastConnected,
-          failureReason: health.failureReason,
-        }));
+        setEvolutionStatus(statusData);
 
-        const nextQrCode = qrData.qrcode || qrData.qrCode || health.qrCode || null;
-        if (nextQrCode) {
-          setQrCode(nextQrCode);
-          setQrStatus("ready");
-        } else {
-          attempts += 1;
-          if (attempts >= maxAttempts) {
-            setQrCode(null);
-            setQrStatus("timeout");
-            cancelled = true;
-            if (interval) {
-              clearInterval(interval);
-            }
-          }
-        }
-
-        if (health.connected && health.method === "wppconnect" && health.authenticated) {
+        if (statusData.connected) {
           cancelled = true;
-          if (interval) {
-            clearInterval(interval);
-          }
-          setQuickOpen(false);
+          if (interval) clearInterval(interval);
+          setEvolutionOpen(false);
           setQrCode(null);
           setQrStatus("idle");
           await loadStatus();
           addToast("WhatsApp conectado com sucesso!", "success");
+          return;
+        }
+
+        const nextQrCode = qrData.qrcode || qrData.qrCode || null;
+        if (nextQrCode) {
+          setQrCode(nextQrCode);
+          setQrStatus("ready");
+          return;
+        }
+
+        attempts += 1;
+        if (attempts >= 150) {
+          cancelled = true;
+          if (interval) clearInterval(interval);
+          setQrCode(null);
+          setQrStatus("timeout");
         }
       } catch {
-        // Ignora falhas transitórias de polling para não derrubar a modal.
+        // Mantem o modal aberto durante falhas temporarias.
       }
     };
 
     setQrStatus((current) => (current === "ready" ? current : "generating"));
-    void syncQuickConnect();
+    void syncEvolution();
+
     interval = setInterval(() => {
-      void syncQuickConnect();
+      void syncEvolution();
     }, 2000);
+
     return () => {
       cancelled = true;
-      if (interval) {
-        clearInterval(interval);
-      }
+      if (interval) clearInterval(interval);
     };
-  }, [addToast, quickOpen, selectedCompanyId]);
+  }, [addToast, evolutionOpen, selectedCompanyId]);
 
-  const handleQuickConnect = async () => {
+  const handleEvolutionConnect = async () => {
     if (!selectedCompanyId) {
       addToast("Escolha uma empresa antes de conectar.", "info");
       return;
     }
 
-    setQuickLoading(true);
+    setEvolutionLoading(true);
     setQrCode(null);
     setQrStatus("generating");
-    setQuickOpen(true);
+    setEvolutionOpen(true);
+
     try {
-      await createWhatsappInstance(selectedCompanyId);
+      await evolutionConnect(selectedCompanyId);
       await loadStatus();
     } catch {
-      setQuickOpen(false);
+      setEvolutionOpen(false);
       setQrStatus("idle");
-      addToast("Nao foi possivel abrir o QR Code agora.", "error");
+      addToast("Nao foi possivel conectar. Tente novamente.", "error");
     } finally {
-      setQuickLoading(false);
+      setEvolutionLoading(false);
     }
   };
 
-  const handleQuickReconnect = async () => {
+  const handleEvolutionDisconnect = async () => {
     if (!selectedCompanyId) return;
 
-    setQuickLoading(true);
+    setEvolutionLoading(true);
     try {
-      await terminateWhatsappSession(selectedCompanyId);
+      await evolutionDisconnect(selectedCompanyId);
       setQrCode(null);
       setQrStatus("idle");
-      setQuickStatus(null);
       await loadStatus();
-      await handleQuickConnect();
+      addToast("WhatsApp desconectado.", "success");
     } catch {
-      addToast("Nao foi possivel reconectar agora.", "error");
+      addToast("Nao foi possivel desconectar.", "error");
     } finally {
-      setQuickLoading(false);
+      setEvolutionLoading(false);
     }
   };
 
@@ -222,8 +195,9 @@ const IntegrationsHub = () => {
     }
   };
 
-  const handleDisconnect = async () => {
+  const handleOfficialDisconnect = async () => {
     if (!selectedCompanyId) return;
+
     setOfficialLoading(true);
     try {
       await disconnectMetaAPIConfig(selectedCompanyId);
@@ -251,17 +225,9 @@ const IntegrationsHub = () => {
   const instagramStatus = findStatus("INSTAGRAM");
   const mercadoLivreStatus = findStatus("MERCADOLIVRE");
   const shopeeStatus = findStatus("SHOPEE");
-  const whatsappConnected = Boolean(officialStatus?.connected || quickStatus?.connected);
-  const quickConnected = Boolean(quickStatus?.connected && quickStatus?.method === "wppconnect");
+  const evolutionConnected = Boolean(evolutionStatus?.connected);
   const officialConnected = Boolean(officialStatus?.connected && officialStatus?.method === "meta");
-  const quickLifecycle = quickStatus?.lifecycleState || quickStatus?.status;
-  const whatsappBadge = whatsappConnected
-    ? "Conectado"
-    : quickLifecycle === "qr_ready"
-      ? "Aguardando QR"
-      : quickLifecycle === "needs_new_qr"
-        ? "Novo QR"
-      : "Desconectado";
+  const whatsappConnected = evolutionConnected || officialConnected;
 
   const channels = [
     {
@@ -316,58 +282,81 @@ const IntegrationsHub = () => {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h3 className="text-xl font-black text-zinc-50">WhatsApp Business</h3>
-                <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${whatsappConnected ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : quickLifecycle === "qr_ready" ? "border-amber-400/30 bg-amber-400/10 text-amber-300" : quickLifecycle === "needs_new_qr" ? "border-red-500/30 bg-red-500/10 text-red-300" : "border-zinc-700 bg-zinc-900 text-zinc-400"}`}>
-                  {whatsappBadge}
+                <span
+                  className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
+                    whatsappConnected
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      : "border-zinc-700 bg-zinc-900 text-zinc-400"
+                  }`}
+                >
+                  {whatsappConnected ? "Conectado" : "Desconectado"}
                 </span>
               </div>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Use QR Code para ativacao rapida ou Meta API para operacao oficial.
+                Conecte por QR Code com Evolution API ou use a Meta API como opcao oficial.
               </p>
               <p className="mt-2 text-xs text-zinc-500">
-                Ultima sincronizacao: {formatLastSync(officialStatus?.updatedAt || quickStatus?.updatedAt)}
+                Ultima sincronizacao: {formatLastSync(officialStatus?.updatedAt || null)}
               </p>
             </div>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <div className="rounded-[24px] border border-amber-400/20 bg-zinc-900/60 p-5">
+            <div className="rounded-[24px] border border-lime-400/20 bg-zinc-900/60 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="text-lg font-black text-zinc-50">QR Code</h4>
+                  <h4 className="text-lg font-black text-zinc-50">Evolution API</h4>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Fluxo simples para escanear e iniciar.
+                    Conexao simples por QR Code, sem Chrome no backend.
                   </p>
                 </div>
-                <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
-                  {quickConnected ? "Conectado" : qrStatus === "ready" || quickLifecycle === "qr_ready" ? "Aguardando QR" : quickLifecycle === "needs_new_qr" ? "Novo QR" : "Rapido"}
+                <span
+                  className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
+                    evolutionConnected
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      : qrStatus === "ready" || qrStatus === "generating"
+                        ? "border-lime-400/30 bg-lime-400/10 text-lime-300"
+                        : "border-zinc-700 bg-zinc-900 text-zinc-400"
+                  }`}
+                >
+                  {evolutionConnected ? "Ativo" : qrStatus === "ready" || qrStatus === "generating" ? "QR Code" : "Offline"}
                 </span>
               </div>
-              {quickConnected ? (
+
+              {evolutionConnected ? (
                 <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-                  <p className="text-sm font-bold text-emerald-300">WhatsApp conectado via QR Code</p>
+                  <p className="text-sm font-bold text-emerald-300">✓ WhatsApp Conectado</p>
                   <p className="mt-1 text-sm text-zinc-200">
-                    {quickStatus?.status || "Sessao ativa"}
+                    Sua conexao esta pronta para o atendimento automatico.
                   </p>
                 </div>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => void handleQuickConnect()}
-                disabled={quickLoading || !selectedCompanyId}
-                className="mt-5 w-full rounded-2xl bg-amber-400 px-4 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
-              >
-                {quickLoading ? "Gerando QR Code..." : quickConnected ? "Gerar novo QR Code" : "Conectar via QR Code"}
-              </button>
-              {quickConnected ? (
+              ) : (
+                <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
+                  <p className="text-sm text-zinc-300">
+                    Clique para gerar o QR Code e conectar com seu WhatsApp Business.
+                  </p>
+                </div>
+              )}
+
+              {!evolutionConnected ? (
                 <button
                   type="button"
-                  onClick={() => void handleQuickReconnect()}
-                  disabled={quickLoading || !selectedCompanyId}
-                  className="mt-3 w-full rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-200 transition hover:bg-amber-400/20 disabled:opacity-50"
+                  onClick={() => void handleEvolutionConnect()}
+                  disabled={evolutionLoading || !selectedCompanyId}
+                  className="mt-5 w-full rounded-2xl bg-[#B6FF00] px-4 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
                 >
-                  Reconectar com outro numero
+                  {evolutionLoading ? "Gerando QR Code..." : "Conectar WhatsApp"}
                 </button>
-              ) : null}
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleEvolutionDisconnect()}
+                  disabled={evolutionLoading || !selectedCompanyId}
+                  className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
+                >
+                  Desconectar
+                </button>
+              )}
             </div>
 
             <div className="rounded-[24px] border border-lime-400/20 bg-zinc-900/60 p-5">
@@ -375,11 +364,11 @@ const IntegrationsHub = () => {
                 <div>
                   <h4 className="text-lg font-black text-zinc-50">Meta API</h4>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Opcao oficial com mais estabilidade no longo prazo.
+                    Opcao oficial para integracoes da Meta.
                   </p>
                 </div>
                 <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-lime-300">
-                  Recomendado
+                  Oficial
                 </span>
               </div>
 
@@ -387,10 +376,16 @@ const IntegrationsHub = () => {
                 <div className="mt-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-4">
                   <p className="text-sm font-bold text-lime-300">WhatsApp conectado</p>
                   <p className="mt-1 text-sm text-zinc-200">
-                    {officialStatus.phoneNumber || "Numero conectado"}
+                    {officialStatus?.phoneNumber || "Numero conectado"}
                   </p>
                 </div>
-              ) : null}
+              ) : (
+                <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
+                  <p className="text-sm text-zinc-300">
+                    Use seu token para ativar a Meta API quando precisar.
+                  </p>
+                </div>
+              )}
 
               <div className="mt-5 flex gap-3">
                 <button
@@ -404,7 +399,7 @@ const IntegrationsHub = () => {
                 {officialConnected ? (
                   <button
                     type="button"
-                    onClick={() => void handleDisconnect()}
+                    onClick={() => void handleOfficialDisconnect()}
                     disabled={officialLoading}
                     className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300 transition hover:bg-red-500/20"
                   >
@@ -425,7 +420,15 @@ const IntegrationsHub = () => {
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-3">
                   <h3 className="text-xl font-black text-zinc-50">{card.title}</h3>
-                  <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${card.status?.connected ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : card.actionType === "soon" ? "border-amber-400/30 bg-amber-400/10 text-amber-300" : "border-zinc-700 bg-zinc-900 text-zinc-400"}`}>
+                  <span
+                    className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
+                      card.status?.connected
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                        : card.actionType === "soon"
+                          ? "border-amber-400/30 bg-amber-400/10 text-amber-300"
+                          : "border-zinc-700 bg-zinc-900 text-zinc-400"
+                    }`}
+                  >
                     {card.status?.connected ? "Conectado" : card.actionType === "soon" ? "Em breve" : "Nao conectado"}
                   </span>
                 </div>
@@ -455,31 +458,43 @@ const IntegrationsHub = () => {
         ))}
       </div>
 
-      {quickOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm" onClick={() => setQuickOpen(false)}>
-          <div className="w-full max-w-lg rounded-[28px] border border-zinc-800 bg-zinc-950 p-6" onClick={(event) => event.stopPropagation()}>
+      {evolutionOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+          onClick={() => setEvolutionOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-[28px] border border-zinc-800 bg-zinc-950 p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-300">Conexao Rapida</p>
-                <h3 className="mt-2 text-2xl font-black text-zinc-50">Escaneie o QR Code</h3>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
+                  Evolution API
+                </p>
+                <h3 className="mt-2 text-2xl font-black text-zinc-50">Conectar WhatsApp</h3>
               </div>
-              <button type="button" onClick={() => setQuickOpen(false)} className="rounded-xl border border-zinc-800 px-3 py-2 text-xs text-zinc-400">
+              <button
+                type="button"
+                onClick={() => setEvolutionOpen(false)}
+                className="rounded-xl border border-zinc-800 px-3 py-2 text-xs text-zinc-400"
+              >
                 Fechar
               </button>
             </div>
 
-            <div className="mt-6 rounded-[24px] border border-amber-400/20 bg-zinc-900/70 p-6 text-center">
-              <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-3xl border border-dashed border-amber-300/40 bg-white p-3 text-center text-xs font-bold text-zinc-700">
+            <div className="mt-6 rounded-[24px] border border-lime-400/20 bg-zinc-900/70 p-6 text-center">
+              <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-3xl border border-dashed border-lime-300/40 bg-white p-3 text-center text-xs font-bold text-zinc-700">
                 {qrStatus === "timeout" ? (
                   <div className="space-y-3">
-                    <p>QR expirou.</p>
+                    <p>QR Code expirou. Tentar novamente.</p>
                     <button
                       type="button"
-                      onClick={() => void handleQuickConnect()}
-                      disabled={quickLoading}
-                      className="rounded-2xl bg-amber-400 px-4 py-2 text-xs font-black text-zinc-950 disabled:opacity-50"
+                      onClick={() => void handleEvolutionConnect()}
+                      disabled={evolutionLoading}
+                      className="rounded-2xl bg-[#B6FF00] px-4 py-2 text-xs font-black text-zinc-950 disabled:opacity-50"
                     >
-                      {quickLoading ? "Gerando..." : "Tentar novamente"}
+                      {evolutionLoading ? "Gerando..." : "Tentar novamente"}
                     </button>
                   </div>
                 ) : qrCode && qrStatus === "ready" ? (
@@ -490,17 +505,17 @@ const IntegrationsHub = () => {
                   />
                 ) : (
                   <div className="space-y-2">
-                    <p>Aguardando QR Code...</p>
-                    <p className="text-[11px] font-medium text-zinc-500">
-                      Pode levar ate 30 segundos.
-                    </p>
+                    <p>Gerando QR Code... aguarde alguns segundos.</p>
                   </div>
                 )}
               </div>
+
               <div className="mt-4 space-y-2 text-sm text-zinc-400">
-                {quickSteps.map((step) => (
-                  <p key={step}>{step}</p>
-                ))}
+                {qrStatus === "ready" ? (
+                  <p>Escaneie o QR Code com seu WhatsApp Business</p>
+                ) : (
+                  <p>Aguardando QR Code...</p>
+                )}
               </div>
             </div>
           </div>
@@ -508,14 +523,24 @@ const IntegrationsHub = () => {
       ) : null}
 
       {officialOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm" onClick={() => setOfficialOpen(false)}>
-          <div className="w-full max-w-3xl rounded-[28px] border border-zinc-800 bg-zinc-950 p-6" onClick={(event) => event.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+          onClick={() => setOfficialOpen(false)}
+        >
+          <div
+            className="w-full max-w-3xl rounded-[28px] border border-zinc-800 bg-zinc-950 p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">Conexao Oficial Meta</p>
                 <h3 className="mt-2 text-2xl font-black text-zinc-50">Conecte em 3 passos</h3>
               </div>
-              <button type="button" onClick={() => setOfficialOpen(false)} className="rounded-xl border border-zinc-800 px-3 py-2 text-xs text-zinc-400">
+              <button
+                type="button"
+                onClick={() => setOfficialOpen(false)}
+                className="rounded-xl border border-zinc-800 px-3 py-2 text-xs text-zinc-400"
+              >
                 Fechar
               </button>
             </div>
@@ -541,11 +566,9 @@ const IntegrationsHub = () => {
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-lime-300">Passo 2</p>
                 <h4 className="mt-2 text-lg font-black text-zinc-50">Gere seu token</h4>
                 <ol className="mt-3 space-y-2 text-sm text-zinc-300">
-                  {officialSteps.map((step, index) => (
-                    <li key={step}>
-                      {index + 1}. {step}
-                    </li>
-                  ))}
+                  <li>1. Abra Configuracoes e Usuarios do Sistema.</li>
+                  <li>2. Gere um token com acesso ao WhatsApp.</li>
+                  <li>3. Copie o token para finalizar a conexao.</li>
                 </ol>
               </div>
 

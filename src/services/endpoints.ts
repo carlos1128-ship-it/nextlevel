@@ -138,7 +138,7 @@ function normalizeBotConfig(data: any): BotConfig {
     agentName: data?.agentName || data?.botName || "Atendente IA",
     welcomeMessage: data?.welcomeMessage ?? null,
     toneOfVoice: data?.toneOfVoice || "amigavel",
-    tone: data?.tone || data?.toneOfVoice || "Amigável",
+    tone: data?.tone || data?.toneOfVoice || "AmigÃ¡vel",
     instructions: data?.instructions ?? null,
     isActive: Boolean(data?.isActive ?? true),
     isOnline: Boolean(data?.isOnline ?? data?.isActive ?? true),
@@ -967,90 +967,42 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
   return data;
 }
 
-// ─── WhatsApp Instance ───────────────────────────────────────
+// â”€â”€â”€ WhatsApp Instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export async function createWhatsappInstance(companyId?: string | null) {
-  const { data } = await api.post<WhatsappConnectionSnapshot>(
-    "/attendant/whatsapp/instance",
-    null,
-    { params: companyId ? { companyId } : undefined },
-  );
-  return data;
-}
-
-export async function getWhatsappQRCode(companyId?: string | null) {
-  const { data } = await api.get<WhatsappConnectionSnapshot>(
-    "/attendant/whatsapp/qrcode",
-    { params: companyId ? { companyId } : undefined },
-  );
-  return data;
-}
-
-export async function getWhatsappStatus(companyId?: string | null) {
-  const { data } = await api.get<WhatsappConnectionSnapshot>("/attendant/whatsapp/status", {
-    params: companyId ? { companyId } : undefined,
+export async function evolutionConnect(companyId: string) {
+  const { data } = await api.post<{ status: string; message: string }>("/evolution/connect", {
+    companyId,
   });
   return data;
 }
 
-export async function getAttendantConnectionStatus(companyId?: string | null) {
-  const { data } = await api.get<WhatsappConnectionSnapshot>("/attendant/connection-status", {
-    params: companyId ? { companyId } : undefined,
+export async function evolutionGetQRCode(companyId: string) {
+  const { data } = await api.get<WhatsappConnectionSnapshot>("/evolution/qrcode", {
+    params: { companyId },
   });
   return data;
 }
 
-export async function terminateWhatsappSession(companyId: string) {
-  const { data } = await api.delete<{ success: boolean }>(`/attendant/whatsapp/session/${companyId}`);
-  return data;
-}
-
-/**
- * MELHORIA v2.0: Health check detalhado — verifica estado REAL com WPPConnect
- */
-export async function getWhatsappHealth(companyId?: string | null) {
+export async function evolutionGetStatus(companyId: string) {
   const { data } = await api.get<{
-    companyId: string;
-    status: string;
     connected: boolean;
-    authenticated?: boolean;
-    connectionState?: string | null;
-    method?: "meta" | "wppconnect" | null;
-    qrCode: string | null;
-    phoneNumber: string | null;
-    pushname: string | null;
-    hasClient: boolean;
-    hasInitialization: boolean;
-    hasRetryTimer: boolean;
-    lastError: string | null;
-    dbStatus: string;
-    dbEnabled: boolean;
-    dbLastConnected: string | null;
-    healthy: boolean;
-    needsReconnect: boolean;
-    awaitingQR: boolean;
-    qrRequired?: boolean;
-    lifecycleState?: "idle" | "starting" | "qr_ready" | "connected" | "failed";
-    failureReason?: string | null;
-  }>("/attendant/whatsapp/health", {
-    params: companyId ? { companyId } : undefined,
+    state: string;
+  }>("/evolution/status", {
+    params: { companyId },
   });
   return data;
 }
 
-/**
- * MELHORIA v2.0: Cleanup forçado ao trocar de empresa
- */
-export async function cleanupWhatsappSession(companyId?: string | null) {
-  const { data } = await api.post<{ success: boolean; companyId: string; status: string }>(
-    "/attendant/whatsapp/cleanup",
-    null,
-    { params: companyId ? { companyId } : undefined },
-  );
+export async function evolutionDisconnect(companyId: string) {
+  const { data } = await api.delete<{ status: string }>("/evolution/disconnect", {
+    data: { companyId },
+  });
   return data;
 }
 
-// ─── Shopee Scraper ──────────────────────────────────────────
+
+
+// â”€â”€â”€ Shopee Scraper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function initializeShopeeLogin(companyId: string, credentials?: { user?: string, pass?: string }) {
   const { data } = await api.post("/integrations/shopee/initialize-login", credentials || {}, {
@@ -1084,7 +1036,7 @@ export async function saveMetaAPIConfig(
     phoneNumber?: string;
   }
 ) {
-  // Map frontend field names → DTO field names expected by the backend
+  // Map frontend field names â†’ DTO field names expected by the backend
   const { data } = await api.post(
     "/whatsapp/config", // Corrected path to match controller @Controller('whatsapp')
     {
@@ -1113,7 +1065,7 @@ export async function getWhatsappOAuthUrl(companyId: string): Promise<string> {
 export async function getMetaWhatsappStatus(companyId: string) {
   const { data } = await api.get<{
     connected: boolean;
-    method: "meta" | "wppconnect" | null;
+    method: "meta" | null;
     status: string;
     phoneNumberId: string | null;
     phoneNumber: string | null;
