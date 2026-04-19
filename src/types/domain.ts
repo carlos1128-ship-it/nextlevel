@@ -197,8 +197,10 @@ export interface WhatsappConnectionSnapshot {
   instanceName?: string | null;
   qrCode?: string | null;
   qrcode?: string | null;
+  pairingCode?: string | null;
   ready?: boolean;
   status: string;
+  state?: string;
   lifecycleState?: string;
   connected?: boolean;
   method?: "meta" | "evolution" | null;

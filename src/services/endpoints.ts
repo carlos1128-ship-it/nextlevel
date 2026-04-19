@@ -970,7 +970,7 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
 // â”€â”€â”€ WhatsApp Instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function evolutionConnect(companyId: string) {
-  const { data } = await api.post<{ status: string; message: string }>("/evolution/connect", {
+  const { data } = await api.post<WhatsappConnectionSnapshot>("/evolution/connect", {
     companyId,
   });
   return data;
@@ -984,10 +984,7 @@ export async function evolutionGetQRCode(companyId: string) {
 }
 
 export async function evolutionGetStatus(companyId: string) {
-  const { data } = await api.get<{
-    connected: boolean;
-    state: string;
-  }>("/evolution/status", {
+  const { data } = await api.get<WhatsappConnectionSnapshot>("/evolution/status", {
     params: { companyId },
   });
   return data;

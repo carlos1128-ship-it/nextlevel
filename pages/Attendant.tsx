@@ -129,6 +129,9 @@ const Attendant = () => {
     const socket: Socket = io(`${resolveSocketUrl()}/attendant`, {
       transports: ["websocket"],
       withCredentials: true,
+      auth: {
+        token: localStorage.getItem("access_token") || "",
+      },
       query: { companyId: selectedCompanyId },
     });
 

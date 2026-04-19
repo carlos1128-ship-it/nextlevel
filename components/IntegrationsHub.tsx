@@ -25,7 +25,12 @@ type OfficialStatus = {
 
 type EvolutionStatus = {
   connected: boolean;
-  state: string;
+  state?: string;
+  status?: string;
+  qrCode?: string | null;
+  qrcode?: string | null;
+  qrRequired?: boolean;
+  pairingCode?: string | null;
 };
 
 const IntegrationsHub = () => {
@@ -87,7 +92,10 @@ const IntegrationsHub = () => {
 
         if (cancelled) return;
 
-        setEvolutionStatus(statusData);
+        setEvolutionStatus({
+          ...statusData,
+          pairingCode: qrData.pairingCode || statusData.pairingCode || null,
+        });
 
         if (statusData.connected) {
           cancelled = true;
@@ -503,6 +511,13 @@ const IntegrationsHub = () => {
                     alt="QR Code WhatsApp"
                     style={{ width: "100%", height: "100%", objectFit: "contain" }}
                   />
+                ) : evolutionStatus?.pairingCode ? (
+                  <div className="space-y-2">
+                    <p>Código de pareamento</p>
+                    <p className="rounded-2xl bg-zinc-100 px-4 py-3 text-lg tracking-[0.25em] text-zinc-900">
+                      {evolutionStatus.pairingCode}
+                    </p>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     <p>Gerando QR Code... aguarde alguns segundos.</p>
@@ -513,6 +528,8 @@ const IntegrationsHub = () => {
               <div className="mt-4 space-y-2 text-sm text-zinc-400">
                 {qrStatus === "ready" ? (
                   <p>Escaneie o QR Code com seu WhatsApp Business</p>
+                ) : evolutionStatus?.pairingCode ? (
+                  <p>Se preferir, use o código de pareamento no WhatsApp.</p>
                 ) : (
                   <p>Aguardando QR Code...</p>
                 )}

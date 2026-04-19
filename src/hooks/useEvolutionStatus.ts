@@ -17,7 +17,7 @@ export function useEvolutionStatus(companyId: string | null | undefined) {
     try {
       const data = await evolutionGetStatus(companyId);
       setConnected(Boolean(data.connected));
-      setState(data.state || "close");
+      setState(data.state || data.lifecycleState || "close");
     } catch {
       setConnected(false);
       setState("close");
