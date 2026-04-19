@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../services/api';
+import { cleanupWhatsappSession } from '../services/endpoints';
 
 export interface WhatsAppHealthStatus {
   companyId: string;
@@ -23,6 +24,8 @@ export interface WhatsAppHealthStatus {
   healthy: boolean;
   needsReconnect: boolean;
   awaitingQR: boolean;
+  reconnectAttempts?: number;
+  nextReconnectAt?: string | null;
   lifecycleState?: 'idle' | 'starting' | 'qr_ready' | 'connected' | 'failed';
   failureReason?: string | null;
 }
@@ -76,8 +79,13 @@ export function useWhatsAppStatus(
         previousStatusRef.current = healthStatus.status;
         onStatusChange?.(healthStatus);
       }
-    } catch (err: any) {
-      const message = err.response?.data?.message || err.message || 'Erro ao buscar status';
+    } catch (err: unknown) {
+      const error = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      const message =
+        error.response?.data?.message || error.message || 'Erro ao buscar status';
       setError(message);
     } finally {
       setLoading(false);
@@ -133,6 +141,13 @@ export function useWhatsAppStatus(
     needsReconnect: status?.needsReconnect ?? false,
     isAwaitingQR: status?.awaitingQR ?? false,
     refresh: fetchStatus,
-    cleanup: async () => undefined,
+    cleanup: async () => {
+      if (!companyId) {
+        return;
+      }
+
+      await cleanupWhatsappSession(companyId);
+      await fetchStatus();
+    },
   };
 }

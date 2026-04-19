@@ -8,7 +8,6 @@ import {
   getMetaWhatsappStatus,
   getWhatsappHealth,
   getWhatsappQRCode,
-  getWhatsappStatus,
   saveMetaAPIConfig,
   terminateWhatsappSession,
 } from "../src/services/endpoints";
@@ -68,7 +67,7 @@ const IntegrationsHub = () => {
     try {
       const [metaData, quickData, integrationsData] = await Promise.all([
         getMetaWhatsappStatus(selectedCompanyId),
-        getWhatsappStatus(selectedCompanyId),
+        getWhatsappHealth(selectedCompanyId),
         getIntegrationStatuses(selectedCompanyId),
       ]);
       setOfficialStatus(metaData);
