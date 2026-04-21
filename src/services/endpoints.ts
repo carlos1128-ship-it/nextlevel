@@ -28,6 +28,8 @@ import type {
   AdminUsageStats,
   AuditFeedItem,
   SubscriptionTier,
+  AgentConfig,
+  WhatsappConnection,
 } from "../types/domain";
 
 function extractCompanyId(company: Partial<Company> | null | undefined) {
@@ -282,6 +284,47 @@ function normalizeAdminQuota(data: any): AdminQuota {
       name: data?.company?.name || "Empresa",
       sector: data?.company?.sector ?? null,
     },
+  };
+}
+
+function normalizeWhatsappConnection(data: any): WhatsappConnection {
+  return {
+    id: data?.id ?? null,
+    companyId: data?.companyId ?? null,
+    provider: data?.provider || "evolution",
+    instanceName: data?.instanceName ?? null,
+    status: data?.status || "disconnected",
+    qrCode: data?.qrCode ?? data?.code ?? null,
+    pairingCode: data?.pairingCode ?? null,
+    phoneNumber: data?.phoneNumber ?? null,
+    webhookUrl: data?.webhookUrl ?? null,
+    lastConnectionAt: data?.lastConnectionAt ?? null,
+    createdAt: data?.createdAt ?? null,
+    updatedAt: data?.updatedAt ?? null,
+  };
+}
+
+function normalizeAgentConfig(data: any, companyId: string): AgentConfig {
+  return {
+    id: data?.id || "",
+    companyId: data?.companyId || companyId,
+    agentName: data?.agentName || data?.botName || "Atendente Next Level",
+    welcomeMessage: data?.welcomeMessage || "",
+    systemPrompt: data?.systemPrompt || data?.instructions || "",
+    toneOfVoice: data?.toneOfVoice || data?.tone || "consultivo",
+    internetSearchEnabled: Boolean(data?.internetSearchEnabled),
+    speechToTextEnabled: Boolean(data?.speechToTextEnabled ?? data?.speechToText),
+    imageUnderstandingEnabled: Boolean(
+      data?.imageUnderstandingEnabled ?? data?.imageUnderstanding,
+    ),
+    pauseForHuman: Boolean(data?.pauseForHuman),
+    debounceSeconds: Number(data?.debounceSeconds ?? 3),
+    maxContextMessages: Number(data?.maxContextMessages ?? 20),
+    isEnabled: Boolean(data?.isEnabled ?? data?.isOnline ?? data?.isActive),
+    modelProvider: data?.modelProvider || "openai",
+    modelName: data?.modelName || "gpt-4o-mini",
+    createdAt: data?.createdAt,
+    updatedAt: data?.updatedAt,
   };
 }
 
@@ -729,6 +772,34 @@ export async function getIntegrationDiagnostic(provider: string, companyId?: str
     status: data?.status || "INACTIVE",
     lastEventReceived: data?.lastEventReceived || null,
   } as IntegrationDiagnostic;
+}
+
+export async function startWhatsappConnection(companyId: string) {
+  const { data } = await api.post("/whatsapp/connect/start", { companyId });
+  return normalizeWhatsappConnection(data);
+}
+
+export async function getWhatsappConnectionStatus(companyId: string) {
+  const { data } = await api.get(`/whatsapp/connect/status/${companyId}`);
+  return normalizeWhatsappConnection(data);
+}
+
+export async function disconnectWhatsapp(companyId: string) {
+  const { data } = await api.post("/whatsapp/connect/disconnect", { companyId });
+  return normalizeWhatsappConnection(data);
+}
+
+export async function getAgentConfig(companyId: string) {
+  const { data } = await api.get(`/agent-config/${companyId}`);
+  return normalizeAgentConfig(data, companyId);
+}
+
+export async function saveAgentConfig(
+  companyId: string,
+  payload: Partial<AgentConfig>,
+) {
+  const { data } = await api.patch(`/agent-config/${companyId}`, payload);
+  return normalizeAgentConfig(data, companyId);
 }
 
 export async function getIntegrationOAuthSession(

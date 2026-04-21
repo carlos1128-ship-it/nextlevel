@@ -32,10 +32,10 @@ const navItems: SidebarNavItem[] = [
   { id: "home", path: "/", name: "Inicio", icon: HomeIcon, isPrimary: true },
   { id: "reports", path: "/reports", name: "Relatorios", icon: BarChartIcon, isPrimary: true },
   { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
+  { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "insights", path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
   { id: "market", path: "/market-intel", name: "Mercado", icon: RadarIcon, isPrimary: true },
   { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
-  { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon },
   { id: "products", path: "/products", name: "Produtos", icon: PackageIcon },
   { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
   { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
@@ -82,10 +82,6 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
           ? { ...item, name: "Custos/Metragem" }
       : item,
   );
-
-  if (niche === "MEDICINA") {
-    items = moveItemsToFront(items, ["attendant"]);
-  }
 
   if (niche === "SERVICOS") {
     items = moveItemsToFront(items, ["costs", "projects"]);
@@ -178,7 +174,7 @@ const BottomNav = ({ items }: { items: SidebarNavItem[] }) => (
         key={item.path}
         to={item.path}
         className={({ isActive }) =>
-          `relative flex w-1/4 flex-col items-center rounded-xl p-2 text-[10px] font-bold uppercase tracking-tight transition-all ${
+          `relative flex flex-1 flex-col items-center rounded-xl p-2 text-[10px] font-bold uppercase tracking-tight transition-all ${
             isActive ? "text-lime-500" : "text-zinc-500 dark:text-zinc-400"
           }`
         }

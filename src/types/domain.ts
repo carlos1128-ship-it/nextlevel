@@ -101,6 +101,48 @@ export interface OperationalCost {
 
 export type IntegrationProvider = "WHATSAPP" | "INSTAGRAM" | "MERCADOLIVRE" | "SHOPEE";
 
+export type WhatsappConnectionStatus =
+  | "creating"
+  | "waiting_qr"
+  | "connected"
+  | "disconnected"
+  | "error";
+
+export interface WhatsappConnection {
+  id: string | null;
+  companyId: string | null;
+  provider: "evolution" | string;
+  instanceName: string | null;
+  status: WhatsappConnectionStatus;
+  qrCode: string | null;
+  pairingCode: string | null;
+  phoneNumber: string | null;
+  webhookUrl: string | null;
+  lastConnectionAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AgentConfig {
+  id: string;
+  companyId: string;
+  agentName: string;
+  welcomeMessage: string;
+  systemPrompt: string;
+  toneOfVoice: string;
+  internetSearchEnabled: boolean;
+  speechToTextEnabled: boolean;
+  imageUnderstandingEnabled: boolean;
+  pauseForHuman: boolean;
+  debounceSeconds: number;
+  maxContextMessages: number;
+  isEnabled: boolean;
+  modelProvider: string;
+  modelName: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface IntegrationStatus {
   provider: IntegrationProvider;
   status: string;
