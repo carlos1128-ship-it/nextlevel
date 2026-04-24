@@ -5,6 +5,7 @@ import { useToast } from "../components/Toast";
 import {
   disconnectWhatsapp,
   getWhatsappConnectionStatus,
+  restartWhatsappConnection,
   startWhatsappConnection,
 } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
@@ -44,6 +45,15 @@ const Integrations = () => {
     if (connection.status === "error") return "Erro";
     return "Desconectado";
   }, [connection]);
+
+  const webhookLabel =
+    connection?.webhookStatus === "configured" ? "Webhook configurado" : "Webhook pendente";
+  const automationLabel =
+    connection?.automationStatus === "configured" ? "Automacao configurada" : "Automacao pendente";
+  const phoneLabel =
+    isConnected(connection?.status) && !connection?.phoneNumber
+      ? "Conectado, sincronizando numero"
+      : connection?.phoneNumber || "Aguardando conexao";
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -99,9 +109,14 @@ const Integrations = () => {
 
     try {
       setLoading(true);
-      const next = await startWhatsappConnection(selectedCompanyId);
+      const next = isConnected(connection?.status)
+        ? await restartWhatsappConnection(selectedCompanyId)
+        : await startWhatsappConnection(selectedCompanyId);
       setConnection(next);
-      addToast("Instancia WhatsApp iniciada.", "success");
+      addToast(
+        isConnected(next.status) ? "WhatsApp reconectado." : "Instancia WhatsApp iniciada.",
+        "success",
+      );
     } catch (error) {
       addToast(getErrorMessage(error, "Nao foi possivel iniciar o WhatsApp."), "error");
     } finally {
@@ -146,15 +161,23 @@ const Integrations = () => {
                 Atendimento IA via Evolution
               </h2>
             </div>
-            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
+            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Sessao</p>
                 <p className="mt-1 font-bold text-zinc-100">{statusLabel}</p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Webhook</p>
+                <p className="mt-1 font-bold text-zinc-100">{webhookLabel}</p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Automacao</p>
+                <p className="mt-1 font-bold text-zinc-100">{automationLabel}</p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Numero</p>
                 <p className="mt-1 font-bold text-zinc-100">
-                  {connection?.phoneNumber || "Aguardando conexao"}
+                  {phoneLabel}
                 </p>
               </div>
             </div>

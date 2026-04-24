@@ -118,6 +118,8 @@ export interface WhatsappConnection {
   pairingCode: string | null;
   phoneNumber: string | null;
   webhookUrl: string | null;
+  webhookStatus?: "configured" | "pending" | "error";
+  automationStatus?: "configured" | "pending" | "error";
   lastConnectionAt: string | null;
   createdAt: string | null;
   updatedAt: string | null;

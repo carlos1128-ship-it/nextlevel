@@ -299,6 +299,8 @@ function normalizeWhatsappConnection(data: any): WhatsappConnection {
     pairingCode: data?.pairingCode ?? null,
     phoneNumber: data?.phoneNumber ?? null,
     webhookUrl: data?.webhookUrl ?? null,
+    webhookStatus: data?.webhookStatus ?? "pending",
+    automationStatus: data?.automationStatus ?? "pending",
     lastConnectionAt: data?.lastConnectionAt ?? null,
     createdAt: data?.createdAt ?? null,
     updatedAt: data?.updatedAt ?? null,
@@ -796,6 +798,11 @@ export async function getIntegrationDiagnostic(provider: string, companyId?: str
 
 export async function startWhatsappConnection(companyId: string) {
   const { data } = await api.post("/whatsapp/connect/start", { companyId });
+  return normalizeWhatsappConnection(data);
+}
+
+export async function restartWhatsappConnection(companyId: string) {
+  const { data } = await api.post("/whatsapp/connect/restart", { companyId });
   return normalizeWhatsappConnection(data);
 }
 
