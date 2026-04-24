@@ -101,6 +101,51 @@ export interface OperationalCost {
 
 export type IntegrationProvider = "WHATSAPP" | "INSTAGRAM" | "MERCADOLIVRE" | "SHOPEE";
 
+export type WhatsappConnectionStatus =
+  | "creating"
+  | "waiting_qr"
+  | "connected"
+  | "disconnected"
+  | "error";
+
+export interface WhatsappConnection {
+  id: string | null;
+  companyId: string | null;
+  provider: "evolution" | string;
+  instanceName: string | null;
+  status: WhatsappConnectionStatus;
+  qrCode: string | null;
+  pairingCode: string | null;
+  phoneNumber: string | null;
+  webhookUrl: string | null;
+  lastConnectionAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AgentConfig {
+  id: string;
+  companyId: string;
+  agentName: string;
+  companyDescription: string;
+  welcomeMessage: string;
+  systemPrompt: string;
+  toneOfVoice: string;
+  internetSearchEnabled: boolean;
+  speechToTextEnabled: boolean;
+  imageUnderstandingEnabled: boolean;
+  pauseForHuman: boolean;
+  splitRepliesEnabled: boolean;
+  messageBufferEnabled: boolean;
+  debounceSeconds: number;
+  maxContextMessages: number;
+  isEnabled: boolean;
+  modelProvider: string;
+  modelName: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface IntegrationStatus {
   provider: IntegrationProvider;
   status: string;
@@ -256,6 +301,20 @@ export interface ConversationThread {
   createdAt: string;
   updatedAt: string;
   messages: ConversationMessage[];
+}
+
+export interface ConversationLiveFeedItem {
+  id: string;
+  companyId: string;
+  whatsappConnectionId: string | null;
+  remoteJid: string | null;
+  contactName: string | null;
+  contactNumber: string;
+  status: string;
+  botPaused: boolean;
+  lastMessage: string;
+  lastMessageDirection: "inbound" | "outbound" | string | null;
+  lastMessageAt: string;
 }
 
 export interface Lead {
