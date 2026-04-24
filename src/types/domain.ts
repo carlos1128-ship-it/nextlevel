@@ -127,6 +127,7 @@ export interface AgentConfig {
   id: string;
   companyId: string;
   agentName: string;
+  companyDescription: string;
   welcomeMessage: string;
   systemPrompt: string;
   toneOfVoice: string;
@@ -134,6 +135,8 @@ export interface AgentConfig {
   speechToTextEnabled: boolean;
   imageUnderstandingEnabled: boolean;
   pauseForHuman: boolean;
+  splitRepliesEnabled: boolean;
+  messageBufferEnabled: boolean;
   debounceSeconds: number;
   maxContextMessages: number;
   isEnabled: boolean;
@@ -298,6 +301,20 @@ export interface ConversationThread {
   createdAt: string;
   updatedAt: string;
   messages: ConversationMessage[];
+}
+
+export interface ConversationLiveFeedItem {
+  id: string;
+  companyId: string;
+  whatsappConnectionId: string | null;
+  remoteJid: string | null;
+  contactName: string | null;
+  contactNumber: string;
+  status: string;
+  botPaused: boolean;
+  lastMessage: string;
+  lastMessageDirection: "inbound" | "outbound" | string | null;
+  lastMessageAt: string;
 }
 
 export interface Lead {

@@ -30,6 +30,7 @@ import type {
   SubscriptionTier,
   AgentConfig,
   WhatsappConnection,
+  ConversationLiveFeedItem,
 } from "../types/domain";
 
 function extractCompanyId(company: Partial<Company> | null | undefined) {
@@ -309,6 +310,7 @@ function normalizeAgentConfig(data: any, companyId: string): AgentConfig {
     id: data?.id || "",
     companyId: data?.companyId || companyId,
     agentName: data?.agentName || data?.botName || "Atendente Next Level",
+    companyDescription: data?.companyDescription || "",
     welcomeMessage: data?.welcomeMessage || "",
     systemPrompt: data?.systemPrompt || data?.instructions || "",
     toneOfVoice: data?.toneOfVoice || data?.tone || "consultivo",
@@ -318,6 +320,8 @@ function normalizeAgentConfig(data: any, companyId: string): AgentConfig {
       data?.imageUnderstandingEnabled ?? data?.imageUnderstanding,
     ),
     pauseForHuman: Boolean(data?.pauseForHuman),
+    splitRepliesEnabled: Boolean(data?.splitRepliesEnabled),
+    messageBufferEnabled: Boolean(data?.messageBufferEnabled ?? true),
     debounceSeconds: Number(data?.debounceSeconds ?? 3),
     maxContextMessages: Number(data?.maxContextMessages ?? 20),
     isEnabled: Boolean(data?.isEnabled ?? data?.isOnline ?? data?.isActive),
@@ -325,6 +329,22 @@ function normalizeAgentConfig(data: any, companyId: string): AgentConfig {
     modelName: data?.modelName || "gpt-4o-mini",
     createdAt: data?.createdAt,
     updatedAt: data?.updatedAt,
+  };
+}
+
+function normalizeConversationLiveFeedItem(data: any): ConversationLiveFeedItem {
+  return {
+    id: data?.id || "",
+    companyId: data?.companyId || "",
+    whatsappConnectionId: data?.whatsappConnectionId ?? null,
+    remoteJid: data?.remoteJid ?? null,
+    contactName: data?.contactName ?? null,
+    contactNumber: data?.contactNumber || "",
+    status: data?.status || "Aguardando",
+    botPaused: Boolean(data?.botPaused),
+    lastMessage: data?.lastMessage || "",
+    lastMessageDirection: data?.lastMessageDirection ?? null,
+    lastMessageAt: data?.lastMessageAt || new Date().toISOString(),
   };
 }
 
@@ -780,7 +800,9 @@ export async function startWhatsappConnection(companyId: string) {
 }
 
 export async function getWhatsappConnectionStatus(companyId: string) {
-  const { data } = await api.get(`/whatsapp/connect/status/${companyId}`);
+  const { data } = await api.get("/whatsapp/connect/status", {
+    params: { companyId },
+  });
   return normalizeWhatsappConnection(data);
 }
 
@@ -790,7 +812,7 @@ export async function disconnectWhatsapp(companyId: string) {
 }
 
 export async function getAgentConfig(companyId: string) {
-  const { data } = await api.get(`/agent-config/${companyId}`);
+  const { data } = await api.get("/agent-config", { params: { companyId } });
   return normalizeAgentConfig(data, companyId);
 }
 
@@ -798,8 +820,23 @@ export async function saveAgentConfig(
   companyId: string,
   payload: Partial<AgentConfig>,
 ) {
-  const { data } = await api.patch(`/agent-config/${companyId}`, payload);
+  const { data } = await api.patch("/agent-config", payload, {
+    params: { companyId },
+  });
   return normalizeAgentConfig(data, companyId);
+}
+
+export async function getConversationsLiveFeed(params?: {
+  companyId?: string | null;
+  limit?: number;
+}) {
+  const { data } = await api.get<any[]>("/conversations/live-feed", {
+    params: {
+      companyId: params?.companyId || undefined,
+      limit: params?.limit || undefined,
+    },
+  });
+  return Array.isArray(data) ? data.map(normalizeConversationLiveFeedItem) : [];
 }
 
 export async function getIntegrationOAuthSession(

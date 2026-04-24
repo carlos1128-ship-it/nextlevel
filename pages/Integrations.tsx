@@ -167,7 +167,13 @@ const Integrations = () => {
               disabled={loading || !selectedCompanyId}
               className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Conectando..." : "Conectar WhatsApp"}
+              {loading
+                ? "Conectando..."
+                : isConnected(connection?.status)
+                  ? "Reconectar WhatsApp"
+                  : connection?.status === "waiting_qr"
+                    ? "Gerar novo QR"
+                    : "Conectar WhatsApp"}
             </button>
             {isConnected(connection?.status) ? (
               <button
