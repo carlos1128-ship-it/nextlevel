@@ -127,12 +127,16 @@ export interface WhatsappConnection {
   status: WhatsappConnectionStatus;
   connectionState?: string | null;
   qrCode: string | null;
+  code?: string | null;
   pairingCode: string | null;
   phoneNumber: string | null;
   webhookUrl: string | null;
   webhookStatus?: "configured" | "pending" | "error";
   automationStatus?: "configured" | "pending" | "error";
   lastError?: string | null;
+  message?: string | null;
+  retryAfterSeconds?: number | null;
+  expiresInSeconds?: number | null;
   sessionGeneration?: number | null;
   userRequestedDisconnect?: boolean;
   lastConnectionAt: string | null;

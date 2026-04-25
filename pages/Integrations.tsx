@@ -34,6 +34,10 @@ function isQrPending(status?: string | null) {
   return status === "qr_required" || status === "qr_pending" || status === "waiting_qr";
 }
 
+function hasQrData(connection?: WhatsappConnection | null) {
+  return Boolean(connection?.qrCode || connection?.code || connection?.pairingCode);
+}
+
 function isOperationStatus(status?: string | null) {
   return (
     status === "creating" ||
@@ -55,15 +59,16 @@ const Integrations = () => {
   const statusLabel = useMemo(() => {
     if (!connection) return "Desconectado";
     if (connection.status === "not_configured") return "Desconectado";
-    if (isQrPending(connection.status)) return "Aguardando QR";
+    if (connection.status === "qr_pending" && hasQrData(connection)) return "QR pendente";
+    if (isQrPending(connection.status)) return "QR indisponivel";
     if (connection.status === "creating" || connection.status === "creating_instance") return "Criando instancia";
     if (connection.status === "connecting") return "Conectando";
     if (connection.status === "disconnecting") return "Desconectando";
     if (connection.status === "connected") return "Conectado";
     if (connection.status === "disconnected_pending_provider_cleanup") return "Desconectado na Next Level";
     if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessario";
-    if (connection.status === "rate_limited") return "Aguardando Evolution";
-    if (connection.status === "provider_warming_up") return "Evolution aquecendo";
+    if (connection.status === "rate_limited") return "Limite temporario";
+    if (connection.status === "provider_warming_up") return "Evolution iniciando";
     if (connection.status === "error") return "Erro";
     if (connection.status === "idle") return "Pronto para conectar";
     return "Desconectado";
@@ -112,6 +117,10 @@ const Integrations = () => {
 
     if (rawQr.startsWith("data:image")) {
       setQrImage(rawQr);
+      console.info("whatsapp.frontend.qr.rendered", {
+        instanceName: connection?.instanceName,
+        source: "base64",
+      });
       return;
     }
 
@@ -123,9 +132,15 @@ const Integrations = () => {
         light: "#f7fee7",
       },
     })
-      .then(setQrImage)
+      .then((image) => {
+        setQrImage(image);
+        console.info("whatsapp.frontend.qr.rendered", {
+          instanceName: connection?.instanceName,
+          source: "code",
+        });
+      })
       .catch(() => setQrImage(null));
-  }, [connection?.qrCode]);
+  }, [connection?.instanceName, connection?.qrCode]);
 
   const handleConnect = async () => {
     if (!selectedCompanyId) {
@@ -137,10 +152,23 @@ const Integrations = () => {
       setLoading(true);
       const next = await startWhatsappConnection(selectedCompanyId);
       setConnection(next);
-      addToast(
-        isConnected(next.status) ? "WhatsApp conectado." : "Fluxo de QR iniciado.",
-        "success",
-      );
+      if (isConnected(next.status)) {
+        addToast("WhatsApp conectado.", "success");
+      } else if (next.status === "qr_pending" && hasQrData(next)) {
+        addToast("QR Code gerado.", "success");
+      } else if (next.status === "provider_warming_up") {
+        addToast(
+          next.message || "Evolution iniciando, tente novamente em alguns segundos.",
+          "info",
+        );
+      } else if (next.status === "rate_limited") {
+        addToast(
+          next.message || "A Evolution limitou as requisicoes. Aguarde alguns segundos.",
+          "info",
+        );
+      } else {
+        addToast(next.message || next.lastError || "Erro ao gerar QR Code.", "error");
+      }
     } catch (error) {
       addToast(getErrorMessage(error, "Nao foi possivel iniciar o WhatsApp."), "error");
     } finally {
@@ -155,7 +183,15 @@ const Integrations = () => {
       setLoading(true);
       const next = await restartWhatsappConnection(selectedCompanyId);
       setConnection(next);
-      addToast(isConnected(next.status) ? "Conexao verificada." : "Reparo iniciado.", "success");
+      if (isConnected(next.status)) {
+        addToast("Conexao verificada.", "success");
+      } else if (next.status === "qr_pending" && hasQrData(next)) {
+        addToast("QR Code gerado.", "success");
+      } else if (next.status === "provider_warming_up" || next.status === "rate_limited") {
+        addToast(next.message || "Evolution indisponivel agora.", "info");
+      } else {
+        addToast(next.message || "Conexao ainda precisa de novo QR.", "info");
+      }
     } catch (error) {
       addToast(getErrorMessage(error, "Nao foi possivel reparar a conexao."), "error");
     } finally {
@@ -259,7 +295,7 @@ const Integrations = () => {
           </div>
         </div>
 
-        {isQrPending(connection?.status) || qrImage || connection?.pairingCode ? (
+        {(connection?.status === "qr_pending" && hasQrData(connection)) || qrImage ? (
           <div className="mt-6 grid gap-5 border-t border-zinc-900 pt-5 lg:grid-cols-[320px_1fr]">
             <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-zinc-800 bg-lime-50 p-5">
               {qrImage ? (
@@ -293,9 +329,9 @@ const Integrations = () => {
           </div>
         ) : null}
 
-        {connection?.status === "error" && connection.lastError ? (
+        {connection?.status === "provider_warming_up" || connection?.status === "rate_limited" || connection?.status === "error" ? (
           <p className="mt-4 rounded-md border border-red-500/30 bg-red-950/30 p-3 text-sm font-semibold text-red-200">
-            {connection.lastError}
+            {connection.message || connection.lastError || "Nao foi possivel gerar o QR Code agora."}
           </p>
         ) : null}
       </section>

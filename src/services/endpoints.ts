@@ -289,6 +289,7 @@ function normalizeAdminQuota(data: any): AdminQuota {
 }
 
 function normalizeWhatsappConnection(data: any): WhatsappConnection {
+  const qrCode = data?.qrCode ?? data?.code ?? data?.qrcode ?? data?.base64 ?? null;
   return {
     id: data?.id ?? null,
     companyId: data?.companyId ?? null,
@@ -296,13 +297,23 @@ function normalizeWhatsappConnection(data: any): WhatsappConnection {
     instanceName: data?.instanceName ?? null,
     status: data?.status || "disconnected",
     connectionState: data?.connectionState ?? null,
-    qrCode: data?.qrCode ?? data?.code ?? null,
+    qrCode,
+    code: data?.code ?? qrCode,
     pairingCode: data?.pairingCode ?? null,
     phoneNumber: data?.phoneNumber ?? null,
     webhookUrl: data?.webhookUrl ?? null,
     webhookStatus: data?.webhookStatus ?? "pending",
     automationStatus: data?.automationStatus ?? "pending",
     lastError: data?.lastError ?? null,
+    message: data?.message ?? null,
+    retryAfterSeconds:
+      data?.retryAfterSeconds === undefined || data?.retryAfterSeconds === null
+        ? null
+        : Number(data.retryAfterSeconds),
+    expiresInSeconds:
+      data?.expiresInSeconds === undefined || data?.expiresInSeconds === null
+        ? null
+        : Number(data.expiresInSeconds),
     sessionGeneration: data?.sessionGeneration ?? null,
     userRequestedDisconnect: Boolean(data?.userRequestedDisconnect),
     lastConnectionAt: data?.lastConnectionAt ?? null,
