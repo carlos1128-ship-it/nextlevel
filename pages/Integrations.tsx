@@ -30,6 +30,14 @@ function isConnected(status?: string | null) {
   return status === "connected";
 }
 
+function isQrPending(status?: string | null) {
+  return status === "qr_pending" || status === "waiting_qr";
+}
+
+function isOperationStatus(status?: string | null) {
+  return status === "creating" || status === "connecting" || status === "disconnecting";
+}
+
 const Integrations = () => {
   const { selectedCompanyId } = useAuth();
   const { addToast } = useToast();
@@ -39,10 +47,13 @@ const Integrations = () => {
 
   const statusLabel = useMemo(() => {
     if (!connection) return "Desconectado";
-    if (connection.status === "waiting_qr") return "Aguardando QR";
+    if (isQrPending(connection.status)) return "Aguardando QR";
     if (connection.status === "creating") return "Criando instancia";
+    if (connection.status === "connecting") return "Conectando";
+    if (connection.status === "disconnecting") return "Desconectando";
     if (connection.status === "connected") return "Conectado";
     if (connection.status === "error") return "Erro";
+    if (connection.status === "idle") return "Pronto para conectar";
     return "Desconectado";
   }, [connection]);
 
@@ -65,7 +76,9 @@ const Integrations = () => {
   useEffect(() => {
     if (!selectedCompanyId) return;
     const shouldPoll =
-      connection?.status === "creating" || connection?.status === "waiting_qr";
+      connection?.status === "creating" ||
+      isQrPending(connection?.status) ||
+      connection?.status === "connecting";
     if (!shouldPoll) return;
 
     const timer = window.setInterval(() => {
@@ -187,14 +200,14 @@ const Integrations = () => {
             <button
               type="button"
               onClick={handleConnect}
-              disabled={loading || !selectedCompanyId}
+              disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
               className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading
                 ? "Conectando..."
                 : isConnected(connection?.status)
                   ? "Reconectar WhatsApp"
-                  : connection?.status === "waiting_qr"
+                  : isQrPending(connection?.status)
                     ? "Gerar novo QR"
                     : "Conectar WhatsApp"}
             </button>
@@ -202,7 +215,7 @@ const Integrations = () => {
               <button
                 type="button"
                 onClick={handleDisconnect}
-                disabled={loading}
+                disabled={loading || isOperationStatus(connection?.status)}
                 className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
               >
                 Desconectar
@@ -211,7 +224,7 @@ const Integrations = () => {
           </div>
         </div>
 
-        {connection?.status === "waiting_qr" || qrImage || connection?.pairingCode ? (
+        {isQrPending(connection?.status) || qrImage || connection?.pairingCode ? (
           <div className="mt-6 grid gap-5 border-t border-zinc-900 pt-5 lg:grid-cols-[320px_1fr]">
             <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-zinc-800 bg-lime-50 p-5">
               {qrImage ? (
@@ -243,6 +256,12 @@ const Integrations = () => {
               </div>
             </div>
           </div>
+        ) : null}
+
+        {connection?.status === "error" && connection.lastError ? (
+          <p className="mt-4 rounded-md border border-red-500/30 bg-red-950/30 p-3 text-sm font-semibold text-red-200">
+            {connection.lastError}
+          </p>
         ) : null}
       </section>
 

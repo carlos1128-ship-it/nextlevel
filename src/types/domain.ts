@@ -102,10 +102,14 @@ export interface OperationalCost {
 export type IntegrationProvider = "WHATSAPP" | "INSTAGRAM" | "MERCADOLIVRE" | "SHOPEE";
 
 export type WhatsappConnectionStatus =
+  | "idle"
   | "creating"
+  | "qr_pending"
   | "waiting_qr"
+  | "connecting"
   | "connected"
   | "disconnected"
+  | "disconnecting"
   | "error";
 
 export interface WhatsappConnection {
@@ -120,6 +124,7 @@ export interface WhatsappConnection {
   webhookUrl: string | null;
   webhookStatus?: "configured" | "pending" | "error";
   automationStatus?: "configured" | "pending" | "error";
+  lastError?: string | null;
   lastConnectionAt: string | null;
   createdAt: string | null;
   updatedAt: string | null;

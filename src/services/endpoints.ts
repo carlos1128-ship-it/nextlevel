@@ -301,6 +301,7 @@ function normalizeWhatsappConnection(data: any): WhatsappConnection {
     webhookUrl: data?.webhookUrl ?? null,
     webhookStatus: data?.webhookStatus ?? "pending",
     automationStatus: data?.automationStatus ?? "pending",
+    lastError: data?.lastError ?? null,
     lastConnectionAt: data?.lastConnectionAt ?? null,
     createdAt: data?.createdAt ?? null,
     updatedAt: data?.updatedAt ?? null,
