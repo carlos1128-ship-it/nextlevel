@@ -323,6 +323,30 @@ function normalizeWhatsappConnection(data: any): WhatsappConnection {
   };
 }
 
+function toWhatsappConnectionSnapshot(data: any): WhatsappConnectionSnapshot {
+  const connection = normalizeWhatsappConnection(data);
+  const qrRequired =
+    connection.status === "qr_required" ||
+    connection.status === "qr_pending" ||
+    connection.status === "qr_not_ready";
+
+  return {
+    instanceName: connection.instanceName,
+    qrCode: connection.qrCode,
+    qrcode: connection.qrCode,
+    pairingCode: connection.pairingCode,
+    ready: connection.status === "connected",
+    status: connection.status,
+    state: connection.connectionState || connection.status,
+    lifecycleState: connection.status,
+    connected: connection.status === "connected",
+    method: "evolution",
+    phoneNumber: connection.phoneNumber,
+    qrRequired,
+    failureReason: connection.lastError || connection.message || null,
+  };
+}
+
 function normalizeAgentConfig(data: any, companyId: string): AgentConfig {
   return {
     id: data?.id || "",
@@ -813,7 +837,7 @@ export async function getIntegrationDiagnostic(provider: string, companyId?: str
 }
 
 export async function startWhatsappConnection(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/start", { companyId });
+  const { data } = await api.post("/whatsapp/connection/connect", { companyId });
   return normalizeWhatsappConnection(data);
 }
 
@@ -828,7 +852,7 @@ export async function restartWhatsappConnection(companyId: string) {
 }
 
 export async function getWhatsappConnectionStatus(companyId: string) {
-  const { data } = await api.get("/whatsapp/connect/status", {
+  const { data } = await api.get("/whatsapp/connection/status", {
     params: { companyId },
   });
   return normalizeWhatsappConnection(data);
@@ -1106,31 +1130,31 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
 // â”€â”€â”€ WhatsApp Instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function evolutionConnect(companyId: string) {
-  const { data } = await api.post<WhatsappConnectionSnapshot>("/evolution/connect", {
+  const { data } = await api.post("/whatsapp/connection/connect", {
     companyId,
   });
-  return data;
+  return toWhatsappConnectionSnapshot(data);
 }
 
 export async function evolutionGetQRCode(companyId: string) {
-  const { data } = await api.get<WhatsappConnectionSnapshot>("/evolution/qrcode", {
+  const { data } = await api.get("/whatsapp/connection/status", {
     params: { companyId },
   });
-  return data;
+  return toWhatsappConnectionSnapshot(data);
 }
 
 export async function evolutionGetStatus(companyId: string) {
-  const { data } = await api.get<WhatsappConnectionSnapshot>("/evolution/status", {
+  const { data } = await api.get("/whatsapp/connection/status", {
     params: { companyId },
   });
-  return data;
+  return toWhatsappConnectionSnapshot(data);
 }
 
 export async function evolutionDisconnect(companyId: string) {
-  const { data } = await api.delete<{ status: string }>("/evolution/disconnect", {
-    data: { companyId },
+  const { data } = await api.post("/whatsapp/connect/disconnect", {
+    companyId,
   });
-  return data;
+  return toWhatsappConnectionSnapshot(data);
 }
 
 
