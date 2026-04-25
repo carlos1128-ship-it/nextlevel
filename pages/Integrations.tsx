@@ -31,11 +31,18 @@ function isConnected(status?: string | null) {
 }
 
 function isQrPending(status?: string | null) {
-  return status === "qr_pending" || status === "waiting_qr";
+  return status === "qr_required" || status === "qr_pending" || status === "waiting_qr";
 }
 
 function isOperationStatus(status?: string | null) {
-  return status === "creating" || status === "connecting" || status === "disconnecting";
+  return (
+    status === "creating" ||
+    status === "creating_instance" ||
+    status === "qr_required" ||
+    status === "qr_pending" ||
+    status === "connecting" ||
+    status === "disconnecting"
+  );
 }
 
 const Integrations = () => {
@@ -47,11 +54,16 @@ const Integrations = () => {
 
   const statusLabel = useMemo(() => {
     if (!connection) return "Desconectado";
+    if (connection.status === "not_configured") return "Desconectado";
     if (isQrPending(connection.status)) return "Aguardando QR";
-    if (connection.status === "creating") return "Criando instancia";
+    if (connection.status === "creating" || connection.status === "creating_instance") return "Criando instancia";
     if (connection.status === "connecting") return "Conectando";
     if (connection.status === "disconnecting") return "Desconectando";
     if (connection.status === "connected") return "Conectado";
+    if (connection.status === "disconnected_pending_provider_cleanup") return "Desconectado na Next Level";
+    if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessario";
+    if (connection.status === "rate_limited") return "Aguardando Evolution";
+    if (connection.status === "provider_warming_up") return "Evolution aquecendo";
     if (connection.status === "error") return "Erro";
     if (connection.status === "idle") return "Pronto para conectar";
     return "Desconectado";
@@ -77,6 +89,7 @@ const Integrations = () => {
     if (!selectedCompanyId) return;
     const shouldPoll =
       connection?.status === "creating" ||
+      connection?.status === "creating_instance" ||
       isQrPending(connection?.status) ||
       connection?.status === "connecting";
     if (!shouldPoll) return;
@@ -122,16 +135,29 @@ const Integrations = () => {
 
     try {
       setLoading(true);
-      const next = isConnected(connection?.status)
-        ? await restartWhatsappConnection(selectedCompanyId)
-        : await startWhatsappConnection(selectedCompanyId);
+      const next = await startWhatsappConnection(selectedCompanyId);
       setConnection(next);
       addToast(
-        isConnected(next.status) ? "WhatsApp reconectado." : "Instancia WhatsApp iniciada.",
+        isConnected(next.status) ? "WhatsApp conectado." : "Fluxo de QR iniciado.",
         "success",
       );
     } catch (error) {
       addToast(getErrorMessage(error, "Nao foi possivel iniciar o WhatsApp."), "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRepair = async () => {
+    if (!selectedCompanyId) return;
+
+    try {
+      setLoading(true);
+      const next = await restartWhatsappConnection(selectedCompanyId);
+      setConnection(next);
+      addToast(isConnected(next.status) ? "Conexao verificada." : "Reparo iniciado.", "success");
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel reparar a conexao."), "error");
     } finally {
       setLoading(false);
     }
@@ -197,20 +223,29 @@ const Integrations = () => {
           </div>
 
           <div className="flex shrink-0 gap-3">
-            <button
-              type="button"
-              onClick={handleConnect}
-              disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
-              className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading
-                ? "Conectando..."
-                : isConnected(connection?.status)
-                  ? "Reconectar WhatsApp"
+            {isConnected(connection?.status) ? (
+              <button
+                type="button"
+                onClick={handleRepair}
+                disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
+                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? "Verificando..." : "Reparar conexao"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleConnect}
+                disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
+                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading
+                  ? "Conectando..."
                   : isQrPending(connection?.status)
-                    ? "Gerar novo QR"
+                    ? "Aguardando leitura"
                     : "Conectar WhatsApp"}
-            </button>
+              </button>
+            )}
             {isConnected(connection?.status) ? (
               <button
                 type="button"

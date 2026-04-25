@@ -102,14 +102,21 @@ export interface OperationalCost {
 export type IntegrationProvider = "WHATSAPP" | "INSTAGRAM" | "MERCADOLIVRE" | "SHOPEE";
 
 export type WhatsappConnectionStatus =
+  | "not_configured"
+  | "creating_instance"
+  | "qr_required"
+  | "qr_pending"
   | "idle"
   | "creating"
-  | "qr_pending"
   | "waiting_qr"
   | "connecting"
   | "connected"
   | "disconnected"
+  | "disconnected_requires_new_qr"
+  | "disconnected_pending_provider_cleanup"
   | "disconnecting"
+  | "rate_limited"
+  | "provider_warming_up"
   | "error";
 
 export interface WhatsappConnection {
@@ -118,6 +125,7 @@ export interface WhatsappConnection {
   provider: "evolution" | string;
   instanceName: string | null;
   status: WhatsappConnectionStatus;
+  connectionState?: string | null;
   qrCode: string | null;
   pairingCode: string | null;
   phoneNumber: string | null;
@@ -125,7 +133,10 @@ export interface WhatsappConnection {
   webhookStatus?: "configured" | "pending" | "error";
   automationStatus?: "configured" | "pending" | "error";
   lastError?: string | null;
+  sessionGeneration?: number | null;
+  userRequestedDisconnect?: boolean;
   lastConnectionAt: string | null;
+  lastDisconnectedAt?: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 }

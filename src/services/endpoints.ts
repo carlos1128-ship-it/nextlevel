@@ -295,6 +295,7 @@ function normalizeWhatsappConnection(data: any): WhatsappConnection {
     provider: data?.provider || "evolution",
     instanceName: data?.instanceName ?? null,
     status: data?.status || "disconnected",
+    connectionState: data?.connectionState ?? null,
     qrCode: data?.qrCode ?? data?.code ?? null,
     pairingCode: data?.pairingCode ?? null,
     phoneNumber: data?.phoneNumber ?? null,
@@ -302,7 +303,10 @@ function normalizeWhatsappConnection(data: any): WhatsappConnection {
     webhookStatus: data?.webhookStatus ?? "pending",
     automationStatus: data?.automationStatus ?? "pending",
     lastError: data?.lastError ?? null,
+    sessionGeneration: data?.sessionGeneration ?? null,
+    userRequestedDisconnect: Boolean(data?.userRequestedDisconnect),
     lastConnectionAt: data?.lastConnectionAt ?? null,
+    lastDisconnectedAt: data?.lastDisconnectedAt ?? null,
     createdAt: data?.createdAt ?? null,
     updatedAt: data?.updatedAt ?? null,
   };
