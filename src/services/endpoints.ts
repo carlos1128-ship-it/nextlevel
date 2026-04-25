@@ -817,6 +817,11 @@ export async function startWhatsappConnection(companyId: string) {
   return normalizeWhatsappConnection(data);
 }
 
+export async function requestWhatsappQr(companyId: string) {
+  const { data } = await api.post("/whatsapp/connect/qr", { companyId });
+  return normalizeWhatsappConnection(data);
+}
+
 export async function restartWhatsappConnection(companyId: string) {
   const { data } = await api.post("/whatsapp/connect/restart", { companyId });
   return normalizeWhatsappConnection(data);

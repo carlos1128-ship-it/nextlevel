@@ -49,12 +49,17 @@ function isOperationStatus(status?: string | null) {
   );
 }
 
+function isCooldownStatus(status?: string | null) {
+  return status === "rate_limited" || status === "provider_warming_up" || status === "qr_not_ready";
+}
+
 const Integrations = () => {
   const { selectedCompanyId } = useAuth();
   const { addToast } = useToast();
   const [connection, setConnection] = useState<WhatsappConnection | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [retryRemaining, setRetryRemaining] = useState(0);
 
   const statusLabel = useMemo(() => {
     if (!connection) return "Desconectado";
@@ -66,9 +71,12 @@ const Integrations = () => {
     if (connection.status === "disconnecting") return "Desconectando";
     if (connection.status === "connected") return "Conectado";
     if (connection.status === "disconnected_pending_provider_cleanup") return "Desconectado na Next Level";
+    if (connection.status === "disconnect_pending") return "Limpeza pendente";
     if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessario";
     if (connection.status === "rate_limited") return "Limite temporario";
     if (connection.status === "provider_warming_up") return "Evolution iniciando";
+    if (connection.status === "qr_not_ready") return "QR ainda nao pronto";
+    if (connection.status === "repair_ready") return "Reparo pronto";
     if (connection.status === "error") return "Erro";
     if (connection.status === "idle") return "Pronto para conectar";
     return "Desconectado";
@@ -109,6 +117,23 @@ const Integrations = () => {
   }, [connection?.status, selectedCompanyId]);
 
   useEffect(() => {
+    if (!isCooldownStatus(connection?.status)) {
+      setRetryRemaining(0);
+      return;
+    }
+
+    const initial = Math.max(0, Number(connection?.retryAfterSeconds || 0));
+    setRetryRemaining(initial);
+    if (!initial) return;
+
+    const timer = window.setInterval(() => {
+      setRetryRemaining((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [connection?.retryAfterSeconds, connection?.status]);
+
+  useEffect(() => {
     const rawQr = connection?.qrCode;
     if (!rawQr) {
       setQrImage(null);
@@ -117,7 +142,7 @@ const Integrations = () => {
 
     if (rawQr.startsWith("data:image")) {
       setQrImage(rawQr);
-      console.info("whatsapp.frontend.qr.rendered", {
+      console.info("whatsapp.qr.frontend.rendered", {
         instanceName: connection?.instanceName,
         source: "base64",
       });
@@ -134,7 +159,7 @@ const Integrations = () => {
     })
       .then((image) => {
         setQrImage(image);
-        console.info("whatsapp.frontend.qr.rendered", {
+        console.info("whatsapp.qr.frontend.rendered", {
           instanceName: connection?.instanceName,
           source: "code",
         });
@@ -166,6 +191,8 @@ const Integrations = () => {
           next.message || "A Evolution limitou as requisicoes. Aguarde alguns segundos.",
           "info",
         );
+      } else if (next.status === "qr_not_ready") {
+        addToast(next.message || "QR ainda nao esta pronto. Tente novamente em alguns segundos.", "info");
       } else {
         addToast(next.message || next.lastError || "Erro ao gerar QR Code.", "error");
       }
@@ -189,6 +216,8 @@ const Integrations = () => {
         addToast("QR Code gerado.", "success");
       } else if (next.status === "provider_warming_up" || next.status === "rate_limited") {
         addToast(next.message || "Evolution indisponivel agora.", "info");
+      } else if (next.status === "qr_not_ready" || next.status === "repair_ready") {
+        addToast(next.message || "Clique em Conectar WhatsApp para gerar o QR.", "info");
       } else {
         addToast(next.message || "Conexao ainda precisa de novo QR.", "info");
       }
@@ -272,11 +301,18 @@ const Integrations = () => {
               <button
                 type="button"
                 onClick={handleConnect}
-                disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
+                disabled={
+                  loading ||
+                  !selectedCompanyId ||
+                  isOperationStatus(connection?.status) ||
+                  retryRemaining > 0
+                }
                 className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading
                   ? "Conectando..."
+                  : retryRemaining > 0
+                    ? `Aguarde ${retryRemaining}s`
                   : isQrPending(connection?.status)
                     ? "Aguardando leitura"
                     : "Conectar WhatsApp"}
@@ -329,9 +365,13 @@ const Integrations = () => {
           </div>
         ) : null}
 
-        {connection?.status === "provider_warming_up" || connection?.status === "rate_limited" || connection?.status === "error" ? (
+        {connection?.status === "provider_warming_up" ||
+        connection?.status === "rate_limited" ||
+        connection?.status === "qr_not_ready" ||
+        connection?.status === "error" ? (
           <p className="mt-4 rounded-md border border-red-500/30 bg-red-950/30 p-3 text-sm font-semibold text-red-200">
             {connection.message || connection.lastError || "Nao foi possivel gerar o QR Code agora."}
+            {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
           </p>
         ) : null}
       </section>
