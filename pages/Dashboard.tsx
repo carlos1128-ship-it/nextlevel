@@ -244,6 +244,81 @@ const KpiCard: React.FC<
   );
 };
 
+/* ─────────────────────────────────────────────────────────────
+   Growth Metrics — placeholder cards
+   Keys are stable for future backend integration.
+   Replace placeholder values with real API data when available:
+   { ltv, averageTicket, cpc, cpa, conversionRate, cac }
+───────────────────────────────────────────────────────────── */
+const GROWTH_METRICS: Array<{
+  key: "ltv" | "averageTicket" | "cpc" | "cpa" | "conversionRate" | "cac";
+  title: string;
+  description: string;
+  placeholder: string;
+  accentColor: string;
+}> = [
+  {
+    key: "ltv",
+    title: "LTV",
+    description: "Valor médio estimado que um cliente gera ao longo do relacionamento.",
+    placeholder: "Aguardando histórico",
+    accentColor: "text-lime-400",
+  },
+  {
+    key: "averageTicket",
+    title: "Ticket Médio",
+    description: "Valor médio por venda no período selecionado.",
+    placeholder: "Dados insuficientes",
+    accentColor: "text-cyan-400",
+  },
+  {
+    key: "cpc",
+    title: "CPC",
+    description: "Custo médio por clique nas campanhas conectadas.",
+    placeholder: "Aguardando campanhas",
+    accentColor: "text-purple-400",
+  },
+  {
+    key: "cpa",
+    title: "CPA",
+    description: "Custo médio para adquirir uma ação ou conversão.",
+    placeholder: "Aguardando integrações",
+    accentColor: "text-amber-400",
+  },
+  {
+    key: "conversionRate",
+    title: "Taxa de Conversão",
+    description: "Percentual de visitantes ou leads que viraram venda.",
+    placeholder: "Em breve",
+    accentColor: "text-blue-400",
+  },
+  {
+    key: "cac",
+    title: "CAC",
+    description: "Custo médio para adquirir um novo cliente.",
+    placeholder: "Conecte campanhas",
+    accentColor: "text-rose-400",
+  },
+];
+
+const GrowthMetricCard: React.FC<{
+  title: string;
+  description: string;
+  placeholder: string;
+  accentColor: string;
+}> = ({ title, description, placeholder, accentColor }) => (
+  <div className="flex flex-col rounded-3xl border border-zinc-800/90 bg-zinc-950 p-5 transition-all duration-300 hover:border-lime-400/25">
+    <div className="flex items-start justify-between gap-2">
+      <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
+      <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
+        Em config.
+      </span>
+    </div>
+    <p className={`mt-4 text-2xl font-black tracking-tight ${accentColor}`}>{placeholder}</p>
+    <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
+  </div>
+);
+
 const Dashboard = () => {
   const { username, detailLevel, selectedCompanyId } = useAuth();
   const { addToast } = useToast();
@@ -549,6 +624,36 @@ const Dashboard = () => {
           iconAccent="text-cyan-300"
         />
       </div>
+
+      {/* ── Métricas de Crescimento (placeholders — prontos para backend) ── */}
+      <section aria-label="Métricas de Crescimento">
+        <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-500">LEITURA AVANÇADA</p>
+            <h2 className="mt-1.5 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
+              Métricas de Crescimento
+            </h2>
+            <p className="mt-1 max-w-xl text-sm text-zinc-500">
+              Indicadores preparados para cruzar vendas, clientes e campanhas quando as integrações estiverem ativas.
+            </p>
+          </div>
+          <span className="mt-3 inline-flex w-max items-center gap-2 rounded-full border border-lime-400/20 bg-lime-400/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.22em] text-lime-300 sm:mt-0">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime-400"></span>
+            Preparado para integrações
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {GROWTH_METRICS.map((metric) => (
+            <GrowthMetricCard
+              key={metric.key}
+              title={metric.title}
+              description={metric.description}
+              placeholder={metric.placeholder}
+              accentColor={metric.accentColor}
+            />
+          ))}
+        </div>
+      </section>
 
       {!hasChartData ? (
         <div className="grid place-items-center rounded-3xl border border-zinc-900 bg-zinc-950 p-10 text-zinc-500">
