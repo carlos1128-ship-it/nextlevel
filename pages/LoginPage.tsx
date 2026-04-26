@@ -500,7 +500,7 @@ const LoginPage: React.FC = () => {
                 <span className="text-lg font-black tracking-[-0.08em] text-lime-200">NL</span>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.34em] text-zinc-500">Next Level AI</p>
+                <p className="text-xs font-bold uppercase tracking-[0.34em] text-zinc-500">Next Level</p>
                 <p className="mt-1 text-sm font-semibold text-zinc-200">Visão. Margem. Controle Total da Operação.</p>
               </div>
             </div>
@@ -521,7 +521,7 @@ const LoginPage: React.FC = () => {
               ACESSO SEGURO · PAINEL OPERACIONAL
             </div>
             <div className="max-w-4xl">
-              <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-zinc-500">Painel Operacional · Next Level AI</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-zinc-500">Painel Operacional · Next Level</p>
               <h1 className="mt-4 text-5xl font-black leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
                 <span className="block">ENTRE NO <span className="text-lime-300">CENTRO DE</span></span>
                 <span className="mt-2 block"><span className="text-lime-300">COMANDO</span> DA SUA</span>
@@ -533,7 +533,7 @@ const LoginPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <button type="button" onClick={focusRegister} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-lime-300/20 bg-lime-300 px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-zinc-950 shadow-[0_0_34px_rgba(182,255,0,0.24)] transition hover:-translate-y-0.5 hover:brightness-105">
-                CRIAR CONTA GRÁTIS <ArrowUpRight />
+                ASSINAR AGORA <ArrowUpRight />
               </button>
               <button type="button" onClick={() => scrollToSection("life-demo")} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-7 py-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.08]">
                 Ver Demonstração Tática
@@ -741,7 +741,7 @@ const LoginPage: React.FC = () => {
 
         {/* FOOTER */}
         <footer className="pt-10 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-600">
-          Next Level AI · Visão Operacional · Margem Real · Automação Tática · Operação Viva
+          Next Level · Visão Operacional · Margem Real · Automação Tática · Operação Viva
         </footer>
       </div>
     </div>
