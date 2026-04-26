@@ -77,7 +77,7 @@ const CreditCardIcon = () => (
 /* ─────────────────────────────────────────────────────────────
    Static data
 ───────────────────────────────────────────────────────────── */
-const providerPills = ["WhatsApp", "Instagram", "Mercado Livre", "Shopee", "Mercado Pago"];
+const providerPills = ["WhatsApp", "Instagram", "Mercado Livre", "Shopee"];
 
 const heroSignals = [
   { label: "Linha da vida", value: "+18,4%", helper: "Margem protegida após ajuste de preço e frete." },
@@ -93,24 +93,24 @@ const tacticalCards = [
 
 const pricingPlans = [
   {
-    eyebrow: "Plano Common", price: "R$ 97/mês",
+    eyebrow: "Plano Common", monthlyPrice: "R$ 97/mês", annualPrice: "R$ 1.067/ano",
     summary: "A base para organizar sua operação, conectar canais e enxergar margem real desde o primeiro acesso.",
     features: ["Calculadora de margem e preço ideal", "Até 2 empresas vinculadas", "Dashboard em tempo real", "Chat IA essencial", "Suporte via e-mail"],
-    cta: "Assinar agora", recommended: false, isContact: false,
+    cta: "Assinar agora", recommended: false,
     microcopy: "Assinatura mensal com acesso imediato ao painel e configuração inicial guiada.",
   },
   {
-    eyebrow: "Plano Premium", price: "R$ 137/mês",
+    eyebrow: "Plano Premium", monthlyPrice: "R$ 137/mês", annualPrice: "R$ 1.507/ano",
     summary: "A camada que organiza vendas, margem e atendimento no ritmo real da operação.",
     features: ["Até 10 empresas vinculadas", "WhatsApp e Instagram", "Alertas de margem", "Relatórios automáticos semanais", "Recomendações práticas da IA", "Suporte prioritário"],
-    cta: "Assinar agora", recommended: true, isContact: false,
+    cta: "Assinar agora", recommended: true,
     microcopy: "Pensado para quem não quer escalar faturamento queimando lucro no processo.",
   },
   {
-    eyebrow: "Plano Pro Business", price: "R$ 247/mês",
+    eyebrow: "Plano Pro Business", monthlyPrice: "R$ 247/mês", annualPrice: "R$ 2.717/ano",
     summary: "Para quando a empresa precisa de mais previsibilidade, mais canais e menos improviso no comando.",
-    features: ["Empresas ilimitadas", "Tudo do Premium", "Mercado Livre, Mercado Pago e Shopee", "Insights preditivos avançados", "Integrações customizadas via API", "Acompanhamento prioritário"],
-    cta: "Começar agora", recommended: false, isContact: false,
+    features: ["Empresas ilimitadas", "Tudo do Premium", "Mercado Livre, Shopee e marketplaces", "Insights preditivos avançados", "Integrações customizadas via API", "Acompanhamento prioritário"],
+    cta: "Começar agora", recommended: false,
     microcopy: "Acesso completo para operações em expansão que precisam de visibilidade e velocidade.",
   },
 ];
@@ -427,6 +427,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [billingAnnual, setBillingAnnual] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -524,7 +525,7 @@ const LoginPage: React.FC = () => {
               <h1 className="mt-4 text-5xl font-black leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
                 <span className="block">ENTRE NO <span className="text-lime-300">CENTRO DE</span></span>
                 <span className="mt-2 block"><span className="text-lime-300">COMANDO</span> DA SUA</span>
-                <span className="mt-2 block"><span className="text-lime-300">OPERAÇÃO.</span></span>
+                <span className="mt-2 block"><span className="text-lime-300">EMPRESA.</span></span>
               </h1>
               <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400 sm:text-lg">
                 Recupere visão, margem e controle antes que a operação perca ritmo. Automatize vendas, conecte canais e enxergue margem verdadeira — antes de perder dinheiro.
@@ -631,35 +632,77 @@ const LoginPage: React.FC = () => {
                 Escolha seu plano, entre no painel e avance para a camada de <span className="text-lime-300">lucro real.</span>
               </h2>
             </div>
-            <div className="flex flex-col gap-2 max-w-sm">
+            <div className="flex flex-col gap-3 max-w-sm">
               <p className="max-w-xl text-sm leading-7 text-zinc-400">
-                Estrutura de três planos pagos com a mesma experiência Next Level, focada em margem, clareza e execução imediata.
+                Três planos com a mesma experiência Next Level, focada em margem, clareza e execução imediata.
               </p>
-              <div className="inline-flex items-center gap-2 rounded-full border border-lime-400/25 bg-lime-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-lime-300 w-max shadow-[0_0_16px_rgba(182,255,0,0.08)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-lime-400"></span>
-                Anual · 11 meses pagos + 1 mês grátis
+              {/* Billing toggle */}
+              <div className="flex items-center gap-3">
+                <div className="flex rounded-2xl border border-white/10 bg-white/[0.03] p-1">
+                  <button type="button" onClick={() => setBillingAnnual(false)}
+                    className={`rounded-[14px] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
+                      !billingAnnual ? "bg-white text-zinc-950" : "text-zinc-400 hover:text-white"
+                    }`}>
+                    Mensal
+                  </button>
+                  <button type="button" onClick={() => setBillingAnnual(true)}
+                    className={`rounded-[14px] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
+                      billingAnnual ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"
+                    }`}>
+                    Anual
+                  </button>
+                </div>
+                {billingAnnual && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-lime-300 shadow-[0_0_14px_rgba(182,255,0,0.08)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-lime-400"></span>
+                    1 mês grátis
+                  </span>
+                )}
               </div>
+              {billingAnnual && (
+                <p className="text-[11px] text-zinc-500">Você paga 11 meses e ganha 1 mês grátis.</p>
+              )}
             </div>
           </div>
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {pricingPlans.map((plan) => (
-              <div key={plan.eyebrow} className={`relative flex flex-col rounded-[32px] border p-6 ${plan.recommended ? "border-lime-400/25 bg-[linear-gradient(160deg,rgba(182,255,0,0.08),rgba(5,7,11,1)_60%)]" : "border-white/10 bg-white/[0.04]"}`}>
+              <div key={plan.eyebrow} className={`relative flex flex-col rounded-[32px] border p-6 ${
+                plan.recommended
+                  ? "border-lime-400/25 bg-[linear-gradient(160deg,rgba(182,255,0,0.08),rgba(5,7,11,1)_60%)]"
+                  : "border-white/10 bg-white/[0.04]"
+              }`}>
                 {plan.recommended && (
                   <div className="absolute -top-3 right-6 rounded-full border border-lime-400/30 bg-lime-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-950">Recomendado</div>
                 )}
                 <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">{plan.eyebrow}</p>
-                <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">{plan.price}</p>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <p className="text-3xl font-black tracking-[-0.04em] text-white">
+                    {billingAnnual ? plan.annualPrice : plan.monthlyPrice}
+                  </p>
+                  {billingAnnual && (
+                    <span className="text-xs font-semibold text-lime-400 line-through opacity-60">{plan.monthlyPrice} × 12</span>
+                  )}
+                </div>
+                {billingAnnual && (
+                  <p className="mt-1 text-[11px] text-lime-300/80">Equivale a {plan.monthlyPrice.replace("/mês", "")} × 11 mêses.</p>
+                )}
                 <p className="mt-3 text-sm leading-7 text-zinc-400">{plan.summary}</p>
                 <ul className="mt-5 flex-1 space-y-3">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-3">
-                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${plan.recommended ? "bg-lime-300 text-zinc-950" : "border border-white/20 text-zinc-400"}`}><CheckIcon /></span>
+                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                        plan.recommended ? "bg-lime-300 text-zinc-950" : "border border-white/20 text-zinc-400"
+                      }`}><CheckIcon /></span>
                       <span className="text-sm text-zinc-300">{f}</span>
                     </li>
                   ))}
                 </ul>
                 <button type="button" onClick={focusRegister}
-                  className={`mt-6 w-full rounded-[20px] py-4 text-sm font-black uppercase tracking-[0.16em] transition hover:-translate-y-0.5 ${plan.recommended ? "bg-lime-300 text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] hover:brightness-105" : "border border-white/10 bg-white/[0.04] text-zinc-100 hover:bg-white/[0.08]"}`}>
+                  className={`mt-6 w-full rounded-[20px] py-4 text-sm font-black uppercase tracking-[0.16em] transition hover:-translate-y-0.5 ${
+                    plan.recommended
+                      ? "bg-lime-300 text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] hover:brightness-105"
+                      : "border border-white/10 bg-white/[0.04] text-zinc-100 hover:bg-white/[0.08]"
+                  }`}>
                   {plan.cta}
                 </button>
                 {plan.microcopy && (
