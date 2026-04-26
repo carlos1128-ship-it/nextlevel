@@ -298,7 +298,7 @@ const ScenarioChart: React.FC<{ positive: boolean }> = ({ positive }) => {
 /* ─────────────────────────────────────────────────────────────
    Auth Panel — improved visuals, unchanged auth logic
 ───────────────────────────────────────────────────────────── */
-const authFieldCls = "w-full rounded-[20px] border border-white/10 bg-[#060911] px-4 py-3 text-sm text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-lime-400/50 focus:bg-[#090f18] focus:shadow-[0_0_12px_rgba(182,255,0,0.08)]";
+const authFieldCls = "w-full rounded-[20px] border border-white/10 bg-[#060911] px-4 py-3 text-sm text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-lime-400/60 focus:bg-[#090f18] focus:shadow-[0_0_18px_rgba(182,255,0,0.10),inset_0_0_0_1px_rgba(182,255,0,0.08)]";
 
 interface AuthPanelProps {
   isRegisterView: boolean;
@@ -317,8 +317,8 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
   name, setName, email, setEmail, password, setPassword,
   showPassword, setShowPassword, error, loading, setError,
 }) => (
-  <aside id="auth-panel" className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(14,18,24,0.98),rgba(7,9,13,0.98))] p-6 shadow-[0_28px_90px_rgba(0,0,0,0.4)]">
-    <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top,rgba(182,255,0,0.18),transparent_54%)]" />
+  <aside id="auth-panel" className="relative overflow-hidden rounded-[34px] border border-lime-400/[0.12] bg-[linear-gradient(180deg,rgba(14,18,24,0.98),rgba(7,9,13,0.98))] p-6 shadow-[0_28px_90px_rgba(0,0,0,0.5),0_0_0_1px_rgba(182,255,0,0.04),inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top,rgba(182,255,0,0.22),transparent_54%)]" />
     <div className="relative">
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -354,7 +354,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
           const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
           window.location.href = `${base}/auth/google`;
         }}
-        className="mt-4 flex w-full items-center justify-center gap-3 rounded-[20px] border border-white/10 bg-white/[0.04] py-3 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.08]">
+        className="mt-4 flex w-full items-center justify-center gap-3 rounded-[20px] border border-white/[0.12] bg-white/[0.05] py-3.5 text-sm font-black uppercase tracking-[0.14em] text-zinc-200 transition hover:border-white/25 hover:bg-white/[0.10] hover:text-white">
         <GoogleIcon /> CONTINUAR COM GOOGLE
       </button>
 
@@ -398,17 +398,17 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
         <button type="submit" disabled={loading}
           className="inline-flex w-full items-center justify-center gap-3 rounded-[22px] border border-lime-300/10 bg-lime-300 px-4 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 transition duration-300 hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-60">
           {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" />}
-          {loading ? "Processando..." : isRegisterView ? "Criar Conta" : "Entrar no Painel"}
+          {loading ? "PROCESSANDO..." : isRegisterView ? "CRIAR CONTA" : "ENTRAR NO PAINEL"}
         </button>
       </form>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <div className="rounded-[20px] border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">Operação cega</p>
-          <p className="mt-2 text-sm font-semibold text-zinc-100">Faturamento sem margem e desconto sem critério.</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">Sem visibilidade</p>
+          <p className="mt-2 text-sm font-semibold text-zinc-100">Faturamento cresce, margem some, caixa sangra.</p>
         </div>
         <div className="rounded-[20px] border border-lime-400/15 bg-lime-400/10 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-lime-100/70">Operação assistida</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-lime-100/70">Com Next Level</p>
           <p className="mt-2 text-sm font-semibold text-lime-50">Venda, custo e decisão no mesmo radar.</p>
         </div>
       </div>
@@ -500,14 +500,14 @@ const LoginPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.34em] text-zinc-500">Next Level AI</p>
-                <p className="mt-1 text-sm font-semibold text-zinc-200">Margem real. Automação tática. Operação viva.</p>
+                <p className="mt-1 text-sm font-semibold text-zinc-200">Visão. Margem. Controle Total da Operação.</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <button type="button" onClick={() => scrollToSection("tactical-content")} className="rounded-full px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">O que fazemos</button>
               <button type="button" onClick={() => scrollToSection("pricing")} className="rounded-full px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Planos</button>
               <button type="button" onClick={focusLogin} className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 font-semibold text-zinc-100 transition hover:border-lime-400/30 hover:text-lime-100">Entrar</button>
-              <button type="button" onClick={focusRegister} className="rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 font-black uppercase tracking-[0.18em] text-lime-100 shadow-[0_0_30px_rgba(182,255,0,0.12)] transition hover:brightness-110">Assinar agora</button>
+              <button type="button" onClick={focusRegister} className="rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 font-black uppercase tracking-[0.18em] text-lime-100 shadow-[0_0_30px_rgba(182,255,0,0.12)] transition hover:brightness-110">Criar Conta</button>
             </div>
           </div>
         </nav>
@@ -520,10 +520,11 @@ const LoginPage: React.FC = () => {
               ACESSO SEGURO · PAINEL OPERACIONAL
             </div>
             <div className="max-w-4xl">
-              <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-zinc-500">A batalha pela sobrevivência</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-zinc-500">Painel Operacional · Next Level AI</p>
               <h1 className="mt-4 text-5xl font-black leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
-                <span className="block">Entre no <span className="text-lime-300">centro de comando</span></span>
-                <span className="mt-2 block">da sua <span className="text-lime-300">operação.</span></span>
+                <span className="block">ENTRE NO <span className="text-lime-300">CENTRO DE</span></span>
+                <span className="mt-2 block"><span className="text-lime-300">COMANDO</span> DA SUA</span>
+                <span className="mt-2 block"><span className="text-lime-300">OPERAÇÃO.</span></span>
               </h1>
               <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400 sm:text-lg">
                 Recupere visão, margem e controle antes que a operação perca ritmo. Automatize vendas, conecte canais e enxergue margem verdadeira — antes de perder dinheiro.
@@ -531,7 +532,7 @@ const LoginPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <button type="button" onClick={focusRegister} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-lime-300/20 bg-lime-300 px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-zinc-950 shadow-[0_0_34px_rgba(182,255,0,0.24)] transition hover:-translate-y-0.5 hover:brightness-105">
-                Assinar Agora <ArrowUpRight />
+                CRIAR CONTA GRÁTIS <ArrowUpRight />
               </button>
               <button type="button" onClick={() => scrollToSection("life-demo")} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-7 py-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.08]">
                 Ver Demonstração Tática
@@ -625,9 +626,9 @@ const LoginPage: React.FC = () => {
         <section id="pricing" className="scroll-mt-24 pt-16">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-200/70">Novo funil de entrada</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-200/70">Escolha seu nível de operação</p>
               <h2 className="mt-3 max-w-4xl text-4xl font-black leading-[0.94] tracking-[-0.04em] text-white sm:text-5xl">
-                Escolha seu plano, entre no painel e avance para a camada de lucro real.
+                Escolha seu plano, entre no painel e avance para a camada de <span className="text-lime-300">lucro real.</span>
               </h2>
             </div>
             <div className="flex flex-col gap-2 max-w-sm">
@@ -685,7 +686,7 @@ const LoginPage: React.FC = () => {
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button type="button" onClick={focusRegister} className="rounded-[24px] bg-lime-300 px-7 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 shadow-[0_0_36px_rgba(182,255,0,0.24)] transition hover:-translate-y-0.5 hover:brightness-105">
-                  Entrar para o Lucro Real
+                  CRIAR CONTA E ENTRAR NO PAINEL
                 </button>
                 <button type="button" onClick={focusLogin} className="rounded-[24px] border border-white/10 bg-white/[0.04] px-7 py-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.08]">
                   Já tenho conta
@@ -697,7 +698,7 @@ const LoginPage: React.FC = () => {
 
         {/* FOOTER */}
         <footer className="pt-10 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-600">
-          Next Level Platform · Margem verdadeira · Automação tática · Operação viva
+          Next Level AI · Visão Operacional · Margem Real · Automação Tática · Operação Viva
         </footer>
       </div>
     </div>
