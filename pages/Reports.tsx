@@ -291,6 +291,12 @@ const Reports = () => {
       const pageH = pdf.internal.pageSize.getHeight();
       const imgH = (canvas.height * pageW) / canvas.width;
 
+      // Paint dark background on page 1 before adding image.
+      // Without this, any unused space below the image is jsPDF's
+      // default white, causing the white blank area at the bottom.
+      pdf.setFillColor(9, 9, 11); // #09090b — matches report bg
+      pdf.rect(0, 0, pageW, pageH, "F");
+
       let position = 0;
       let remaining = imgH;
 
@@ -300,6 +306,9 @@ const Reports = () => {
         if (remaining > 0) {
           pdf.addPage();
           position -= pageH;
+          // Paint dark background on every subsequent page too.
+          pdf.setFillColor(9, 9, 11);
+          pdf.rect(0, 0, pageW, pageH, "F");
         }
       }
 
