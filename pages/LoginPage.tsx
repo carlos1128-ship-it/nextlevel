@@ -322,7 +322,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
     <div className="relative">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-lime-200/75">Ponto de entrada</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-lime-200/75">Acesso Seguro · Next Level</p>
           <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-white">
             {isRegisterView ? "CRIAR CONTA NEXT LEVEL" : "ENTRAR NO PAINEL"}
           </h2>
@@ -330,9 +330,9 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
             {isRegisterView ? "Crie sua conta e prepare seu painel operacional." : "Acesse sua operação com segurança."}
           </p>
         </div>
-        <div className="shrink-0 rounded-2xl border border-lime-400/20 bg-lime-400/10 px-3 py-2 text-right">
-          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-lime-200/70">Acesso</p>
-          <p className="mt-1 text-sm font-black text-lime-100">Seguro</p>
+        <div className="shrink-0 rounded-2xl border border-lime-400/20 bg-lime-400/10 px-3 py-2 text-right shadow-[0_0_20px_rgba(182,255,0,0.06)]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-lime-200/70">Painel</p>
+          <p className="mt-1 text-sm font-black text-lime-100">Operacional</p>
         </div>
       </div>
 
@@ -343,7 +343,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
         </button>
         <button type="button" onClick={() => { setIsRegisterView(true); setError(""); }}
           className={`rounded-[18px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.14em] transition ${isRegisterView ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
-          Assinar
+          Cadastro
         </button>
       </div>
 
@@ -499,8 +499,8 @@ const LoginPage: React.FC = () => {
                 <span className="text-lg font-black tracking-[-0.08em] text-lime-200">NL</span>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.34em] text-zinc-500">Next Level</p>
-                <p className="mt-1 text-sm font-semibold text-zinc-200">Operação tática, margem real, sobrevivência inteligente.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.34em] text-zinc-500">Next Level AI</p>
+                <p className="mt-1 text-sm font-semibold text-zinc-200">Margem real. Automação tática. Operação viva.</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -515,17 +515,18 @@ const LoginPage: React.FC = () => {
         {/* HERO */}
         <section className="grid gap-10 pb-16 pt-14 xl:grid-cols-[1fr_420px] xl:items-start">
           <div className="space-y-8 pt-4">
-            <div className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-300">
-              PAINEL OPERACIONAL — O Cérebro Tático do seu Negócio
+            <div className="inline-flex items-center gap-2 rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-lime-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-lime-400 shadow-[0_0_6px_#b6ff00]"></span>
+              ACESSO SEGURO · PAINEL OPERACIONAL
             </div>
             <div className="max-w-4xl">
               <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-zinc-500">A batalha pela sobrevivência</p>
               <h1 className="mt-4 text-5xl font-black leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
-                <span className="block">A linha que separa sua empresa</span>
-                <span className="mt-2 block text-lime-200">do lucro real ou do colapso.</span>
+                <span className="block">Entre no <span className="text-lime-300">centro de comando</span></span>
+                <span className="mt-2 block">da sua <span className="text-lime-300">operação.</span></span>
               </h1>
-              <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-300 sm:text-lg">
-                Sem a Next Level, você opera cego. Automatize vendas, conecte canais e enxergue margem verdadeira antes de perder dinheiro. A escolha é sua.
+              <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400 sm:text-lg">
+                Recupere visão, margem e controle antes que a operação perca ritmo. Automatize vendas, conecte canais e enxergue margem verdadeira — antes de perder dinheiro.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -538,14 +539,14 @@ const LoginPage: React.FC = () => {
             </div>
             <div className="flex flex-wrap gap-3">
               {providerPills.map((p) => (
-                <span key={p} className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-300">{p}</span>
+                <span key={p} className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400 transition-colors hover:border-lime-400/20 hover:text-lime-200 cursor-default">{p}</span>
               ))}
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {heroSignals.map((item) => (
-                <article key={item.label} className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
+                <article key={item.label} className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 backdrop-blur transition duration-300 hover:border-lime-400/15 hover:bg-white/[0.06]">
                   <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-500">{item.label}</p>
-                  <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-white">{item.value}</p>
+                  <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-lime-200">{item.value}</p>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">{item.helper}</p>
                 </article>
               ))}
@@ -633,8 +634,9 @@ const LoginPage: React.FC = () => {
               <p className="max-w-xl text-sm leading-7 text-zinc-400">
                 Estrutura de três planos pagos com a mesma experiência Next Level, focada em margem, clareza e execução imediata.
               </p>
-              <div className="inline-flex items-center gap-2 rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-lime-200/80 w-max">
-                Anual: 11 meses pagos + 1 mês grátis
+              <div className="inline-flex items-center gap-2 rounded-full border border-lime-400/25 bg-lime-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-lime-300 w-max shadow-[0_0_16px_rgba(182,255,0,0.08)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-lime-400"></span>
+                Anual · 11 meses pagos + 1 mês grátis
               </div>
             </div>
           </div>
@@ -673,9 +675,9 @@ const LoginPage: React.FC = () => {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(182,255,0,0.16),transparent_22%)]" />
             <div className="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
               <div className="max-w-3xl">
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-100/70">Última chamada</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80">Última chamada</p>
                 <h2 className="mt-3 text-4xl font-black leading-[0.94] tracking-[-0.04em] text-white sm:text-5xl">
-                  Se a sua linha de lucro ainda depende de sorte, ela já está em risco.
+                  Se a sua <span className="text-lime-300">linha de lucro</span> ainda depende de sorte, ela já está em risco.
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-200/80 sm:text-base">
                   Assine agora e transforme crescimento bruto em lucro verdadeiro com visibilidade tático-financeira desde o primeiro acesso.
