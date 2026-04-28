@@ -14,7 +14,7 @@ import { useTheme } from './src/hooks/useTheme';
 import type { Company, DetailLevel, UserNiche } from './src/types/domain';
 import NotFound from './src/app/not-found';
 import { applyMetadata, resolveMetadata } from './src/app/layout';
-import { getCompanies, getUserProfile } from './src/services/endpoints';
+import { getCompanies, getCompanyPersonalizationStatus, getUserProfile } from './src/services/endpoints';
 import api from './src/services/api';
 
 // Lazy load pages with heavy dependencies
@@ -30,12 +30,14 @@ const CommandCenter = lazy(() => import('./pages/CommandCenter'));
 const MarketIntel = lazy(() => import('./pages/MarketIntel'));
 const Attendant = lazy(() => import('./pages/Attendant'));
 const SystemHealth = lazy(() => import('./pages/SystemHealth'));
+const OnboardingPersonalization = lazy(() => import('./pages/OnboardingPersonalization'));
 
 // Authentication Context
 interface AuthContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
   isProfileReady: boolean;
+  isCompanyReady: boolean;
   username: string | null;
   email: string | null;
   niche: UserNiche | null;
@@ -99,6 +101,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(hasStoredToken);
   const [isAdmin, setIsAdmin] = useState(Boolean(storedUser.admin));
   const [isProfileReady, setIsProfileReady] = useState(!hasStoredToken);
+  const [isCompanyReady, setIsCompanyReady] = useState(!hasStoredToken);
   const [username, setUsername] = useState<string | null>(storedUser.name);
   const [email, setEmail] = useState<string | null>(storedUser.email);
   const [niche, setNicheState] = useState<UserNiche | null>(storedUser.niche);
@@ -138,6 +141,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     setIsLoggedIn(true);
     setIsAdmin(Boolean(user.admin));
     setIsProfileReady(true);
+    setIsCompanyReady(false);
     setUsername(user.name || null);
     setEmail(user.email || null);
     setNicheState(user.niche || null);
@@ -160,6 +164,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     setIsLoggedIn(false);
     setIsAdmin(false);
     setIsProfileReady(true);
+    setIsCompanyReady(true);
     setUsername(null);
     setEmail(null);
     setNicheState(null);
@@ -172,6 +177,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   useEffect(() => {
     if (!isLoggedIn) {
       setIsProfileReady(true);
+      setIsCompanyReady(true);
       return;
     }
     getUserProfile()
@@ -198,7 +204,11 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   }, [isLoggedIn, setDetailLevel, setTheme]);
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      setIsCompanyReady(true);
+      return;
+    }
+    setIsCompanyReady(false);
     getCompanies()
       .then((companies) => {
         const list = Array.isArray(companies) ? companies : [];
@@ -222,13 +232,15 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
       })
       .catch(() => {
         // ignore company bootstrap errors to avoid blocking app load
-      });
+      })
+      .finally(() => setIsCompanyReady(true));
   }, [isLoggedIn, selectedCompanyId, storedCompanyId]);
 
   const value = {
     isLoggedIn,
     isAdmin,
     isProfileReady,
+    isCompanyReady,
     username,
     email,
     niche,
@@ -259,6 +271,67 @@ const AdminRoute = ({ children }: { children?: ReactNode }) => {
   if (!isProfileReady) return null;
   if (!isLoggedIn || !token) return <Navigate to="/login" />;
   return isAdmin ? <>{children}</> : <Navigate to="/" replace />;
+};
+
+const FullscreenLoading = ({ label = "Preparando experiencia" }: { label?: string }) => (
+  <div className="flex min-h-screen items-center justify-center bg-[#040507] text-zinc-100">
+    <div className="text-center">
+      <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
+      <p className="mt-3 text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">{label}</p>
+    </div>
+  </div>
+);
+
+const OnboardingGate = ({ children }: { children?: ReactNode }) => {
+  const location = useLocation();
+  const { isLoggedIn, isProfileReady, isCompanyReady, selectedCompanyId } = useAuth();
+  const [checking, setChecking] = useState(true);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!isLoggedIn || !isProfileReady || !isCompanyReady) {
+      setChecking(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!selectedCompanyId) {
+      setChecking(false);
+      setShouldRedirect(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setChecking(true);
+    getCompanyPersonalizationStatus({ companyId: selectedCompanyId })
+      .then((status) => {
+        if (!cancelled) setShouldRedirect(Boolean(status.shouldRedirectToOnboarding));
+      })
+      .catch(() => {
+        if (!cancelled) setShouldRedirect(false);
+      })
+      .finally(() => {
+        if (!cancelled) setChecking(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, isProfileReady, isCompanyReady, selectedCompanyId]);
+
+  if (!isProfileReady || !isCompanyReady || checking) {
+    return <FullscreenLoading />;
+  }
+
+  if (shouldRedirect && location.pathname !== "/onboarding/personalization") {
+    const returnTo = encodeURIComponent(`${location.pathname}${location.search}`);
+    return <Navigate to={`/onboarding/personalization?returnTo=${returnTo}`} replace />;
+  }
+
+  return <>{children}</>;
 };
 
 const App = () => {
@@ -322,13 +395,23 @@ const GoogleAuthCallback = () => {
 
 const AppContent = () => {
   const { isLoggedIn } = useAuth();
-  const dashboardShell = (
+  const personalizedShell = (page: ReactNode) => (
+    <ProtectedRoute>
+      <OnboardingGate>
+        <Layout>
+          {page}
+        </Layout>
+      </OnboardingGate>
+    </ProtectedRoute>
+  );
+  const plainShell = (page: ReactNode) => (
     <ProtectedRoute>
       <Layout>
-        <Dashboard />
+        {page}
       </Layout>
     </ProtectedRoute>
   );
+  const dashboardShell = personalizedShell(<Dashboard />);
 
   return (
     <BrowserRouter>
@@ -346,30 +429,29 @@ const AppContent = () => {
         <Routes>
           <Route path="/auth/callback" element={<GoogleAuthCallback />} />
           <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
+          <Route path="/onboarding/personalization" element={<ProtectedRoute><OnboardingPersonalization /></ProtectedRoute>} />
           <Route path="/" element={isLoggedIn ? dashboardShell : <LoginPage />} />
           <Route
             path="/dashboard"
-            element={
-              <ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>
-            }
+            element={dashboardShell}
           />
-          <Route path="/reports" element={<ProtectedRoute><Layout><Reports /></Layout></ProtectedRoute>} />
-          <Route path="/chat" element={<ProtectedRoute><Layout><Chat /></Layout></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
-          <Route path="/integrations" element={<ProtectedRoute><Layout><Integrations /></Layout></ProtectedRoute>} />
-          <Route path="/companies" element={<ProtectedRoute><Layout><Companies /></Layout></ProtectedRoute>} />
-          <Route path="/insights" element={<ProtectedRoute><Layout><Insights /></Layout></ProtectedRoute>} />
-          <Route path="/financial-flow" element={<ProtectedRoute><Layout><FinancialFlow /></Layout></ProtectedRoute>} />
-          <Route path="/finance" element={<ProtectedRoute><Layout><FinancialFlow /></Layout></ProtectedRoute>} />
-          <Route path="/products" element={<ProtectedRoute><Layout><Products /></Layout></ProtectedRoute>} />
-          <Route path="/customers" element={<ProtectedRoute><Layout><Customers /></Layout></ProtectedRoute>} />
-          <Route path="/costs" element={<ProtectedRoute><Layout><Costs /></Layout></ProtectedRoute>} />
-          <Route path="/market-intel" element={<ProtectedRoute><Layout><MarketIntel /></Layout></ProtectedRoute>} />
-          <Route path="/attendant" element={<ProtectedRoute><Layout><Attendant /></Layout></ProtectedRoute>} />
+          <Route path="/reports" element={personalizedShell(<Reports />)} />
+          <Route path="/chat" element={personalizedShell(<Chat />)} />
+          <Route path="/settings" element={plainShell(<Settings />)} />
+          <Route path="/profile" element={plainShell(<Profile />)} />
+          <Route path="/integrations" element={personalizedShell(<Integrations />)} />
+          <Route path="/companies" element={plainShell(<Companies />)} />
+          <Route path="/insights" element={personalizedShell(<Insights />)} />
+          <Route path="/financial-flow" element={personalizedShell(<FinancialFlow />)} />
+          <Route path="/finance" element={personalizedShell(<FinancialFlow />)} />
+          <Route path="/products" element={personalizedShell(<Products />)} />
+          <Route path="/customers" element={personalizedShell(<Customers />)} />
+          <Route path="/costs" element={personalizedShell(<Costs />)} />
+          <Route path="/market-intel" element={personalizedShell(<MarketIntel />)} />
+          <Route path="/attendant" element={personalizedShell(<Attendant />)} />
           <Route path="/admin/system-health" element={<AdminRoute><Layout><SystemHealth /></Layout></AdminRoute>} />
-          <Route path="/command-center" element={<ProtectedRoute><Layout><CommandCenter /></Layout></ProtectedRoute>} />
-          <Route path="/plans" element={<ProtectedRoute><Layout><Plans /></Layout></ProtectedRoute>} />
+          <Route path="/command-center" element={personalizedShell(<CommandCenter />)} />
+          <Route path="/plans" element={plainShell(<Plans />)} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

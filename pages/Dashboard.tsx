@@ -27,14 +27,22 @@ import { useToast } from "../components/Toast";
 import { getErrorMessage } from "../src/services/error";
 import {
   exportFinancialCsv,
-  getDashboardSummary,
+  getDashboardMetrics,
+  getDashboardPreferences,
   getForecast,
   getAttendantRoi,
-  getTransactions,
 } from "../src/services/endpoints";
 import { useStrategicInsights } from "../src/hooks/useStrategicInsights";
-import type { DashboardPeriod, DashboardSummary, ForecastResponse, AttendantRoi, TransactionItem } from "../src/types/domain";
-import { getTransactionDateValue } from "../src/utils/datetime";
+import type {
+  DashboardPeriod,
+  DashboardSummary,
+  DashboardMetricsResponse,
+  DashboardMetricResult,
+  ForecastResponse,
+  AttendantRoi,
+  TransactionItem,
+  DashboardResolvedLayoutItem,
+} from "../src/types/domain";
 
 const EMPTY_SUMMARY: DashboardSummary = {
   revenue: 0,
@@ -51,11 +59,23 @@ const PIE_COLORS = ["#B6FF00", "#87B900", "#6D9200", "#547100"];
 const PERIODS: Array<{ label: string; value: DashboardPeriod }> = [
   { label: "Hoje", value: "today" },
   { label: "Ontem", value: "yesterday" },
-  { label: "Semana", value: "week" },
+  { label: "7 dias", value: "7d" },
+  { label: "30 dias", value: "30d" },
   { label: "Mes", value: "month" },
-  { label: "Ano", value: "year" },
 ];
 const FORECAST_HORIZONS: Array<7 | 15 | 30> = [7, 15, 30];
+const DEFAULT_VISIBLE_METRICS = new Set([
+  "revenue",
+  "losses",
+  "profit",
+  "cash_flow",
+  "company_count",
+  "ai_roi",
+  "cash_flow_summary",
+  "category_mix",
+  "revenue_forecast",
+  "alerts_insights",
+]);
 
 const asCurrency = (value: number) =>
   `R$ ${Number(value || 0).toLocaleString("pt-BR", {
@@ -86,98 +106,6 @@ type TransactionsUpdatedDetail = {
   totalExpense?: number;
   balance?: number;
   transactionsCount?: number;
-};
-
-const isSameCalendarDay = (left: Date, right: Date) =>
-  left.getFullYear() === right.getFullYear() &&
-  left.getMonth() === right.getMonth() &&
-  left.getDate() === right.getDate();
-
-const isTransactionInPeriod = (value: string | undefined, period: DashboardPeriod) => {
-  if (!value) return false;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return false;
-
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-  if (period === "today") return isSameCalendarDay(target, today);
-  if (period === "yesterday") {
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    return isSameCalendarDay(target, yesterday);
-  }
-  if (period === "week") {
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - 6);
-    return target >= weekStart && target <= today;
-  }
-  if (period === "month") {
-    return target.getFullYear() === today.getFullYear() && target.getMonth() === today.getMonth();
-  }
-  return target.getFullYear() === today.getFullYear();
-};
-
-const buildLineDataFromTransactions = (transactions: TransactionItem[], period: DashboardPeriod) => {
-  const grouped = new Map<string, { name: string; Receitas: number; Saidas: number }>();
-
-  transactions.forEach((tx, index) => {
-    const txDate = new Date(getTransactionDateValue(tx));
-    if (Number.isNaN(txDate.getTime())) return;
-
-    let key = "";
-    if (period === "today" || period === "yesterday") {
-      key = `${String(txDate.getHours()).padStart(2, "0")}:00`;
-    } else if (period === "year") {
-      key = txDate.toLocaleDateString("pt-BR", { month: "short" });
-    } else {
-      key = txDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-    }
-
-    if (!grouped.has(key)) {
-      grouped.set(key, { name: key || `Ponto ${index + 1}`, Receitas: 0, Saidas: 0 });
-    }
-
-    const row = grouped.get(key);
-    if (!row) return;
-    if (tx.type === "income") row.Receitas += Number(tx.amount || 0);
-    if (tx.type === "expense") row.Saidas += Number(tx.amount || 0);
-  });
-
-  return Array.from(grouped.values());
-};
-
-const buildSummaryFromTransactions = (
-  transactions: TransactionItem[],
-  period: DashboardPeriod,
-  currentSummary: DashboardSummary
-): DashboardSummary => {
-  const filtered = transactions.filter((tx) => isTransactionInPeriod(getTransactionDateValue(tx), period));
-  const revenue = filtered
-    .filter((tx) => tx.type === "income")
-    .reduce((acc, tx) => acc + Number(tx.amount || 0), 0);
-  const losses = filtered
-    .filter((tx) => tx.type === "expense")
-    .reduce((acc, tx) => acc + Number(tx.amount || 0), 0);
-  const profit = revenue - losses;
-
-  return {
-    ...currentSummary,
-    revenue,
-    losses,
-    profit,
-    cashflow: profit,
-    period,
-    lineData: buildLineDataFromTransactions(filtered, period),
-    pieData:
-      revenue > 0 || losses > 0
-        ? [
-            { name: "RECEITA", value: revenue },
-            { name: "SAIDAS", value: losses },
-          ]
-        : [],
-  };
 };
 
 const hasUsefulSummaryData = (summary: DashboardSummary) => {
@@ -213,10 +141,16 @@ const CustomTooltip = ({
 };
 
 const KpiCard: React.FC<
-  KpiCardProps & { iconAccent?: string }
-> = ({ title, value, change, changeType, icon: Icon, color, iconAccent }) => {
+  Omit<KpiCardProps, "changeType"> & {
+    changeType: "increase" | "decrease" | "flat";
+    iconAccent?: string;
+    status?: DashboardMetricResult["status"];
+    reason?: string;
+  }
+> = ({ title, value, change, changeType, icon: Icon, color, iconAccent, status = "ok", reason }) => {
+  const isMuted = status !== "ok";
   return (
-    <div className="flex min-w-[260px] flex-col rounded-3xl border border-zinc-800/90 bg-zinc-950 p-6 transition-all duration-300 hover:border-lime-400/40">
+    <div className={`flex min-w-[260px] flex-col rounded-3xl border bg-zinc-950 p-6 transition-all duration-300 hover:border-lime-400/40 ${isMuted ? "border-amber-500/25" : "border-zinc-800/90"}`}>
       <div className="mb-4 flex items-start justify-between">
         <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">
           {title}
@@ -225,78 +159,79 @@ const KpiCard: React.FC<
           <Icon className={`h-5 w-5 ${iconAccent || color}`} />
         </div>
       </div>
-      <p className="text-[clamp(22px,2.4vw,32px)] md:text-[clamp(24px,2.2vw,36px)] font-black leading-none tracking-tighter text-zinc-100 whitespace-normal break-words">
+      <p className={`text-[clamp(22px,2.4vw,32px)] md:text-[clamp(24px,2.2vw,36px)] font-black leading-none tracking-tighter whitespace-normal break-words ${isMuted ? "text-amber-200" : "text-zinc-100"}`}>
         {value}
       </p>
       <div
         className={`mt-2 flex items-center text-[11px] font-black ${
-          changeType === "increase" ? "text-lime-400" : "text-red-500"
+          changeType === "increase" ? "text-lime-400" : changeType === "decrease" ? "text-red-500" : "text-zinc-500"
         }`}
       >
         {changeType === "increase" ? (
           <ArrowUpRightIcon className="mr-1 h-3.5 w-3.5" />
-        ) : (
+        ) : changeType === "decrease" ? (
           <ArrowDownRightIcon className="mr-1 h-3.5 w-3.5" />
-        )}
+        ) : null}
         {change} <span className="ml-1 font-medium text-zinc-500">no periodo selecionado</span>
       </div>
+      {reason ? <p className="mt-3 text-[11px] leading-5 text-zinc-500">{reason}</p> : null}
     </div>
   );
 };
 
 /* ─────────────────────────────────────────────────────────────
-   Growth Metrics — placeholder cards
+   Legacy growth metric notes, kept out of the rendered dashboard.
    Keys are stable for future backend integration.
-   Replace placeholder values with real API data when available:
+   Production values now come from /api/dashboard/metrics:
    { ltv, averageTicket, cpc, cpa, conversionRate, cac }
 ───────────────────────────────────────────────────────────── */
-const GROWTH_METRICS: Array<{
+const LEGACY_GROWTH_METRICS: Array<{
   key: "ltv" | "averageTicket" | "cpc" | "cpa" | "conversionRate" | "cac";
   title: string;
   description: string;
-  placeholder: string;
+  legacyText: string;
   accentColor: string;
 }> = [
   {
     key: "ltv",
     title: "LTV",
     description: "Valor médio estimado que um cliente gera ao longo do relacionamento.",
-    placeholder: "Aguardando histórico",
+    legacyText: "Aguardando histórico",
     accentColor: "text-lime-400",
   },
   {
     key: "averageTicket",
     title: "Ticket Médio",
     description: "Valor médio por venda no período selecionado.",
-    placeholder: "Dados insuficientes",
+    legacyText: "Dados insuficientes",
     accentColor: "text-cyan-400",
   },
   {
     key: "cpc",
     title: "CPC",
     description: "Custo médio por clique nas campanhas conectadas.",
-    placeholder: "Aguardando campanhas",
+    legacyText: "Aguardando campanhas",
     accentColor: "text-purple-400",
   },
   {
     key: "cpa",
     title: "CPA",
     description: "Custo médio para adquirir uma ação ou conversão.",
-    placeholder: "Aguardando integrações",
+    legacyText: "Aguardando integrações",
     accentColor: "text-amber-400",
   },
   {
     key: "conversionRate",
     title: "Taxa de Conversão",
     description: "Percentual de visitantes ou leads que viraram venda.",
-    placeholder: "Em breve",
+    legacyText: "Em breve",
     accentColor: "text-blue-400",
   },
   {
     key: "cac",
     title: "CAC",
     description: "Custo médio para adquirir um novo cliente.",
-    placeholder: "Conecte campanhas",
+    legacyText: "Conecte campanhas",
     accentColor: "text-rose-400",
   },
 ];
@@ -304,9 +239,9 @@ const GROWTH_METRICS: Array<{
 const GrowthMetricCard: React.FC<{
   title: string;
   description: string;
-  placeholder: string;
+  legacyText: string;
   accentColor: string;
-}> = ({ title, description, placeholder, accentColor }) => (
+}> = ({ title, description, legacyText, accentColor }) => (
   <div className="flex flex-col rounded-3xl border border-zinc-800/90 bg-zinc-950 p-5 transition-all duration-300 hover:border-lime-400/25">
     <div className="flex items-start justify-between gap-2">
       <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
@@ -314,22 +249,119 @@ const GrowthMetricCard: React.FC<{
         Em config.
       </span>
     </div>
-    <p className={`mt-4 text-2xl font-black tracking-tight ${accentColor}`}>{placeholder}</p>
+    <p className={`mt-4 text-2xl font-black tracking-tight ${accentColor}`}>{legacyText}</p>
     <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
+  </div>
+);
+
+const ADVANCED_METRICS: Array<{
+  key: string;
+  title: string;
+  description: string;
+  accentColor: string;
+}> = [
+  { key: "sales_count", title: "Vendas", description: "Quantidade real de vendas e entradas comerciais registradas no periodo.", accentColor: "text-lime-400" },
+  { key: "average_ticket", title: "Ticket Medio", description: "Valor medio por venda no periodo selecionado.", accentColor: "text-cyan-400" },
+  { key: "customers_acquired", title: "Clientes adquiridos", description: "Clientes criados no periodo selecionado.", accentColor: "text-purple-400" },
+  { key: "operational_costs", title: "Custos operacionais", description: "Custos operacionais cadastrados no periodo.", accentColor: "text-amber-400" },
+  { key: "margin", title: "Margem", description: "Lucro liquido dividido pela receita, quando ha receita no periodo.", accentColor: "text-blue-400" },
+  { key: "waste_inefficiency", title: "Desperdicio", description: "Custos operacionais como percentual da receita real.", accentColor: "text-rose-400" },
+  { key: "conversion_rate", title: "Taxa de Conversao", description: "Percentual de visitantes ou leads que viraram venda.", accentColor: "text-blue-400" },
+  { key: "cac", title: "CAC", description: "Custo medio para adquirir um novo cliente.", accentColor: "text-rose-400" },
+  { key: "roi", title: "ROI", description: "Retorno sobre investimento, sem confundir com ROAS.", accentColor: "text-lime-300" },
+  { key: "roas", title: "ROAS", description: "Retorno de receita atribuida a anuncios.", accentColor: "text-sky-300" },
+  { key: "ltv", title: "LTV", description: "Valor medio de cliente baseado em historico de compras.", accentColor: "text-emerald-300" },
+  { key: "repeat_customers", title: "Clientes recorrentes", description: "Clientes com mais de uma compra vinculada.", accentColor: "text-orange-300" },
+  { key: "best_selling_products", title: "Mais vendidos", description: "Produtos agrupados por receita registrada.", accentColor: "text-fuchsia-300" },
+  { key: "peak_sales_hours", title: "Pico de vendas", description: "Vendas agrupadas por horario real.", accentColor: "text-teal-300" },
+];
+
+const DIRECT_RENDERED_METRIC_KEYS = new Set([
+  "revenue",
+  "losses",
+  "profit",
+  "net_profit",
+  "cash_flow",
+  "company_count",
+  "ai_roi",
+  "cash_flow_summary",
+  "category_mix",
+  "revenue_forecast",
+  "alerts_insights",
+]);
+
+const ADVANCED_METRIC_KEYS = new Set(ADVANCED_METRICS.map((item) => item.key));
+
+const RealMetricCard: React.FC<{
+  title: string;
+  description: string;
+  accentColor: string;
+  metric?: DashboardMetricResult;
+}> = ({ title, description, accentColor, metric }) => (
+  <div className="flex flex-col rounded-3xl border border-zinc-800/90 bg-zinc-950 p-5 transition-all duration-300 hover:border-lime-400/25">
+    <div className="flex items-start justify-between gap-2">
+      <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
+      <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
+        {metric?.status === "ok" ? "Real" : "Honesto"}
+      </span>
+    </div>
+    <p className={`mt-4 text-2xl font-black tracking-tight ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
+      {metric?.formatted || "Carregando"}
+    </p>
+    <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
+    {metric?.reason ? <p className="mt-2 text-[11px] leading-5 text-zinc-600">{metric.reason}</p> : null}
   </div>
 );
 
 const Dashboard = () => {
   const { username, detailLevel, selectedCompanyId } = useAuth();
   const { addToast } = useToast();
-  const [summary, setSummary] = useState<DashboardSummary>(EMPTY_SUMMARY);
+  const [metricsData, setMetricsData] = useState<DashboardMetricsResponse | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [layout, setLayout] = useState<DashboardResolvedLayoutItem[]>([]);
+  const [isLayoutLoading, setIsLayoutLoading] = useState(true);
   const [activePeriod, setActivePeriod] = useState<DashboardPeriod>("today");
   const [forecast, setForecast] = useState<ForecastResponse | null>(null);
   const [forecastHorizon, setForecastHorizon] = useState<7 | 15 | 30>(30);
   const [isForecastLoading, setIsForecastLoading] = useState(false);
   const [attendantRoi, setAttendantRoi] = useState<AttendantRoi>({ iaSalesCount: 0, iaRevenue: 0 });
-  const shouldLoadStrategicInsights = selectedCompanyId !== null && hasUsefulSummaryData(summary);
+  const enabledMetricKeys = useMemo(
+    () => (isLayoutLoading ? Array.from(DEFAULT_VISIBLE_METRICS) : layout.map((item) => item.metricKey)),
+    [isLayoutLoading, layout],
+  );
+  const enabledMetricSet = useMemo(() => new Set(enabledMetricKeys), [enabledMetricKeys]);
+  const isMetricEnabled = (metricKey: string) => enabledMetricSet.has(metricKey);
+  const hasSelectedMetrics = enabledMetricKeys.length > 0;
+  const metric = (metricKey: string) => metricsData?.metrics?.[metricKey];
+  const metricNumber = (metricKey: string) => {
+    const item = metric(metricKey);
+    return item?.status === "ok" && typeof item.value === "number" ? item.value : 0;
+  };
+  const summary: DashboardSummary = useMemo(
+    () => ({
+      ...EMPTY_SUMMARY,
+      revenue: metricNumber("revenue"),
+      losses: metricNumber("losses"),
+      profit: metricNumber("profit") || metricNumber("net_profit"),
+      cashflow: metricNumber("cash_flow"),
+      companyCount: metricNumber("company_count"),
+      period: activePeriod,
+      lineData: (metricsData?.charts?.revenueByDay || []).map((item) => ({
+        name: String(item.name || ""),
+        Receitas: Number(item.Receitas || 0),
+        Saidas: Number(item.Saidas || 0),
+      })),
+      pieData: (metricsData?.charts?.costsByCategory || []).map((item) => ({
+        name: String(item.name || ""),
+        value: Number(item.value || 0),
+      })),
+    }),
+    [metricsData, activePeriod],
+  );
+  const shouldLoadStrategicInsights =
+    selectedCompanyId !== null &&
+    isMetricEnabled("alerts_insights") &&
+    hasUsefulSummaryData(summary);
   const {
     rawText: sharedInsightText,
     error: strategicInsightError,
@@ -343,16 +375,6 @@ const Dashboard = () => {
   const formattedInsight = useMemo(() => normalizeAiText(sharedInsightText), [sharedInsightText]);
 
   const chartData = useMemo(() => {
-    if (!summary.lineData.length) {
-      return [
-        { name: "00:00", Receitas: 0, Saidas: 0 },
-        { name: "04:00", Receitas: 0, Saidas: 0 },
-        { name: "08:00", Receitas: 0, Saidas: 0 },
-        { name: "12:00", Receitas: 0, Saidas: 0 },
-        { name: "16:00", Receitas: 0, Saidas: 0 },
-        { name: "20:00", Receitas: 0, Saidas: 0 },
-      ];
-    }
     return summary.lineData.map((item) => ({
       name: item.name,
       Receitas: Number(item.Receitas || 0),
@@ -361,15 +383,17 @@ const Dashboard = () => {
   }, [summary.lineData]);
 
   const pieData = useMemo(() => {
-    if (!summary.pieData.length) {
-      return [
-        { name: "RECEITA", value: 1 },
-      ];
+    const salesByProduct = metricsData?.charts?.salesByProduct || [];
+    if (salesByProduct.length) {
+      return salesByProduct.map((item) => ({
+        name: String(item.name || ""),
+        value: Number(item.revenue || item.value || 0),
+      }));
     }
     return summary.pieData;
-  }, [summary.pieData]);
+  }, [metricsData, summary.pieData]);
 
-  const hasChartData = summary.lineData.length > 0 || summary.pieData.length > 0;
+  const hasChartData = chartData.length > 0 || pieData.length > 0;
 
   const forecastChartData = useMemo(() => {
     if (!forecast || forecast.status !== "ok") return [];
@@ -405,23 +429,35 @@ const Dashboard = () => {
     return "Previsão pronta";
   }, [forecast]);
 
-  const loadSummary = async () => {
+  const loadLayout = async () => {
+    setIsLayoutLoading(true);
+    try {
+      const data = await getDashboardPreferences({ companyId: selectedCompanyId });
+      setLayout(Array.isArray(data?.resolvedLayout) ? data.resolvedLayout : []);
+    } catch (error) {
+      setLayout([]);
+      addToast(getErrorMessage(error, "Nao foi possivel carregar sua personalizacao."), "error");
+    } finally {
+      setIsLayoutLoading(false);
+    }
+  };
+
+  const loadMetrics = async () => {
+    if (!hasSelectedMetrics && !isLayoutLoading) {
+      setMetricsData(null);
+      return;
+    }
     setIsUpdating(true);
     try {
-      const data = await getDashboardSummary({
+      const data = await getDashboardMetrics({
         companyId: selectedCompanyId,
         period: activePeriod,
+        metrics: enabledMetricKeys,
+        comparePrevious: true,
       });
-      const normalized: DashboardSummary = {
-        ...EMPTY_SUMMARY,
-        ...data,
-        period: data?.period || activePeriod,
-        lineData: Array.isArray(data?.lineData) ? data.lineData : [],
-        pieData: Array.isArray(data?.pieData) ? data.pieData : [],
-      };
-      setSummary(normalized);
+      setMetricsData(data);
     } catch (error) {
-      setSummary(EMPTY_SUMMARY);
+      setMetricsData(null);
       addToast(getErrorMessage(error, "Nao foi possivel carregar o dashboard."), "error");
     } finally {
       setIsUpdating(false);
@@ -429,7 +465,7 @@ const Dashboard = () => {
   };
 
   const loadForecast = async (horizonOverride?: 7 | 15 | 30) => {
-    if (!selectedCompanyId) {
+    if (!selectedCompanyId || !isMetricEnabled("revenue_forecast")) {
       setForecast(null);
       return;
     }
@@ -450,27 +486,27 @@ const Dashboard = () => {
     }
   };
 
-  const refreshSummaryFromTransactions = async () => {
-    if (!selectedCompanyId) {
-      setSummary(EMPTY_SUMMARY);
-      return;
-    }
-
-    try {
-      const transactions = await getTransactions(selectedCompanyId);
-      setSummary((current) => buildSummaryFromTransactions(transactions, activePeriod, current));
-    } catch {
-      // Keep the last rendered dashboard state and let the canonical summary request reconcile.
-    }
-  };
-
   useEffect(() => {
-    void loadSummary();
-  }, [detailLevel, selectedCompanyId, activePeriod]);
-
-  useEffect(() => {
-    void loadForecast(forecastHorizon);
+    void loadLayout();
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    const onPreferencesUpdated = () => {
+      void loadLayout();
+    };
+    window.addEventListener("dashboard:preferences-updated", onPreferencesUpdated);
+    return () => window.removeEventListener("dashboard:preferences-updated", onPreferencesUpdated);
+  }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (isLayoutLoading) return;
+    void loadMetrics();
+  }, [detailLevel, selectedCompanyId, activePeriod, isLayoutLoading, enabledMetricKeys.join(",")]);
+
+  useEffect(() => {
+    if (isLayoutLoading) return;
+    void loadForecast(forecastHorizon);
+  }, [selectedCompanyId, isLayoutLoading, enabledMetricKeys.join(",")]);
 
   useEffect(() => {
     const onTransactionsUpdated = (event: Event) => {
@@ -479,8 +515,7 @@ const Dashboard = () => {
         return;
       }
 
-      void refreshSummaryFromTransactions();
-      void loadSummary();
+      void loadMetrics();
       void loadForecast(forecastHorizon);
     };
     window.addEventListener("transactions:updated", onTransactionsUpdated);
@@ -493,7 +528,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const loadRoi = async () => {
-      if (!selectedCompanyId) {
+      if (!selectedCompanyId || !isMetricEnabled("ai_roi")) {
         setAttendantRoi({ iaSalesCount: 0, iaRevenue: 0 });
         return;
       }
@@ -504,8 +539,9 @@ const Dashboard = () => {
         setAttendantRoi({ iaSalesCount: 0, iaRevenue: 0 });
       }
     };
+    if (isLayoutLoading) return;
     void loadRoi();
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, isLayoutLoading, enabledMetricKeys.join(",")]);
 
   const handleExport = async () => {
     try {
@@ -528,6 +564,42 @@ const Dashboard = () => {
   };
 
   const marginDirection = summary.profit >= 0 ? "increase" : "decrease";
+  const dynamicGrowthMetrics = layout
+    .filter(
+      (item) =>
+        item.enabled &&
+        !DIRECT_RENDERED_METRIC_KEYS.has(item.metricKey) &&
+        !ADVANCED_METRIC_KEYS.has(item.metricKey),
+    )
+    .map((item, index) => ({
+      key: item.metricKey,
+      title: item.label,
+      description: item.description,
+      accentColor: ["text-lime-300", "text-cyan-300", "text-amber-300", "text-fuchsia-300"][index % 4],
+    }));
+  const visibleGrowthMetrics = [
+    ...ADVANCED_METRICS.filter((item) => isMetricEnabled(item.key)),
+    ...dynamicGrowthMetrics,
+  ];
+  const metricChange = (item?: DashboardMetricResult) => {
+    if (!item || item.status !== "ok") {
+      return { text: item?.status === "not_enough_data" ? "Dado insuficiente" : "Sem dados", type: "flat" as const };
+    }
+    const comparison = item.comparison;
+    if (!comparison) {
+      return { text: "Valor real", type: "flat" as const };
+    }
+    const prefix = comparison.changePercent > 0 ? "+" : "";
+    return {
+      text: `${prefix}${comparison.changePercent.toFixed(2)}%`,
+      type:
+        comparison.direction === "up"
+          ? ("increase" as const)
+          : comparison.direction === "down"
+            ? ("decrease" as const)
+            : ("flat" as const),
+    };
+  };
 
   return (
     <div className="space-y-7 overflow-x-hidden">
@@ -539,6 +611,12 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="flex w-full gap-3 md:w-auto">
+          <Link
+            to="/settings#dashboard"
+            className="flex-1 rounded-2xl border border-lime-400/30 bg-lime-400/10 px-7 py-3 text-center text-[11px] font-black uppercase tracking-[0.2em] text-lime-300 transition hover:border-lime-400/60 md:flex-none"
+          >
+            Personalizar
+          </Link>
           <button
             onClick={handleExport}
             className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-7 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-100 transition hover:bg-zinc-900 md:flex-none"
@@ -546,7 +624,7 @@ const Dashboard = () => {
             Exportar Dados
           </button>
           <button
-            onClick={() => void loadSummary()}
+            onClick={() => void loadMetrics()}
             disabled={isUpdating}
             className={`flex-1 rounded-2xl bg-lime-400 px-7 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-900 transition ${
               isUpdating ? "opacity-50" : "hover:opacity-90"
@@ -573,60 +651,100 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
-        <KpiCard
-          title="Faturamento"
-          value={asCurrency(summary.revenue)}
-          change="Entradas consolidadas"
-          changeType="increase"
-          icon={DollarSignIcon}
-          color="text-lime-400"
-        />
-        <KpiCard
-          title="Perdas"
-          value={asCurrency(summary.losses)}
-          change="Saidas e custos"
-          changeType="decrease"
-          icon={DollarSignIcon}
-          color="text-red-500"
-        />
-        <KpiCard
-          title="Lucro"
-          value={asCurrency(summary.profit)}
-          change={summary.profit >= 0 ? "Margem positiva" : "Margem pressionada"}
-          changeType={marginDirection}
-          icon={BarChartIcon}
-          color="text-blue-400"
-        />
-        <KpiCard
-          title="Fluxo de Caixa"
-          value={asCurrency(summary.cashflow)}
-          change={summary.cashflow >= 0 ? "Caixa saudavel" : "Caixa negativo"}
-          changeType={summary.cashflow >= 0 ? "increase" : "decrease"}
-          icon={BarChartIcon}
-          color="text-purple-400"
-        />
-        <KpiCard
-          title="Empresas"
-          value={String(summary.companyCount || 0)}
-          change="Base vinculada"
-          changeType="increase"
-          icon={BuildingIcon}
-          color="text-amber-400"
-        />
-        <KpiCard
-          title="ROI da IA"
-          value={`${attendantRoi.iaSalesCount} vendas`}
-          change={`Gerado pela IA: ${asCurrency(attendantRoi.iaRevenue)}`}
-          changeType="increase"
-          icon={MessageSquareIcon}
-          color="text-cyan-400"
-          iconAccent="text-cyan-300"
-        />
-      </div>
+      {!isLayoutLoading && !hasSelectedMetrics ? (
+        <div className="rounded-3xl border border-dashed border-lime-400/30 bg-lime-400/10 p-8 text-center">
+          <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Dashboard sem widgets ativos</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
+            Escolha os indicadores que fazem sentido para esta empresa e salve uma visao mais limpa.
+          </p>
+          <Link
+            to="/settings#dashboard"
+            className="mt-5 inline-flex rounded-2xl bg-lime-400 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-950"
+          >
+            Personalizar dashboard
+          </Link>
+        </div>
+      ) : null}
 
-      {/* ── Métricas de Crescimento (placeholders — prontos para backend) ── */}
-      <section aria-label="Métricas de Crescimento">
+      {hasSelectedMetrics ? (
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
+          {isMetricEnabled("revenue") ? (
+            <KpiCard
+              title="Faturamento"
+              value={metric("revenue")?.formatted || "Carregando"}
+              change={metricChange(metric("revenue")).text}
+              changeType={metricChange(metric("revenue")).type}
+              icon={DollarSignIcon}
+              color="text-lime-400"
+              status={metric("revenue")?.status}
+              reason={metric("revenue")?.reason}
+            />
+          ) : null}
+          {isMetricEnabled("losses") ? (
+            <KpiCard
+              title="Perdas"
+              value={metric("losses")?.formatted || "Carregando"}
+              change={metricChange(metric("losses")).text}
+              changeType={metricChange(metric("losses")).type}
+              icon={DollarSignIcon}
+              color="text-red-500"
+              status={metric("losses")?.status}
+              reason={metric("losses")?.reason}
+            />
+          ) : null}
+          {isMetricEnabled("profit") || isMetricEnabled("net_profit") ? (
+            <KpiCard
+              title={isMetricEnabled("net_profit") ? "Lucro liquido" : "Lucro"}
+              value={(metric("net_profit") || metric("profit"))?.formatted || "Carregando"}
+              change={metricChange(metric("net_profit") || metric("profit")).text}
+              changeType={metricChange(metric("net_profit") || metric("profit")).type || marginDirection}
+              icon={BarChartIcon}
+              color="text-blue-400"
+              status={(metric("net_profit") || metric("profit"))?.status}
+              reason={(metric("net_profit") || metric("profit"))?.reason}
+            />
+          ) : null}
+          {isMetricEnabled("cash_flow") ? (
+            <KpiCard
+              title="Fluxo de Caixa"
+              value={metric("cash_flow")?.formatted || "Carregando"}
+              change={metricChange(metric("cash_flow")).text}
+              changeType={metricChange(metric("cash_flow")).type}
+              icon={BarChartIcon}
+              color="text-purple-400"
+              status={metric("cash_flow")?.status}
+              reason={metric("cash_flow")?.reason}
+            />
+          ) : null}
+          {isMetricEnabled("company_count") ? (
+            <KpiCard
+              title="Empresas"
+              value={metric("company_count")?.formatted || "Carregando"}
+              change="Base vinculada"
+              changeType="flat"
+              icon={BuildingIcon}
+              color="text-amber-400"
+              status={metric("company_count")?.status}
+              reason={metric("company_count")?.reason}
+            />
+          ) : null}
+          {isMetricEnabled("ai_roi") ? (
+            <KpiCard
+              title="ROI da IA"
+              value={`${attendantRoi.iaSalesCount} vendas`}
+              change={`Gerado pela IA: ${asCurrency(attendantRoi.iaRevenue)}`}
+              changeType="increase"
+              icon={MessageSquareIcon}
+              color="text-cyan-400"
+              iconAccent="text-cyan-300"
+            />
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* ── Metricas de crescimento vindas do backend ── */}
+      {visibleGrowthMetrics.length > 0 ? (
+      <section aria-label="Metricas de Crescimento">
         <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-500">LEITURA AVANÇADA</p>
@@ -643,24 +761,26 @@ const Dashboard = () => {
           </span>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {GROWTH_METRICS.map((metric) => (
-            <GrowthMetricCard
-              key={metric.key}
-              title={metric.title}
-              description={metric.description}
-              placeholder={metric.placeholder}
-              accentColor={metric.accentColor}
+          {visibleGrowthMetrics.map((item) => (
+            <RealMetricCard
+              key={item.key}
+              title={item.title}
+              description={item.description}
+              accentColor={item.accentColor}
+              metric={metric(item.key)}
             />
           ))}
         </div>
       </section>
+      ) : null}
 
-      {!hasChartData ? (
+      {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && !hasChartData ? (
         <div className="grid place-items-center rounded-3xl border border-zinc-900 bg-zinc-950 p-10 text-zinc-500">
           Nenhum dado disponivel ainda para este periodo.
         </div>
-      ) : (
+      ) : (isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) ? (
         <div className="grid min-h-0 grid-cols-1 gap-5 xl:grid-cols-3">
+          {isMetricEnabled("cash_flow_summary") ? (
           <div className="relative min-h-0 overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-7 xl:col-span-2">
             <div className="relative z-10 mb-8 flex items-center justify-between">
               <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Fluxo por Faixa</h3>
@@ -708,7 +828,9 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
           </div>
+          ) : null}
 
+          {isMetricEnabled("category_mix") ? (
           <div className="flex flex-col items-center rounded-3xl border border-zinc-900 bg-zinc-950 p-7">
             <h3 className="mb-8 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Mix do Periodo</h3>
             <div className="w-full min-w-0">
@@ -744,9 +866,11 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
+          ) : null}
         </div>
-      )}
+      ) : null}
 
+      {isMetricEnabled("revenue_forecast") ? (
       <div className="rounded-3xl border border-zinc-900 bg-zinc-950 p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -855,7 +979,9 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+      ) : null}
 
+      {isMetricEnabled("alerts_insights") ? (
       <div className="flex flex-col items-start gap-6 rounded-3xl border border-zinc-900 bg-zinc-950 p-7 md:flex-row md:items-center">
         <div className="min-w-0 flex-1">
           <div className="mb-3 flex items-center gap-3">
@@ -880,6 +1006,7 @@ const Dashboard = () => {
           Ver Insights Completos
         </Link>
       </div>
+      ) : null}
     </div>
   );
 };

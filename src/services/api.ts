@@ -100,6 +100,14 @@ function dispatchFriendlyApiError(error: AxiosError) {
     return;
   }
 
+  const status = error.response?.status || 0;
+  const isRecoverableWhatsappConnectionError =
+    (url.includes('/whatsapp/connection') || url.includes('/whatsapp/connect/')) &&
+    ([409, 429, 502, 503, 504].includes(status) || !error.response);
+  if (isRecoverableWhatsappConnectionError) {
+    return;
+  }
+
   const message = getErrorMessage(
     error,
     'Algo saiu do fluxo esperado, mas sua operacao continua protegida.',

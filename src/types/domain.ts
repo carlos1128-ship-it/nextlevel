@@ -1,6 +1,6 @@
 export type DetailLevel = "low" | "medium" | "high";
 export type UserNiche = "ECOMMERCE" | "MEDICINA" | "SERVICOS" | "EDUCACAO" | "OUTROS";
-export type DashboardPeriod = "today" | "yesterday" | "week" | "month" | "year";
+export type DashboardPeriod = "today" | "yesterday" | "week" | "month" | "year" | "7d" | "30d" | "custom";
 
 export interface DashboardSummary {
   revenue: number;
@@ -11,7 +11,190 @@ export interface DashboardSummary {
   period: DashboardPeriod;
   lineData: Array<{ name: string; Receitas: number; Saidas: number }>;
   pieData: Array<{ name: string; value: number }>;
+  enabledMetrics?: string[];
 }
+
+export type DashboardMetricCategory =
+  | "finance"
+  | "sales"
+  | "marketing"
+  | "products"
+  | "customers"
+  | "operations"
+  | "ai_insights";
+
+export type DashboardDisplayType = "card" | "chart" | "table" | "list";
+
+export interface DashboardMetricDefinition {
+  key: string;
+  label: string;
+  description: string;
+  category: DashboardMetricCategory;
+  requiredData: string[];
+  supportedBusinessTypes: string[];
+  defaultEnabled: boolean;
+  planAvailability: string[];
+  displayType: DashboardDisplayType;
+}
+
+export interface DashboardPreference {
+  metricKey: string;
+  enabled: boolean;
+  order: number;
+  size?: "small" | "medium" | "large" | null;
+}
+
+export type DashboardResolvedLayoutItem = DashboardMetricDefinition & {
+  metricKey: string;
+  enabled: boolean;
+  order: number;
+  size?: "small" | "medium" | "large" | null;
+};
+
+export interface DashboardPreferencesResponse {
+  availableMetrics: DashboardMetricDefinition[];
+  preferences: DashboardPreference[];
+  resolvedLayout: DashboardResolvedLayoutItem[];
+}
+
+export type DashboardMetricStatus = "ok" | "no_data" | "not_enough_data";
+export type DashboardMetricDirection = "up" | "down" | "flat";
+
+export interface DashboardMetricResult {
+  key: string;
+  label: string;
+  value: number | null;
+  formatted: string;
+  status: DashboardMetricStatus;
+  reason?: string;
+  comparison?: {
+    previousValue: number;
+    changePercent: number;
+    direction: DashboardMetricDirection;
+  };
+}
+
+export type DashboardChartPoint = Record<string, string | number | null>;
+
+export interface DashboardMetricsResponse {
+  period: {
+    key: DashboardPeriod;
+    startDate: string;
+    endDate: string;
+    label: string;
+  };
+  metrics: Record<string, DashboardMetricResult>;
+  charts: {
+    revenueByDay: DashboardChartPoint[];
+    salesByProduct: DashboardChartPoint[];
+    costsByCategory: DashboardChartPoint[];
+    peakSalesHours: DashboardChartPoint[];
+  };
+  warnings: string[];
+}
+
+export type BusinessType =
+  | "ecommerce_physical"
+  | "ecommerce_digital"
+  | "saas"
+  | "agency"
+  | "medical_clinic"
+  | "law_office"
+  | "local_services"
+  | "retail_store"
+  | "restaurant"
+  | "marketplace_seller"
+  | "other";
+
+export interface CompanyProfile {
+  id?: string;
+  companyId?: string;
+  businessType: BusinessType;
+  businessModel?: string | null;
+  mainGoal?: string | null;
+  salesChannel?: string | null;
+  companySize?: string | null;
+  monthlyRevenueRange?: string | null;
+  dataMaturity?: string | null;
+  usesPaidTraffic: boolean;
+  hasPhysicalProducts: boolean;
+  hasDigitalProducts: boolean;
+  hasServices: boolean;
+  usesWhatsAppForSales: boolean;
+  usesMarketplace: boolean;
+  hasSupportTeam: boolean;
+  hasOperationalCosts: boolean;
+  wantsAutomation: boolean;
+  wantsMarketAnalysis: boolean;
+  onboardingCompleted: boolean;
+  onboardingSkipped: boolean;
+  completedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CompanyModulePreference {
+  key?: string;
+  moduleKey: string;
+  label: string;
+  description: string;
+  route: string;
+  enabled: boolean;
+  source?: string | null;
+  order: number;
+}
+
+export interface AgentRecommendation {
+  tone: string;
+  toneOfVoice: string;
+  attendantActive: boolean;
+  bufferEnabled: boolean;
+  splitResponsesEnabled: boolean;
+  imageReadingEnabled: boolean;
+  audioToTextEnabled: boolean;
+  humanPauseEnabled: boolean;
+  internetSearchEnabled: boolean;
+  debounceSeconds: number;
+  maxContextMessages: number;
+  systemPrompt: string;
+  welcomeMessage: string;
+  safetyBoundaries: string[];
+}
+
+export interface PersonalizationRecommendations {
+  businessType: BusinessType;
+  modules: string[];
+  dashboardMetrics: string[];
+  agent: AgentRecommendation;
+  integrations: string[];
+  firstActions: string[];
+  reports: string[];
+  insightTopics: string[];
+}
+
+export interface CompanyPersonalizationStatus {
+  onboardingCompleted: boolean;
+  onboardingSkipped: boolean;
+  profile: CompanyProfile | null;
+  shouldRedirectToOnboarding: boolean;
+  shouldShowPersonalizationBanner?: boolean;
+  hasActivePlan?: boolean;
+  legacyCompany?: boolean;
+}
+
+export interface CompanyPersonalizationResponse {
+  profile: CompanyProfile | null;
+  modulePreferences: CompanyModulePreference[];
+  dashboardPreferences: DashboardPreference[];
+  agentConfig: AgentConfig | null;
+  recommendations: PersonalizationRecommendations | null;
+}
+
+export type CompanyOnboardingPayload = Partial<Omit<CompanyProfile, "id" | "companyId" | "createdAt" | "updatedAt" | "completedAt">> & {
+  businessType: BusinessType;
+  applyRecommendedSetup?: boolean;
+  overwriteAgentConfig?: boolean;
+};
 
 export interface TransactionItem {
   id: string;
@@ -276,6 +459,9 @@ export interface WhatsappConnectionSnapshot {
   method?: "meta" | "evolution" | null;
   phoneNumber?: string | null;
   qrRequired?: boolean;
+  webhookStatus?: "configured" | "pending" | "error";
+  automationStatus?: "configured" | "pending" | "error";
+  retryAfterSeconds?: number | null;
   failureReason?: string | null;
   diagnosticSnapshot?: {
     companyId: string;

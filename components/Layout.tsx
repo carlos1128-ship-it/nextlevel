@@ -21,9 +21,9 @@ import {
 } from "./icons";
 import { useAuth } from "../App";
 import { useToast } from "./Toast";
-import { updateUserProfile } from "../src/services/endpoints";
+import { getCompanyPersonalization, updateUserProfile } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
-import type { UserNiche } from "../src/types/domain";
+import type { CompanyModulePreference, UserNiche } from "../src/types/domain";
 import NicheModal, { type CompanyStage } from "../src/components/onboarding/NicheModal";
 
 type SidebarNavItem = NavItem & { id: string };
@@ -52,6 +52,24 @@ const adminNavItem: SidebarNavItem = {
   path: "/admin/system-health",
   name: "System Health",
   icon: ShieldIcon,
+};
+const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
+  home: "dashboard",
+  reports: "reports",
+  chat: "chat",
+  attendant: "attendant",
+  insights: "insights",
+  market: "market_intelligence",
+  projects: "automations",
+  products: "products",
+  customers: "customers",
+  costs: "costs",
+  plans: "plans",
+  settings: "settings",
+  profile: "profile",
+  integrations: "integrations",
+  companies: "companies",
+  "financial-flow": "financial",
 };
 const COMPANY_STAGE_STORAGE_KEY = "nextlevel:onboarding-company-stage";
 const DEFAULT_COMPANY_STAGE: CompanyStage = "ESCALANDO";
@@ -94,9 +112,39 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
   return isAdmin ? [...items, adminNavItem] : items;
 }
 
-const Sidebar = () => {
-  const { username, isAdmin, niche } = useAuth();
-  const items = useMemo(() => resolveNavItems(isAdmin, niche), [isAdmin, niche]);
+function splitNavItemsByModulePreferences(
+  items: SidebarNavItem[],
+  modulePreferences: CompanyModulePreference[],
+) {
+  if (!modulePreferences.length) {
+    return { primaryItems: items, moreItems: [] as SidebarNavItem[] };
+  }
+
+  const preferenceByModule = new Map(modulePreferences.map((item) => [item.moduleKey, item]));
+  const withPreference = items.map((item, index) => {
+    const moduleKey = MODULE_KEY_BY_NAV_ID[item.id] || item.id;
+    const preference = preferenceByModule.get(moduleKey);
+    return {
+      item,
+      enabled: preference?.enabled ?? true,
+      order: preference?.order ?? index,
+    };
+  });
+
+  return {
+    primaryItems: withPreference
+      .filter((entry) => entry.enabled)
+      .sort((a, b) => a.order - b.order)
+      .map((entry) => entry.item),
+    moreItems: withPreference
+      .filter((entry) => !entry.enabled)
+      .sort((a, b) => a.order - b.order)
+      .map((entry) => entry.item),
+  };
+}
+
+const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
+  const { username } = useAuth();
   return (
     <aside className="fixed left-0 top-0 z-50 hidden h-full w-64 flex-col justify-between border-r border-zinc-200 bg-white p-6 text-zinc-800 dark:border-zinc-900 dark:bg-[#080b10] dark:text-zinc-100 lg:flex">
       <div>
@@ -104,7 +152,7 @@ const Sidebar = () => {
         <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operacao Segura</p>
         <nav aria-label="Menu Principal">
           <ul className="space-y-1">
-            {(Array.isArray(items) ? items : []).map((item) => (
+            {(Array.isArray(primaryItems) ? primaryItems : []).map((item) => (
               <li key={item.path}>
                 <NavLink
                   to={item.path}
@@ -122,6 +170,32 @@ const Sidebar = () => {
               </li>
             ))}
           </ul>
+          {moreItems.length > 0 ? (
+            <details className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-900 dark:bg-zinc-950/70">
+              <summary className="cursor-pointer px-2 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
+                Mais ferramentas
+              </summary>
+              <ul className="mt-2 space-y-1">
+                {moreItems.map((item) => (
+                  <li key={item.path}>
+                    <NavLink
+                      to={item.path}
+                      className={({ isActive }) =>
+                        `group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                          isActive
+                            ? "bg-lime-100 text-lime-700 dark:bg-lime-400/20 dark:text-lime-300"
+                            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                        }`
+                      }
+                    >
+                      <item.icon className="mr-3 h-5 w-5" />
+                      <span>{item.name}</span>
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
         </nav>
       </div>
 
@@ -228,17 +302,55 @@ const FloatingActionButton = () => {
 };
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const { isAdmin, niche, setNiche } = useAuth();
+  const { isAdmin, niche, selectedCompanyId, setNiche } = useAuth();
   const { addToast } = useToast();
   const [selectedNiche, setSelectedNiche] = useState<UserNiche | null>(niche);
   const [selectedStage, setSelectedStage] = useState<CompanyStage>(() => readStoredCompanyStage());
   const [savingNiche, setSavingNiche] = useState(false);
+  const [modulePreferences, setModulePreferences] = useState<CompanyModulePreference[]>([]);
   const items = useMemo(() => resolveNavItems(isAdmin, niche), [isAdmin, niche]);
+  const { primaryItems, moreItems } = useMemo(
+    () => splitNavItemsByModulePreferences(items, modulePreferences),
+    [items, modulePreferences],
+  );
   const showNicheModal = niche === null;
 
   useEffect(() => {
     setSelectedNiche(niche);
   }, [niche]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedCompanyId) {
+      setModulePreferences([]);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    getCompanyPersonalization({ companyId: selectedCompanyId })
+      .then((data) => {
+        if (!cancelled) setModulePreferences(data.modulePreferences || []);
+      })
+      .catch(() => {
+        if (!cancelled) setModulePreferences([]);
+      });
+
+    const onPersonalizationUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ companyId?: string }>).detail;
+      if (detail?.companyId && detail.companyId !== selectedCompanyId) return;
+      getCompanyPersonalization({ companyId: selectedCompanyId })
+        .then((data) => setModulePreferences(data.modulePreferences || []))
+        .catch(() => setModulePreferences([]));
+    };
+
+    window.addEventListener("company:personalization-updated", onPersonalizationUpdated);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("company:personalization-updated", onPersonalizationUpdated);
+    };
+  }, [selectedCompanyId]);
 
   const handleConfirmNiche = async () => {
     if (!selectedNiche) return;
@@ -263,12 +375,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
         aria-hidden={showNicheModal || undefined}
         className={`transition duration-500 ${showNicheModal ? "pointer-events-none blur-[15px] saturate-[0.8] brightness-[0.76]" : ""}`}
       >
-        <Sidebar />
+        <Sidebar primaryItems={primaryItems} moreItems={moreItems} />
         <main className="min-h-screen min-h-0 flex-col lg:pl-64">
           <Header />
           <div className="mx-auto w-full max-w-7xl flex-1 min-h-0 overflow-x-hidden p-4 md:p-8">{children}</div>
         </main>
-        <BottomNav items={items} />
+        <BottomNav items={primaryItems} />
         <FloatingActionButton />
       </div>
 

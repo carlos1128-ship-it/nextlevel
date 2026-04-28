@@ -3,10 +3,12 @@ import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
 import { getErrorMessage } from "../src/services/error";
 import { changePassword, getUserProfile, updateUserProfile } from "../src/services/endpoints";
+import DashboardPersonalizationPanel from "../src/components/dashboard/DashboardPersonalizationPanel";
+import CompanyPersonalizationPanel from "../src/components/personalization/CompanyPersonalizationPanel";
 import type { DetailLevel } from "../src/types/domain";
 
 const Settings = () => {
-  const { detailLevel, setDetailLevel, theme, setTheme, logout } = useAuth();
+  const { detailLevel, setDetailLevel, theme, setTheme, logout, selectedCompanyId } = useAuth();
   const { addToast } = useToast();
   const [saving, setSaving] = useState(false);
 
@@ -97,6 +99,10 @@ const Settings = () => {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">Configuracoes</h1>
+
+      <CompanyPersonalizationPanel companyId={selectedCompanyId} onToast={addToast} />
+
+      <DashboardPersonalizationPanel companyId={selectedCompanyId} onToast={addToast} />
 
       <section className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Perfil</h2>

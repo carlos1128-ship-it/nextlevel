@@ -11,6 +11,7 @@ import {
   getMetaWhatsappStatus,
   saveMetaAPIConfig,
 } from "../src/services/endpoints";
+import { getErrorMessage } from "../src/services/error";
 import type { IntegrationStatus } from "../src/types/domain";
 import { MessageSquareIcon, PackageIcon, PuzzleIcon, RadarIcon } from "./icons";
 
@@ -31,7 +32,13 @@ type EvolutionStatus = {
   qrcode?: string | null;
   qrRequired?: boolean;
   pairingCode?: string | null;
+  webhookStatus?: "configured" | "pending" | "error";
+  automationStatus?: "configured" | "pending" | "error";
+  retryAfterSeconds?: number | null;
+  failureReason?: string | null;
 };
+
+type QrStatus = "idle" | "generating" | "ready" | "warming" | "rate_limited" | "timeout";
 
 const IntegrationsHub = () => {
   const { selectedCompanyId } = useAuth();
@@ -46,7 +53,7 @@ const IntegrationsHub = () => {
   const [integrationStatuses, setIntegrationStatuses] = useState<IntegrationStatus[]>([]);
   const [metaAccessToken, setMetaAccessToken] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [qrStatus, setQrStatus] = useState<"idle" | "generating" | "ready" | "timeout">("idle");
+  const [qrStatus, setQrStatus] = useState<QrStatus>("idle");
 
   const loadStatus = async () => {
     if (!selectedCompanyId) return;
@@ -81,6 +88,7 @@ const IntegrationsHub = () => {
 
     let cancelled = false;
     let attempts = 0;
+    let lastStartRetryAt = 0;
     let interval: ReturnType<typeof setInterval> | null = null;
 
     const syncEvolution = async () => {
@@ -112,6 +120,28 @@ const IntegrationsHub = () => {
         if (nextQrCode) {
           setQrCode(nextQrCode);
           setQrStatus("ready");
+          return;
+        }
+
+        const recoverableStatus =
+          statusData.status === "rate_limited" ||
+          statusData.status === "provider_warming_up" ||
+          statusData.status === "qr_not_ready";
+        if (recoverableStatus && Number(statusData.retryAfterSeconds || 0) <= 0) {
+          const now = Date.now();
+          if (now - lastStartRetryAt > 10000) {
+            lastStartRetryAt = now;
+            await evolutionConnect(selectedCompanyId).catch(() => undefined);
+          }
+        }
+
+        if (statusData.status === "rate_limited") {
+          setQrStatus("rate_limited");
+          return;
+        }
+
+        if (statusData.status === "provider_warming_up" || statusData.status === "qr_not_ready") {
+          setQrStatus("warming");
           return;
         }
 
@@ -154,10 +184,10 @@ const IntegrationsHub = () => {
     try {
       await evolutionConnect(selectedCompanyId);
       await loadStatus();
-    } catch {
-      setEvolutionOpen(false);
-      setQrStatus("idle");
-      addToast("Nao foi possivel conectar. Tente novamente.", "error");
+    } catch (error) {
+      setEvolutionOpen(true);
+      setQrStatus("warming");
+      addToast(getErrorMessage(error, "Preparando a Evolution. Tente novamente em alguns segundos."), "info");
     } finally {
       setEvolutionLoading(false);
     }
@@ -236,6 +266,27 @@ const IntegrationsHub = () => {
   const evolutionConnected = Boolean(evolutionStatus?.connected);
   const officialConnected = Boolean(officialStatus?.connected && officialStatus?.method === "meta");
   const whatsappConnected = evolutionConnected || officialConnected;
+  const evolutionRecovering =
+    qrStatus === "warming" ||
+    qrStatus === "rate_limited" ||
+    evolutionStatus?.status === "provider_warming_up" ||
+    evolutionStatus?.status === "rate_limited";
+  const evolutionStatusLabel = evolutionConnected
+    ? "Ativo"
+    : qrStatus === "ready"
+      ? "QR Code"
+      : evolutionRecovering
+        ? "Preparando"
+        : qrStatus === "generating"
+          ? "QR Code"
+          : "Offline";
+  const evolutionHelperMessage =
+    evolutionStatus?.failureReason ||
+    (qrStatus === "rate_limited"
+      ? "A Evolution limitou as requisicoes. Aguarde alguns segundos antes de tentar novamente."
+      : qrStatus === "warming"
+        ? "A Evolution esta iniciando. Vamos tentar buscar o QR automaticamente."
+        : null);
 
   const channels = [
     {
@@ -322,12 +373,12 @@ const IntegrationsHub = () => {
                   className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
                     evolutionConnected
                       ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                      : qrStatus === "ready" || qrStatus === "generating"
+                      : qrStatus === "ready" || qrStatus === "generating" || evolutionRecovering
                         ? "border-lime-400/30 bg-lime-400/10 text-lime-300"
                         : "border-zinc-700 bg-zinc-900 text-zinc-400"
                   }`}
                 >
-                  {evolutionConnected ? "Ativo" : qrStatus === "ready" || qrStatus === "generating" ? "QR Code" : "Offline"}
+                  {evolutionStatusLabel}
                 </span>
               </div>
 
@@ -337,11 +388,14 @@ const IntegrationsHub = () => {
                   <p className="mt-1 text-sm text-zinc-200">
                     Sua conexao esta pronta para o atendimento automatico.
                   </p>
+                  <p className="mt-2 text-xs text-emerald-200">
+                    Webhook: {evolutionStatus?.webhookStatus === "configured" ? "configurado" : "sincronizando"} - Automacao: {evolutionStatus?.automationStatus === "configured" ? "configurada" : "pendente"}
+                  </p>
                 </div>
               ) : (
                 <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
                   <p className="text-sm text-zinc-300">
-                    Clique para gerar o QR Code e conectar com seu WhatsApp Business.
+                    {evolutionHelperMessage || "Clique para gerar o QR Code e conectar com seu WhatsApp Business."}
                   </p>
                 </div>
               )}
@@ -350,10 +404,10 @@ const IntegrationsHub = () => {
                 <button
                   type="button"
                   onClick={() => void handleEvolutionConnect()}
-                  disabled={evolutionLoading || !selectedCompanyId}
+                  disabled={evolutionLoading || evolutionRecovering || !selectedCompanyId}
                   className="mt-5 w-full rounded-2xl bg-[#B6FF00] px-4 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
                 >
-                  {evolutionLoading ? "Gerando QR Code..." : "Conectar WhatsApp"}
+                  {evolutionLoading || evolutionRecovering ? "Preparando conexao..." : "Conectar WhatsApp"}
                 </button>
               ) : (
                 <button
@@ -505,6 +559,16 @@ const IntegrationsHub = () => {
                       {evolutionLoading ? "Gerando..." : "Tentar novamente"}
                     </button>
                   </div>
+                ) : qrStatus === "rate_limited" ? (
+                  <div className="space-y-3">
+                    <p>A Evolution limitou as requisicoes.</p>
+                    <p>Aguarde alguns segundos. Vamos tentar de novo automaticamente.</p>
+                  </div>
+                ) : qrStatus === "warming" ? (
+                  <div className="space-y-3">
+                    <p>Preparando conexao...</p>
+                    <p>A Evolution pode estar acordando no Render.</p>
+                  </div>
                 ) : qrCode && qrStatus === "ready" ? (
                   <img
                     src={qrCode}
@@ -528,6 +592,10 @@ const IntegrationsHub = () => {
               <div className="mt-4 space-y-2 text-sm text-zinc-400">
                 {qrStatus === "ready" ? (
                   <p>Escaneie o QR Code com seu WhatsApp Business</p>
+                ) : qrStatus === "rate_limited" ? (
+                  <p>Aguardando cooldown da Evolution.</p>
+                ) : qrStatus === "warming" ? (
+                  <p>Sem acao manual: o painel continua tentando buscar o QR.</p>
                 ) : evolutionStatus?.pairingCode ? (
                   <p>Se preferir, use o código de pareamento no WhatsApp.</p>
                 ) : (

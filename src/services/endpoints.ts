@@ -1,9 +1,18 @@
 import api from "./api";
 import type {
   Company,
+  DashboardPreference,
+  DashboardPreferencesResponse,
   DashboardPeriod,
+  DashboardMetricsResponse,
   DashboardSummary,
+  CompanyOnboardingPayload,
+  CompanyPersonalizationResponse,
+  CompanyPersonalizationStatus,
+  CompanyModulePreference,
+  PersonalizationRecommendations,
   DetailLevel,
+  UserNiche,
   Customer,
   OperationalCost,
   PaginatedResponse,
@@ -343,6 +352,9 @@ function toWhatsappConnectionSnapshot(data: any): WhatsappConnectionSnapshot {
     method: "evolution",
     phoneNumber: connection.phoneNumber,
     qrRequired,
+    webhookStatus: connection.webhookStatus,
+    automationStatus: connection.automationStatus,
+    retryAfterSeconds: connection.retryAfterSeconds,
     failureReason: connection.lastError || connection.message || null,
   };
 }
@@ -476,13 +488,139 @@ function asPaginated<T>(
 export async function getDashboardSummary(params?: {
   companyId?: string | null;
   period?: DashboardPeriod;
+  metrics?: string[];
 }) {
   const { data } = await api.get<Partial<DashboardSummary>>("/dashboard/summary", {
     params: {
       companyId: params?.companyId || undefined,
       period: params?.period || undefined,
+      metrics: params?.metrics?.length ? params.metrics.join(",") : undefined,
     },
   });
+  return data;
+}
+
+export async function getDashboardMetrics(params?: {
+  companyId?: string | null;
+  period?: DashboardPeriod;
+  metrics?: string[];
+  comparePrevious?: boolean;
+  startDate?: string;
+  endDate?: string;
+}) {
+  const { data } = await api.get<DashboardMetricsResponse>("/dashboard/metrics", {
+    params: {
+      companyId: params?.companyId || undefined,
+      period: params?.period || undefined,
+      metrics: params?.metrics?.length ? params.metrics.join(",") : undefined,
+      comparePrevious:
+        params?.comparePrevious === undefined ? undefined : String(params.comparePrevious),
+      startDate: params?.startDate || undefined,
+      endDate: params?.endDate || undefined,
+    },
+  });
+  return data;
+}
+
+export async function getDashboardPreferences(params?: { companyId?: string | null }) {
+  const { data } = await api.get<DashboardPreferencesResponse>("/dashboard/preferences", {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return data;
+}
+
+export async function saveDashboardPreferences(
+  preferences: DashboardPreference[],
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.put<DashboardPreferencesResponse>(
+    "/dashboard/preferences",
+    { preferences },
+    { params: params?.companyId ? { companyId: params.companyId } : undefined },
+  );
+  return data;
+}
+
+export async function resetDashboardPreferences(params?: { companyId?: string | null }) {
+  const { data } = await api.post<DashboardPreferencesResponse>(
+    "/dashboard/preferences/reset",
+    {},
+    { params: params?.companyId ? { companyId: params.companyId } : undefined },
+  );
+  return data;
+}
+
+export async function getCompanyPersonalizationStatus(params?: { companyId?: string | null }) {
+  const { data } = await api.get<CompanyPersonalizationStatus>("/company/personalization/status", {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return data;
+}
+
+export async function getCompanyPersonalization(params?: { companyId?: string | null }) {
+  const { data } = await api.get<CompanyPersonalizationResponse>("/company/personalization", {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return data;
+}
+
+export async function previewCompanyOnboarding(
+  payload: CompanyOnboardingPayload,
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.post<{ recommendations: PersonalizationRecommendations }>(
+    "/company/personalization/preview",
+    payload,
+    { params: params?.companyId ? { companyId: params.companyId } : undefined },
+  );
+  return data;
+}
+
+export async function saveCompanyOnboarding(
+  payload: CompanyOnboardingPayload,
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.post<
+    CompanyPersonalizationResponse & {
+      appliedSetup?: unknown;
+      userNiche?: UserNiche;
+    }
+  >("/company/personalization/onboarding", payload, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return data;
+}
+
+export async function updateCompanyPersonalizationProfile(
+  payload: Partial<CompanyOnboardingPayload>,
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.put<Pick<CompanyPersonalizationResponse, "profile" | "recommendations">>(
+    "/company/personalization/profile",
+    payload,
+    { params: params?.companyId ? { companyId: params.companyId } : undefined },
+  );
+  return data;
+}
+
+export async function resetCompanyRecommendations(params?: { companyId?: string | null }) {
+  const { data } = await api.post<CompanyPersonalizationResponse>(
+    "/company/personalization/reset-recommendations",
+    {},
+    { params: params?.companyId ? { companyId: params.companyId } : undefined },
+  );
+  return data;
+}
+
+export async function saveCompanyModulePreferences(
+  preferences: Array<Pick<CompanyModulePreference, "moduleKey" | "enabled" | "order">>,
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.put<{ modulePreferences: CompanyModulePreference[] }>(
+    "/company/modules/preferences",
+    { preferences },
+    { params: params?.companyId ? { companyId: params.companyId } : undefined },
+  );
   return data;
 }
 
