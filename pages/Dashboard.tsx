@@ -71,9 +71,6 @@ const DEFAULT_VISIBLE_METRICS = new Set([
   "cash_flow",
   "company_count",
   "ai_roi",
-  "cash_flow_summary",
-  "category_mix",
-  "revenue_forecast",
   "alerts_insights",
 ]);
 
@@ -414,9 +411,9 @@ const Dashboard = () => {
   const hasForecast = forecast?.status === "ok" && forecastChartData.length > 0;
 
   const forecastStatusMessage = useMemo(() => {
-    if (!forecast) return "Carregando previsões...";
-    if (forecast.status === "insufficient_data") {
-      return forecast.message || "Dados insuficientes para gerar previsão.";
+    if (!forecast) return "Carregando projecao...";
+    if (forecast.status === "insufficient_data" || forecast.status === "not_enough_data") {
+      return forecast.message || "Historico insuficiente para prever receita";
     }
     if (
       forecast.confidenceInterval &&
@@ -424,9 +421,9 @@ const Dashboard = () => {
       typeof forecast.confidenceInterval.lower === "number" &&
       typeof forecast.confidenceInterval.upper === "number"
     ) {
-      return `Margem estimada ±${forecast.confidenceInterval.margin.toFixed(2)} | Confiança entre ${forecast.confidenceInterval.lower.toFixed(2)} e ${forecast.confidenceInterval.upper.toFixed(2)}`;
+      return `Margem estimada +/-${forecast.confidenceInterval.margin.toFixed(2)} | Confianca ${forecast.qualityLabel || "low"}`;
     }
-    return "Previsão pronta";
+    return `Projecao simples pronta${forecast.qualityLabel ? ` - confianca ${forecast.qualityLabel}` : ""}`;
   }, [forecast]);
 
   const loadLayout = async () => {
@@ -876,10 +873,10 @@ const Dashboard = () => {
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Modo Futuro</p>
             <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
-              Previsão de Receita
+              Projecao simples de receita
             </h3>
             <p className="text-sm text-zinc-500">
-              Projeção diária para os próximos {forecastHorizon} dias, com margem de confiança.
+              Media movel dos ultimos registros reais para os proximos {forecastHorizon} dias.
             </p>
           </div>
           <div className="flex gap-2">
@@ -902,15 +899,15 @@ const Dashboard = () => {
         <div className="mt-6">
           {isForecastLoading ? (
             <div className="grid place-items-center rounded-2xl border border-dashed border-zinc-800 px-6 py-12 text-zinc-500">
-              Calculando previsões...
+              Calculando projecao...
             </div>
-          ) : forecast?.status === "insufficient_data" ? (
+          ) : forecast?.status === "insufficient_data" || forecast?.status === "not_enough_data" ? (
             <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 text-sm text-amber-200">
               {forecastStatusMessage}
             </div>
           ) : !hasForecast ? (
             <div className="grid place-items-center rounded-2xl border border-zinc-800 px-6 py-12 text-zinc-500">
-              Forecast indisponível no momento.
+              Projecao indisponivel no momento.
             </div>
           ) : (
             <>

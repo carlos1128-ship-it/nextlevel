@@ -55,7 +55,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 const COMPANY_ID_STORAGE_KEY = "selectedCompanyId";
 const AUTH_USER_STORAGE_KEY = "auth_user";
+const ONBOARDING_STATUS_CACHE_PREFIX = "nextlevel:onboarding-status:";
 const getCompanyId = (company: Partial<Company> | null | undefined) => company?.id || company?._id || null;
+
+function readCachedOnboardingRedirect(companyId: string | null) {
+  if (!companyId) return null;
+  const raw = sessionStorage.getItem(`${ONBOARDING_STATUS_CACHE_PREFIX}${companyId}`);
+  if (raw === "redirect") return true;
+  if (raw === "ready") return false;
+  return null;
+}
+
+function writeCachedOnboardingRedirect(companyId: string | null, shouldRedirect: boolean) {
+  if (!companyId) return;
+  sessionStorage.setItem(`${ONBOARDING_STATUS_CACHE_PREFIX}${companyId}`, shouldRedirect ? "redirect" : "ready");
+}
 
 type StoredAuthUser = {
   name: string | null;
@@ -285,8 +299,9 @@ const FullscreenLoading = ({ label = "Preparando experiencia" }: { label?: strin
 const OnboardingGate = ({ children }: { children?: ReactNode }) => {
   const location = useLocation();
   const { isLoggedIn, isProfileReady, isCompanyReady, selectedCompanyId } = useAuth();
-  const [checking, setChecking] = useState(true);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const cachedRedirect = readCachedOnboardingRedirect(selectedCompanyId);
+  const [checking, setChecking] = useState(cachedRedirect === null);
+  const [shouldRedirect, setShouldRedirect] = useState(Boolean(cachedRedirect));
 
   useEffect(() => {
     let cancelled = false;
@@ -305,10 +320,20 @@ const OnboardingGate = ({ children }: { children?: ReactNode }) => {
       };
     }
 
-    setChecking(true);
+    const cached = readCachedOnboardingRedirect(selectedCompanyId);
+    if (cached !== null) {
+      setShouldRedirect(cached);
+      setChecking(false);
+    } else {
+      setChecking(true);
+    }
     getCompanyPersonalizationStatus({ companyId: selectedCompanyId })
       .then((status) => {
-        if (!cancelled) setShouldRedirect(Boolean(status.shouldRedirectToOnboarding));
+        if (!cancelled) {
+          const nextRedirect = Boolean(status.shouldRedirectToOnboarding);
+          writeCachedOnboardingRedirect(selectedCompanyId, nextRedirect);
+          setShouldRedirect(nextRedirect);
+        }
       })
       .catch(() => {
         if (!cancelled) setShouldRedirect(false);

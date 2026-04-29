@@ -104,7 +104,8 @@ const Integrations = () => {
       connection?.status === "creating" ||
       connection?.status === "creating_instance" ||
       isQrPending(connection?.status) ||
-      connection?.status === "connecting";
+      connection?.status === "connecting" ||
+      isCooldownStatus(connection?.status);
     if (!shouldPoll) return;
 
     const timer = window.setInterval(() => {
@@ -183,7 +184,7 @@ const Integrations = () => {
         addToast("QR Code gerado.", "success");
       } else if (next.status === "provider_warming_up") {
         addToast(
-          next.message || "Evolution iniciando, tente novamente em alguns segundos.",
+          next.message || "Preparando conexao com WhatsApp...",
           "info",
         );
       } else if (next.status === "rate_limited") {
@@ -309,8 +310,10 @@ const Integrations = () => {
                 }
                 className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading
-                  ? "Conectando..."
+                  {loading
+                  ? "Preparando conexao..."
+                  : connection?.status === "provider_warming_up"
+                    ? "Preparando conexao..."
                   : retryRemaining > 0
                     ? `Aguarde ${retryRemaining}s`
                   : isQrPending(connection?.status)
@@ -369,7 +372,11 @@ const Integrations = () => {
         connection?.status === "rate_limited" ||
         connection?.status === "qr_not_ready" ||
         connection?.status === "error" ? (
-          <p className="mt-4 rounded-md border border-red-500/30 bg-red-950/30 p-3 text-sm font-semibold text-red-200">
+          <p className={`mt-4 rounded-md border p-3 text-sm font-semibold ${
+            connection.status === "error"
+              ? "border-red-500/30 bg-red-950/30 text-red-200"
+              : "border-amber-500/30 bg-amber-500/10 text-amber-100"
+          }`}>
             {connection.message || connection.lastError || "Nao foi possivel gerar o QR Code agora."}
             {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
           </p>

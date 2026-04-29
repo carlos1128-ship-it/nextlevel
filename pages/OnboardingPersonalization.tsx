@@ -31,6 +31,8 @@ const BUSINESS_OPTIONS: Array<{ key: BusinessType; label: string; description: s
   { key: "other", label: "Outro", description: "Configuracao balanceada para comecar rapido." },
 ];
 
+const BUSINESS_LABELS = Object.fromEntries(BUSINESS_OPTIONS.map((item) => [item.key, item.label])) as Record<BusinessType, string>;
+
 const OPERATION_TOGGLES: Array<{ key: keyof OnboardingForm; label: string; hint: string }> = [
   { key: "hasPhysicalProducts", label: "Vende produtos fisicos?", hint: "Ativa produtos, margem e mix." },
   { key: "hasDigitalProducts", label: "Vende produtos digitais?", hint: "Ativa funil, conversao e reembolso." },
@@ -122,6 +124,9 @@ const DEFAULT_FORM: OnboardingForm = {
   companySize: "",
   monthlyRevenueRange: "",
   dataMaturity: "",
+  originalBusinessDescription: "",
+  detectedBusinessType: null,
+  classificationConfidence: null,
   usesPaidTraffic: false,
   hasPhysicalProducts: true,
   hasDigitalProducts: false,
@@ -190,12 +195,15 @@ const OnboardingPersonalization = () => {
   }, [step, selectedCompanyId, form]);
 
   const selectedBusiness = useMemo(
-    () => BUSINESS_OPTIONS.find((item) => item.key === form.businessType) || BUSINESS_OPTIONS[0],
-    [form.businessType],
+    () => BUSINESS_OPTIONS.find((item) => item.key === (preview?.businessType || form.businessType)) || BUSINESS_OPTIONS[0],
+    [form.businessType, preview?.businessType],
   );
 
   const canGoNext = useMemo(() => {
-    if (step === 0) return Boolean(form.businessType);
+    if (step === 0) {
+      if (form.businessType !== "other") return Boolean(form.businessType);
+      return Boolean(form.originalBusinessDescription?.trim());
+    }
     if (step === 2) return Boolean(form.mainGoal);
     if (step === 3) return Boolean(form.companySize && form.monthlyRevenueRange && form.dataMaturity);
     return true;
@@ -231,6 +239,7 @@ const OnboardingPersonalization = () => {
       );
       if (result.userNiche) setNiche(result.userNiche);
       localStorage.removeItem(draftKey);
+      sessionStorage.setItem(`nextlevel:onboarding-status:${selectedCompanyId}`, "ready");
       window.dispatchEvent(new CustomEvent("dashboard:preferences-updated", { detail: { companyId: selectedCompanyId } }));
       window.dispatchEvent(new CustomEvent("company:personalization-updated", { detail: { companyId: selectedCompanyId } }));
       addToast("Experiencia personalizada com sucesso.", "success");
@@ -291,6 +300,23 @@ const OnboardingPersonalization = () => {
                   );
                 })}
               </div>
+              {form.businessType === "other" ? (
+                <label className="mt-5 block rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
+                  <span className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
+                    Descricao livre
+                  </span>
+                  <span className="mt-2 block text-sm font-bold text-zinc-200">
+                    Descreva com o que sua empresa trabalha
+                  </span>
+                  <textarea
+                    value={form.originalBusinessDescription || ""}
+                    onChange={(event) => updateField("originalBusinessDescription", event.target.value)}
+                    rows={4}
+                    className="mt-4 w-full resize-none rounded-2xl border border-zinc-800 bg-[#05070a] px-4 py-3 text-sm font-medium text-zinc-100 outline-none transition focus:border-lime-400"
+                    placeholder="Ex: consultoria para restaurantes, curso online, clinica odontologica, loja de pecas..."
+                  />
+                </label>
+              ) : null}
             </section>
           ) : null}
 
@@ -369,12 +395,21 @@ const OnboardingPersonalization = () => {
             <section>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Configuracao recomendada</p>
               <h2 className="mt-2 text-3xl font-black tracking-tighter">Seu painel vai nascer com foco em {selectedBusiness.label}</h2>
-              <p className="mt-2 text-sm text-zinc-500">Com base no seu perfil, a NEXT LEVEL recomenda comecar por estes modulos, metricas e primeiras acoes.</p>
+              <p className="mt-2 text-sm text-zinc-500">O dashboard inicial fica limpo; as metricas abaixo entram como sugestoes para voce ativar quando fizer sentido.</p>
               {previewLoading ? (
                 <div className="mt-8 rounded-3xl border border-dashed border-zinc-800 p-8 text-center text-zinc-500">Gerando recomendacao real no backend...</div>
               ) : preview ? (
                 <div className="mt-8 grid gap-4 lg:grid-cols-3">
-                  <PreviewCard title="Metricas" items={preview.dashboardMetrics.slice(0, 10).map(formatKey)} />
+                  {form.businessType === "other" ? (
+                    <div className="rounded-3xl border border-lime-400/25 bg-lime-400/10 p-5 lg:col-span-3">
+                      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Perfil sugerido</p>
+                      <p className="mt-2 text-lg font-black">{BUSINESS_LABELS[preview.businessType] || "Outro"}</p>
+                      <p className="mt-2 text-sm text-zinc-400">
+                        Voce pode aceitar esta sugestao agora ou voltar para escolher outro perfil manualmente.
+                      </p>
+                    </div>
+                  ) : null}
+                  <PreviewCard title="Metricas sugeridas" items={preview.dashboardMetrics.slice(0, 10).map(formatKey)} />
                   <PreviewCard title="Modulos" items={preview.modules.slice(0, 10).map(formatKey)} />
                   <PreviewCard title="Primeiras acoes" items={preview.firstActions.slice(0, 6)} />
                   <div className="rounded-3xl border border-lime-400/25 bg-lime-400/10 p-5 lg:col-span-3">

@@ -305,6 +305,7 @@ function normalizeWhatsappConnection(data: any): WhatsappConnection {
     provider: data?.provider || "evolution",
     instanceName: data?.instanceName ?? null,
     status: data?.status || "disconnected",
+    statusCode: data?.statusCode ?? null,
     connectionState: data?.connectionState ?? null,
     qrCode,
     code: data?.code ?? qrCode,

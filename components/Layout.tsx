@@ -72,7 +72,9 @@ const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   "financial-flow": "financial",
 };
 const COMPANY_STAGE_STORAGE_KEY = "nextlevel:onboarding-company-stage";
+const SIDEBAR_PREF_CACHE_PREFIX = "nextlevel:sidebar-module-preferences:";
 const DEFAULT_COMPANY_STAGE: CompanyStage = "ESCALANDO";
+const DEFAULT_VISIBLE_NAV_IDS = new Set(["home", "reports", "chat", "attendant", "insights", "settings", "profile", "plans", "companies"]);
 
 function readStoredCompanyStage(): CompanyStage {
   const raw = localStorage.getItem(COMPANY_STAGE_STORAGE_KEY);
@@ -114,10 +116,13 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
 
 function splitNavItemsByModulePreferences(
   items: SidebarNavItem[],
-  modulePreferences: CompanyModulePreference[],
+  modulePreferences: CompanyModulePreference[] | null,
 ) {
-  if (!modulePreferences.length) {
-    return { primaryItems: items, moreItems: [] as SidebarNavItem[] };
+  if (!modulePreferences?.length) {
+    return {
+      primaryItems: items.filter((item) => DEFAULT_VISIBLE_NAV_IDS.has(item.id) || item.isPrimary),
+      moreItems: items.filter((item) => !(DEFAULT_VISIBLE_NAV_IDS.has(item.id) || item.isPrimary)),
+    };
   }
 
   const preferenceByModule = new Map(modulePreferences.map((item) => [item.moduleKey, item]));
@@ -141,6 +146,23 @@ function splitNavItemsByModulePreferences(
       .sort((a, b) => a.order - b.order)
       .map((entry) => entry.item),
   };
+}
+
+function readCachedModulePreferences(companyId: string | null): CompanyModulePreference[] | null {
+  if (!companyId) return null;
+  const raw = sessionStorage.getItem(`${SIDEBAR_PREF_CACHE_PREFIX}${companyId}`);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as CompanyModulePreference[];
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedModulePreferences(companyId: string | null, preferences: CompanyModulePreference[]) {
+  if (!companyId) return;
+  sessionStorage.setItem(`${SIDEBAR_PREF_CACHE_PREFIX}${companyId}`, JSON.stringify(preferences));
 }
 
 const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
@@ -307,7 +329,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const [selectedNiche, setSelectedNiche] = useState<UserNiche | null>(niche);
   const [selectedStage, setSelectedStage] = useState<CompanyStage>(() => readStoredCompanyStage());
   const [savingNiche, setSavingNiche] = useState(false);
-  const [modulePreferences, setModulePreferences] = useState<CompanyModulePreference[]>([]);
+  const [modulePreferences, setModulePreferences] = useState<CompanyModulePreference[] | null>(() =>
+    readCachedModulePreferences(selectedCompanyId),
+  );
   const items = useMemo(() => resolveNavItems(isAdmin, niche), [isAdmin, niche]);
   const { primaryItems, moreItems } = useMemo(
     () => splitNavItemsByModulePreferences(items, modulePreferences),
@@ -322,26 +346,39 @@ const Layout = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let cancelled = false;
     if (!selectedCompanyId) {
-      setModulePreferences([]);
+      setModulePreferences(null);
       return () => {
         cancelled = true;
       };
     }
 
+    const cachedPreferences = readCachedModulePreferences(selectedCompanyId);
+    if (cachedPreferences) {
+      setModulePreferences(cachedPreferences);
+    } else {
+      setModulePreferences(null);
+    }
+
     getCompanyPersonalization({ companyId: selectedCompanyId })
       .then((data) => {
-        if (!cancelled) setModulePreferences(data.modulePreferences || []);
+        if (!cancelled) {
+          const preferences = data.modulePreferences || [];
+          writeCachedModulePreferences(selectedCompanyId, preferences);
+          setModulePreferences(preferences);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setModulePreferences([]);
-      });
+      .catch(() => undefined);
 
     const onPersonalizationUpdated = (event: Event) => {
       const detail = (event as CustomEvent<{ companyId?: string }>).detail;
       if (detail?.companyId && detail.companyId !== selectedCompanyId) return;
       getCompanyPersonalization({ companyId: selectedCompanyId })
-        .then((data) => setModulePreferences(data.modulePreferences || []))
-        .catch(() => setModulePreferences([]));
+        .then((data) => {
+          const preferences = data.modulePreferences || [];
+          writeCachedModulePreferences(selectedCompanyId, preferences);
+          setModulePreferences(preferences);
+        })
+        .catch(() => undefined);
     };
 
     window.addEventListener("company:personalization-updated", onPersonalizationUpdated);

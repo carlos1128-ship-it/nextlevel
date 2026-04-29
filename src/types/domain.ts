@@ -116,6 +116,9 @@ export interface CompanyProfile {
   companySize?: string | null;
   monthlyRevenueRange?: string | null;
   dataMaturity?: string | null;
+  originalBusinessDescription?: string | null;
+  detectedBusinessType?: BusinessType | null;
+  classificationConfidence?: number | null;
   usesPaidTraffic: boolean;
   hasPhysicalProducts: boolean;
   hasDigitalProducts: boolean;
@@ -311,6 +314,7 @@ export interface WhatsappConnection {
   provider: "evolution" | string;
   instanceName: string | null;
   status: WhatsappConnectionStatus;
+  statusCode?: "EVOLUTION_WARMING_UP" | "RATE_LIMITED" | "QR_PENDING" | "CONNECTED" | "ERROR" | string | null;
   connectionState?: string | null;
   qrCode: string | null;
   code?: string | null;
@@ -379,12 +383,13 @@ export interface ForecastInterval {
 }
 
 export interface ForecastResponse {
-  status: "ok" | "insufficient_data";
+  status: "ok" | "insufficient_data" | "not_enough_data";
   type: "SALES" | "DEMAND" | "REVENUE";
   historicalData?: ForecastPoint[];
   predictedData?: ForecastPoint[];
   confidenceInterval?: ForecastInterval;
   accuracyScore?: number;
+  qualityLabel?: "low" | "medium" | "high";
   generatedAt?: string;
   message?: string;
 }
