@@ -1,9 +1,29 @@
 import { AxiosError } from "axios";
 
+export const ACTIVE_COMPANY_ACCESS_MESSAGE =
+  "Não foi possível acessar a empresa ativa. Atualize a sessão ou selecione uma empresa válida.";
+
+export function isActiveCompanyAccessError(error: unknown) {
+  if (!(error instanceof AxiosError)) return false;
+  if (error.response?.status !== 403) return false;
+  const payload = error.response.data;
+  const message =
+    typeof payload === "string"
+      ? payload
+      : payload && typeof payload === "object"
+        ? String((payload as { message?: unknown }).message || "")
+        : "";
+  return message.toLowerCase().includes("sem acesso a empresa");
+}
+
 export function getErrorMessage(error: unknown, fallback = "Erro na requisicao.") {
   if (error instanceof AxiosError) {
     if (!error.response) {
       return "Nao conseguimos falar com a plataforma agora. Verifique sua conexao e tente novamente.";
+    }
+
+    if (isActiveCompanyAccessError(error)) {
+      return ACTIVE_COMPANY_ACCESS_MESSAGE;
     }
 
     const payload = error.response?.data;
