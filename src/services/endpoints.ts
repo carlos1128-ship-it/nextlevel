@@ -40,6 +40,8 @@ import type {
   AgentConfig,
   WhatsappConnection,
   ConversationLiveFeedItem,
+  IntelligentImportRecord,
+  ImportedMetricRecord,
 } from "../types/domain";
 
 function extractCompanyId(company: Partial<Company> | null | undefined) {
@@ -1372,4 +1374,163 @@ export async function getMetaWhatsappStatus(companyId: string) {
     { params: { companyId } }
   );
   return data;
+}
+
+function normalizeImportedMetricRecord(data: any): ImportedMetricRecord {
+  return {
+    id: data?.id || "",
+    companyId: data?.companyId || "",
+    importId: data?.importId || "",
+    metricKey: data?.metricKey || "",
+    label: data?.label || "",
+    value: data?.value,
+    unit: data?.unit || "text",
+    currency: data?.currency ?? null,
+    periodStart: data?.periodStart || null,
+    periodEnd: data?.periodEnd || null,
+    source: data?.source || "manual_text",
+    platform: data?.platform ?? null,
+    confidence: Number(data?.confidence || 0),
+    status: data?.status || "pending_review",
+    metadataJson: data?.metadataJson,
+    createdAt: data?.createdAt || new Date().toISOString(),
+    updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
+    sourceLabel: data?.sourceLabel || undefined,
+  };
+}
+
+function normalizeIntelligentImportRecord(data: any): IntelligentImportRecord {
+  return {
+    id: data?.id || "",
+    companyId: data?.companyId || "",
+    userId: data?.userId || "",
+    inputType: (data?.inputType || "text") as IntelligentImportRecord["inputType"],
+    fileName: data?.fileName ?? null,
+    fileMimeType: data?.fileMimeType ?? null,
+    fileSize: data?.fileSize === undefined || data?.fileSize === null ? null : Number(data.fileSize),
+    expectedCategory: data?.expectedCategory || "auto",
+    detectedCategory: data?.detectedCategory || "unknown",
+    detectedPlatform: data?.detectedPlatform || "unknown",
+    detectedPeriodStart: data?.detectedPeriodStart || null,
+    detectedPeriodEnd: data?.detectedPeriodEnd || null,
+    confidence: Number(data?.confidence || 0),
+    status: data?.status || "uploaded",
+    aiSummary: data?.aiSummary ?? null,
+    extracted: data?.extracted || null,
+    warnings: Array.isArray(data?.warnings) ? data.warnings : [],
+    previewRows: Array.isArray(data?.previewRows) ? data.previewRows : [],
+    importedMetrics: Array.isArray(data?.importedMetrics)
+      ? data.importedMetrics.map(normalizeImportedMetricRecord)
+      : [],
+    importedEntities: Array.isArray(data?.importedEntities) ? data.importedEntities : [],
+    errorMessage: data?.errorMessage ?? null,
+    createdAt: data?.createdAt || new Date().toISOString(),
+    updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
+    confirmedAt: data?.confirmedAt || null,
+    betaCapabilities: data?.betaCapabilities,
+  };
+}
+
+export async function getIntelligentImports(params?: { companyId?: string | null }) {
+  const { data } = await api.get<any[]>("/intelligent-imports", {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return Array.isArray(data) ? data.map(normalizeIntelligentImportRecord) : [];
+}
+
+export async function createTextIntelligentImport(
+  payload: { text: string; expectedCategory?: string },
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.post("/intelligent-imports/text", payload, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return normalizeIntelligentImportRecord(data);
+}
+
+export async function uploadIntelligentImportFile(
+  payload: { file: File; expectedCategory?: string },
+  params?: { companyId?: string | null },
+) {
+  const formData = new FormData();
+  formData.append("file", payload.file);
+  if (payload.expectedCategory) {
+    formData.append("expectedCategory", payload.expectedCategory);
+  }
+  const { data } = await api.post("/intelligent-imports/file", formData, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return normalizeIntelligentImportRecord(data);
+}
+
+export async function analyzeIntelligentImport(id: string, params?: { companyId?: string | null }) {
+  const { data } = await api.post(`/intelligent-imports/${id}/analyze`, null, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return normalizeIntelligentImportRecord(data);
+}
+
+export async function getIntelligentImport(id: string, params?: { companyId?: string | null }) {
+  const { data } = await api.get(`/intelligent-imports/${id}`, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return normalizeIntelligentImportRecord(data);
+}
+
+export async function reviewIntelligentImport(
+  id: string,
+  payload: {
+    expectedCategory?: string;
+    detectedCategory?: string;
+    detectedPlatform?: string;
+    detectedPeriodStart?: string | null;
+    detectedPeriodEnd?: string | null;
+    confidence?: number;
+    summary?: string;
+    metrics?: Array<{
+      metricKey: string;
+      label: string;
+      value: unknown;
+      unit: string;
+      currency?: string | null;
+      confidence?: number;
+      sourceText?: string;
+    }>;
+    entities?: Array<{
+      entityType: string;
+      data: Record<string, unknown>;
+      confidence?: number;
+    }>;
+    warnings?: string[];
+  },
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.put(`/intelligent-imports/${id}/review`, payload, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return normalizeIntelligentImportRecord(data);
+}
+
+export async function confirmIntelligentImport(id: string, params?: { companyId?: string | null }) {
+  const { data } = await api.post(`/intelligent-imports/${id}/confirm`, null, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return normalizeIntelligentImportRecord(data);
+}
+
+export async function rejectIntelligentImport(id: string, params?: { companyId?: string | null }) {
+  const { data } = await api.post(`/intelligent-imports/${id}/reject`, null, {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return normalizeIntelligentImportRecord(data);
+}
+
+export async function getImportedMetrics(params?: { companyId?: string | null }) {
+  const { data } = await api.get<any[]>("/imported-metrics", {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return Array.isArray(data) ? data.map(normalizeImportedMetricRecord) : [];
 }

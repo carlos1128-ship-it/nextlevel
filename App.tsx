@@ -27,6 +27,7 @@ const Plans = lazy(() => import('./pages/Plans'));
 const Products = lazy(() => import('./pages/Products'));
 const Customers = lazy(() => import('./pages/Customers'));
 const Costs = lazy(() => import('./pages/Costs'));
+const AddData = lazy(() => import('./pages/AddData'));
 const CommandCenter = lazy(() => import('./pages/CommandCenter'));
 const MarketIntel = lazy(() => import('./pages/MarketIntel'));
 const Attendant = lazy(() => import('./pages/Attendant'));
@@ -476,6 +477,7 @@ const AppContent = () => {
           <Route path="/products" element={personalizedShell(<Products />)} />
           <Route path="/customers" element={personalizedShell(<Customers />)} />
           <Route path="/costs" element={personalizedShell(<Costs />)} />
+          <Route path="/add-data" element={personalizedShell(<AddData />)} />
           <Route path="/market-intel" element={personalizedShell(<MarketIntel />)} />
           <Route path="/attendant" element={personalizedShell(<Attendant />)} />
           <Route path="/admin/system-health" element={<AdminRoute><Layout><SystemHealth /></Layout></AdminRoute>} />

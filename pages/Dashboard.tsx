@@ -149,8 +149,9 @@ const KpiCard: React.FC<
     iconAccent?: string;
     status?: DashboardMetricResult["status"];
     reason?: string;
+    sourceLabel?: string;
   }
-> = ({ title, value, change, changeType, icon: Icon, color, iconAccent, status = "ok", reason }) => {
+> = ({ title, value, change, changeType, icon: Icon, color, iconAccent, status = "ok", reason, sourceLabel }) => {
   const isMuted = status !== "ok";
   return (
     <div className={`flex min-w-[260px] flex-col rounded-3xl border bg-zinc-950 p-6 transition-all duration-300 hover:border-lime-400/40 ${isMuted ? "border-amber-500/25" : "border-zinc-800/90"}`}>
@@ -178,6 +179,7 @@ const KpiCard: React.FC<
         {change} <span className="ml-1 font-medium text-zinc-500">no periodo selecionado</span>
       </div>
       {reason ? <p className="mt-3 text-[11px] leading-5 text-zinc-500">{reason}</p> : null}
+      {sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{sourceLabel}</p> : null}
     </div>
   );
 };
@@ -314,6 +316,7 @@ const RealMetricCard: React.FC<{
     </p>
     <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
     {metric?.reason ? <p className="mt-2 text-[11px] leading-5 text-zinc-600">{metric.reason}</p> : null}
+    {metric?.sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{metric.sourceLabel}</p> : null}
   </div>
 );
 
@@ -713,6 +716,7 @@ const Dashboard = () => {
               color="text-lime-400"
               status={metric("revenue")?.status}
               reason={metric("revenue")?.reason}
+              sourceLabel={metric("revenue")?.sourceLabel}
             />
           ) : null}
           {isMetricEnabled("losses") ? (
@@ -725,6 +729,7 @@ const Dashboard = () => {
               color="text-red-500"
               status={metric("losses")?.status}
               reason={metric("losses")?.reason}
+              sourceLabel={metric("losses")?.sourceLabel}
             />
           ) : null}
           {isMetricEnabled("profit") || isMetricEnabled("net_profit") ? (
@@ -737,6 +742,7 @@ const Dashboard = () => {
               color="text-blue-400"
               status={(metric("net_profit") || metric("profit"))?.status}
               reason={(metric("net_profit") || metric("profit"))?.reason}
+              sourceLabel={(metric("net_profit") || metric("profit"))?.sourceLabel}
             />
           ) : null}
           {isMetricEnabled("cash_flow") ? (
@@ -749,6 +755,7 @@ const Dashboard = () => {
               color="text-purple-400"
               status={metric("cash_flow")?.status}
               reason={metric("cash_flow")?.reason}
+              sourceLabel={metric("cash_flow")?.sourceLabel}
             />
           ) : null}
           {isMetricEnabled("company_count") ? (

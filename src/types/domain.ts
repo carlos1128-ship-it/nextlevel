@@ -68,6 +68,7 @@ export interface DashboardMetricResult {
   formatted: string;
   status: DashboardMetricStatus;
   reason?: string;
+  sourceLabel?: string;
   comparison?: {
     previousValue: number;
     changePercent: number;
@@ -552,6 +553,110 @@ export interface Lead {
 export interface AttendantRoi {
   iaSalesCount: number;
   iaRevenue: number;
+}
+
+export type IntelligentImportInputType = "image" | "pdf" | "csv" | "text" | "document";
+export type IntelligentImportStatus =
+  | "uploaded"
+  | "analyzing"
+  | "needs_review"
+  | "confirmed"
+  | "rejected"
+  | "failed";
+
+export interface IntelligentImportMetric {
+  metricKey: string;
+  label: string;
+  value: unknown;
+  unit: "currency" | "percentage" | "count" | "ratio" | "text";
+  currency: string | null;
+  confidence: number;
+  sourceText?: string;
+}
+
+export interface IntelligentImportEntity {
+  entityType: "product" | "customer" | "order" | "campaign" | "ad" | "cost" | "unknown";
+  data: Record<string, unknown>;
+  confidence: number;
+}
+
+export interface IntelligentImportExtraction {
+  detectedCategory: "marketing" | "delivery" | "marketplace" | "financial" | "products" | "customers" | "mixed" | "unknown";
+  detectedPlatform: "utmify" | "meta_ads" | "google_ads" | "ifood" | "mercado_livre" | "shopee" | "amazon" | "generic" | "unknown";
+  period: {
+    startDate: string | null;
+    endDate: string | null;
+    label: string | null;
+  };
+  confidence: number;
+  summary: string;
+  metrics: IntelligentImportMetric[];
+  entities: IntelligentImportEntity[];
+  warnings: string[];
+  needsUserReview: boolean;
+  previewRows?: Array<Record<string, string>>;
+  suggestedMapping?: Record<string, string>;
+}
+
+export interface ImportedMetricRecord {
+  id: string;
+  companyId: string;
+  importId: string;
+  metricKey: string;
+  label: string;
+  value: unknown;
+  unit: string;
+  currency: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  source: string;
+  platform: string | null;
+  confidence: number;
+  status: string;
+  metadataJson?: unknown;
+  createdAt: string;
+  updatedAt: string;
+  sourceLabel?: string;
+}
+
+export interface IntelligentImportRecord {
+  id: string;
+  companyId: string;
+  userId: string;
+  inputType: IntelligentImportInputType;
+  fileName?: string | null;
+  fileMimeType?: string | null;
+  fileSize?: number | null;
+  expectedCategory: string;
+  detectedCategory: IntelligentImportExtraction["detectedCategory"];
+  detectedPlatform: IntelligentImportExtraction["detectedPlatform"];
+  detectedPeriodStart: string | null;
+  detectedPeriodEnd: string | null;
+  confidence: number;
+  status: IntelligentImportStatus;
+  aiSummary?: string | null;
+  extracted?: IntelligentImportExtraction | null;
+  warnings: string[];
+  previewRows: Array<Record<string, string>>;
+  importedMetrics: ImportedMetricRecord[];
+  importedEntities: Array<{
+    id: string;
+    companyId: string;
+    importId: string;
+    entityType: string;
+    normalizedJson: Record<string, unknown>;
+    confidence: number;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  confirmedAt?: string | null;
+  betaCapabilities?: {
+    dependsOnGemini?: boolean;
+  };
 }
 
 export type SubscriptionTier = "FREE" | "PRO" | "ENTERPRISE";
