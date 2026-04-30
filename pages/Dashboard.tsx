@@ -67,11 +67,17 @@ const FORECAST_HORIZONS: Array<7 | 15 | 30> = [7, 15, 30];
 const DEFAULT_VISIBLE_METRICS = new Set([
   "revenue",
   "losses",
-  "profit",
+  "net_profit",
   "cash_flow",
   "company_count",
   "ai_roi",
-  "alerts_insights",
+  "income_revenue",
+  "average_ticket",
+  "operational_costs",
+  "margin",
+  "waste_inefficiency",
+  "cash_flow_summary",
+  "category_mix",
 ]);
 
 const asCurrency = (value: number) =>
@@ -257,6 +263,7 @@ const ADVANCED_METRICS: Array<{
   description: string;
   accentColor: string;
 }> = [
+  { key: "income_revenue", title: "Rendas/Receitas", description: "Entradas reais de vendas e transacoes de receita no periodo.", accentColor: "text-lime-300" },
   { key: "sales_count", title: "Vendas", description: "Quantidade real de vendas e entradas comerciais registradas no periodo.", accentColor: "text-lime-400" },
   { key: "average_ticket", title: "Ticket Medio", description: "Valor medio por venda no periodo selecionado.", accentColor: "text-cyan-400" },
   { key: "customers_acquired", title: "Clientes adquiridos", description: "Clientes criados no periodo selecionado.", accentColor: "text-purple-400" },

@@ -147,7 +147,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
       setAvailableMetrics(data.availableMetrics || []);
       setPreferences(sortPreferences(data.preferences || []));
       window.dispatchEvent(new Event("dashboard:preferences-updated"));
-      onToast("Layout recomendado restaurado.", "success");
+      onToast("Layout essencial restaurado.", "success");
     } catch (err) {
       onToast(getErrorMessage(err, "Falha ao restaurar layout recomendado."), "error");
     } finally {
@@ -246,6 +246,11 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
                       <span className="rounded-full border border-zinc-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-500 dark:border-zinc-700">
                         {metric.displayType}
                       </span>
+                      {metric.recommended && !preference.enabled ? (
+                        <span className="rounded-full border border-lime-400/40 bg-lime-300/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-lime-700 dark:text-lime-300">
+                          Recomendado
+                        </span>
+                      ) : null}
                     </div>
                     <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{metric.description}</p>
                     <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
