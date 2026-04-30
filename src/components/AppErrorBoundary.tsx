@@ -1,4 +1,5 @@
 import React from "react";
+import { DASHBOARD_ROUTE } from "../app/routes";
 
 type AppErrorBoundaryProps = {
   children: React.ReactNode;
@@ -44,7 +45,7 @@ class AppErrorBoundary extends React.Component<
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <button
                 type="button"
-                onClick={() => window.location.assign("/dashboard")}
+                onClick={() => window.location.assign(DASHBOARD_ROUTE)}
                 className="rounded-2xl bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 transition hover:brightness-105"
               >
                 Ir para o dashboard

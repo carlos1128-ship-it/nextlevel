@@ -25,11 +25,12 @@ import { getCompanyPersonalization, updateUserProfile } from "../src/services/en
 import { getErrorMessage } from "../src/services/error";
 import type { CompanyModulePreference, UserNiche } from "../src/types/domain";
 import NicheModal, { type CompanyStage } from "../src/components/onboarding/NicheModal";
+import { DASHBOARD_ROUTE } from "../src/app/routes";
 
 type SidebarNavItem = NavItem & { id: string };
 
 const navItems: SidebarNavItem[] = [
-  { id: "home", path: "/", name: "Inicio", icon: HomeIcon, isPrimary: true },
+  { id: "home", path: DASHBOARD_ROUTE, name: "Inicio", icon: HomeIcon, isPrimary: true },
   { id: "reports", path: "/reports", name: "Relatorios", icon: BarChartIcon, isPrimary: true },
   { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },

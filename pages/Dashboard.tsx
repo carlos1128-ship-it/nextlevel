@@ -318,7 +318,7 @@ const RealMetricCard: React.FC<{
 );
 
 const Dashboard = () => {
-  const { username, detailLevel, selectedCompanyId } = useAuth();
+  const { username, detailLevel, selectedCompanyId, isCompanyReady } = useAuth();
   const { addToast } = useToast();
   const [metricsData, setMetricsData] = useState<DashboardMetricsResponse | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -434,6 +434,15 @@ const Dashboard = () => {
   }, [forecast]);
 
   const loadLayout = async () => {
+    if (!isCompanyReady) return;
+    if (!selectedCompanyId) {
+      setLayout([]);
+      setMetricsData(null);
+      setForecast(null);
+      setAttendantRoi({ iaSalesCount: 0, iaRevenue: 0 });
+      setIsLayoutLoading(false);
+      return;
+    }
     setIsLayoutLoading(true);
     try {
       const data = await getDashboardPreferences({ companyId: selectedCompanyId });
@@ -447,6 +456,10 @@ const Dashboard = () => {
   };
 
   const loadMetrics = async () => {
+    if (!selectedCompanyId) {
+      setMetricsData(null);
+      return;
+    }
     if (!hasSelectedMetrics && !isLayoutLoading) {
       setMetricsData(null);
       return;
@@ -491,8 +504,9 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    if (!isCompanyReady) return;
     void loadLayout();
-  }, [selectedCompanyId]);
+  }, [isCompanyReady, selectedCompanyId]);
 
   useEffect(() => {
     const onPreferencesUpdated = () => {
@@ -503,14 +517,16 @@ const Dashboard = () => {
   }, [selectedCompanyId]);
 
   useEffect(() => {
+    if (!isCompanyReady) return;
     if (isLayoutLoading) return;
     void loadMetrics();
-  }, [detailLevel, selectedCompanyId, activePeriod, isLayoutLoading, enabledMetricKeys.join(",")]);
+  }, [detailLevel, selectedCompanyId, activePeriod, isCompanyReady, isLayoutLoading, enabledMetricKeys.join(",")]);
 
   useEffect(() => {
+    if (!isCompanyReady) return;
     if (isLayoutLoading) return;
     void loadForecast(forecastHorizon);
-  }, [selectedCompanyId, isLayoutLoading, enabledMetricKeys.join(",")]);
+  }, [selectedCompanyId, isCompanyReady, isLayoutLoading, enabledMetricKeys.join(",")]);
 
   useEffect(() => {
     const onTransactionsUpdated = (event: Event) => {
@@ -655,7 +671,22 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {!isLayoutLoading && !hasSelectedMetrics ? (
+      {isCompanyReady && !selectedCompanyId ? (
+        <div className="rounded-3xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-center">
+          <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Selecione uma empresa</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
+            O dashboard carrega quando uma empresa ativa estiver definida para esta sessao.
+          </p>
+          <Link
+            to="/companies"
+            className="mt-5 inline-flex rounded-2xl bg-lime-400 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-950"
+          >
+            Abrir empresas
+          </Link>
+        </div>
+      ) : null}
+
+      {!isLayoutLoading && !!selectedCompanyId && !hasSelectedMetrics ? (
         <div className="rounded-3xl border border-dashed border-lime-400/30 bg-lime-400/10 p-8 text-center">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Dashboard sem widgets ativos</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
@@ -670,7 +701,7 @@ const Dashboard = () => {
         </div>
       ) : null}
 
-      {hasSelectedMetrics ? (
+      {selectedCompanyId && hasSelectedMetrics ? (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
           {isMetricEnabled("revenue") ? (
             <KpiCard

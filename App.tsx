@@ -9,6 +9,7 @@ import Companies from './pages/Companies';
 import LoginPage from './pages/LoginPage';
 import { ToastProvider } from './components/Toast';
 import AppErrorBoundary from './src/components/AppErrorBoundary';
+import { DASHBOARD_ROUTE } from './src/app/routes';
 import { useDetailLevel } from './src/hooks/useDetailLevel';
 import { useTheme } from './src/hooks/useTheme';
 import type { Company, DetailLevel, UserNiche } from './src/types/domain';
@@ -275,16 +276,16 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
 const ProtectedRoute = ({ children }: { children?: ReactNode }) => {
   const token = localStorage.getItem('access_token');
   const { isLoggedIn, isProfileReady } = useAuth();
-  if (!isProfileReady) return null;
-  return isLoggedIn && token ? <>{children}</> : <Navigate to="/login" />;
+  if (!isProfileReady) return <FullscreenLoading label="Validando acesso" />;
+  return isLoggedIn && token ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const AdminRoute = ({ children }: { children?: ReactNode }) => {
   const token = localStorage.getItem('access_token');
   const { isLoggedIn, isAdmin, isProfileReady } = useAuth();
-  if (!isProfileReady) return null;
-  if (!isLoggedIn || !token) return <Navigate to="/login" />;
-  return isAdmin ? <>{children}</> : <Navigate to="/" replace />;
+  if (!isProfileReady) return <FullscreenLoading label="Validando acesso" />;
+  if (!isLoggedIn || !token) return <Navigate to="/login" replace />;
+  return isAdmin ? <>{children}</> : <Navigate to={DASHBOARD_ROUTE} replace />;
 };
 
 const FullscreenLoading = ({ label = "Preparando experiencia" }: { label?: string }) => (
@@ -400,7 +401,7 @@ const GoogleAuthCallback = () => {
         localStorage.setItem('refresh_token', refreshToken);
       }
       login({ name, email, admin, niche: null });
-      navigate('/', { replace: true });
+      navigate(DASHBOARD_ROUTE, { replace: true });
     } else {
       navigate('/login?error=google_auth_failed', { replace: true });
     }
@@ -453,11 +454,14 @@ const AppContent = () => {
       }>
         <Routes>
           <Route path="/auth/callback" element={<GoogleAuthCallback />} />
-          <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />} />
+          <Route path="/login" element={isLoggedIn ? <Navigate to={DASHBOARD_ROUTE} replace /> : <LoginPage />} />
           <Route path="/onboarding/personalization" element={<ProtectedRoute><OnboardingPersonalization /></ProtectedRoute>} />
-          <Route path="/" element={isLoggedIn ? dashboardShell : <LoginPage />} />
+          <Route path="/" element={isLoggedIn ? <Navigate to={DASHBOARD_ROUTE} replace /> : <LoginPage />} />
+          <Route path="/inicio" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
+          <Route path="/home" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
+          <Route path="/painel" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
           <Route
-            path="/dashboard"
+            path={DASHBOARD_ROUTE}
             element={dashboardShell}
           />
           <Route path="/reports" element={personalizedShell(<Reports />)} />

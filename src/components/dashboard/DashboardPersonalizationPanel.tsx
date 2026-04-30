@@ -79,6 +79,13 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
   const enabledCount = preferences.filter((preference) => preference.enabled).length;
 
   const load = async () => {
+    if (!companyId) {
+      setAvailableMetrics([]);
+      setPreferences([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -218,7 +225,11 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
         ))}
       </div>
 
-      {loading ? (
+      {!companyId ? (
+        <div className="rounded-2xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800">
+          Selecione uma empresa para personalizar o dashboard.
+        </div>
+      ) : loading ? (
         <div className="rounded-2xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800">
           Carregando metricas...
         </div>

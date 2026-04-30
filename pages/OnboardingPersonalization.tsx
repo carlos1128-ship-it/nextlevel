@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
+import { DASHBOARD_ROUTE, normalizeDashboardRoute } from "../src/app/routes";
 import {
   previewCompanyOnboarding,
   saveCompanyOnboarding,
@@ -155,8 +156,8 @@ const OnboardingPersonalization = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const draftKey = selectedCompanyId ? `nextlevel:onboarding:${selectedCompanyId}` : "";
-  const returnTo = searchParams.get("returnTo") || "/dashboard";
-  const safeReturnTo = returnTo.startsWith("/onboarding") || returnTo.startsWith("/login") ? "/dashboard" : returnTo;
+  const returnTo = normalizeDashboardRoute(searchParams.get("returnTo"));
+  const safeReturnTo = returnTo.startsWith("/onboarding") || returnTo.startsWith("/login") ? DASHBOARD_ROUTE : returnTo;
 
   useEffect(() => {
     if (!draftKey) return;
