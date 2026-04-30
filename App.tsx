@@ -58,6 +58,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const COMPANY_ID_STORAGE_KEY = "selectedCompanyId";
 const AUTH_USER_STORAGE_KEY = "auth_user";
 const ONBOARDING_STATUS_CACHE_PREFIX = "nextlevel:onboarding-status:";
+const COMPANY_ACCESS_INVALID_EVENT = "nextlevel:company-access-invalid";
 const getCompanyId = (company: Partial<Company> | null | undefined) => company?.id || company?._id || null;
 
 function readCachedOnboardingRedirect(companyId: string | null) {
@@ -122,6 +123,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const [email, setEmail] = useState<string | null>(storedUser.email);
   const [niche, setNicheState] = useState<UserNiche | null>(storedUser.niche);
   const [selectedCompanyId, setSelectedCompanyIdState] = useState<string | null>(null);
+  const [companyRefreshTick, setCompanyRefreshTick] = useState(0);
   const { detailLevel, setDetailLevel } = useDetailLevel();
   const { theme, setTheme } = useTheme();
 
@@ -158,6 +160,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     setIsAdmin(Boolean(user.admin));
     setIsProfileReady(true);
     setIsCompanyReady(false);
+    setSelectedCompanyId(null);
     setUsername(user.name || null);
     setEmail(user.email || null);
     setNicheState(user.niche || null);
@@ -220,6 +223,15 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   }, [isLoggedIn, setDetailLevel, setTheme]);
 
   useEffect(() => {
+    const handleInvalidCompany = () => {
+      setSelectedCompanyIdState(null);
+      setCompanyRefreshTick((current) => current + 1);
+    };
+    window.addEventListener(COMPANY_ACCESS_INVALID_EVENT, handleInvalidCompany);
+    return () => window.removeEventListener(COMPANY_ACCESS_INVALID_EVENT, handleInvalidCompany);
+  }, []);
+
+  useEffect(() => {
     if (!isLoggedIn) {
       setIsCompanyReady(true);
       return;
@@ -250,7 +262,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
         // ignore company bootstrap errors to avoid blocking app load
       })
       .finally(() => setIsCompanyReady(true));
-  }, [isLoggedIn, selectedCompanyId, storedCompanyId]);
+  }, [isLoggedIn, selectedCompanyId, storedCompanyId, companyRefreshTick]);
 
   const value = {
     isLoggedIn,

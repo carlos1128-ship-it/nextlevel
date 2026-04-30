@@ -4,6 +4,7 @@ import { getErrorMessage } from './error';
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const GLOBAL_FEEDBACK_EVENT = 'nextlevel:error-feedback';
+const COMPANY_ACCESS_INVALID_EVENT = 'nextlevel:company-access-invalid';
 
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
@@ -91,6 +92,19 @@ function shouldAttachAuthHeader(config: InternalAxiosRequestConfig) {
   return !(url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh'));
 }
 
+function isCompanyAccessError(error: AxiosError) {
+  if (error.response?.status !== 403) return false;
+  const payload = error.response.data;
+  const message =
+    typeof payload === 'string'
+      ? payload
+      : payload && typeof payload === 'object'
+        ? String((payload as { message?: unknown }).message || '')
+        : '';
+
+  return message.toLowerCase().includes('sem acesso a empresa');
+}
+
 function dispatchFriendlyApiError(error: AxiosError) {
   if (typeof window === 'undefined') return;
 
@@ -106,6 +120,11 @@ function dispatchFriendlyApiError(error: AxiosError) {
     ([409, 429, 502, 503, 504].includes(status) || !error.response);
   if (isRecoverableWhatsappConnectionError) {
     return;
+  }
+
+  if (isCompanyAccessError(error)) {
+    localStorage.removeItem('selectedCompanyId');
+    window.dispatchEvent(new CustomEvent(COMPANY_ACCESS_INVALID_EVENT));
   }
 
   const message = getErrorMessage(

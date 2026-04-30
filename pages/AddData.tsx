@@ -5,13 +5,18 @@ import {
   analyzeIntelligentImport,
   confirmIntelligentImport,
   createTextIntelligentImport,
+  getCompanies,
   getIntelligentImport,
   getIntelligentImports,
   rejectIntelligentImport,
   reviewIntelligentImport,
   uploadIntelligentImportFile,
 } from "../src/services/endpoints";
-import { getErrorMessage } from "../src/services/error";
+import {
+  ACTIVE_COMPANY_ACCESS_MESSAGE,
+  getErrorMessage,
+  isActiveCompanyAccessError,
+} from "../src/services/error";
 import type {
   IntelligentImportEntity,
   IntelligentImportMetric,
@@ -115,7 +120,7 @@ function parseMetricDraft(value: string, unit: IntelligentImportMetric["unit"]) 
 }
 
 const AddData = () => {
-  const { selectedCompanyId } = useAuth();
+  const { selectedCompanyId, setSelectedCompanyId, isCompanyReady } = useAuth();
   const { addToast } = useToast();
   const [mode, setMode] = useState<InputMode>("text");
   const [expectedCategory, setExpectedCategory] = useState("auto");
@@ -128,14 +133,42 @@ const AddData = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
 
   const activeMode = useMemo(() => INPUT_MODES.find((item) => item.mode === mode), [mode]);
-  const canAnalyze =
+  const hasValidInput =
     mode === "text"
       ? textValue.trim().length >= 3
       : Boolean(selectedFile);
+  const canAnalyze = isCompanyReady && Boolean(selectedCompanyId) && hasValidInput;
+
+  const reloadActiveCompany = async () => {
+    try {
+      const companies = await getCompanies();
+      const list = Array.isArray(companies) ? companies : [];
+      const current = selectedCompanyId
+        ? list.find((company) => (company.id || company._id) === selectedCompanyId)
+        : null;
+      const fallback = list[0] || null;
+      const nextCompanyId = (current || fallback)?.id || (current || fallback)?._id || null;
+      setSelectedCompanyId(nextCompanyId);
+      return nextCompanyId;
+    } catch {
+      setSelectedCompanyId(null);
+      return null;
+    }
+  };
+
+  const handleCompanyAccessError = async (error: unknown, historyMessage?: string) => {
+    if (!isActiveCompanyAccessError(error)) return false;
+    if (historyMessage) setHistoryError(historyMessage);
+    addToast(ACTIVE_COMPANY_ACCESS_MESSAGE, "error");
+    await reloadActiveCompany();
+    return true;
+  };
 
   const loadHistory = async (selectedId?: string) => {
+    if (!isCompanyReady) return;
     if (!selectedCompanyId) {
       setHistory([]);
       setSelectedImport(null);
@@ -144,6 +177,7 @@ const AddData = () => {
     }
     try {
       setIsLoadingHistory(true);
+      setHistoryError(null);
       const imports = await getIntelligentImports({ companyId: selectedCompanyId });
       setHistory(imports);
       const nextSelected =
@@ -154,7 +188,15 @@ const AddData = () => {
       setDraftMetrics(nextSelected?.extracted?.metrics || []);
       setDraftEntities(nextSelected?.extracted?.entities || []);
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel carregar o historico."), "error");
+      const handled = await handleCompanyAccessError(
+        error,
+        "Nao foi possivel carregar importacoes da empresa ativa.",
+      );
+      if (!handled) {
+        const message = getErrorMessage(error, "Nao foi possivel carregar o historico.");
+        setHistoryError(message);
+        addToast(message, "error");
+      }
     } finally {
       setIsLoadingHistory(false);
     }
@@ -162,7 +204,7 @@ const AddData = () => {
 
   useEffect(() => {
     void loadHistory();
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, isCompanyReady]);
 
   const handleAnalyze = async () => {
     if (!selectedCompanyId) {
@@ -208,7 +250,10 @@ const AddData = () => {
       await loadHistory(analyzed.id);
       addToast("Analise concluida. Revise os dados antes de confirmar.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel analisar esta importacao."), "error");
+      const handled = await handleCompanyAccessError(error);
+      if (!handled) {
+        addToast(getErrorMessage(error, "Nao foi possivel analisar esta importacao."), "error");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -222,7 +267,10 @@ const AddData = () => {
       setDraftMetrics(item.extracted?.metrics || []);
       setDraftEntities(item.extracted?.entities || []);
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel abrir esta importacao."), "error");
+      const handled = await handleCompanyAccessError(error);
+      if (!handled) {
+        addToast(getErrorMessage(error, "Nao foi possivel abrir esta importacao."), "error");
+      }
     }
   };
 
@@ -273,7 +321,10 @@ const AddData = () => {
       await loadHistory(confirmed.id);
       addToast("Importacao confirmada com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel confirmar a importacao."), "error");
+      const handled = await handleCompanyAccessError(error);
+      if (!handled) {
+        addToast(getErrorMessage(error, "Nao foi possivel confirmar a importacao."), "error");
+      }
     } finally {
       setIsConfirming(false);
     }
@@ -290,7 +341,10 @@ const AddData = () => {
       await loadHistory(rejected.id);
       addToast("Importacao rejeitada.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel rejeitar a importacao."), "error");
+      const handled = await handleCompanyAccessError(error);
+      if (!handled) {
+        addToast(getErrorMessage(error, "Nao foi possivel rejeitar a importacao."), "error");
+      }
     } finally {
       setIsConfirming(false);
     }
@@ -433,6 +487,17 @@ const AddData = () => {
             {isLoadingHistory ? (
               <div className="rounded-2xl border border-dashed border-zinc-800 p-6 text-sm text-zinc-500">
                 Carregando importacoes...
+              </div>
+            ) : historyError ? (
+              <div className="space-y-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-5 text-sm text-amber-100">
+                <p>{historyError}</p>
+                <button
+                  type="button"
+                  onClick={() => void reloadActiveCompany()}
+                  className="rounded-xl border border-amber-300/30 px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-amber-100"
+                >
+                  Recarregar empresa ativa
+                </button>
               </div>
             ) : history.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-zinc-800 p-6 text-sm text-zinc-500">
