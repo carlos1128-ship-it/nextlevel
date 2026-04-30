@@ -397,6 +397,28 @@ const Integrations = () => {
           </article>
         ))}
       </section>
+
+      <section className="rounded-lg border border-dashed border-zinc-700 bg-zinc-950/60 p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
+              Importacao manual
+            </p>
+            <h2 className="text-2xl font-black text-zinc-50">CSV de operacao</h2>
+            <p className="max-w-2xl text-sm leading-6 text-zinc-400">
+              Base backend preparada para vendas, produtos, clientes, custos, anuncios e pedidos.
+              O fluxo visual de upload, preview e mapeamento entra em breve nesta tela.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled
+            className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-500"
+          >
+            Em breve
+          </button>
+        </div>
+      </section>
     </main>
   );
 };
