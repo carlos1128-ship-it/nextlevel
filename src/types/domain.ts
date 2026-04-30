@@ -33,6 +33,7 @@ export interface DashboardMetricDefinition {
   requiredData: string[];
   supportedBusinessTypes: string[];
   defaultEnabled: boolean;
+  recommended?: boolean;
   planAvailability: string[];
   displayType: DashboardDisplayType;
 }
