@@ -66,6 +66,9 @@ export function resolveMetadata(pathname: string): Metadata {
     "/": "Next Level | Lucro Real ou Colapso",
     "/login": "Next Level | Lucro Real ou Colapso",
     "/dashboard": "Dashboard | Next Level",
+    "/inicio": "Dashboard | Next Level",
+    "/home": "Dashboard | Next Level",
+    "/painel": "Dashboard | Next Level",
     "/reports": "Relatorios | Next Level",
     "/chat": "Chat IA | Next Level",
     "/settings": "Configuracoes | Next Level",
@@ -82,6 +85,9 @@ export function resolveMetadata(pathname: string): Metadata {
     "/attendant": "Atendente IA | Next Level",
     "/command-center": "Projetos | Next Level",
     "/plans": "Planos | Next Level",
+    "/add-data": "Adicionar Dados | Next Level",
+    "/usage": "Uso do Plano | Next Level",
+    "/plan-usage": "Uso do Plano | Next Level",
     "/admin/system-health": "System Health | Next Level",
   };
 

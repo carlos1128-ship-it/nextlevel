@@ -735,10 +735,6 @@ const Dashboard = () => {
         </div>
       ) : null}
 
-      {selectedCompanyId ? (
-        <AiDashboardPanel data={aiDashboard} loading={isAiDashboardLoading} />
-      ) : null}
-
       {selectedCompanyId && hasSelectedMetrics ? (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
           {isMetricEnabled("revenue") ? (
@@ -816,6 +812,37 @@ const Dashboard = () => {
               iconAccent="text-cyan-300"
             />
           ) : null}
+        </div>
+      ) : null}
+
+      {selectedCompanyId ? (
+        <AiDashboardPanel data={aiDashboard} loading={isAiDashboardLoading} />
+      ) : null}
+
+      {isMetricEnabled("alerts_insights") ? (
+        <div className="flex flex-col items-start gap-6 rounded-3xl border border-zinc-900 bg-zinc-950 p-7 md:flex-row md:items-center">
+          <div className="min-w-0 flex-1">
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <div className="rounded-lg bg-lime-400/15 p-2 text-lime-400">
+                <LightbulbIcon className="h-5 w-5" />
+              </div>
+              <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Insights Estrategicos</h3>
+              {strategicInsightError ? (
+                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
+                  Cache/Retry ativo
+                </span>
+              ) : null}
+            </div>
+            <p className="whitespace-pre-line break-words text-sm leading-relaxed text-zinc-300 md:text-base">
+              {formattedInsight || "Ainda nao ha volume suficiente para um diagnostico automatico robusto. Cadastre movimentacoes financeiras, vendas e custos para liberar analises mais profundas."}
+            </p>
+          </div>
+          <Link
+            to="/insights"
+            className="rounded-2xl border border-zinc-800 bg-zinc-900 px-8 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-100 transition hover:border-lime-400/40"
+          >
+            Ver Insights Completos
+          </Link>
         </div>
       ) : null}
 
@@ -1058,32 +1085,6 @@ const Dashboard = () => {
       </div>
       ) : null}
 
-      {isMetricEnabled("alerts_insights") ? (
-      <div className="flex flex-col items-start gap-6 rounded-3xl border border-zinc-900 bg-zinc-950 p-7 md:flex-row md:items-center">
-        <div className="min-w-0 flex-1">
-          <div className="mb-3 flex items-center gap-3">
-            <div className="rounded-lg bg-lime-400/15 p-2 text-lime-400">
-              <LightbulbIcon className="h-5 w-5" />
-            </div>
-            <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Insight Estrategico</h3>
-            {strategicInsightError ? (
-              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
-                Cache/Retry ativo
-              </span>
-            ) : null}
-          </div>
-          <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-300 md:text-base">
-            {formattedInsight || "Ainda nao ha volume suficiente para um diagnostico automatico robusto. Cadastre movimentacoes financeiras, vendas e custos para liberar analises mais profundas."}
-          </p>
-        </div>
-        <Link
-          to="/insights"
-          className="rounded-2xl border border-zinc-800 bg-zinc-900 px-8 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-100 transition hover:border-lime-400/40"
-        >
-          Ver Insights Completos
-        </Link>
-      </div>
-      ) : null}
     </div>
   );
 };
