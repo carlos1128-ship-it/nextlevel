@@ -42,6 +42,9 @@ import type {
   ConversationLiveFeedItem,
   IntelligentImportRecord,
   ImportedMetricRecord,
+  AIUsageCurrentResponse,
+  AIUsageLimitsResponse,
+  AiDashboardIntelligence,
 } from "../types/domain";
 
 function extractCompanyId(company: Partial<Company> | null | undefined) {
@@ -520,6 +523,19 @@ export async function getDashboardMetrics(params?: {
         params?.comparePrevious === undefined ? undefined : String(params.comparePrevious),
       startDate: params?.startDate || undefined,
       endDate: params?.endDate || undefined,
+    },
+  });
+  return data;
+}
+
+export async function getAiDashboardInsights(params?: {
+  companyId?: string | null;
+  period?: DashboardPeriod;
+}) {
+  const { data } = await api.get<AiDashboardIntelligence>("/ai/dashboard-insights", {
+    params: {
+      companyId: params?.companyId || undefined,
+      period: params?.period || undefined,
     },
   });
   return data;
@@ -1533,4 +1549,21 @@ export async function getImportedMetrics(params?: { companyId?: string | null })
     params: params?.companyId ? { companyId: params.companyId } : undefined,
   });
   return Array.isArray(data) ? data.map(normalizeImportedMetricRecord) : [];
+}
+
+export async function getCurrentAIUsage(params?: { companyId?: string | null; yearMonth?: string }) {
+  const { data } = await api.get<AIUsageCurrentResponse>("/usage/ai/current", {
+    params: {
+      companyId: params?.companyId || undefined,
+      yearMonth: params?.yearMonth || undefined,
+    },
+  });
+  return data;
+}
+
+export async function getAIUsageLimits(params?: { companyId?: string | null }) {
+  const { data } = await api.get<AIUsageLimitsResponse>("/usage/ai/limits", {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
+  return data;
 }

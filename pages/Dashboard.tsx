@@ -24,9 +24,11 @@ import {
   MessageSquareIcon,
 } from "../components/icons";
 import { useToast } from "../components/Toast";
+import AiDashboardPanel from "../components/AiDashboardPanel";
 import { getErrorMessage } from "../src/services/error";
 import {
   exportFinancialCsv,
+  getAiDashboardInsights,
   getDashboardMetrics,
   getDashboardPreferences,
   getForecast,
@@ -42,6 +44,7 @@ import type {
   AttendantRoi,
   TransactionItem,
   DashboardResolvedLayoutItem,
+  AiDashboardIntelligence,
 } from "../src/types/domain";
 
 const EMPTY_SUMMARY: DashboardSummary = {
@@ -331,6 +334,8 @@ const Dashboard = () => {
   const [forecast, setForecast] = useState<ForecastResponse | null>(null);
   const [forecastHorizon, setForecastHorizon] = useState<7 | 15 | 30>(30);
   const [isForecastLoading, setIsForecastLoading] = useState(false);
+  const [aiDashboard, setAiDashboard] = useState<AiDashboardIntelligence | null>(null);
+  const [isAiDashboardLoading, setIsAiDashboardLoading] = useState(false);
   const [attendantRoi, setAttendantRoi] = useState<AttendantRoi>({ iaSalesCount: 0, iaRevenue: 0 });
   const enabledMetricKeys = useMemo(
     () => (isLayoutLoading ? Array.from(DEFAULT_VISIBLE_METRICS) : layout.map((item) => item.metricKey)),
@@ -506,6 +511,26 @@ const Dashboard = () => {
     }
   };
 
+  const loadAiDashboard = async () => {
+    if (!selectedCompanyId) {
+      setAiDashboard(null);
+      return;
+    }
+    setIsAiDashboardLoading(true);
+    try {
+      const data = await getAiDashboardInsights({
+        companyId: selectedCompanyId,
+        period: activePeriod,
+      });
+      setAiDashboard(data);
+    } catch (error) {
+      setAiDashboard(null);
+      addToast(getErrorMessage(error, "Nao foi possivel carregar a inteligencia do dashboard."), "error");
+    } finally {
+      setIsAiDashboardLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isCompanyReady) return;
     void loadLayout();
@@ -530,6 +555,12 @@ const Dashboard = () => {
     if (isLayoutLoading) return;
     void loadForecast(forecastHorizon);
   }, [selectedCompanyId, isCompanyReady, isLayoutLoading, enabledMetricKeys.join(",")]);
+
+  useEffect(() => {
+    if (!isCompanyReady) return;
+    if (isLayoutLoading) return;
+    void loadAiDashboard();
+  }, [selectedCompanyId, activePeriod, isCompanyReady, isLayoutLoading]);
 
   useEffect(() => {
     const onTransactionsUpdated = (event: Event) => {
@@ -606,7 +637,7 @@ const Dashboard = () => {
   ];
   const metricChange = (item?: DashboardMetricResult) => {
     if (!item || item.status !== "ok") {
-      return { text: item?.status === "not_enough_data" ? "Dado insuficiente" : "Sem dados", type: "flat" as const };
+      return { text: item?.status === "not_enough_data" ? "Dados insuficientes" : "Sem dados", type: "flat" as const };
     }
     const comparison = item.comparison;
     if (!comparison) {
@@ -702,6 +733,10 @@ const Dashboard = () => {
             Personalizar dashboard
           </Link>
         </div>
+      ) : null}
+
+      {selectedCompanyId ? (
+        <AiDashboardPanel data={aiDashboard} loading={isAiDashboardLoading} />
       ) : null}
 
       {selectedCompanyId && hasSelectedMetrics ? (

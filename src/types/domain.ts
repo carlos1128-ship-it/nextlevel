@@ -95,6 +95,35 @@ export interface DashboardMetricsResponse {
   warnings: string[];
 }
 
+export interface AiBusinessCard {
+  type: string;
+  title: string;
+  summary: string;
+  impact?: string | null;
+  recommendation?: string | null;
+  priority: "low" | "medium" | "high" | "critical";
+  source: string;
+}
+
+export interface AiDashboardIntelligence {
+  period: {
+    key: DashboardPeriod;
+    startDate: string;
+    endDate: string;
+  };
+  mainInsight: AiBusinessCard;
+  mainRisk: AiBusinessCard | null;
+  growthOpportunity: AiBusinessCard | null;
+  recommendedAction: AiBusinessCard | null;
+  productAttention: AiBusinessCard | null;
+  customerAttention: AiBusinessCard | null;
+  costAttention: AiBusinessCard | null;
+  whatsappSignal: AiBusinessCard | null;
+  nextBestActions: AiBusinessCard[];
+  missingData: string[];
+  generatedFrom: "backend_metrics";
+}
+
 export type BusinessType =
   | "ecommerce_physical"
   | "ecommerce_digital"
@@ -760,4 +789,53 @@ export interface AuditFeedItem {
   details?: unknown;
   createdAt: string;
   company?: Pick<AdminCompanySummary, "id" | "name"> | null;
+}
+
+export type AIUsageFeatureKey =
+  | "chat_ia"
+  | "whatsapp_agent"
+  | "image_analysis"
+  | "audio_transcription"
+  | "web_search"
+  | "report_generation"
+  | "intelligent_import"
+  | "other";
+
+export type AIUsageFeatureStatus = "ok" | "near_limit" | "exceeded";
+
+export interface AIUsageFeatureSummary {
+  feature: AIUsageFeatureKey;
+  label: string;
+  unit: string;
+  requestCount: number;
+  tokenCount: number;
+  monthlyRequestLimit: number | null;
+  monthlyTokenLimit: number | null;
+  enabled: boolean;
+  progressPercent: number;
+  status: AIUsageFeatureStatus;
+}
+
+export interface AIUsageCurrentResponse {
+  companyId: string;
+  planKey: string;
+  yearMonth: string;
+  currentMonth: string;
+  resetMessage: string;
+  features: AIUsageFeatureSummary[];
+}
+
+export interface AIUsageLimitItem {
+  feature: AIUsageFeatureKey;
+  label: string;
+  unit: string;
+  monthlyRequestLimit: number | null;
+  monthlyTokenLimit: number | null;
+  enabled: boolean;
+}
+
+export interface AIUsageLimitsResponse {
+  companyId: string;
+  planKey: string;
+  limits: AIUsageLimitItem[];
 }

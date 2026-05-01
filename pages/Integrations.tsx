@@ -14,15 +14,15 @@ import type { WhatsappConnection } from "../src/types/domain";
 const channels = [
   {
     title: "Instagram",
-    description: "Meta Graph pronto para campanhas e captura de sinais.",
+    description: "Provider setup required: aguardando configuracao oficial via Meta.",
   },
   {
     title: "Mercado Livre",
-    description: "Canal comercial preservado para sincronizacao operacional.",
+    description: "Provider setup required: aguardando OAuth/API oficial.",
   },
   {
     title: "Shopee",
-    description: "Monitoramento e integracao comercial em evolucao.",
+    description: "Beta: login por senha nao e solicitado. Aguardando provider oficial.",
   },
 ];
 
@@ -390,7 +390,7 @@ const Integrations = () => {
             className="rounded-lg border border-zinc-800 bg-zinc-950/70 p-5"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-              Canal ativo
+              Em preparacao
             </p>
             <h2 className="mt-3 text-xl font-black text-zinc-50">{channel.title}</h2>
             <p className="mt-3 text-sm leading-6 text-zinc-400">{channel.description}</p>

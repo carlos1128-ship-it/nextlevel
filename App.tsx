@@ -24,6 +24,7 @@ const Reports = lazy(() => import('./pages/Reports'));
 const Insights = lazy(() => import('./pages/Insights'));
 const FinancialFlow = lazy(() => import('./pages/FinancialFlow'));
 const Plans = lazy(() => import('./pages/Plans'));
+const PlanUsage = lazy(() => import('./pages/PlanUsage'));
 const Products = lazy(() => import('./pages/Products'));
 const Customers = lazy(() => import('./pages/Customers'));
 const Costs = lazy(() => import('./pages/Costs'));
@@ -495,6 +496,8 @@ const AppContent = () => {
           <Route path="/admin/system-health" element={<AdminRoute><Layout><SystemHealth /></Layout></AdminRoute>} />
           <Route path="/command-center" element={personalizedShell(<CommandCenter />)} />
           <Route path="/plans" element={plainShell(<Plans />)} />
+          <Route path="/usage" element={personalizedShell(<PlanUsage />)} />
+          <Route path="/plan-usage" element={<Navigate to="/usage" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

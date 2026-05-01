@@ -7,7 +7,6 @@ type Plan = {
   monthlyPrice: number;
   features: string[];
   isPopular?: boolean;
-  buttonText: string;
 };
 
 const formatPrice = (value: number) =>
@@ -64,11 +63,10 @@ const PlanCard = ({ plan, billingCycle }: { plan: Plan; billingCycle: BillingCyc
       </ul>
       <button
         data-billing-cycle={billingCycle}
-        className={`w-full rounded-xl py-4 text-xs font-black uppercase tracking-widest transition-all ${
-          plan.isPopular ? "bg-[#B6FF00] text-black neon-glow hover:opacity-90" : "bg-white/5 text-white hover:bg-white/10"
-        }`}
+        disabled
+        className="w-full cursor-not-allowed rounded-xl border border-amber-400/30 bg-amber-400/10 py-4 text-xs font-black uppercase tracking-widest text-amber-200"
       >
-        {plan.buttonText}
+        Gateway em configuracao
       </button>
     </div>
   );
@@ -82,7 +80,6 @@ const Plans = () => {
       {
         title: "Common",
         monthlyPrice: 97,
-        buttonText: "Assinar Agora",
         features: [
           "Ate 2 empresas vinculadas",
           "Dashboard em tempo real",
@@ -96,7 +93,6 @@ const Plans = () => {
         title: "Premium",
         monthlyPrice: 137,
         isPopular: true,
-        buttonText: "Assinar Agora",
         features: [
           "Ate 10 empresas vinculadas",
           "WhatsApp e Instagram",
@@ -110,7 +106,6 @@ const Plans = () => {
       {
         title: "Pro Business",
         monthlyPrice: 247,
-        buttonText: "Comecar Agora",
         features: [
           "Empresas ilimitadas",
           "Tudo do Premium",
@@ -162,12 +157,12 @@ const Plans = () => {
       </div>
 
       <div className="mt-20 rounded-3xl border border-zinc-200 bg-[#121212] p-10 text-center dark:border-zinc-800">
-        <h3 className="mb-4 text-2xl font-black tracking-tighter">Precisa de algo sob medida?</h3>
+        <h3 className="mb-4 text-2xl font-black tracking-tighter">Checkout em preparacao</h3>
         <p className="mx-auto mb-8 max-w-lg text-zinc-500 dark:text-zinc-400">
-          Para operacoes de grande escala ou necessidades especificas de integracao, nosso plano Enterprise e a solucao ideal.
+          Os planos ja estao definidos. A assinatura fica bloqueada ate o gateway de pagamento ser configurado com seguranca.
         </p>
-        <button className="border-b-2 border-[#B6FF00] pb-1 text-sm font-black uppercase tracking-widest text-[#B6FF00] transition-all hover:opacity-80">
-          Solicitar Orcamento Customizado
+        <button disabled className="cursor-not-allowed border-b-2 border-zinc-700 pb-1 text-sm font-black uppercase tracking-widest text-zinc-500">
+          Provider setup required
         </button>
       </div>
     </div>

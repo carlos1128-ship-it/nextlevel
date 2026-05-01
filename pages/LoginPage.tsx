@@ -1,27 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
 import { api } from "../services/api";
-import type { UserNiche } from "../src/types/domain";
 
 /* ─────────────────────────────────────────────────────────────
    Helpers
 ───────────────────────────────────────────────────────────── */
-function getFirstString(values: unknown[]): string | null {
-  for (const v of values) {
-    if (typeof v === "string" && v.trim()) return v;
-  }
-  return null;
+function parsePtBrNumber(value: string): number {
+  return parseFloat(value.replace(",", ".")) || 0;
 }
 function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
-function parsePtBrNumber(value: string): number {
-  return parseFloat(value.replace(",", ".")) || 0;
-}
 
 /* ─────────────────────────────────────────────────────────────
-   Inline SVG Icons
+   Animated Counter
+───────────────────────────────────────────────────────────── */
+const AnimatedCounter: React.FC<{ value: string; duration?: number }> = ({ value, duration = 1800 }) => {
+  const [display, setDisplay] = useState("0");
+  const hasRun = useRef(false);
+  const numMatch = value.match(/([\d,.]+)/);
+  const prefix = value.match(/^[^0-9]*/)?.[0] || "";
+  const suffix = value.match(/[^0-9,.]+$/)?.[0] || "";
+
+  useEffect(() => {
+    if (hasRun.current || !numMatch) return;
+    hasRun.current = true;
+    const target = parseFloat(numMatch[1].replace(",", "."));
+    const isFloat = numMatch[1].includes(",") || numMatch[1].includes(".");
+    const steps = 60;
+    let current = 0;
+    const step = target / steps;
+    const interval = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        current = target;
+        clearInterval(interval);
+      }
+      setDisplay(isFloat ? current.toFixed(1).replace(".", ",") : Math.floor(current).toLocaleString("pt-BR"));
+    }, duration / steps);
+  }, []);
+
+  return <>{prefix}{display}{suffix}</>;
+};
+
+/* ─────────────────────────────────────────────────────────────
+   Icons
 ───────────────────────────────────────────────────────────── */
 const EyeIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -34,28 +58,8 @@ const EyeOffIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M17.94 17.94A10.07 10.07 0 0112 20c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 012.042-3.366M6.26 6.26A9.952 9.952 0 0112 4c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411M3 3l18 18" />
   </svg>
 );
-const ArrowUpRight = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
-  </svg>
-);
-const PackageIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
-  </svg>
-);
-const ActivityIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-    <polyline strokeLinecap="round" strokeLinejoin="round" points="22 12 18 12 15 21 9 3 6 12 2 12" />
-  </svg>
-);
-const PuzzleIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-  </svg>
-);
 const GoogleIcon = () => (
-  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+  <svg className="h-4 w-4" viewBox="0 0 24 24">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -67,195 +71,264 @@ const CheckIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
 );
+const BrainIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+  </svg>
+);
+const WhatsAppIcon = () => (
+  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+const ChartIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+  </svg>
+);
+const ShieldIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+  </svg>
+);
+const ZapIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>
+);
+const TrendingUpIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+  </svg>
+);
+const ArrowRight = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+  </svg>
+);
 const CreditCardIcon = () => (
   <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <line x1="1" y1="10" x2="23" y2="10" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+    <line x1="1" y1="10" x2="23" y2="10"/>
   </svg>
 );
 
 /* ─────────────────────────────────────────────────────────────
-   Static data
+   Static Data
 ───────────────────────────────────────────────────────────── */
-const providerPills = ["WhatsApp", "Instagram", "Mercado Livre", "Shopee"];
-
-const heroSignals = [
-  { label: "Linha da vida", value: "+18,4%", helper: "Margem protegida após ajuste de preço e frete." },
-  { label: "Atrito removido", value: "1 clique", helper: "Conexões críticas prontas sem ritual técnico cansativo." },
-  { label: "Campo visual", value: "360°", helper: "Venda, custo e lucro no mesmo radar decisório." },
+const METRICS = [
+  { value: "+18,4%", label: "Aumento médio de margem", icon: TrendingUpIcon },
+  { value: "360°", label: "Visão operacional total", icon: ChartIcon },
+  { value: "1 clique", label: "Para conectar canais", icon: ZapIcon },
+  { value: "24/7", label: "IA trabalhando por você", icon: BrainIcon },
 ];
 
-const tacticalCards = [
-  { eyebrow: "Simplificação infantil", title: "Sua operação simples como um brinquedo.", description: "A calculadora transforma preço, custo, frete e imposto em uma leitura que qualquer pessoa entende em segundos.", Icon: PackageIcon, accent: "rgba(182,255,0,0.10)" },
-  { eyebrow: "Clareza viciante", title: "Gestão tão clara que você não consegue parar de olhar.", description: "Quando a margem aparece viva na tela, a rotina deixa de ser loteria e vira comando tático.", Icon: ActivityIcon, accent: "rgba(52,211,153,0.10)" },
-  { eyebrow: "Integração sem atrito", title: "Sincronize Mercado Livre, Shopee, WhatsApp em 1 clique.", description: "A operação fica centralizada sem token manual, sem planilha quebrada e sem staff perdendo tempo com remendo.", Icon: PuzzleIcon, accent: "rgba(34,211,238,0.10)" },
+const PROOF_STATS = [
+  { quote: "A Netflix economizou mais de US$ 1 bilhão por ano com análise de dados de comportamento do usuário.", source: "Harvard Business Review" },
+  { quote: "Empresas que usam IA na gestão têm 25% mais chance de superar concorrentes em rentabilidade.", source: "McKinsey Global Institute" },
+  { quote: "Pequenos negócios que adotam automação crescem até 3x mais rápido do que os que não adotam.", source: "Salesforce Research 2023" },
 ];
 
-const pricingPlans = [
+const FEATURES = [
   {
-    eyebrow: "Plano Common", monthlyPrice: "R$ 97/mês", annualPrice: "R$ 1.067/ano",
-    summary: "A base para organizar sua operação, conectar canais e enxergar margem real desde o primeiro acesso.",
-    features: ["Calculadora de margem e preço ideal", "Até 2 empresas vinculadas", "Dashboard em tempo real", "Chat IA essencial", "Suporte via e-mail"],
-    cta: "Assinar agora", recommended: false,
-    microcopy: "Assinatura mensal com acesso imediato ao painel e configuração inicial guiada.",
+    icon: BrainIcon,
+    title: "IA que analisa seu negócio",
+    desc: "Insights automáticos sobre vendas, margem, horários de pico e tendências. Sem achismo. Só dados.",
+    color: "from-lime-400/15 to-emerald-400/5",
+    border: "border-lime-400/20",
   },
   {
-    eyebrow: "Plano Premium", monthlyPrice: "R$ 137/mês", annualPrice: "R$ 1.507/ano",
-    summary: "A camada que organiza vendas, margem e atendimento no ritmo real da operação.",
-    features: ["Até 10 empresas vinculadas", "WhatsApp e Instagram", "Alertas de margem", "Relatórios automáticos semanais", "Recomendações práticas da IA", "Suporte prioritário"],
-    cta: "Assinar agora", recommended: true,
-    microcopy: "Pensado para quem não quer escalar faturamento queimando lucro no processo.",
+    icon: WhatsAppIcon,
+    title: "Atendimento automático",
+    desc: "Agentes inteligentes no WhatsApp, Instagram e Mercado Livre. Venda enquanto você dorme.",
+    color: "from-green-400/15 to-teal-400/5",
+    border: "border-green-400/20",
   },
   {
-    eyebrow: "Plano Pro Business", monthlyPrice: "R$ 247/mês", annualPrice: "R$ 2.717/ano",
-    summary: "Para quando a empresa precisa de mais previsibilidade, mais canais e menos improviso no comando.",
-    features: ["Empresas ilimitadas", "Tudo do Premium", "Mercado Livre, Shopee e marketplaces", "Insights preditivos avançados", "Integrações customizadas via API", "Acompanhamento prioritário"],
+    icon: ChartIcon,
+    title: "Dashboard em tempo real",
+    desc: "Tudo em um lugar: vendas, lucro, estoque e alertas. A foto da sua empresa a qualquer momento.",
+    color: "from-cyan-400/15 to-blue-400/5",
+    border: "border-cyan-400/20",
+  },
+  {
+    icon: ShieldIcon,
+    title: "Gestão multi-empresa",
+    desc: "Gerencie várias empresas com um único acesso. Cada uma com seu painel, metas e dados.",
+    color: "from-violet-400/15 to-purple-400/5",
+    border: "border-violet-400/20",
+  },
+];
+
+const INTEGRATIONS = [
+  { name: "WhatsApp", color: "#25D366", bg: "bg-[#25D366]/10 border-[#25D366]/25" },
+  { name: "Instagram", color: "#E1306C", bg: "bg-[#E1306C]/10 border-[#E1306C]/25" },
+  { name: "Mercado Livre", color: "#FFE600", bg: "bg-[#FFE600]/10 border-[#FFE600]/25" },
+  { name: "Shopee", color: "#FF5722", bg: "bg-[#FF5722]/10 border-[#FF5722]/25" },
+  { name: "API própria", color: "#b6ff00", bg: "bg-[#b6ff00]/10 border-[#b6ff00]/25" },
+];
+
+const PRICING = [
+  {
+    name: "Common",
+    monthlyPrice: "R$ 97", annualPrice: "R$ 1.067",
+    summary: "A base para organizar sua operação e ter visibilidade real desde o primeiro acesso.",
+    features: ["Calculadora de margem inteligente", "Até 2 empresas vinculadas", "Dashboard em tempo real", "IA básica de análise", "Suporte via e-mail"],
     cta: "Começar agora", recommended: false,
-    microcopy: "Acesso completo para operações em expansão que precisam de visibilidade e velocidade.",
+    microcopy: "Acesso imediato · Sem fidelidade",
+  },
+  {
+    name: "Premium",
+    monthlyPrice: "R$ 137", annualPrice: "R$ 1.507",
+    summary: "A camada que organiza vendas, margem e atendimento no ritmo real da sua operação.",
+    features: ["Até 10 empresas vinculadas", "WhatsApp + Instagram integrados", "Alertas inteligentes de margem", "Relatórios automáticos semanais", "Recomendações táticas da IA", "Suporte prioritário"],
+    cta: "Ativar Premium", recommended: true,
+    microcopy: "Pensado pra escalar sem queimar lucro",
+  },
+  {
+    name: "Pro Business",
+    monthlyPrice: "R$ 247", annualPrice: "R$ 2.717",
+    summary: "Para operações em expansão que precisam de previsibilidade, velocidade e zero improviso.",
+    features: ["Empresas ilimitadas", "Tudo do Premium", "Mercado Livre + Shopee + marketplaces", "Insights preditivos avançados", "Integrações via API customizada", "Acompanhamento dedicado"],
+    cta: "Falar com consultor", recommended: false,
+    microcopy: "Para quem opera em outro nível",
   },
 ];
 
 /* ─────────────────────────────────────────────────────────────
-   Margin Calculator (frontend-only, no API calls)
+   Margin Calculator
 ───────────────────────────────────────────────────────────── */
-const MarginCalculatorSection: React.FC = () => {
+const MarginCalculator: React.FC = () => {
   const [tab, setTab] = useState<"lucro" | "preco">("lucro");
-  const [productName, setProductName] = useState("");
-  const [salePrice, setSalePrice] = useState("");
   const [cost, setCost] = useState("");
+  const [salePrice, setSalePrice] = useState("");
   const [desiredMargin, setDesiredMargin] = useState("");
 
   const sale = parsePtBrNumber(salePrice);
   const c = parsePtBrNumber(cost);
-  const desiredMarginValue = parsePtBrNumber(desiredMargin);
+  const dm = parsePtBrNumber(desiredMargin);
   const profit = sale - c;
   const margin = sale > 0 ? (profit / sale) * 100 : 0;
-  const hasProfitResult = sale > 0 && c > 0;
-  const hasIdealPrice = c > 0 && desiredMarginValue > 0;
-  const idealPrice = hasIdealPrice ? c * (1 + desiredMarginValue / 100) : 0;
+  const idealPrice = c > 0 && dm > 0 ? c / (1 - dm / 100) : 0;
   const idealProfit = idealPrice - c;
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  const calcField = "w-full rounded-2xl border border-white/10 bg-[#060911] px-4 py-3 text-sm text-zinc-50 outline-none placeholder:text-zinc-600 focus:border-lime-400/50 transition";
+  const fieldCls = "w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-zinc-50 outline-none placeholder:text-zinc-600 focus:border-lime-400/50 focus:bg-white/[0.06] transition";
+
+  const marginColor = margin >= 20 ? "text-lime-400" : margin >= 10 ? "text-yellow-400" : "text-red-400";
+  const marginLabel = margin >= 20 ? "Saudável ✓" : margin >= 10 ? "Atenção ⚠" : "Crítica ✗";
 
   return (
-    <div className="rounded-[32px] border border-white/10 bg-[#05070b] p-6 md:p-8">
-      <div className="flex flex-col gap-8 xl:flex-row xl:items-start xl:gap-10">
-        <div className="flex-1">
-          <div className="inline-flex items-center gap-2 rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-lime-200/80">
-            ⬡ Calculadora minimalista
-          </div>
-          <h3 className="mt-5 text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">
-            Descubra o lucro ideal sem ruído
-          </h3>
-          <p className="mt-3 text-sm leading-7 text-zinc-400">
-            Digite só o essencial. A resposta aparece na hora, com foco em lucro real e precificação inteligente.
+    <div className="rounded-[28px] border border-white/10 bg-[#050709] overflow-hidden">
+      {/* Header */}
+      <div className="border-b border-white/[0.06] px-6 py-5 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-lime-300/70">Calculadora ao Vivo</p>
+          <h3 className="mt-1 text-xl font-black tracking-tight text-white">Descubra seu lucro real agora</h3>
+        </div>
+        <div className="flex rounded-2xl border border-white/10 bg-white/[0.04] p-1">
+          {(["lucro", "preco"] as const).map((t) => (
+            <button key={t} type="button" onClick={() => setTab(t)}
+              className={`rounded-[14px] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition ${tab === t ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
+              {t === "lucro" ? "Lucro" : "Preço Ideal"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-0">
+        {/* Inputs */}
+        <div className="p-6 space-y-4">
+          {tab === "lucro" ? (
+            <>
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Preço de venda</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
+                  <input value={salePrice} onChange={e => setSalePrice(e.target.value)} className={`${fieldCls} pl-10`} placeholder="0,00" inputMode="decimal" />
+                </div>
+              </div>
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Custo do produto</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
+                  <input value={cost} onChange={e => setCost(e.target.value)} className={`${fieldCls} pl-10`} placeholder="0,00" inputMode="decimal" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Custo do produto</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
+                  <input value={cost} onChange={e => setCost(e.target.value)} className={`${fieldCls} pl-10`} placeholder="0,00" inputMode="decimal" />
+                </div>
+              </div>
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Margem desejada</label>
+                <div className="relative">
+                  <input value={desiredMargin} onChange={e => setDesiredMargin(e.target.value)} className={`${fieldCls} pr-10`} placeholder="30" inputMode="decimal" />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">%</span>
+                </div>
+              </div>
+            </>
+          )}
+          <p className="text-xs text-zinc-600 pt-2">
+            Esta é uma amostra gratuita. Na plataforma, você tem acesso a análises completas com frete, imposto e múltiplos produtos.
           </p>
-
-          <div className="mt-6 flex rounded-2xl border border-white/10 bg-white/[0.03] p-1">
-            {(["lucro", "preco"] as const).map((t) => (
-              <button key={t} type="button" onClick={() => setTab(t)}
-                className={`flex-1 rounded-[14px] py-2.5 text-sm font-bold uppercase tracking-[0.14em] transition ${tab === t ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
-                {t === "lucro" ? "Lucro do Produto" : "Gerador de Preço Ideal"}
-              </button>
-            ))}
-          </div>
-
-          {tab === "lucro" ? (
-            <>
-              <div className="mt-5 grid gap-4 md:grid-cols-3">
-                <div className="md:col-span-3">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Nome do produto</p>
-                  <input value={productName} onChange={(e) => setProductName(e.target.value)} className={calcField} placeholder="Nome do produto" />
-                </div>
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Preço de venda</p>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
-                    <input value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className={`${calcField} pl-10`} placeholder="0,00" inputMode="decimal" />
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Custo do produto</p>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
-                    <input value={cost} onChange={(e) => setCost(e.target.value)} className={`${calcField} pl-10`} placeholder="0,00" inputMode="decimal" />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                {[
-                  { label: "Preço de venda", value: sale > 0 ? fmt(sale) : "R$ 0,00" },
-                  { label: "Custo do produto", value: c > 0 ? fmt(c) : "R$ 0,00" },
-                  { label: "Margem atual", value: `${margin.toFixed(1)}%` },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">{item.label}</p>
-                    <p className="mt-2 text-lg font-black tracking-tight text-white">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Custo do produto</p>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">R$</span>
-                    <input value={cost} onChange={(e) => setCost(e.target.value)} className={`${calcField} pl-10`} placeholder="0,00" inputMode="decimal" />
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Margem desejada</p>
-                  <div className="relative">
-                    <input value={desiredMargin} onChange={(e) => setDesiredMargin(e.target.value)} className={`${calcField} pr-10`} placeholder="30" inputMode="decimal" />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                {[
-                  { label: "Custo base", value: c > 0 ? fmt(c) : "R$ 0,00" },
-                  { label: "Margem desejada", value: desiredMarginValue > 0 ? `${desiredMarginValue.toFixed(1)}%` : "0,0%" },
-                  { label: "Lucro embutido", value: hasIdealPrice ? fmt(idealProfit) : "R$ 0,00" },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">{item.label}</p>
-                    <p className="mt-2 text-lg font-black tracking-tight text-white">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </div>
 
-        <div className="min-w-[260px] rounded-[28px] border border-lime-400/15 bg-[linear-gradient(160deg,rgba(182,255,0,0.06),transparent_60%)] p-6 shadow-[0_0_40px_rgba(182,255,0,0.08)]">
-          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-lime-200/70">Resultado ao vivo</p>
+        {/* Result */}
+        <div className="border-l border-white/[0.06] p-6 bg-[linear-gradient(160deg,rgba(182,255,0,0.04),transparent)] flex flex-col justify-center">
           {tab === "lucro" ? (
-            hasProfitResult ? (
-              <>
-                <p className="mt-4 text-2xl font-black tracking-[-0.04em] text-white">{productName || "Produto"}</p>
-                <p className="mt-2 text-sm text-zinc-400">Lucro por unidade vendida</p>
-                <p className={`mt-6 text-5xl font-black tracking-[-0.04em] ${profit >= 0 ? "text-lime-300" : "text-red-400"}`}>{fmt(profit)}</p>
-                <p className={`mt-2 text-sm font-semibold ${margin >= 20 ? "text-lime-400" : margin >= 10 ? "text-yellow-400" : "text-red-400"}`}>
-                  Margem: {margin.toFixed(1)}% {margin >= 20 ? "Saudável" : margin >= 10 ? "Atenção" : "Crítica"}
-                </p>
-              </>
+            sale > 0 && c > 0 ? (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Lucro por unidade</p>
+                  <p className={`mt-2 text-5xl font-black tracking-tight ${profit >= 0 ? "text-lime-300" : "text-red-400"}`}>{fmt(profit)}</p>
+                </div>
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-600">Margem</p>
+                    <p className={`mt-1 text-xl font-black ${marginColor}`}>{margin.toFixed(1)}%</p>
+                    <p className={`text-[10px] font-semibold ${marginColor}`}>{marginLabel}</p>
+                  </div>
+                  <div className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-600">Custo</p>
+                    <p className="mt-1 text-xl font-black text-white">{fmt(c)}</p>
+                    <p className="text-[10px] text-zinc-500">{((c/sale)*100).toFixed(0)}% do preço</p>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <p className="mt-6 text-sm leading-7 text-zinc-500">Preencha nome, preço de venda e custo para ver o lucro por produto com clareza.</p>
-            )
-          ) : hasIdealPrice ? (
-            <>
-              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-zinc-400">Preço ideal de venda</p>
-              <div className="mt-5 rounded-[24px] border border-lime-300/20 bg-[#0a1207] px-5 py-6 shadow-[0_0_34px_rgba(182,255,0,0.16)]">
-                <p className="text-5xl font-black tracking-[-0.04em] text-lime-300">{fmt(idealPrice)}</p>
-                <p className="mt-3 text-sm leading-6 text-lime-100/75">Para custo de {fmt(c)} com margem desejada de {desiredMarginValue.toFixed(1)}%.</p>
+              <div className="text-center py-4">
+                <div className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-lime-400/10 mb-3">
+                  <ChartIcon />
+                </div>
+                <p className="text-sm text-zinc-500">Preencha os campos ao lado para ver seu lucro real</p>
               </div>
-              <p className="mt-4 text-sm font-semibold text-lime-300">Lucro estimado por unidade: {fmt(idealProfit)}</p>
-            </>
+            )
           ) : (
-            <p className="mt-6 text-sm leading-7 text-zinc-500">Informe um custo maior que zero e uma margem maior que zero para gerar o preço ideal em tempo real.</p>
+            idealPrice > 0 ? (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Preço ideal de venda</p>
+                  <p className="mt-2 text-5xl font-black tracking-tight text-lime-300">{fmt(idealPrice)}</p>
+                </div>
+                <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-3">
+                  <p className="text-sm text-lime-200/80">Lucro embutido: <span className="font-black text-lime-300">{fmt(idealProfit)}</span></p>
+                  <p className="text-xs text-zinc-500 mt-1">Para margem de {dm.toFixed(1)}% com custo de {fmt(c)}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <div className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-lime-400/10 mb-3">
+                  <ZapIcon />
+                </div>
+                <p className="text-sm text-zinc-500">Informe custo e margem desejada para gerar o preço ideal</p>
+              </div>
+            )
           )}
         </div>
       </div>
@@ -264,41 +337,9 @@ const MarginCalculatorSection: React.FC = () => {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   Scenario Chart (static SVG, no real data)
+   Auth Panel
 ───────────────────────────────────────────────────────────── */
-const ScenarioChart: React.FC<{ positive: boolean }> = ({ positive }) => {
-  const salesPath = "M 30 130 C 80 120 120 100 160 80 C 200 60 230 55 270 50 C 290 48 310 46 340 44";
-  const profitPathBad = "M 30 140 C 80 135 120 140 160 150 C 200 162 230 175 270 188 C 290 194 310 200 340 208";
-  const profitPathGood = "M 30 150 C 80 140 120 120 160 100 C 200 80 230 65 270 50 C 290 43 310 38 340 34";
-  const id = positive ? "good" : "bad";
-  return (
-    <div className="mt-4 rounded-2xl border border-white/10 bg-[#060911] p-4">
-      <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-600">
-        <span>Vendas</span><span>Lucro Real</span>
-      </div>
-      <svg viewBox="0 0 370 230" className="w-full" style={{ height: 160 }}>
-        <defs>
-          <linearGradient id={`sg-${id}`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.3)"/><stop offset="100%" stopColor="rgba(255,255,255,0.7)"/>
-          </linearGradient>
-          <linearGradient id={`pg-${id}`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={positive ? "rgba(182,255,0,0.5)" : "rgba(239,68,68,0.5)"}/>
-            <stop offset="100%" stopColor={positive ? "#b6ff00" : "#ef4444"}/>
-          </linearGradient>
-        </defs>
-        <path d={salesPath} fill="none" stroke={`url(#sg-${id})`} strokeWidth="2.5" strokeLinecap="round"/>
-        <path d={positive ? profitPathGood : profitPathBad} fill="none" stroke={`url(#pg-${id})`} strokeWidth="2.5" strokeLinecap="round"/>
-        <circle cx="340" cy="44" r="5" fill="rgba(255,255,255,0.8)"/>
-        <circle cx="340" cy={positive ? 34 : 208} r="5" fill={positive ? "#b6ff00" : "#ef4444"}/>
-      </svg>
-    </div>
-  );
-};
-
-/* ─────────────────────────────────────────────────────────────
-   Auth Panel — improved visuals, unchanged auth logic
-───────────────────────────────────────────────────────────── */
-const authFieldCls = "w-full rounded-[20px] border border-white/10 bg-[#060911] px-4 py-3 text-sm text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-lime-400/60 focus:bg-[#090f18] focus:shadow-[0_0_18px_rgba(182,255,0,0.10),inset_0_0_0_1px_rgba(182,255,0,0.08)]";
+const authFieldCls = "w-full rounded-[18px] border border-white/10 bg-[#070a0f] px-4 py-3 text-sm text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-lime-400/60 focus:bg-[#0a1020] focus:shadow-[0_0_20px_rgba(182,255,0,0.08),inset_0_0_0_1px_rgba(182,255,0,0.06)]";
 
 interface AuthPanelProps {
   isRegisterView: boolean;
@@ -317,99 +358,102 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
   name, setName, email, setEmail, password, setPassword,
   showPassword, setShowPassword, error, loading, setError,
 }) => (
-  <aside id="auth-panel" className="relative overflow-hidden rounded-[34px] border border-lime-400/[0.12] bg-[linear-gradient(180deg,rgba(14,18,24,0.98),rgba(7,9,13,0.98))] p-6 shadow-[0_28px_90px_rgba(0,0,0,0.5),0_0_0_1px_rgba(182,255,0,0.04),inset_0_1px_0_rgba(255,255,255,0.04)]">
-    <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top,rgba(182,255,0,0.22),transparent_54%)]" />
-    <div className="relative">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-lime-200/75">Acesso Seguro · Next Level</p>
-          <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-white">
-            {isRegisterView ? "CRIAR CONTA NEXT LEVEL" : "ENTRAR NO PAINEL"}
-          </h2>
-          <p className="mt-1 text-xs text-zinc-400">
-            {isRegisterView ? "Crie sua conta e prepare seu painel operacional." : "Acesse sua operação com segurança."}
-          </p>
-        </div>
-        <div className="shrink-0 rounded-2xl border border-lime-400/20 bg-lime-400/10 px-3 py-2 text-right shadow-[0_0_20px_rgba(182,255,0,0.06)]">
-          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-lime-200/70">Painel</p>
-          <p className="mt-1 text-sm font-black text-lime-100">Operacional</p>
-        </div>
-      </div>
+  <aside id="auth-panel" className="sticky top-6 self-start">
+    <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.14] bg-[linear-gradient(200deg,rgba(14,20,28,0.99),rgba(6,8,12,0.99))] shadow-[0_32px_100px_rgba(0,0,0,0.6),0_0_0_1px_rgba(182,255,0,0.03),inset_0_1px_0_rgba(255,255,255,0.04)]">
+      {/* Glow top */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(182,255,0,0.18),transparent_60%)]" />
 
-      <div className="mt-5 grid grid-cols-2 rounded-[22px] border border-white/10 bg-white/[0.04] p-1">
-        <button type="button" onClick={() => { setIsRegisterView(false); setError(""); }}
-          className={`rounded-[18px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.14em] transition ${!isRegisterView ? "bg-white text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
-          Entrar
-        </button>
-        <button type="button" onClick={() => { setIsRegisterView(true); setError(""); }}
-          className={`rounded-[18px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.14em] transition ${isRegisterView ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
-          Cadastro
-        </button>
-      </div>
-
-      {/* Google OAuth — handler unchanged */}
-      <button type="button"
-        onClick={() => {
-          const raw = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
-          const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
-          window.location.href = `${base}/auth/google`;
-        }}
-        className="mt-4 flex w-full items-center justify-center gap-3 rounded-[20px] border border-white/[0.12] bg-white/[0.05] py-3.5 text-sm font-black uppercase tracking-[0.14em] text-zinc-200 transition hover:border-white/25 hover:bg-white/[0.10] hover:text-white">
-        <GoogleIcon /> CONTINUAR COM GOOGLE
-      </button>
-
-      <div className="my-4 flex items-center gap-3">
-        <div className="h-px flex-1 bg-white/[0.08]" />
-        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">ou</span>
-        <div className="h-px flex-1 bg-white/[0.08]" />
-      </div>
-
-      <form onSubmit={isRegisterView ? onRegister : onLogin} className="space-y-4">
-        {isRegisterView && (
+      <div className="relative p-7">
+        {/* Logo mark */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center h-10 w-10 rounded-2xl bg-lime-400 shadow-[0_0_20px_rgba(182,255,0,0.4)]">
+            <span className="text-zinc-950 font-black text-sm tracking-tighter">NL</span>
+          </div>
           <div>
-            <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Nome</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} className={authFieldCls} type="text" placeholder="Ex.: Ana Oliveira" />
-          </div>
-        )}
-        <div>
-          <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">E-mail</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} className={authFieldCls} type="email" placeholder="voce@empresa.com" />
-        </div>
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <label className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Senha</label>
-            {!isRegisterView && (
-              <a href="/forgot-password" className="text-[10px] font-semibold text-zinc-500 transition hover:text-lime-300">Esqueceu a senha?</a>
-            )}
-          </div>
-          <div className="relative">
-            <input value={password} onChange={(e) => setPassword(e.target.value)} className={`${authFieldCls} pr-12`}
-              type={showPassword ? "text" : "password"} placeholder={isRegisterView ? "Crie uma senha forte" : "Sua senha"} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 transition hover:text-zinc-200"
-              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}>
-              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-            </button>
+            <p className="text-white font-black text-base tracking-tight">NEXT LEVEL</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Plataforma de Gestão IA</p>
           </div>
         </div>
 
-        {error && <p className="rounded-[18px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
+        {/* Tab selector */}
+        <div className="grid grid-cols-2 rounded-[20px] border border-white/10 bg-white/[0.03] p-1 mb-5">
+          <button type="button" onClick={() => { setIsRegisterView(false); setError(""); }}
+            className={`rounded-[16px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] transition ${!isRegisterView ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-400 hover:text-white"}`}>
+            Entrar
+          </button>
+          <button type="button" onClick={() => { setIsRegisterView(true); setError(""); }}
+            className={`rounded-[16px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] transition ${isRegisterView ? "bg-lime-300 text-zinc-950 shadow-[0_0_18px_rgba(182,255,0,0.3)]" : "text-zinc-400 hover:text-white"}`}>
+            Cadastro
+          </button>
+        </div>
 
-        <button type="submit" disabled={loading}
-          className="inline-flex w-full items-center justify-center gap-3 rounded-[22px] border border-lime-300/10 bg-lime-300 px-4 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 transition duration-300 hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-60">
-          {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" />}
-          {loading ? "PROCESSANDO..." : isRegisterView ? "CRIAR CONTA" : "ENTRAR NO PAINEL"}
+        {/* Google */}
+        <button type="button"
+          onClick={() => {
+            const raw = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+            const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
+            window.location.href = `${base}/auth/google`;
+          }}
+          className="flex w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] mb-4">
+          <GoogleIcon /> Google
         </button>
-      </form>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-[20px] border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">Sem visibilidade</p>
-          <p className="mt-2 text-sm font-semibold text-zinc-100">Faturamento cresce, margem some, caixa sangra.</p>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-white/[0.07]" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">ou email</span>
+          <div className="h-px flex-1 bg-white/[0.07]" />
         </div>
-        <div className="rounded-[20px] border border-lime-400/15 bg-lime-400/10 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-lime-100/70">Com Next Level</p>
-          <p className="mt-2 text-sm font-semibold text-lime-50">Venda, custo e decisão no mesmo radar.</p>
+
+        <form onSubmit={isRegisterView ? onRegister : onLogin} className="space-y-3">
+          {isRegisterView && (
+            <div>
+              <label className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Nome completo</label>
+              <input value={name} onChange={e => setName(e.target.value)} className={authFieldCls} type="text" placeholder="Seu nome" />
+            </div>
+          )}
+          <div>
+            <label className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">E-mail</label>
+            <input value={email} onChange={e => setEmail(e.target.value)} className={authFieldCls} type="email" placeholder="voce@empresa.com" />
+          </div>
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Senha</label>
+              {!isRegisterView && <a href="/forgot-password" className="text-[10px] font-semibold text-zinc-500 hover:text-lime-300 transition">Esqueceu?</a>}
+            </div>
+            <div className="relative">
+              <input value={password} onChange={e => setPassword(e.target.value)} className={`${authFieldCls} pr-12`}
+                type={showPassword ? "text" : "password"} placeholder={isRegisterView ? "Crie uma senha forte" : "Sua senha"} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition">
+                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <p className="rounded-[14px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-300">{error}</p>
+          )}
+
+          <button type="submit" disabled={loading}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-[18px] bg-lime-300 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-60 mt-1">
+            {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" /> : null}
+            {isRegisterView ? "Criar minha conta" : "Entrar no painel"}
+            {!loading && <ArrowRight />}
+          </button>
+        </form>
+
+        {/* Trust signals */}
+        <div className="mt-5 pt-5 border-t border-white/[0.06] grid grid-cols-3 gap-2 text-center">
+          {[
+            { icon: "🔒", label: "SSL 256-bit" },
+            { icon: "⚡", label: "Setup em 3 min" },
+            { icon: "🤖", label: "IA ativa 24/7" },
+          ].map(s => (
+            <div key={s.label} className="rounded-xl bg-white/[0.03] py-2.5 px-1">
+              <p className="text-base">{s.icon}</p>
+              <p className="mt-1 text-[9px] font-semibold text-zinc-500 uppercase tracking-[0.15em]">{s.label}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -417,9 +461,11 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
 );
 
 /* ─────────────────────────────────────────────────────────────
-   Main Page
+   MAIN PAGE
 ───────────────────────────────────────────────────────────── */
 const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [isRegisterView, setIsRegisterView] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -428,133 +474,156 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [billingAnnual, setBillingAnnual] = useState(false);
+  const [activeStat, setActiveStat] = useState(0);
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  useEffect(() => {
+    const interval = setInterval(() => setActiveStat(p => (p + 1) % PROOF_STATS.length), 4000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const resetForm = () => { setName(""); setEmail(""); setPassword(""); setError(""); setLoading(false); };
+  const focusAuth = (register = false) => {
+    setIsRegisterView(register);
+    document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
-  /* ── Login handler — UNCHANGED ── */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    if (!email.trim() || !password.trim()) { setError("Preencha e-mail e senha."); return; }
+    if (!email || !password) { setError("Preencha e-mail e senha."); return; }
+    setLoading(true); setError("");
     try {
-      setLoading(true);
-      const response = await api.post<{
-        accessToken?: string; access_token?: string;
-        refreshToken?: string; refresh_token?: string;
-        user?: { name?: string; admin?: boolean; niche?: UserNiche | null };
-      }>("/auth/login", { email, password });
-      const payload = response.data as Record<string, unknown>;
-      const nestedData = (payload.data || payload.result || payload.tokens || {}) as Record<string, unknown>;
-      const token = getFirstString([payload.access_token, payload.accessToken, payload.token, nestedData.access_token, nestedData.accessToken, nestedData.token]);
-      const refreshToken = getFirstString([payload.refresh_token, payload.refreshToken, nestedData.refresh_token, nestedData.refreshToken]);
-      if (!token) throw new Error("Token não retornado no login.");
-      localStorage.setItem("access_token", token);
-      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
-      else localStorage.removeItem("refresh_token");
-      login({ name: response.data.user?.name || email, email, admin: Boolean(response.data.user?.admin), niche: response.data.user?.niche || null });
-      navigate("/", { replace: true });
-    } catch (err: unknown) {
-      if (err && typeof err === "object" && "response" in err) {
-        const r = (err as { response?: { data?: Record<string, unknown> } }).response;
-        setError(String(r?.data?.message || r?.data?.error || r?.data?.detail || "Erro ao fazer login"));
-      } else {
-        setError(err instanceof Error ? err.message : "Erro ao fazer login");
-      }
+      const res = await api.post("/auth/login", { email, password });
+      const token = res.data?.token || res.data?.data?.token;
+      if (token) { login(token, res.data?.user || res.data?.data?.user); navigate("/dashboard"); }
+      else setError("Resposta inesperada do servidor.");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.response?.data?.error || "Credenciais inválidas.");
     } finally { setLoading(false); }
   };
 
-  /* ── Register handler — UNCHANGED ── */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    if (!name.trim() || !email.trim() || !password.trim()) { setError("Preencha todos os campos."); return; }
+    if (!name || !email || !password) { setError("Preencha todos os campos."); return; }
+    if (password.length < 6) { setError("Senha deve ter pelo menos 6 caracteres."); return; }
+    setLoading(true); setError("");
     try {
-      setLoading(true);
-      await api.post("/auth/register", { email, password, name: name.trim(), companyName: name.trim() });
-      alert("Conta criada com sucesso. Faça login.");
-      setIsRegisterView(false);
-      resetForm();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro ao registrar");
+      const res = await api.post("/auth/register", { name, email, password });
+      const token = res.data?.token || res.data?.data?.token;
+      if (token) { login(token, res.data?.user || res.data?.data?.user); navigate("/dashboard"); }
+      else setError("Erro ao criar conta.");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.response?.data?.error || "Erro ao criar conta.");
     } finally { setLoading(false); }
   };
 
-  const focusRegister = () => { setIsRegisterView(true); scrollToSection("auth-panel"); };
-  const focusLogin = () => { setIsRegisterView(false); scrollToSection("auth-panel"); };
-
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030507] text-zinc-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(182,255,0,0.08),transparent_18%),radial-gradient(circle_at_82%_8%,rgba(255,255,255,0.1),transparent_16%),radial-gradient(circle_at_50%_0%,rgba(18,68,44,0.22),transparent_36%),linear-gradient(180deg,#030507_0%,#05070b_36%,#040608_100%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[720px] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(4,6,8,0))]" />
+    <div className="min-h-screen bg-[#030508] text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {/* Grid bg pattern */}
+      <div className="pointer-events-none fixed inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%220%200%2040%2040%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200h1v40H0zM0%200h40v1H0z%22%20fill%3D%22rgba(255%2C255%2C255%2C0.025)%22/%3E%3C/svg%3E')] opacity-60" />
 
-      <div className="relative mx-auto max-w-[1480px] px-4 pb-24 pt-6 sm:px-6 lg:px-8">
+      {/* Ambient top glow */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-[600px] bg-[radial-gradient(ellipse_at_top,rgba(182,255,0,0.07),transparent_60%)]" />
 
-        {/* NAV */}
-        <nav className="rounded-full border border-white/10 bg-black/20 px-4 py-3 backdrop-blur-xl md:px-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded-2xl border border-lime-300/25 bg-lime-300/10 shadow-[0_0_34px_rgba(182,255,0,0.18)]">
-                <span className="text-lg font-black tracking-[-0.08em] text-lime-200">NL</span>
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.34em] text-zinc-500">Next Level</p>
-                <p className="mt-1 text-sm font-semibold text-zinc-200">Visão. Margem. Controle Total da Operação.</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <button type="button" onClick={() => scrollToSection("tactical-content")} className="rounded-full px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">O que fazemos</button>
-              <button type="button" onClick={() => scrollToSection("pricing")} className="rounded-full px-4 py-2 text-zinc-400 transition hover:bg-white/5 hover:text-white">Planos</button>
-              <button type="button" onClick={focusLogin} className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 font-semibold text-zinc-100 transition hover:border-lime-400/30 hover:text-lime-100">Entrar</button>
-              <button type="button" onClick={focusRegister} className="rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 font-black uppercase tracking-[0.18em] text-lime-100 shadow-[0_0_30px_rgba(182,255,0,0.12)] transition hover:brightness-110">Criar Conta</button>
-            </div>
+      {/* NAV */}
+      <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-lime-400 shadow-[0_0_16px_rgba(182,255,0,0.4)]">
+            <span className="text-zinc-950 font-black text-xs">NL</span>
           </div>
-        </nav>
+          <span className="font-black text-lg tracking-tight text-white">NEXT LEVEL</span>
+          <span className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 border-l border-white/10 pl-3">Gestão com IA</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => scrollToSection("features")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Funcionalidades</button>
+          <button onClick={() => scrollToSection("pricing")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Planos</button>
+          <button onClick={() => focusAuth(false)} className="rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-200 hover:bg-white/[0.1] transition">Entrar</button>
+          <button onClick={() => focusAuth(true)} className="rounded-xl bg-lime-400 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_18px_rgba(182,255,0,0.3)] hover:brightness-105 transition">Começar grátis</button>
+        </div>
+      </nav>
 
-        {/* HERO */}
-        <section className="grid gap-10 pb-16 pt-14 xl:grid-cols-[1fr_420px] xl:items-start">
-          <div className="space-y-8 pt-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-lime-400/20 bg-lime-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-lime-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-lime-400 shadow-[0_0_6px_#b6ff00]"></span>
-              ACESSO SEGURO · PAINEL OPERACIONAL
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+
+        {/* ─── HERO ─── */}
+        <section className="pt-10 pb-20 grid lg:grid-cols-[1fr_400px] gap-14 items-start">
+          {/* Left */}
+          <div>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 mb-7">
+              <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-lime-300">Plataforma de IA para negócios</span>
             </div>
-            <div className="max-w-4xl">
-              <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-zinc-500">Painel Operacional · Next Level</p>
-              <h1 className="mt-4 text-5xl font-black leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
-                <span className="block">ENTRE NO <span className="text-lime-300">CENTRO DE</span></span>
-                <span className="mt-2 block"><span className="text-lime-300">COMANDO</span> DA SUA</span>
-                <span className="mt-2 block"><span className="text-lime-300">EMPRESA.</span></span>
-              </h1>
-              <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400 sm:text-lg">
-                Recupere visão, margem e controle antes que a operação perca ritmo. Automatize vendas, conecte canais e enxergue margem verdadeira — antes de perder dinheiro.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button type="button" onClick={focusRegister} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-lime-300/20 bg-lime-300 px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-zinc-950 shadow-[0_0_34px_rgba(182,255,0,0.24)] transition hover:-translate-y-0.5 hover:brightness-105">
-                ASSINAR AGORA <ArrowUpRight />
+
+            {/* Headline */}
+            <h1 className="text-[clamp(2.6rem,6vw,4.8rem)] font-black leading-[0.92] tracking-[-0.04em] text-white">
+              Seu negócio em<br />
+              <span className="relative inline-block">
+                <span className="relative z-10 text-lime-300">outro nível.</span>
+                <span className="absolute -inset-x-2 inset-y-0 rounded-lg bg-lime-400/8 -z-0"></span>
+              </span><br />
+              Com IA real.
+            </h1>
+
+            <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400 font-light">
+              Centralize vendas, automatize atendimento, analise margens e tome decisões baseadas em dados — não em achismo. A Next Level é o cérebro digital do seu negócio.
+            </p>
+
+            {/* CTAs */}
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <button onClick={() => focusAuth(true)}
+                className="flex items-center gap-2.5 rounded-[18px] bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_36px_rgba(182,255,0,0.25)] hover:-translate-y-0.5 hover:brightness-105 transition">
+                Criar conta grátis <ArrowRight />
               </button>
-              <button type="button" onClick={() => scrollToSection("life-demo")} className="inline-flex items-center justify-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-7 py-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.08]">
-                Ver Demonstração Tática
+              <button onClick={() => scrollToSection("calculator")}
+                className="flex items-center gap-2.5 rounded-[18px] border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-zinc-200 hover:bg-white/[0.08] transition">
+                Testar calculadora
               </button>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {providerPills.map((p) => (
-                <span key={p} className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400 transition-colors hover:border-lime-400/20 hover:text-lime-200 cursor-default">{p}</span>
+
+            {/* Integrations row */}
+            <div className="mt-8 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-600 mr-1">Integra com:</span>
+              {INTEGRATIONS.map(i => (
+                <span key={i.name} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold ${i.bg}`} style={{ color: i.color }}>
+                  {i.name}
+                </span>
               ))}
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              {heroSignals.map((item) => (
-                <article key={item.label} className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 backdrop-blur transition duration-300 hover:border-lime-400/15 hover:bg-white/[0.06]">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-500">{item.label}</p>
-                  <p className="mt-3 text-2xl font-black tracking-[-0.04em] text-lime-200">{item.value}</p>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">{item.helper}</p>
-                </article>
+
+            {/* Metrics */}
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {METRICS.map((m) => (
+                <div key={m.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-lime-400/10 text-lime-400">
+                      <m.icon />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-black tracking-tight text-white">
+                    <AnimatedCounter value={m.value} />
+                  </p>
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">{m.label}</p>
+                </div>
               ))}
+            </div>
+
+            {/* Social proof carousel */}
+            <div className="mt-8 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 relative overflow-hidden">
+              <div className="flex items-start gap-3">
+                <span className="text-lime-400 text-2xl font-serif leading-none">"</span>
+                <div>
+                  <p className="text-sm leading-6 text-zinc-300 transition-all duration-500">{PROOF_STATS[activeStat].quote}</p>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">— {PROOF_STATS[activeStat].source}</p>
+                </div>
+              </div>
+              <div className="flex gap-1.5 mt-4">
+                {PROOF_STATS.map((_, i) => (
+                  <button key={i} onClick={() => setActiveStat(i)}
+                    className={`h-1 rounded-full transition-all duration-300 ${i === activeStat ? "w-6 bg-lime-400" : "w-2 bg-white/15"}`} />
+                ))}
+              </div>
             </div>
           </div>
 
+          {/* Auth Panel */}
           <AuthPanel
             isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
             onLogin={handleLogin} onRegister={handleRegister}
@@ -565,173 +634,182 @@ const LoginPage: React.FC = () => {
           />
         </section>
 
-        {/* O QUE FAZEMOS */}
-        <section id="tactical-content" className="scroll-mt-24 pt-8">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-200/70">O que nós fazemos</p>
-              <h2 className="mt-3 max-w-4xl text-4xl font-black leading-[0.94] tracking-[-0.04em] text-white sm:text-5xl">
-                Clareza operacional suficiente para mexer no seu caixa no mesmo dia.
-              </h2>
-            </div>
-            <p className="max-w-xl text-sm leading-7 text-zinc-400">
-              Não é dashboard decorativo. É leitura de vida ou morte para uma operação que precisa parar de crescer no prejuízo.
+        {/* ─── FEATURES ─── */}
+        <section id="features" className="py-20 scroll-mt-20">
+          <div className="text-center mb-12">
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
+            <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white max-w-2xl mx-auto">
+              Tudo que seu negócio precisa. <span className="text-lime-300">Em um lugar.</span>
+            </h2>
+            <p className="mt-4 max-w-lg mx-auto text-sm leading-7 text-zinc-400">
+              Não é só um painel bonito. É automação, inteligência e visibilidade operacional integradas.
             </p>
           </div>
-          <div className="mt-8 grid gap-4 xl:grid-cols-3">
-            {tacticalCards.map((item) => (
-              <article key={item.title} className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-1 hover:border-lime-400/20 hover:bg-white/[0.06]">
-                <div className="absolute inset-x-0 top-0 h-28" style={{ background: `linear-gradient(to bottom, ${item.accent}, transparent)` }} />
-                <div className="relative">
-                  <div className="inline-flex rounded-2xl border border-white/10 bg-black/30 p-3 text-lime-200"><item.Icon /></div>
-                  <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">{item.eyebrow}</p>
-                  <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-white">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-zinc-400">{item.description}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="mt-8"><MarginCalculatorSection /></div>
-        </section>
 
-        {/* CENÁRIOS / GRÁFICOS */}
-        <section id="life-demo" className="scroll-mt-24 pt-16">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-500">Gráficos vida ou morte</p>
-              <h2 className="mt-3 max-w-4xl text-4xl font-black leading-[0.94] tracking-[-0.04em] text-white sm:text-5xl">
-                A Next Level enxerga a margem que seus funcionários, ou você, queimam sem saber.
-              </h2>
-            </div>
-            <div className="max-w-xl rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">Leitura tático-financeira</p>
-              <p className="mt-2 text-sm leading-7 text-zinc-400">Primeiro a venda sobe. Depois o prejuízo vem escondido. A plataforma mostra esse ponto antes do caixa sentir.</p>
-            </div>
-          </div>
-          <div className="mt-8 grid gap-5 xl:grid-cols-2">
-            {[
-              { eyebrow: "Cenário 1", title: "Sem Next Level: vendas sobem, lucro entra no vermelho.", helper: "Faturamento acelera, mas frete, imposto e desconto mordem a margem até virar um gráfico bonito com caixa frágil.", positive: false },
-              { eyebrow: "Cenário 2", title: "Com Next Level: a calculadora ajusta a margem e o lucro dispara.", helper: "Preço ideal, integração organizada e margem viva em neon. O crescimento deixa de parecer sucesso e passa a ser sucesso.", positive: true },
-            ].map((s) => (
-              <div key={s.eyebrow} className={`rounded-[32px] border p-6 ${s.positive ? "border-lime-400/15 bg-[linear-gradient(160deg,rgba(182,255,0,0.06),transparent_60%)]" : "border-red-500/15 bg-[linear-gradient(160deg,rgba(239,68,68,0.06),transparent_60%)]"}`}>
-                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">{s.eyebrow}</p>
-                <h3 className="mt-3 text-2xl font-black tracking-[-0.03em] text-white">{s.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-zinc-400">{s.helper}</p>
-                <ScenarioChart positive={s.positive} />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURES.map((f) => (
+              <div key={f.title} className={`rounded-[24px] border ${f.border} bg-gradient-to-b ${f.color} p-6 group hover:-translate-y-1 transition duration-300`}>
+                <div className="flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/[0.06] text-lime-300 mb-4 group-hover:bg-lime-400/15 transition">
+                  <f.icon />
+                </div>
+                <h3 className="text-base font-black tracking-tight text-white mb-2">{f.title}</h3>
+                <p className="text-sm leading-6 text-zinc-400">{f.desc}</p>
               </div>
             ))}
           </div>
+
+          {/* Big value prop */}
+          <div className="mt-8 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(182,255,0,0.06),rgba(3,5,8,0.9)_50%)] p-8 sm:p-10 overflow-hidden relative">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.1),transparent_40%)]" />
+            <div className="relative grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Por que a Next Level</p>
+                <h3 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-[1.05]">
+                  Menos achismo.<br />Mais <span className="text-lime-300">estratégia.</span>
+                </h3>
+                <p className="mt-4 text-sm leading-7 text-zinc-400">
+                  A IA da Next Level analisa seu histórico, prevê tendências e te entrega recomendações prontas para executar. Como ter um consultor de gestão disponível 24 horas por dia.
+                </p>
+                <button onClick={() => focusAuth(true)} className="mt-6 flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-lime-300 hover:text-lime-200 transition group">
+                  Quero experimentar <ArrowRight />
+                </button>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { label: "Previsão de faturamento 30 dias", detail: "Algoritmos de média móvel com alertas de risco" },
+                  { label: "Identifica desperdícios automaticamente", detail: "Gargalos de estoque, horários ociosos, margens comprimidas" },
+                  { label: "Fecha vendas sem intervenção humana", detail: "Agentes IA no WhatsApp, Instagram e ML" },
+                  { label: "Relatórios automáticos diários", detail: "Dashboard + e-mail + alertas em tempo real" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-start gap-3 rounded-[16px] border border-white/[0.07] bg-white/[0.02] p-4">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-lime-400 text-zinc-950 shrink-0 mt-0.5">
+                      <CheckIcon />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">{item.label}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{item.detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </section>
 
-        {/* PRICING */}
-        <section id="pricing" className="scroll-mt-24 pt-16">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        {/* ─── CALCULATOR ─── */}
+        <section id="calculator" className="py-20 scroll-mt-20">
+          <div className="text-center mb-10">
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Experimente agora</p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white">
+              Calcule seu lucro real.<br /><span className="text-lime-300">Agora, ao vivo.</span>
+            </h2>
+            <p className="mt-4 text-sm text-zinc-400 max-w-md mx-auto">Uma pequena amostra do que a plataforma faz com todos seus produtos e canais de venda.</p>
+          </div>
+          <MarginCalculator />
+        </section>
+
+        {/* ─── PRICING ─── */}
+        <section id="pricing" className="py-20 scroll-mt-20">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-200/70">Escolha seu nível de operação</p>
-              <h2 className="mt-3 max-w-4xl text-4xl font-black leading-[0.94] tracking-[-0.04em] text-white sm:text-5xl">
-                Escolha seu plano, entre no painel e avance para a camada de <span className="text-lime-300">lucro real.</span>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Escolha seu nível</p>
+              <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white max-w-xl leading-[0.94]">
+                Escolha seu plano.<br /><span className="text-lime-300">Escale com lucro.</span>
               </h2>
             </div>
-            <div className="flex flex-col gap-3 max-w-sm">
-              <p className="max-w-xl text-sm leading-7 text-zinc-400">
-                Três planos com a mesma experiência Next Level, focada em margem, clareza e execução imediata.
-              </p>
-              {/* Billing toggle */}
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-zinc-400 max-w-xs">Três níveis. Mesma experiência Next Level — focada em margem, clareza e execução.</p>
               <div className="flex items-center gap-3">
                 <div className="flex rounded-2xl border border-white/10 bg-white/[0.03] p-1">
                   <button type="button" onClick={() => setBillingAnnual(false)}
-                    className={`rounded-[14px] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
-                      !billingAnnual ? "bg-white text-zinc-950" : "text-zinc-400 hover:text-white"
-                    }`}>
+                    className={`rounded-[14px] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition ${!billingAnnual ? "bg-white text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
                     Mensal
                   </button>
                   <button type="button" onClick={() => setBillingAnnual(true)}
-                    className={`rounded-[14px] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
-                      billingAnnual ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"
-                    }`}>
+                    className={`rounded-[14px] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition ${billingAnnual ? "bg-lime-300 text-zinc-950" : "text-zinc-400 hover:text-white"}`}>
                     Anual
                   </button>
                 </div>
                 {billingAnnual && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-lime-300 shadow-[0_0_14px_rgba(182,255,0,0.08)]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-lime-400"></span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-lime-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-lime-400 animate-pulse"></span>
                     1 mês grátis
                   </span>
                 )}
               </div>
-              {billingAnnual && (
-                <p className="text-[11px] text-zinc-500">Você paga 11 meses e ganha 1 mês grátis.</p>
-              )}
             </div>
           </div>
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            {pricingPlans.map((plan) => (
-              <div key={plan.eyebrow} className={`relative flex flex-col rounded-[32px] border p-6 ${
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {PRICING.map((plan) => (
+              <div key={plan.name} className={`relative flex flex-col rounded-[28px] border p-6 transition hover:-translate-y-1 duration-300 ${
                 plan.recommended
-                  ? "border-lime-400/25 bg-[linear-gradient(160deg,rgba(182,255,0,0.08),rgba(5,7,11,1)_60%)]"
-                  : "border-white/10 bg-white/[0.04]"
+                  ? "border-lime-400/30 bg-[linear-gradient(160deg,rgba(182,255,0,0.09),rgba(5,7,11,1)_60%)] shadow-[0_0_50px_rgba(182,255,0,0.08)]"
+                  : "border-white/[0.08] bg-white/[0.025]"
               }`}>
                 {plan.recommended && (
-                  <div className="absolute -top-3 right-6 rounded-full border border-lime-400/30 bg-lime-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-950">Recomendado</div>
+                  <div className="absolute -top-3.5 right-6 rounded-full border border-lime-400/40 bg-lime-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-950 shadow-[0_0_14px_rgba(182,255,0,0.3)]">
+                    Mais popular
+                  </div>
                 )}
-                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">{plan.eyebrow}</p>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <p className="text-3xl font-black tracking-[-0.04em] text-white">
+                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">{plan.name}</p>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-3xl font-black tracking-tight text-white">
                     {billingAnnual ? plan.annualPrice : plan.monthlyPrice}
-                  </p>
-                  {billingAnnual && (
-                    <span className="text-xs font-semibold text-lime-400 line-through opacity-60">{plan.monthlyPrice} × 12</span>
-                  )}
+                  </span>
+                  <span className="text-sm text-zinc-500">{billingAnnual ? "/ano" : "/mês"}</span>
                 </div>
                 {billingAnnual && (
-                  <p className="mt-1 text-[11px] text-lime-300/80">Equivale a {plan.monthlyPrice.replace("/mês", "")} × 11 mêses.</p>
+                  <p className="mt-1 text-[11px] text-lime-300/80">Equivale a {plan.monthlyPrice}/mês × 11</p>
                 )}
-                <p className="mt-3 text-sm leading-7 text-zinc-400">{plan.summary}</p>
-                <ul className="mt-5 flex-1 space-y-3">
+                <p className="mt-3 text-sm leading-6 text-zinc-400 flex-1">{plan.summary}</p>
+                <ul className="mt-5 space-y-2.5">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-3">
-                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                        plan.recommended ? "bg-lime-300 text-zinc-950" : "border border-white/20 text-zinc-400"
+                    <li key={f} className="flex items-center gap-2.5">
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                        plan.recommended ? "bg-lime-300 text-zinc-950" : "border border-white/15 text-zinc-400"
                       }`}><CheckIcon /></span>
                       <span className="text-sm text-zinc-300">{f}</span>
                     </li>
                   ))}
                 </ul>
-                <button type="button" onClick={focusRegister}
-                  className={`mt-6 w-full rounded-[20px] py-4 text-sm font-black uppercase tracking-[0.16em] transition hover:-translate-y-0.5 ${
+                <button type="button" onClick={() => focusAuth(true)}
+                  className={`mt-6 w-full rounded-[18px] py-3.5 text-sm font-black uppercase tracking-[0.14em] transition hover:-translate-y-0.5 ${
                     plan.recommended
-                      ? "bg-lime-300 text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] hover:brightness-105"
+                      ? "bg-lime-300 text-zinc-950 shadow-[0_0_24px_rgba(182,255,0,0.2)] hover:brightness-105"
                       : "border border-white/10 bg-white/[0.04] text-zinc-100 hover:bg-white/[0.08]"
                   }`}>
                   {plan.cta}
                 </button>
-                {plan.microcopy && (
-                  <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-zinc-600"><CreditCardIcon /> {plan.microcopy}</p>
-                )}
+                <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-zinc-600">
+                  <CreditCardIcon /> {plan.microcopy}
+                </p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* CTA FINAL */}
-        <section className="pt-16">
-          <div className="relative overflow-hidden rounded-[36px] border border-lime-400/[0.18] bg-[linear-gradient(135deg,rgba(182,255,0,0.16),rgba(8,11,16,0.98)_40%,rgba(3,5,7,1)_100%)] p-7 sm:p-9">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(182,255,0,0.16),transparent_22%)]" />
-            <div className="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-              <div className="max-w-3xl">
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80">Última chamada</p>
-                <h2 className="mt-3 text-4xl font-black leading-[0.94] tracking-[-0.04em] text-white sm:text-5xl">
-                  Se a sua <span className="text-lime-300">linha de lucro</span> ainda depende de sorte, ela já está em risco.
+        {/* ─── FINAL CTA ─── */}
+        <section className="py-10 pb-16">
+          <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.15] bg-[linear-gradient(135deg,rgba(182,255,0,0.14),rgba(8,11,16,0.97)_40%,rgba(3,5,7,1))] p-8 sm:p-12">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(182,255,0,0.18),transparent_25%)]" />
+            <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+              <div className="max-w-2xl">
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">Você está pronto para o próximo nível?</p>
+                <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white">
+                  Se a sua <span className="text-lime-300">margem de lucro</span> ainda depende de sorte, ela já está em risco.
                 </h2>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-200/80 sm:text-base">
-                  Assine agora e transforme crescimento bruto em lucro verdadeiro com visibilidade tático-financeira desde o primeiro acesso.
+                <p className="mt-4 text-sm leading-7 text-zinc-300/80">
+                  Assine agora e transforme crescimento bruto em lucro real — com visibilidade total desde o primeiro acesso.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button type="button" onClick={focusRegister} className="rounded-[24px] bg-lime-300 px-7 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 shadow-[0_0_36px_rgba(182,255,0,0.24)] transition hover:-translate-y-0.5 hover:brightness-105">
-                  CRIAR CONTA E ENTRAR NO PAINEL
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row shrink-0">
+                <button type="button" onClick={() => focusAuth(true)}
+                  className="flex items-center justify-center gap-2 rounded-[22px] bg-lime-300 px-7 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_40px_rgba(182,255,0,0.25)] hover:-translate-y-0.5 hover:brightness-105 transition whitespace-nowrap">
+                  Criar conta agora <ArrowRight />
                 </button>
-                <button type="button" onClick={focusLogin} className="rounded-[24px] border border-white/10 bg-white/[0.04] px-7 py-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/[0.08]">
+                <button type="button" onClick={() => focusAuth(false)}
+                  className="flex items-center justify-center rounded-[22px] border border-white/10 bg-white/[0.04] px-7 py-4 text-sm font-semibold text-zinc-100 hover:bg-white/[0.08] transition whitespace-nowrap">
                   Já tenho conta
                 </button>
               </div>
@@ -739,9 +817,17 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        {/* FOOTER */}
-        <footer className="pt-10 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-600">
-          Next Level · Visão Operacional · Margem Real · Automação Tática · Operação Viva
+        {/* Footer */}
+        <footer className="pb-10 text-center">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-lime-400 shadow-[0_0_12px_rgba(182,255,0,0.3)]">
+              <span className="text-zinc-950 font-black text-[10px]">NL</span>
+            </div>
+            <span className="font-black text-sm tracking-tight text-white">NEXT LEVEL</span>
+          </div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-700">
+            IA · Gestão · Automação · Análise · Resultados
+          </p>
         </footer>
       </div>
     </div>
