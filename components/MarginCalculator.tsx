@@ -118,7 +118,7 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
             </div>
 
             <div
-              className="inline-flex w-full rounded-full border border-zinc-800 bg-zinc-950/90 p-1 text-sm text-zinc-400 lg:w-auto"
+              className="inline-flex w-full min-w-0 flex-wrap rounded-2xl border border-zinc-800 bg-zinc-950/90 p-1 text-sm text-zinc-400 lg:w-auto"
               role="tablist"
               aria-label="Modo da calculadora"
             >
@@ -127,7 +127,7 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                 role="tab"
                 aria-selected={mode === "profit"}
                 onClick={() => setMode("profit")}
-                className={`flex-1 rounded-full px-4 py-2.5 font-semibold transition lg:flex-none ${
+                className={`min-w-0 flex-1 rounded-xl px-3 py-2.5 text-xs font-semibold whitespace-normal break-words transition sm:text-sm lg:flex-none ${
                   mode === "profit"
                     ? "bg-emerald-500 text-zinc-950 shadow-[0_0_28px_rgba(16,185,129,0.28)]"
                     : "hover:text-zinc-200"
@@ -140,7 +140,7 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                 role="tab"
                 aria-selected={mode === "ideal-price"}
                 onClick={() => setMode("ideal-price")}
-                className={`flex-1 rounded-full px-4 py-2.5 font-semibold transition lg:flex-none ${
+                className={`min-w-0 flex-1 rounded-xl px-3 py-2.5 text-xs font-semibold whitespace-normal break-words transition sm:text-sm lg:flex-none ${
                   mode === "ideal-price"
                     ? "bg-emerald-500 text-zinc-950 shadow-[0_0_28px_rgba(16,185,129,0.28)]"
                     : "hover:text-zinc-200"

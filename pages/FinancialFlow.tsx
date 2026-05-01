@@ -44,6 +44,7 @@ const FinancialFlow = () => {
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [periodDays, setPeriodDays] = useState<7 | 30 | 90>(30);
 
   const [type, setType] = useState<"income" | "expense">("income");
   const [amount, setAmount] = useState("");
@@ -79,10 +80,23 @@ const FinancialFlow = () => {
   }, [selectedCompanyId]);
 
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
+  const filteredTransactions = useMemo(() => {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - periodDays + 1);
+    start.setHours(0, 0, 0, 0);
+
+    return safeTransactions.filter((tx) => {
+      const value = getTransactionDateValue(tx);
+      const txDate = value ? new Date(value) : null;
+      if (!txDate || Number.isNaN(txDate.getTime())) return false;
+      return txDate >= start && txDate <= now;
+    });
+  }, [safeTransactions, periodDays]);
 
   const chartData = useMemo(() => {
     const grouped = new Map<string, { name: string; Entradas: number; Saidas: number }>();
-    safeTransactions.forEach((tx, index) => {
+    filteredTransactions.forEach((tx, index) => {
       const day = formatTransactionDate(getTransactionDateValue(tx), { month: "short" });
       if (!grouped.has(day)) grouped.set(day, { name: day || `Sem ${index + 1}`, Entradas: 0, Saidas: 0 });
       const row = grouped.get(day);
@@ -92,22 +106,13 @@ const FinancialFlow = () => {
     });
 
     const values = Array.from(grouped.values()).slice(-8);
-    if (values.length) return values;
+    return values;
+  }, [filteredTransactions]);
 
-    return [
-      { name: "Sem 1", Entradas: 4000, Saidas: 2400 },
-      { name: "Sem 2", Entradas: 3000, Saidas: 1398 },
-      { name: "Sem 3", Entradas: 5000, Saidas: 3908 },
-      { name: "Sem 4", Entradas: 2800, Saidas: 2100 },
-      { name: "Sem 5", Entradas: 1900, Saidas: 900 },
-      { name: "Sem 6", Entradas: 4400, Saidas: 3200 },
-    ];
-  }, [safeTransactions]);
-
-  const totalIncome = safeTransactions
+  const totalIncome = filteredTransactions
     .filter((t) => t.type === "income")
     .reduce((acc, t) => acc + Number(t.amount || 0), 0);
-  const totalExpense = safeTransactions
+  const totalExpense = filteredTransactions
     .filter((t) => t.type === "expense")
     .reduce((acc, t) => acc + Number(t.amount || 0), 0);
   const balance = totalIncome - totalExpense;
@@ -163,36 +168,40 @@ const FinancialFlow = () => {
       <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Fluxo Financeiro</h1>
 
       <div className="flex flex-wrap gap-3">
-        <select className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 focus:outline-none">
-          <option>Ultimos 30 dias</option>
-          <option>Ultimos 7 dias</option>
-          <option>Ultimos 90 dias</option>
+        <select
+          value={periodDays}
+          onChange={(event) => setPeriodDays(Number(event.target.value) as 7 | 30 | 90)}
+          className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 focus:outline-none"
+        >
+          <option value={30}>Ultimos 30 dias</option>
+          <option value={7}>Ultimos 7 dias</option>
+          <option value={90}>Ultimos 90 dias</option>
         </select>
-        <select className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 focus:outline-none">
-          <option>Empresa A</option>
-        </select>
+        <span className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm text-zinc-400">
+          Empresa ativa
+        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
-          <p className="text-sm text-zinc-500">Faturamento Mensal</p>
+        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
+          <p className="text-sm text-zinc-500">Faturamento do periodo</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(totalIncome)}</p>
-          <p className="mt-2 text-sm font-bold text-lime-400">+12.5% vs. periodo anterior</p>
+          <p className="mt-2 text-sm font-bold text-zinc-500">Periodo: {periodDays} dias</p>
         </div>
-        <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
+        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
           <p className="text-sm text-zinc-500">Lucro Liquido</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(balance)}</p>
-          <p className="mt-2 text-sm font-bold text-lime-400">+8.3% vs. periodo anterior</p>
+          <p className="mt-2 text-sm font-bold text-zinc-500">Receitas menos saidas</p>
         </div>
-        <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
+        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
           <p className="text-sm text-zinc-500">Custos Operacionais</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(totalExpense)}</p>
-          <p className="mt-2 text-sm font-bold text-red-500">-2.1% vs. periodo anterior</p>
+          <p className="mt-2 text-sm font-bold text-zinc-500">Saidas do periodo</p>
         </div>
-        <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
+        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
           <p className="text-sm text-zinc-500">Margem de Lucro</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{margin.toFixed(1)}%</p>
-          <p className="mt-2 text-sm font-bold text-lime-400">+2.1% vs. periodo anterior</p>
+          <p className="mt-2 text-sm font-bold text-zinc-500">Calculada com dados reais</p>
         </div>
       </div>
 
@@ -211,6 +220,11 @@ const FinancialFlow = () => {
         <>
           <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 shadow-sm min-w-0">
             <h3 className="mb-4 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Fluxo de Caixa (Entradas vs. Saidas)</h3>
+            {chartData.length === 0 ? (
+              <div className="grid min-h-[260px] place-items-center rounded-2xl border border-dashed border-zinc-800 text-sm text-zinc-500">
+                Sem movimentacoes no periodo selecionado.
+              </div>
+            ) : (
             <ResponsiveContainer width="100%" minWidth={280} minHeight={260} height={380}>
               <AreaChart data={chartData}>
                 <defs>
@@ -231,6 +245,7 @@ const FinancialFlow = () => {
                 <Area type="monotone" dataKey="Saidas" stroke="#ef4444" fill="url(#colorSaidas)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </div>
 
           <form
@@ -278,16 +293,16 @@ const FinancialFlow = () => {
             </button>
           </form>
 
-          {safeTransactions.length === 0 ? (
+          {filteredTransactions.length === 0 ? (
             <EmptyState
-              title="Sem transacoes cadastradas"
-              description="Use o formulario acima para registrar sua primeira movimentacao."
+              title="Sem transacoes neste periodo"
+              description="Altere o filtro ou registre uma nova movimentacao."
             />
           ) : (
             <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
               <h3 className="mb-4 text-xl font-black tracking-tight text-zinc-100">Ultimas transacoes</h3>
               <div className="space-y-3">
-                {safeTransactions.slice(0, 12).map((tx) => {
+                {filteredTransactions.slice(0, 12).map((tx) => {
                   const transactionDate = getTransactionDateValue(tx);
                   return (
                     <div

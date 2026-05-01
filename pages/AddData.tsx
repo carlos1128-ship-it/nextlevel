@@ -142,6 +142,10 @@ const AddData = () => {
       : Boolean(selectedFile);
   const canAnalyze = isCompanyReady && Boolean(selectedCompanyId) && hasValidInput;
 
+  useEffect(() => {
+    document.title = "Adicionar Dados | Next Level";
+  }, []);
+
   const reloadActiveCompany = async () => {
     try {
       const companies = await getCompanies();
@@ -351,7 +355,7 @@ const AddData = () => {
   };
 
   return (
-    <main className="space-y-7">
+    <main className="min-w-0 space-y-7 overflow-x-hidden">
       <section className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
           Adicionar Dados
@@ -364,8 +368,8 @@ const AddData = () => {
         </p>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-5 rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+      <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-w-0 space-y-5 rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
           <div className="grid gap-3 md:grid-cols-2">
             {INPUT_MODES.map((item) => (
               <button
@@ -375,15 +379,15 @@ const AddData = () => {
                   setMode(item.mode);
                   setSelectedFile(null);
                 }}
-                className={`rounded-2xl border p-4 text-left transition ${
+                className={`min-w-0 rounded-2xl border p-4 text-left transition ${
                   mode === item.mode
                     ? "border-lime-400/50 bg-lime-400/10"
                     : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-black text-zinc-100">{item.title}</p>
+                  <div className="min-w-0">
+                    <p className="break-words text-sm font-black text-zinc-100">{item.title}</p>
                     <p className="mt-2 text-xs leading-5 text-zinc-500">{item.description}</p>
                   </div>
                   {item.beta ? (
@@ -396,7 +400,7 @@ const AddData = () => {
             ))}
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
             <label className="space-y-2">
               <span className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
                 Categoria esperada
@@ -414,7 +418,7 @@ const AddData = () => {
               </select>
             </label>
 
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+            <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
               {mode === "text" ? (
                 <label className="block space-y-2">
                   <span className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
@@ -430,7 +434,7 @@ const AddData = () => {
               ) : (
                 <label className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-700 bg-zinc-950/80 px-5 text-center">
                   <PlusIcon className="h-8 w-8 text-lime-300" />
-                  <p className="mt-4 text-sm font-black text-zinc-100">
+                  <p className="mt-4 max-w-full break-words text-sm font-black text-zinc-100">
                     {selectedFile ? selectedFile.name : activeMode?.title}
                   </p>
                   <p className="mt-2 max-w-md text-xs leading-5 text-zinc-500">
@@ -470,7 +474,7 @@ const AddData = () => {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+        <aside className="min-w-0 overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-6 xl:max-w-[360px]">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-lime-300">
@@ -483,7 +487,7 @@ const AddData = () => {
             </span>
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 max-h-[620px] space-y-3 overflow-y-auto overflow-x-hidden pr-1">
             {isLoadingHistory ? (
               <div className="rounded-2xl border border-dashed border-zinc-800 p-6 text-sm text-zinc-500">
                 Carregando importacoes...
@@ -509,22 +513,22 @@ const AddData = () => {
                   key={item.id}
                   type="button"
                   onClick={() => void handleSelectImport(item.id)}
-                  className={`w-full rounded-2xl border p-4 text-left transition ${
+                  className={`w-full min-w-0 rounded-2xl border p-4 text-left transition ${
                     selectedImport?.id === item.id
                       ? "border-lime-400/50 bg-lime-400/10"
                       : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-black text-zinc-100">
                         {item.fileName || item.aiSummary || "Importacao manual"}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-500">
+                      <p className="mt-1 truncate text-xs text-zinc-500">
                         {item.inputType} • {item.detectedPlatform || "unknown"} • {item.detectedCategory || "unknown"}
                       </p>
                     </div>
-                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${statusClasses(item.status)}`}>
+                    <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${statusClasses(item.status)}`}>
                       {statusLabel(item.status)}
                     </span>
                   </div>
@@ -532,10 +536,10 @@ const AddData = () => {
               ))
             )}
           </div>
-        </div>
+        </aside>
       </section>
 
-      <section className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+      <section className="min-w-0 overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
         {!selectedImport ? (
           <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center">
             <h2 className="text-2xl font-black text-zinc-100">Aguardando sua primeira importacao</h2>
@@ -546,7 +550,7 @@ const AddData = () => {
         ) : (
           <div className="space-y-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
+              <div className="min-w-0 space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${statusClasses(selectedImport.status)}`}>
                     {statusLabel(selectedImport.status)}
@@ -562,10 +566,10 @@ const AddData = () => {
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-zinc-100">
+                  <h2 className="break-words text-2xl font-black text-zinc-100">
                     {selectedImport.fileName || "Importacao manual"}
                   </h2>
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+                  <p className="mt-2 max-w-3xl break-words text-sm leading-6 text-zinc-400">
                     {selectedImport.extracted?.summary || selectedImport.aiSummary || "Importacao carregada para revisao."}
                   </p>
                 </div>
@@ -646,8 +650,8 @@ const AddData = () => {
               </div>
             ) : null}
 
-            <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+              <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
                 <div className="mb-4 flex items-center gap-2">
                   <BarChartIcon className="h-5 w-5 text-lime-300" />
                   <h3 className="text-lg font-black text-zinc-100">Metricas extraidas</h3>
@@ -659,15 +663,15 @@ const AddData = () => {
                     {draftMetrics.map((metric, index) => (
                       <div
                         key={`${selectedImport.id}-${metric.metricKey}-${index}`}
-                        className="grid gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-4 md:grid-cols-[1.1fr_1fr_130px]"
+                        className="grid min-w-0 gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-4 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_130px]"
                       >
-                        <div>
-                          <p className="text-sm font-black text-zinc-100">{metric.label}</p>
+                        <div className="min-w-0">
+                          <p className="break-words text-sm font-black text-zinc-100">{metric.label}</p>
                           <p className="mt-1 text-xs uppercase tracking-[0.12em] text-zinc-500">
                             {metric.metricKey} • {metric.unit}
                           </p>
                           {metric.sourceText ? (
-                            <p className="mt-2 text-xs text-zinc-500">{metric.sourceText}</p>
+                            <p className="mt-2 break-words text-xs text-zinc-500">{metric.sourceText}</p>
                           ) : null}
                         </div>
                         <input
@@ -684,8 +688,8 @@ const AddData = () => {
                 )}
               </div>
 
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+              <div className="min-w-0 space-y-4">
+                <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
                   <div className="mb-4 flex items-center gap-2">
                     <UsersIcon className="h-5 w-5 text-lime-300" />
                     <h3 className="text-lg font-black text-zinc-100">Entidades detectadas</h3>
@@ -702,7 +706,7 @@ const AddData = () => {
                               {Math.round(entity.confidence * 100)}%
                             </span>
                           </div>
-                          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-5 text-zinc-400">
+                          <pre className="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-words text-xs leading-5 text-zinc-400">
                             {JSON.stringify(entity.data, null, 2)}
                           </pre>
                         </div>
@@ -711,7 +715,7 @@ const AddData = () => {
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+                <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
                   <div className="mb-4 flex items-center gap-2">
                     <LightbulbIcon className="h-5 w-5 text-lime-300" />
                     <h3 className="text-lg font-black text-zinc-100">Notas do MVP</h3>

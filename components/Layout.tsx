@@ -174,10 +174,12 @@ function writeCachedModulePreferences(companyId: string | null, preferences: Com
 const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
   const { username } = useAuth();
   return (
-    <aside className="fixed left-0 top-0 z-50 hidden h-full w-64 flex-col justify-between border-r border-zinc-200 bg-white p-6 text-zinc-800 dark:border-zinc-900 dark:bg-[#080b10] dark:text-zinc-100 lg:flex">
-      <div>
+    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-zinc-200 bg-white p-6 text-zinc-800 dark:border-zinc-900 dark:bg-[#080b10] dark:text-zinc-100 lg:flex">
+      <div className="shrink-0">
         <div className="mb-8 text-4xl font-black tracking-tight text-lime-500 dark:text-lime-400">NEXT LEVEL</div>
         <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operacao Segura</p>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
         <nav aria-label="Menu Principal">
           <ul className="space-y-1">
             {(Array.isArray(primaryItems) ? primaryItems : []).map((item) => (
@@ -192,8 +194,8 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
                     }`
                   }
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  <span>{item.name}</span>
+                  <item.icon className="mr-3 h-5 w-5 shrink-0" />
+                  <span className="min-w-0 truncate">{item.name}</span>
                 </NavLink>
               </li>
             ))}
@@ -216,8 +218,8 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
                         }`
                       }
                     >
-                      <item.icon className="mr-3 h-5 w-5" />
-                      <span>{item.name}</span>
+                      <item.icon className="mr-3 h-5 w-5 shrink-0" />
+                      <span className="min-w-0 truncate">{item.name}</span>
                     </NavLink>
                   </li>
                 ))}
@@ -227,11 +229,11 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
         </nav>
       </div>
 
-      <Link to="/profile" className="group flex items-center gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-900" aria-label="Acessar perfil">
+      <Link to="/profile" className="group mt-5 flex shrink-0 items-center gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-900" aria-label="Acessar perfil">
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 font-bold text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
           {username?.charAt(0).toUpperCase() || "U"}
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{username || "Usuario"}</p>
           <p className="text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ver Perfil</p>
         </div>
