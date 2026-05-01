@@ -5,6 +5,7 @@ import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
 import { EmptyState } from "../components/AsyncState";
 import { chatWithAi, getCompanies } from "../src/services/endpoints";
+import { getErrorMessage } from "../src/services/error";
 
 const CHAT_STORAGE_KEY = "chat_history_v1";
 const QUICK_PROMPTS = [
@@ -116,7 +117,8 @@ const Chat = () => {
         },
       ]);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao consultar IA.";
+      const message = getErrorMessage(error, "Erro ao consultar IA.");
+      const isUsageLimit = message.toLowerCase().includes("limite de ia");
       const isGeminiError = message.toLowerCase().includes('gemini') ||
         message.toLowerCase().includes('overloaded') ||
         message.toLowerCase().includes('rate limit') ||
@@ -127,13 +129,22 @@ const Chat = () => {
         ...prev,
         {
           id: Date.now() + 1,
-          text: isGeminiError
-            ? "⚠️ A IA está sobrecarregada no momento. Tente novamente em alguns segundos ou minutos."
-            : "Não consegui responder agora. Tente novamente em alguns segundos.",
+          text: isUsageLimit
+            ? "Voce atingiu o limite de IA deste mes. Faca upgrade de plano para continuar."
+            : isGeminiError
+              ? "A IA esta sobrecarregada no momento. Tente novamente em alguns segundos ou minutos."
+              : "Nao consegui responder agora. Tente novamente em alguns segundos.",
           sender: "ai",
         },
       ]);
-      addToast(isGeminiError ? "Aviso: IA sobrecarregada, tente novamente em alguns segundos" : message, "error");
+      addToast(
+        isUsageLimit
+          ? "Voce atingiu o limite de IA deste mes. Veja os planos para continuar."
+          : isGeminiError
+            ? "Aviso: IA sobrecarregada, tente novamente em alguns segundos"
+            : message,
+        "error",
+      );
     } finally {
       setIsTyping(false);
     }

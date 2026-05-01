@@ -18,6 +18,7 @@ import {
   ReceiptIcon,
   RadarIcon,
   ShieldIcon,
+  ActivityIcon,
 } from "./icons";
 import { useAuth } from "../App";
 import { useToast } from "./Toast";
@@ -42,6 +43,7 @@ const navItems: SidebarNavItem[] = [
   { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
   { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
   { id: "plans", path: "/plans", name: "Planos", icon: CreditCardIcon },
+  { id: "usage", path: "/usage", name: "Uso do Plano", icon: ActivityIcon },
   { id: "settings", path: "/settings", name: "Configuracoes", icon: SettingsIcon },
   { id: "profile", path: "/profile", name: "Perfil", icon: UserIcon },
   { id: "integrations", path: "/integrations", name: "Integracoes", icon: PuzzleIcon },
@@ -68,6 +70,7 @@ const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   customers: "customers",
   costs: "costs",
   plans: "plans",
+  usage: "usage",
   settings: "settings",
   profile: "profile",
   integrations: "integrations",
