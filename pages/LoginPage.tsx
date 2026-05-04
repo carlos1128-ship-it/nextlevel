@@ -541,6 +541,10 @@ const LoginPage: React.FC = () => {
     document.getElementById("o-que-fazemos")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const nextExample = () => {
+    setActiveStat((prev) => (prev + 1) % PROOF_STATS.length);
+  };
+
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     mouseTargetRef.current = { x: event.clientX, y: event.clientY };
     if (mouseFrameRef.current !== null) return;
@@ -702,7 +706,7 @@ const LoginPage: React.FC = () => {
           onMouseEnter={() => setIsInsightPaused(true)}
           onMouseLeave={() => setIsInsightPaused(false)}
         >
-          <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.18] bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(255,255,255,0.035)_35%,rgba(5,8,12,0.96))] p-6 shadow-[0_0_60px_rgba(182,255,0,0.08)] sm:p-8">
+          <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.18] bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(255,255,255,0.035)_35%,rgba(5,8,12,0.96))] p-6 pr-16 shadow-[0_0_60px_rgba(182,255,0,0.08)] sm:p-8 sm:pr-20">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(182,255,0,0.16),transparent_32%)]" />
             <div className="relative grid gap-6 lg:grid-cols-[240px_1fr] lg:items-center">
               <div>
@@ -736,6 +740,14 @@ const LoginPage: React.FC = () => {
                 </div>
               </div>
             </div>
+            <button
+              type="button"
+              aria-label="Próximo exemplo"
+              onClick={nextExample}
+              className="absolute right-4 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-lime-300/20 bg-black/25 text-2xl font-light leading-none text-lime-200/70 shadow-[0_0_20px_rgba(0,0,0,0.22)] backdrop-blur-md transition duration-300 hover:border-lime-300/55 hover:bg-lime-300/10 hover:text-lime-200 hover:shadow-[0_0_24px_rgba(182,255,0,0.16)] active:scale-95 sm:right-6 sm:top-1/2 sm:h-12 sm:w-12 sm:-translate-y-1/2 sm:text-3xl"
+            >
+              <span aria-hidden="true">›</span>
+            </button>
           </div>
         </section>
 
