@@ -117,44 +117,45 @@ const CreditCardIcon = () => (
    Static Data
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const METRICS = [
-  { value: "360", label: "Visao operacional", icon: ChartIcon },
-  { value: "1", label: "Ambiente por empresa", icon: ShieldIcon },
-  { value: "1 clique", label: "Para conectar canais", icon: ZapIcon },
-  { value: "24/7", label: "IA de apoio", icon: BrainIcon },
+  { title: "Enxergue o invisivel", label: "A Next Level faz voce, empresario, enxergar o que antes nao via.", icon: ChartIcon },
+  { title: "+20% de lucro", label: "Aumente seu lucro em 20% ja no primeiro mes.", icon: TrendingUpIcon },
+  { title: "Conecte sem dor", label: "Integracoes que facilitam sua vida.", icon: ZapIcon },
+  { title: "IA em tudo", label: "Inteligencia Artificial presente em toda a plataforma.", icon: BrainIcon },
 ];
 
 const PROOF_STATS = [
-  { quote: "Grandes empresas usam dados e IA para reduzir desperdicios, prever demanda e personalizar decisoes.", source: "Inteligencia aplicada a gestao" },
-  { quote: "A NEXT LEVEL leva essa logica para empresas menores, com dados organizados, alertas e recomendacoes praticas.", source: "NEXT LEVEL AI" },
-  { quote: "A calculadora e apenas uma amostra: dentro da plataforma, a IA cruza vendas, custos, atendimento e oportunidades.", source: "Previa da plataforma" },
+  { quote: "Netflix virou referencia mundial ao usar Big Data para prever demanda, personalizar experiencias e reter clientes.", source: "Big Data em escala" },
+  { quote: "Empresas orientadas por dados tomam decisoes mais rapidas, reduzem desperdicio e encontram oportunidades antes da concorrencia.", source: "IA aplicada ao lucro" },
+  { quote: "Analise preditiva ajuda negocios a economizar milhoes ao antecipar estoque, precos, demanda e risco de caixa.", source: "Previsao comercial" },
+  { quote: "A Next Level leva esse poder para PMEs: dados organizados, IA ativa e recomendacoes prontas para executar.", source: "Next Level AI" },
 ];
 
 const FEATURES = [
   {
     icon: BrainIcon,
-    title: "IA que analisa seu negocio",
-    desc: "Organiza vendas, custos, margem, clientes e canais para apoiar decisoes com dados reais.",
+    title: "Controle inteligente de estoque",
+    desc: "Identifique ruptura, excesso parado e produtos que precisam de acao antes de perder dinheiro.",
     color: "from-lime-400/15 to-emerald-400/5",
     border: "border-lime-400/20",
   },
   {
     icon: WhatsAppIcon,
-    title: "Atendimento com IA",
-    desc: "Agentes para apoiar respostas, capturar sinais de compra e transformar conversas em dados de negocio.",
+    title: "Atendimento omnichannel",
+    desc: "Venda e responda por WhatsApp, Instagram e marketplaces com IA treinada no seu catalogo.",
     color: "from-green-400/15 to-teal-400/5",
     border: "border-green-400/20",
   },
   {
     icon: ChartIcon,
-    title: "Dashboard executivo",
-    desc: "Faturamento, perdas, lucro liquido, fluxo de caixa, relatorios e insights no mesmo painel.",
+    title: "Relatorios automaticos",
+    desc: "Receba faturamento, margem, fluxo de caixa e alertas de risco em linguagem simples.",
     color: "from-cyan-400/15 to-blue-400/5",
     border: "border-cyan-400/20",
   },
   {
     icon: ShieldIcon,
-    title: "Gestao multi-empresa",
-    desc: "Cada empresa com dados, memoria e configuracoes isoladas para operar com seguranca.",
+    title: "IA de vendas e decisao",
+    desc: "Preve demanda, pontua leads, sugere campanhas e mostra onde aumentar lucro.",
     color: "from-violet-400/15 to-purple-400/5",
     border: "border-violet-400/20",
   },
@@ -164,8 +165,7 @@ const INTEGRATIONS = [
   { name: "WhatsApp", color: "#25D366", bg: "bg-[#25D366]/10 border-[#25D366]/25" },
   { name: "Instagram", color: "#E1306C", bg: "bg-[#E1306C]/10 border-[#E1306C]/25" },
   { name: "Mercado Livre", color: "#FFE600", bg: "bg-[#FFE600]/10 border-[#FFE600]/25" },
-  { name: "Shopee", color: "#FF5722", bg: "bg-[#FF5722]/10 border-[#FF5722]/25" },
-  { name: "API propria", color: "#b6ff00", bg: "bg-[#b6ff00]/10 border-[#b6ff00]/25" },
+  { name: "Ultimatefy", color: "#B6FF00", bg: "bg-[#B6FF00]/10 border-[#B6FF00]/25" },
 ];
 
 const PRICING = [
@@ -189,7 +189,7 @@ const PRICING = [
     name: "Pro Business",
     monthlyPrice: "R$ 247", annualPrice: "R$ 2.717",
     summary: "Para operacoes em expansao que precisam de previsibilidade, velocidade e zero improviso.",
-    features: ["Empresas ilimitadas", "Tudo do Premium", "Mercado Livre + Shopee + marketplaces", "Insights preditivos avancados", "Integracoes via API customizada", "Acompanhamento dedicado"],
+    features: ["Empresas ilimitadas", "Tudo do Premium", "Mercado Livre + Ultimatefy + marketplaces", "Insights preditivos avancados", "Integracoes guiadas", "Acompanhamento dedicado"],
     cta: "Falar com consultor", recommended: false,
     microcopy: "Para quem opera em outro nivel",
   },
@@ -275,7 +275,7 @@ const MarginCalculator: React.FC = () => {
             </>
           )}
           <p className="text-xs text-zinc-600 pt-2">
-            Esta e uma amostra gratuita. Na plataforma, voce tem acesso a analises completas com frete, imposto e multiplos produtos.
+            Essa e apenas uma fracao do que nossa plataforma faz pelo seu negocio.
           </p>
         </div>
 
@@ -475,9 +475,10 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [billingAnnual, setBillingAnnual] = useState(false);
   const [activeStat, setActiveStat] = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const interval = setInterval(() => setActiveStat(p => (p + 1) % PROOF_STATS.length), 4000);
+    const interval = setInterval(() => setActiveStat(p => (p + 1) % PROOF_STATS.length), 5500);
     return () => clearInterval(interval);
   }, []);
 
@@ -516,18 +517,29 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030508] text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div
+      className="min-h-screen bg-[#030508] text-white"
+      onMouseMove={(event) => setMousePosition({ x: event.clientX, y: event.clientY })}
+      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+    >
       {/* Grid bg pattern */}
       <div className="pointer-events-none fixed inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%220%200%2040%2040%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200h1v40H0zM0%200h40v1H0z%22%20fill%3D%22rgba(255%2C255%2C255%2C0.025)%22/%3E%3C/svg%3E')] opacity-60" />
 
       {/* Ambient top glow */}
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[600px] bg-[radial-gradient(ellipse_at_top,rgba(182,255,0,0.07),transparent_60%)]" />
 
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-80 blur-[1px] transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(260px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(182,255,0,0.16), rgba(34,197,94,0.05) 34%, transparent 68%)`,
+        }}
+      />
+
       {/* NAV */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
           <span className="font-black text-xl tracking-tight text-white">NEXT LEVEL</span>
-          <span className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 border-l border-white/10 pl-3">Gestao empresarial com IA</span>
+          <span className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 border-l border-white/10 pl-3">Gestao empresarial com IA e Big Data</span>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => scrollToSection("features")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Funcionalidades</button>
@@ -540,7 +552,7 @@ const LoginPage: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-6">
 
         {/* â”€â”€â”€ HERO â”€â”€â”€ */}
-        <section className="pt-10 pb-20 grid lg:grid-cols-[1fr_400px] gap-14 items-start">
+        <section className="pt-8 pb-14 grid lg:grid-cols-[1fr_400px] gap-14 items-start">
           {/* Left */}
           <div>
             {/* Badge */}
@@ -550,17 +562,19 @@ const LoginPage: React.FC = () => {
             </div>
 
             {/* Headline */}
-            <h1 className="text-[clamp(2.6rem,6vw,4.8rem)] font-black leading-[0.92] text-white">
-              Gestao com IA para<br />
+            <h1 className="text-5xl font-black leading-[0.96] text-white sm:text-6xl xl:text-7xl">
+              Gestao Empresarial com IA,<br />
               <span className="relative inline-block">
-                <span className="relative z-10 text-lime-300">vender mais</span>
+                <span className="relative z-10 text-lime-300">Analise de Big Data</span>
                 <span className="absolute -inset-x-2 inset-y-0 rounded-lg bg-lime-400/8 -z-0"></span>
-              </span><br />
-              e decidir melhor.
+              </span>
             </h1>
+            <p className="mt-4 max-w-2xl text-xl font-black leading-7 text-white sm:text-2xl">
+              Solucoes para Analistas, Vendedores e Administradores. <span className="text-lime-300">Isso e Next Level.</span>
+            </p>
 
             <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400 font-light">
-              Transforme dados soltos em decisoes que ajudam a aumentar lucro, reduzir perdas e entender o negocio com mais clareza.
+              Transforme dados soltos em decisoes inteligentes que aumentam seu lucro, reduzem perdas e deixam sua operacao mais eficiente.
             </p>
 
             {/* CTAs */}
@@ -569,7 +583,7 @@ const LoginPage: React.FC = () => {
                 className="flex items-center gap-2.5 rounded-[18px] bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_36px_rgba(182,255,0,0.25)] hover:-translate-y-0.5 hover:brightness-105 transition">
                 Assinar agora <ArrowRight />
               </button>
-              <button onClick={() => scrollToSection("calculator")}
+              <button onClick={() => scrollToSection("about-next-level")}
                 className="flex items-center gap-2.5 rounded-[18px] border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-zinc-200 hover:bg-white/[0.08] transition">
                 Entenda o que fazemos
               </button>
@@ -594,10 +608,10 @@ const LoginPage: React.FC = () => {
                       <m.icon />
                     </div>
                   </div>
-                  <p className="text-2xl font-black tracking-tight text-white">
-                    <AnimatedCounter value={m.value} />
+                  <p className="text-base font-black tracking-tight text-white">
+                    {m.title}
                   </p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">{m.label}</p>
+                  <p className="mt-2 text-xs leading-5 text-zinc-400">{m.label}</p>
                 </div>
               ))}
             </div>
@@ -632,6 +646,41 @@ const LoginPage: React.FC = () => {
         </section>
 
         {/* â”€â”€â”€ FEATURES â”€â”€â”€ */}
+        <section id="about-next-level" className="py-16 scroll-mt-20">
+          <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.1),rgba(6,8,12,0.96)_42%,rgba(3,5,8,1))] p-8 sm:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.18),transparent_34%)]" />
+            <div className="relative grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">O que fazemos</p>
+                <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
+                  A IA que trabalha pelo lucro do seu negocio 24/7.
+                </h2>
+                <p className="mt-5 text-sm leading-7 text-zinc-300">
+                  A Next Level e a plataforma de IA para todo tipo de empreendedor. Aqui voce controla estoques, vendas, atendimento, margem e canais em um unico lugar inteligente, com recomendacoes praticas para impulsionar seu faturamento.
+                </p>
+                <p className="mt-3 text-sm leading-7 text-zinc-400">
+                  Seja loja fisica, e-commerce, servico local, equipe comercial ou operacao multiempresa, a plataforma cruza Big Data, comportamento de compra e historico financeiro para mostrar onde vender mais, economizar e decidir com seguranca.
+                </p>
+              </div>
+              <div className="grid gap-3">
+                {[
+                  "Descubra perdas invisiveis antes que elas virem prejuizo.",
+                  "Aprove campanhas com IA quando existir chance real de ROI.",
+                  "Conecte canais de venda sem expor tokens ou complexidade.",
+                  "Transforme atendimento em dados de venda e recorrencia.",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3 rounded-[16px] border border-white/[0.08] bg-white/[0.03] p-4">
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-lime-300 text-zinc-950">
+                      <CheckIcon />
+                    </div>
+                    <p className="text-sm font-semibold leading-6 text-zinc-100">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="features" className="py-20 scroll-mt-20">
           <div className="text-center mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
@@ -639,7 +688,7 @@ const LoginPage: React.FC = () => {
               Tudo que seu negocio precisa. <span className="text-lime-300">Em um lugar.</span>
             </h2>
             <p className="mt-4 max-w-lg mx-auto text-sm leading-7 text-zinc-400">
-              Nao e so um painel bonito. E automacao, inteligencia e visibilidade operacional integradas.
+              Veja em segundos as funcionalidades que transformam dados, atendimento e estoque em lucro real.
             </p>
           </div>
 
@@ -701,7 +750,7 @@ const LoginPage: React.FC = () => {
               Calcule seu lucro real.<br /><span className="text-lime-300">Agora, ao vivo.</span>
             </h2>
               <p className="mt-4 text-sm text-zinc-400 max-w-2xl mx-auto">
-                A calculadora e apenas uma amostra do que a NEXT LEVEL analisa. Dentro da plataforma, a IA cruza vendas, custos, atendimento, campanhas e oportunidades.
+                Essa calculadora e apenas uma fracao do que nossa plataforma faz pelo seu negocio. Dentro da Next Level, a IA cruza vendas, custos, atendimento, campanhas e oportunidades.
               </p>
           </div>
           <MarginCalculator />
