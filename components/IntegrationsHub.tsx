@@ -3,13 +3,17 @@ import { useAuth } from "../App";
 import { useToast } from "./Toast";
 import {
   disconnectMetaAPIConfig,
+  disconnectInstagram,
   evolutionConnect,
   evolutionDisconnect,
   evolutionGetQRCode,
   evolutionGetStatus,
   getIntegrationStatuses,
+  getInstagramConnectUrl,
+  getInstagramStatus,
   getMetaWhatsappStatus,
   saveMetaAPIConfig,
+  type InstagramConnectionStatus,
 } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
 import type { IntegrationStatus } from "../src/types/domain";
@@ -48,8 +52,11 @@ const IntegrationsHub = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [evolutionLoading, setEvolutionLoading] = useState(false);
   const [officialLoading, setOfficialLoading] = useState(false);
+  const [instagramLoading, setInstagramLoading] = useState(false);
   const [officialStatus, setOfficialStatus] = useState<OfficialStatus | null>(null);
   const [evolutionStatus, setEvolutionStatus] = useState<EvolutionStatus | null>(null);
+  const [instagramConnectionStatus, setInstagramConnectionStatus] =
+    useState<InstagramConnectionStatus | null>(null);
   const [integrationStatuses, setIntegrationStatuses] = useState<IntegrationStatus[]>([]);
   const [metaAccessToken, setMetaAccessToken] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -59,15 +66,17 @@ const IntegrationsHub = () => {
     if (!selectedCompanyId) return;
 
     try {
-      const [metaData, evolutionData, integrationsData] = await Promise.all([
+      const [metaData, evolutionData, integrationsData, instagramData] = await Promise.all([
         getMetaWhatsappStatus(selectedCompanyId),
         evolutionGetStatus(selectedCompanyId),
         getIntegrationStatuses(selectedCompanyId),
+        getInstagramStatus(selectedCompanyId),
       ]);
 
       setOfficialStatus(metaData);
       setEvolutionStatus(evolutionData);
       setIntegrationStatuses(integrationsData);
+      setInstagramConnectionStatus(instagramData);
 
       if (metaData?.phoneNumber) {
         setPhoneNumber(metaData.phoneNumber);
@@ -75,6 +84,7 @@ const IntegrationsHub = () => {
     } catch {
       setOfficialStatus(null);
       setEvolutionStatus(null);
+      setInstagramConnectionStatus(null);
       setIntegrationStatuses([]);
     }
   };
@@ -248,6 +258,38 @@ const IntegrationsHub = () => {
     }
   };
 
+  const handleInstagramConnect = async () => {
+    if (!selectedCompanyId) {
+      addToast("Escolha uma empresa antes de conectar.", "info");
+      return;
+    }
+
+    setInstagramLoading(true);
+    try {
+      const currentPath = `${window.location.pathname}${window.location.search}`;
+      const { authUrl } = await getInstagramConnectUrl(selectedCompanyId, currentPath);
+      window.location.assign(authUrl);
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel iniciar o OAuth do Instagram."), "error");
+      setInstagramLoading(false);
+    }
+  };
+
+  const handleInstagramDisconnect = async () => {
+    if (!selectedCompanyId) return;
+
+    setInstagramLoading(true);
+    try {
+      await disconnectInstagram(selectedCompanyId);
+      await loadStatus();
+      addToast("Instagram desconectado.", "success");
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel desconectar o Instagram."), "error");
+    } finally {
+      setInstagramLoading(false);
+    }
+  };
+
   const showComingSoon = (channel: string) => {
     addToast(`${channel} fica visivel aqui e entra em configuracao guiada em breve.`, "info");
   };
@@ -295,8 +337,8 @@ const IntegrationsHub = () => {
       description: "DMs e automacoes via Meta Graph API.",
       status: instagramStatus,
       icon: <RadarIcon className="h-6 w-6" />,
-      actionLabel: instagramStatus?.connected ? "Conectado" : "Em breve",
-      actionType: "soon" as const,
+      actionLabel: instagramConnectionStatus?.connected ? "Desconectar" : "Conectar Instagram",
+      actionType: "instagram" as const,
     },
     {
       key: "MERCADOLIVRE",
@@ -502,10 +544,44 @@ const IntegrationsHub = () => {
             </div>
 
             <div className="mt-5 flex items-center gap-3">
-              {card.actionType === "soon" ? (
-                <span className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-300">
-                  Em breve
-                </span>
+              {card.actionType === "instagram" ? (
+                <div className="w-full space-y-3">
+                  {instagramConnectionStatus?.provider_setup_required ? (
+                    <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-200">
+                      Configure META_APP_ID, META_APP_SECRET, CALLBACK_URL e WEBHOOK_VERIFY_TOKEN no backend.
+                    </div>
+                  ) : null}
+                  {instagramConnectionStatus?.connected ? (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                      <p className="text-sm font-bold text-emerald-300">
+                        Instagram conectado{instagramConnectionStatus.igUsername ? ` como @${instagramConnectionStatus.igUsername}` : ""}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-400">
+                        Pagina: {instagramConnectionStatus.pageName || instagramConnectionStatus.pageId || "Meta Business"}
+                      </p>
+                    </div>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      instagramConnectionStatus?.connected
+                        ? void handleInstagramDisconnect()
+                        : void handleInstagramConnect()
+                    }
+                    disabled={instagramLoading || !selectedCompanyId || Boolean(instagramConnectionStatus?.provider_setup_required)}
+                    className={`rounded-2xl px-4 py-3 text-sm font-black transition disabled:opacity-50 ${
+                      instagramConnectionStatus?.connected
+                        ? "border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20"
+                        : "bg-[#B6FF00] text-zinc-950 hover:brightness-105"
+                    }`}
+                  >
+                    {instagramLoading
+                      ? "Aguarde..."
+                      : instagramConnectionStatus?.connected
+                        ? "Desconectar"
+                        : "Conectar Instagram"}
+                  </button>
+                </div>
               ) : (
                 <button
                   type="button"

@@ -1068,6 +1068,53 @@ export async function getIntegrationOAuthSession(
   return data;
 }
 
+export type InstagramConnectionStatus = {
+  connected: boolean;
+  status: string;
+  provider_setup_required?: boolean;
+  igBusinessId?: string | null;
+  igUsername?: string | null;
+  pageId?: string | null;
+  pageName?: string | null;
+  tokenExpiry?: string | null;
+  updatedAt?: string | null;
+};
+
+export async function getInstagramConnectUrl(
+  companyId: string,
+  returnTo?: string,
+) {
+  const { data } = await api.get<{
+    provider: "instagram";
+    authUrl: string;
+    callbackUrl: string;
+    mode: "oauth";
+  }>("/instagram/connect", {
+    params: {
+      companyId,
+      returnTo: returnTo || undefined,
+    },
+  });
+
+  return data;
+}
+
+export async function getInstagramStatus(companyId: string) {
+  const { data } = await api.get<InstagramConnectionStatus>("/instagram/status", {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function disconnectInstagram(companyId: string) {
+  const { data } = await api.post(
+    "/instagram/disconnect",
+    null,
+    { params: { companyId } },
+  );
+  return data;
+}
+
 export async function getForecast(params: {
   companyId?: string | null;
   type: "SALES" | "DEMAND" | "REVENUE";

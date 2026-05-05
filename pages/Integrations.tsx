@@ -4,18 +4,18 @@ import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
 import {
   disconnectWhatsapp,
+  disconnectInstagram,
+  getInstagramConnectUrl,
+  getInstagramStatus,
   getWhatsappConnectionStatus,
   restartWhatsappConnection,
   startWhatsappConnection,
+  type InstagramConnectionStatus,
 } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
 import type { WhatsappConnection } from "../src/types/domain";
 
 const channels = [
-  {
-    title: "Instagram",
-    description: "Provider setup required: aguardando configuracao oficial via Meta.",
-  },
   {
     title: "Mercado Livre",
     description: "Provider setup required: aguardando OAuth/API oficial.",
@@ -59,6 +59,8 @@ const Integrations = () => {
   const [connection, setConnection] = useState<WhatsappConnection | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [instagramLoading, setInstagramLoading] = useState(false);
+  const [instagramStatus, setInstagramStatus] = useState<InstagramConnectionStatus | null>(null);
   const [retryRemaining, setRetryRemaining] = useState(0);
 
   const statusLabel = useMemo(() => {
@@ -96,7 +98,23 @@ const Integrations = () => {
     getWhatsappConnectionStatus(selectedCompanyId)
       .then(setConnection)
       .catch(() => undefined);
+    getInstagramStatus(selectedCompanyId)
+      .then(setInstagramStatus)
+      .catch(() => undefined);
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("integration_provider") !== "instagram") return;
+
+    const status = params.get("integration_status");
+    const message = params.get("integration_message");
+    addToast(
+      message || (status === "connected" ? "Instagram conectado." : "Nao foi possivel conectar o Instagram."),
+      status === "connected" ? "success" : "error",
+    );
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [addToast]);
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -244,6 +262,44 @@ const Integrations = () => {
     }
   };
 
+  const refreshInstagramStatus = async () => {
+    if (!selectedCompanyId) return;
+    const next = await getInstagramStatus(selectedCompanyId);
+    setInstagramStatus(next);
+  };
+
+  const handleInstagramConnect = async () => {
+    if (!selectedCompanyId) {
+      addToast("Selecione uma empresa antes de conectar.", "error");
+      return;
+    }
+
+    try {
+      setInstagramLoading(true);
+      const returnTo = `${window.location.pathname}${window.location.search}`;
+      const session = await getInstagramConnectUrl(selectedCompanyId, returnTo);
+      window.location.assign(session.authUrl);
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel iniciar o Instagram."), "error");
+      setInstagramLoading(false);
+    }
+  };
+
+  const handleInstagramDisconnect = async () => {
+    if (!selectedCompanyId) return;
+
+    try {
+      setInstagramLoading(true);
+      await disconnectInstagram(selectedCompanyId);
+      await refreshInstagramStatus();
+      addToast("Instagram desconectado.", "success");
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel desconectar o Instagram."), "error");
+    } finally {
+      setInstagramLoading(false);
+    }
+  };
+
   return (
     <main className="space-y-7">
       <section className="space-y-2">
@@ -381,6 +437,79 @@ const Integrations = () => {
             {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
           </p>
         ) : null}
+      </section>
+
+      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 space-y-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
+                Instagram
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-zinc-50">
+                DMs com IA via Meta Graph API
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+                Conecte uma conta profissional vinculada a uma Pagina do Facebook para responder DMs com memoria isolada por empresa.
+              </p>
+            </div>
+
+            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {instagramStatus?.connected ? "Conectado" : "Desconectado"}
+                </p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {instagramStatus?.igUsername ? `@${instagramStatus.igUsername}` : "Aguardando OAuth"}
+                </p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Pagina</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {instagramStatus?.pageName || instagramStatus?.pageId || "Meta Business"}
+                </p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Webhook</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {instagramStatus?.provider_setup_required ? "Configurar ENV" : "Pronto"}
+                </p>
+              </div>
+            </div>
+
+            {instagramStatus?.provider_setup_required ? (
+              <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
+                Configure META_APP_ID, META_APP_SECRET, CALLBACK_URL e WEBHOOK_VERIFY_TOKEN no backend.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="flex shrink-0 gap-3">
+            {instagramStatus?.connected ? (
+              <button
+                type="button"
+                onClick={handleInstagramDisconnect}
+                disabled={instagramLoading}
+                className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
+              >
+                {instagramLoading ? "Desconectando..." : "Desconectar"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleInstagramConnect}
+                disabled={instagramLoading || Boolean(instagramStatus?.provider_setup_required)}
+                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {instagramLoading ? "Abrindo Meta..." : "Conectar Instagram"}
+              </button>
+            )}
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
