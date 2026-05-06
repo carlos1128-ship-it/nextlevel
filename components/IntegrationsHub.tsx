@@ -548,7 +548,7 @@ const IntegrationsHub = () => {
                 <div className="w-full space-y-3">
                   {instagramConnectionStatus?.provider_setup_required ? (
                     <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-200">
-                      Configure META_APP_ID, META_APP_SECRET, CALLBACK_URL e WEBHOOK_VERIFY_TOKEN no backend.
+                      Configure META_APP_ID, META_APP_SECRET, INSTAGRAM_REDIRECT_URI, INSTAGRAM_OAUTH_SCOPE e INSTAGRAM_WEBHOOK_VERIFY_TOKEN no backend.
                     </div>
                   ) : null}
                   {instagramConnectionStatus?.connected ? (

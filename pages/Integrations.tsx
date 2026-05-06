@@ -483,7 +483,7 @@ const Integrations = () => {
 
             {instagramStatus?.provider_setup_required ? (
               <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
-                Configure META_APP_ID, META_APP_SECRET, CALLBACK_URL e WEBHOOK_VERIFY_TOKEN no backend.
+                Configure META_APP_ID, META_APP_SECRET, INSTAGRAM_REDIRECT_URI, INSTAGRAM_OAUTH_SCOPE e INSTAGRAM_WEBHOOK_VERIFY_TOKEN no backend.
               </p>
             ) : null}
           </div>
@@ -505,7 +505,7 @@ const Integrations = () => {
                 disabled={instagramLoading || Boolean(instagramStatus?.provider_setup_required)}
                 className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {instagramLoading ? "Abrindo Meta..." : "Conectar Instagram"}
+                {instagramLoading ? "Abrindo Instagram..." : "Conectar Instagram"}
               </button>
             )}
           </div>
