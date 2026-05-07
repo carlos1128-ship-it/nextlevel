@@ -49,6 +49,20 @@ function isOperationStatus(status?: string | null) {
   );
 }
 
+function isInstagramTokenExpired(status?: InstagramConnectionStatus | null) {
+  return Boolean(
+    status?.tokenExpired ||
+      status?.status === "token_expired" ||
+      status?.status === "reconnect_required",
+  );
+}
+
+function getInstagramStatusLabel(status?: InstagramConnectionStatus | null) {
+  if (isInstagramTokenExpired(status)) return "Token expirado";
+  if (status?.connected) return "Conectado";
+  return "Desconectado";
+}
+
 function isCooldownStatus(status?: string | null) {
   return status === "rate_limited" || status === "provider_warming_up" || status === "qr_not_ready";
 }
@@ -458,7 +472,7 @@ const Integrations = () => {
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
                 <p className="mt-1 font-bold text-zinc-100">
-                  {instagramStatus?.connected ? "Conectado" : "Desconectado"}
+                  {getInstagramStatusLabel(instagramStatus)}
                 </p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
@@ -486,10 +500,15 @@ const Integrations = () => {
                 Configure META_APP_ID, META_APP_SECRET, INSTAGRAM_REDIRECT_URI, INSTAGRAM_OAUTH_SCOPE e INSTAGRAM_WEBHOOK_VERIFY_TOKEN no backend.
               </p>
             ) : null}
+            {isInstagramTokenExpired(instagramStatus) ? (
+              <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
+                Token expirado / Reconexao necessaria.
+              </p>
+            ) : null}
           </div>
 
           <div className="flex shrink-0 gap-3">
-            {instagramStatus?.connected ? (
+            {instagramStatus?.connected && !isInstagramTokenExpired(instagramStatus) ? (
               <button
                 type="button"
                 onClick={handleInstagramDisconnect}
@@ -505,7 +524,11 @@ const Integrations = () => {
                 disabled={instagramLoading || Boolean(instagramStatus?.provider_setup_required)}
                 className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {instagramLoading ? "Abrindo Instagram..." : "Conectar Instagram"}
+                {instagramLoading
+                  ? "Abrindo Instagram..."
+                  : isInstagramTokenExpired(instagramStatus)
+                    ? "Reconectar Instagram"
+                    : "Conectar Instagram"}
               </button>
             )}
           </div>

@@ -1074,12 +1074,16 @@ export async function getIntegrationOAuthSession(
 export type InstagramConnectionStatus = {
   connected: boolean;
   status: string;
+  provider?: string | null;
   provider_setup_required?: boolean;
+  instagramAccountId?: string | null;
   igBusinessId?: string | null;
   igUsername?: string | null;
   pageId?: string | null;
   pageName?: string | null;
   tokenExpiry?: string | null;
+  tokenExpiresAt?: string | null;
+  tokenExpired?: boolean;
   updatedAt?: string | null;
 };
 

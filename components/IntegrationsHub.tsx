@@ -44,6 +44,14 @@ type EvolutionStatus = {
 
 type QrStatus = "idle" | "generating" | "ready" | "warming" | "rate_limited" | "timeout";
 
+function isInstagramTokenExpired(status?: InstagramConnectionStatus | null) {
+  return Boolean(
+    status?.tokenExpired ||
+      status?.status === "token_expired" ||
+      status?.status === "reconnect_required",
+  );
+}
+
 const IntegrationsHub = () => {
   const { selectedCompanyId } = useAuth();
   const { addToast } = useToast();
@@ -329,6 +337,7 @@ const IntegrationsHub = () => {
       : qrStatus === "warming"
         ? "A Evolution esta iniciando. Vamos tentar buscar o QR automaticamente."
         : null);
+  const instagramNeedsReconnect = isInstagramTokenExpired(instagramConnectionStatus);
 
   const channels = [
     {
@@ -337,7 +346,11 @@ const IntegrationsHub = () => {
       description: "DMs e automacoes via Meta Graph API.",
       status: instagramStatus,
       icon: <RadarIcon className="h-6 w-6" />,
-      actionLabel: instagramConnectionStatus?.connected ? "Desconectar" : "Conectar Instagram",
+      actionLabel: instagramNeedsReconnect
+        ? "Reconectar Instagram"
+        : instagramConnectionStatus?.connected
+          ? "Desconectar"
+          : "Conectar Instagram",
       actionType: "instagram" as const,
     },
     {
@@ -526,12 +539,18 @@ const IntegrationsHub = () => {
                   <h3 className="text-xl font-black text-zinc-50">{card.title}</h3>
                   <span
                     className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
-                      card.status?.connected
+                      card.status?.connected && !(card.key === "INSTAGRAM" && instagramNeedsReconnect)
                         ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                        : card.key === "INSTAGRAM" && instagramNeedsReconnect
+                          ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
                         : "border-zinc-700 bg-zinc-900 text-zinc-400"
                     }`}
                   >
-                    {card.status?.connected ? "Conectado" : "Nao conectado"}
+                    {card.key === "INSTAGRAM" && instagramNeedsReconnect
+                      ? "Token expirado"
+                      : card.status?.connected
+                        ? "Conectado"
+                        : "Nao conectado"}
                   </span>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{card.description}</p>
@@ -549,10 +568,18 @@ const IntegrationsHub = () => {
                       Configure META_APP_ID, META_APP_SECRET, INSTAGRAM_REDIRECT_URI, INSTAGRAM_OAUTH_SCOPE e INSTAGRAM_WEBHOOK_VERIFY_TOKEN no backend.
                     </div>
                   ) : null}
-                  {instagramConnectionStatus?.connected ? (
-                    <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-                      <p className="text-sm font-bold text-emerald-300">
-                        Instagram conectado{instagramConnectionStatus.igUsername ? ` como @${instagramConnectionStatus.igUsername}` : ""}
+                  {instagramConnectionStatus?.connected || instagramNeedsReconnect ? (
+                    <div className={`rounded-2xl border p-4 ${
+                      instagramNeedsReconnect
+                        ? "border-amber-500/30 bg-amber-500/10"
+                        : "border-emerald-500/30 bg-emerald-500/10"
+                    }`}>
+                      <p className={`text-sm font-bold ${
+                        instagramNeedsReconnect ? "text-amber-200" : "text-emerald-300"
+                      }`}>
+                        {instagramNeedsReconnect
+                          ? "Token expirado / Reconexao necessaria"
+                          : `Instagram conectado${instagramConnectionStatus.igUsername ? ` como @${instagramConnectionStatus.igUsername}` : ""}`}
                       </p>
                       <p className="mt-1 text-xs text-zinc-400">
                         Pagina: {instagramConnectionStatus.pageName || instagramConnectionStatus.pageId || "Meta Business"}
@@ -562,19 +589,21 @@ const IntegrationsHub = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      instagramConnectionStatus?.connected
+                      instagramConnectionStatus?.connected && !instagramNeedsReconnect
                         ? void handleInstagramDisconnect()
                         : void handleInstagramConnect()
                     }
                     disabled={instagramLoading || !selectedCompanyId || Boolean(instagramConnectionStatus?.provider_setup_required)}
                     className={`rounded-2xl px-4 py-3 text-sm font-black transition disabled:opacity-50 ${
-                      instagramConnectionStatus?.connected
+                      instagramConnectionStatus?.connected && !instagramNeedsReconnect
                         ? "border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20"
                         : "bg-[#B6FF00] text-zinc-950 hover:brightness-105"
                     }`}
                   >
                     {instagramLoading
                       ? "Aguarde..."
+                      : instagramNeedsReconnect
+                        ? "Reconectar Instagram"
                       : instagramConnectionStatus?.connected
                         ? "Desconectar"
                         : "Conectar Instagram"}
