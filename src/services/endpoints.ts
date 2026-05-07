@@ -397,6 +397,8 @@ function normalizeConversationLiveFeedItem(data: any): ConversationLiveFeedItem 
     id: data?.id || "",
     companyId: data?.companyId || "",
     whatsappConnectionId: data?.whatsappConnectionId ?? null,
+    provider: data?.provider || "WHATSAPP",
+    channel: data?.channel || "whatsapp",
     remoteJid: data?.remoteJid ?? null,
     contactName: data?.contactName ?? null,
     contactNumber: data?.contactNumber || "",
@@ -404,6 +406,7 @@ function normalizeConversationLiveFeedItem(data: any): ConversationLiveFeedItem 
     botPaused: Boolean(data?.botPaused),
     lastMessage: data?.lastMessage || "",
     lastMessageDirection: data?.lastMessageDirection ?? null,
+    lastMessageStatus: data?.lastMessageStatus ?? null,
     lastMessageAt: data?.lastMessageAt || new Date().toISOString(),
   };
 }
@@ -1039,7 +1042,7 @@ export async function getConversationsLiveFeed(params?: {
   companyId?: string | null;
   limit?: number;
 }) {
-  const { data } = await api.get<any[]>("/conversations/live-feed", {
+  const { data } = await api.get<any[]>("/attendant/conversations", {
     params: {
       companyId: params?.companyId || undefined,
       limit: params?.limit || undefined,

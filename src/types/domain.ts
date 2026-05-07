@@ -554,6 +554,8 @@ export interface ConversationLiveFeedItem {
   id: string;
   companyId: string;
   whatsappConnectionId: string | null;
+  provider: "WHATSAPP" | "INSTAGRAM" | string;
+  channel: "whatsapp" | "instagram" | string;
   remoteJid: string | null;
   contactName: string | null;
   contactNumber: string;
@@ -561,6 +563,7 @@ export interface ConversationLiveFeedItem {
   botPaused: boolean;
   lastMessage: string;
   lastMessageDirection: "inbound" | "outbound" | string | null;
+  lastMessageStatus: string | null;
   lastMessageAt: string;
 }
 

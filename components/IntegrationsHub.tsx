@@ -528,12 +528,10 @@ const IntegrationsHub = () => {
                     className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
                       card.status?.connected
                         ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                        : card.actionType === "soon"
-                          ? "border-amber-400/30 bg-amber-400/10 text-amber-300"
-                          : "border-zinc-700 bg-zinc-900 text-zinc-400"
+                        : "border-zinc-700 bg-zinc-900 text-zinc-400"
                     }`}
                   >
-                    {card.status?.connected ? "Conectado" : card.actionType === "soon" ? "Em breve" : "Nao conectado"}
+                    {card.status?.connected ? "Conectado" : "Nao conectado"}
                   </span>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{card.description}</p>
