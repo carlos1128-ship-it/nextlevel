@@ -42,6 +42,9 @@ const booleanFields: Array<{
   { key: "pauseForHuman", label: "Pausar para humano" },
 ];
 
+const channelLabel = (item: ConversationLiveFeedItem) =>
+  item.channel === "instagram" || item.provider === "INSTAGRAM" ? "Instagram" : "WhatsApp";
+
 const Attendant = () => {
   const { selectedCompanyId } = useAuth();
   const { addToast } = useToast();
@@ -291,13 +294,16 @@ const Attendant = () => {
                     >
                       {item.botPaused ? "Humano" : "IA ativa"}
                     </span>
+                    <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-300">
+                      {channelLabel(item)}
+                    </span>
                   </div>
                   <p className="mt-1 truncate text-sm text-zinc-400">
                     {item.lastMessage || "Sem mensagem"}
                   </p>
                 </div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500 md:text-right">
-                  {item.status}
+                  {item.lastMessageStatus === "failed" ? "Falha no envio" : item.status}
                 </p>
                 <p className="text-xs text-zinc-500 md:text-right">
                   {new Date(item.lastMessageAt).toLocaleString("pt-BR")}
