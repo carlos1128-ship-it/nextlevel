@@ -545,6 +545,7 @@ export interface ConversationThread {
   isPaused: boolean;
   pausedUntil: string | null;
   lastMessageAt: string;
+  appointmentRequests?: AppointmentRequest[];
   createdAt: string;
   updatedAt: string;
   messages: ConversationMessage[];
@@ -564,7 +565,27 @@ export interface ConversationLiveFeedItem {
   lastMessage: string;
   lastMessageDirection: "inbound" | "outbound" | string | null;
   lastMessageStatus: string | null;
+  intent?: string | null;
+  actionStatus?: string | null;
+  appointmentRequest?: AppointmentRequest | null;
   lastMessageAt: string;
+}
+
+export interface AppointmentRequest {
+  id: string;
+  companyId: string;
+  conversationId: string;
+  channel: string;
+  provider: string;
+  customerExternalId: string;
+  status: string;
+  intent: string;
+  requestedService: string | null;
+  requestedDate: string | null;
+  requestedTime: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Lead {
@@ -577,6 +598,16 @@ export interface Lead {
   lastInteraction: string | null;
   botPausedUntil: string | null;
   lastQuotedValue: number | null;
+  channel?: string | null;
+  provider?: string | null;
+  externalCustomerId?: string | null;
+  latestIntent?: string | null;
+  actionStatus?: string | null;
+  requestedService?: string | null;
+  requestedDate?: string | null;
+  requestedTime?: string | null;
+  notes?: string | null;
+  appointmentRequest?: AppointmentRequest | null;
   createdAt: string;
   updatedAt: string;
   conversations: ChatConversation[];
