@@ -67,7 +67,7 @@ const FinancialFlow = () => {
       setTransactions(Array.isArray(data) ? data : []);
     } catch (error) {
       setTransactions([]);
-      const message = getErrorMessage(error, "Nao foi possivel carregar as transacoes.");
+      const message = getErrorMessage(error, "Não foi possível carregar as transações.");
       setLoadError(message);
       addToast(message, "error");
     } finally {
@@ -126,7 +126,7 @@ const FinancialFlow = () => {
     e.preventDefault();
     const parsedAmount = Number(amount);
     if (!description.trim() || !parsedAmount) {
-      addToast("Preencha descricao e valor.", "info");
+      addToast("Preencha descrição e valor.", "info");
       return;
     }
     try {
@@ -155,9 +155,9 @@ const FinancialFlow = () => {
         balance: result.balance,
         transactionsCount: result.transactionsCount,
       });
-      addToast("Transacao criada.", "success");
+      addToast("Transação criada.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Falha ao criar transacao."), "error");
+      addToast(getErrorMessage(error, "Falha ao criar transação."), "error");
     } finally {
       setLoadingSubmit(false);
     }
@@ -165,7 +165,7 @@ const FinancialFlow = () => {
 
   return (
     <div className="space-y-6 overflow-x-hidden">
-      <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Fluxo Financeiro</h1>
+      <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Fluxo financeiro</h1>
 
       <div className="flex flex-wrap gap-3">
         <select
@@ -184,19 +184,19 @@ const FinancialFlow = () => {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
         <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
-          <p className="text-sm text-zinc-500">Faturamento do periodo</p>
+          <p className="text-sm text-zinc-500">Faturamento do período</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(totalIncome)}</p>
-          <p className="mt-2 text-sm font-bold text-zinc-500">Periodo: {periodDays} dias</p>
+          <p className="mt-2 text-sm font-bold text-zinc-500">Período: {periodDays} dias</p>
         </div>
         <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
-          <p className="text-sm text-zinc-500">Lucro Liquido</p>
+          <p className="text-sm text-zinc-500">Lucro Líquido</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(balance)}</p>
-          <p className="mt-2 text-sm font-bold text-zinc-500">Receitas menos saidas</p>
+          <p className="mt-2 text-sm font-bold text-zinc-500">Receitas menos saídas</p>
         </div>
         <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
           <p className="text-sm text-zinc-500">Custos Operacionais</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(totalExpense)}</p>
-          <p className="mt-2 text-sm font-bold text-zinc-500">Saidas do periodo</p>
+          <p className="mt-2 text-sm font-bold text-zinc-500">Saídas do período</p>
         </div>
         <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
           <p className="text-sm text-zinc-500">Margem de Lucro</p>
@@ -208,10 +208,10 @@ const FinancialFlow = () => {
       <MarginCalculator freeUsesLeft={7} />
 
       {loadingPage ? (
-        <LoadingState label="Carregando transacoes..." />
+        <LoadingState label="Carregando transações..." />
       ) : loadError ? (
         <ErrorState
-          title="Erro ao carregar transacoes"
+          title="Erro ao carregar transações"
           description={loadError}
           actionLabel="Tentar novamente"
           onAction={loadTransactions}
@@ -219,10 +219,10 @@ const FinancialFlow = () => {
       ) : (
         <>
           <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 shadow-sm min-w-0">
-            <h3 className="mb-4 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Fluxo de Caixa (Entradas vs. Saidas)</h3>
+            <h3 className="mb-4 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Fluxo de caixa (Entradas vs. Saídas)</h3>
             {chartData.length === 0 ? (
               <div className="grid min-h-[260px] place-items-center rounded-2xl border border-dashed border-zinc-800 text-sm text-zinc-500">
-                Sem movimentacoes no periodo selecionado.
+                Sem movimentações no período selecionado.
               </div>
             ) : (
             <ResponsiveContainer width="100%" minWidth={280} minHeight={260} height={380}>
@@ -258,7 +258,7 @@ const FinancialFlow = () => {
               className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-100 focus:outline-none"
             >
               <option value="income">Entrada</option>
-              <option value="expense">Saida</option>
+              <option value="expense">Saída</option>
             </select>
             <input
               value={amount}
@@ -269,7 +269,7 @@ const FinancialFlow = () => {
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descricao"
+              placeholder="Descrição"
               className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             <input
@@ -295,12 +295,12 @@ const FinancialFlow = () => {
 
           {filteredTransactions.length === 0 ? (
             <EmptyState
-              title="Sem transacoes neste periodo"
+              title="Sem transações neste período"
               description="Altere o filtro ou registre uma nova movimentacao."
             />
           ) : (
             <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
-              <h3 className="mb-4 text-xl font-black tracking-tight text-zinc-100">Ultimas transacoes</h3>
+              <h3 className="mb-4 text-xl font-black tracking-tight text-zinc-100">Últimas transações</h3>
               <div className="space-y-3">
                 {filteredTransactions.slice(0, 12).map((tx) => {
                   const transactionDate = getTransactionDateValue(tx);

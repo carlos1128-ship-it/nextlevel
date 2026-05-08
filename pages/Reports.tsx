@@ -126,7 +126,7 @@ const Reports = () => {
     if (!selectedCompanyId) {
       setTransactions([]);
       setTotals({ income: 0, expense: 0, balance: 0 });
-      setLoadError("Selecione uma empresa para gerar o relatorio.");
+      setLoadError("Selecione uma empresa para gerar o relatório.");
       setLoading(false);
       return;
     }
@@ -144,7 +144,7 @@ const Reports = () => {
     } catch (error) {
       setTransactions([]);
       setTotals({ income: 0, expense: 0, balance: 0 });
-      const message = getErrorMessage(error, "Nao foi possivel carregar o relatorio.");
+      const message = getErrorMessage(error, "Não foi possível carregar o relatório.");
       setLoadError(message);
       addToast(message, "error");
     } finally {
@@ -216,8 +216,8 @@ const Reports = () => {
     const eff = Math.round((totals.income / totalFlow) * 100) || 85;
     const waste = Math.round((totals.expense / totalFlow) * 100) || 15;
     return [
-      { name: "Sua empresa", Eficiencia: Math.max(35, Math.min(95, eff)), Desperdicio: Math.max(5, Math.min(65, waste)) },
-      { name: "Media setor", Eficiencia: Math.max(30, Math.min(90, eff - 15)), Desperdicio: Math.max(10, Math.min(70, waste + 15)) },
+      { name: "Sua empresa", Eficiência: Math.max(35, Math.min(95, eff)), Desperdicio: Math.max(5, Math.min(65, waste)) },
+      { name: "Média setor", Eficiência: Math.max(30, Math.min(90, eff - 15)), Desperdicio: Math.max(10, Math.min(70, waste + 15)) },
     ];
   }, [totals]);
 
@@ -253,7 +253,7 @@ const Reports = () => {
           ? response
           : response.analysis || response.insight || response.message || "";
       setAiSummary(text || null);
-      if (!text) addToast("IA nao retornou sumario.", "info");
+      if (!text) addToast("IA não retornou sumario.", "info");
     } catch (err) {
       addToast(getErrorMessage(err, "Erro ao gerar sumario com IA."), "error");
     } finally {
@@ -293,7 +293,7 @@ const Reports = () => {
 
       // Paint dark background on page 1 before adding image.
       // Without this, any unused space below the image is jsPDF's
-      // default white, causing the white blank area at the bottom.
+      // default white, causing the white blank Area at the bottom.
       pdf.setFillColor(9, 9, 11); // #09090b — matches report bg
       pdf.rect(0, 0, pageW, pageH, "F");
 
@@ -313,7 +313,7 @@ const Reports = () => {
       }
 
       const date = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
-      pdf.save(`relatorio-next-level-${date}.pdf`);
+      pdf.save(`relatório-next-level-${date}.pdf`);
       addToast("PDF exportado com sucesso.", "success");
     } catch (err) {
       addToast(getErrorMessage(err, "Falha ao gerar PDF."), "error");
@@ -327,7 +327,7 @@ const Reports = () => {
       {/* Header */}
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Relatorios</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Relatórios</h1>
           <p className="mt-1 text-sm text-zinc-500">Analise financeira orientada por dados e IA.</p>
         </div>
 
@@ -349,7 +349,7 @@ const Reports = () => {
           >
             <option value="geral">Todos os setores</option>
             <option value="ecommerce">E-commerce</option>
-            <option value="servicos">Servicos</option>
+            <option value="serviços">Serviços</option>
             <option value="industria">Industria</option>
           </select>
 
@@ -383,18 +383,18 @@ const Reports = () => {
 
       {/* States */}
       {loading ? (
-        <LoadingState label="Carregando relatorio..." />
+        <LoadingState label="Carregando relatório..." />
       ) : loadError ? (
         <ErrorState
-          title="Erro ao carregar relatorio"
+          title="Erro ao carregar relatório"
           description={loadError}
           actionLabel="Tentar novamente"
           onAction={load}
         />
       ) : chartData.length === 0 ? (
         <EmptyState
-          title="Sem dados para relatorio"
-          description="Cadastre transacoes para gerar visualizacoes e exportacoes."
+          title="Sem dados para relatório"
+          description="Cadastre transações para gerar visualizacoes e exportacoes."
         />
       ) : (
         // ── Conteúdo capturável pelo PDF ────────────────────────────────────
@@ -405,7 +405,7 @@ const Reports = () => {
             <div>
               <span className="text-xs font-black uppercase tracking-[0.25em] text-lime-400">Next Level AI</span>
               <p className="mt-0.5 text-[11px] text-zinc-600">
-                Relatorio gerado em {new Date().toLocaleDateString("pt-BR")}
+                Relatório gerado em {new Date().toLocaleDateString("pt-BR")}
               </p>
             </div>
             <span className="rounded-xl bg-lime-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-lime-400">
@@ -469,7 +469,7 @@ const Reports = () => {
 
           {/* Chart row 2 */}
           <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
-            <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Eficiencia vs Media do Setor</h2>
+            <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Eficiência vs Média do Setor</h2>
             <p className="mb-4 text-[11px] text-zinc-500">Comparativo de eficiencia e desperdicio financeiro</p>
             <div className="h-[260px] w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -478,21 +478,21 @@ const Reports = () => {
                   <XAxis dataKey="name" stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
                   <YAxis stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
                   <Tooltip contentStyle={TOOLTIP_STYLE} />
-                  <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} formatter={(v) => <span className={v === "Desperdicio" ? "text-red-400" : "text-lime-400"}>{v}</span>} />
+                  <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} formatter={(v) => <span className={v === "Desperdicio" ? "text-red-400" : "text-lime-400"}>{v === "Desperdicio" ? "Desperdício" : v}</span>} />
                   <Bar dataKey="Desperdicio" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={48} />
-                  <Bar dataKey="Eficiencia" fill="#B6FF00" radius={[4, 4, 0, 0]} maxBarSize={48} />
+                  <Bar dataKey="Eficiência" fill="#B6FF00" radius={[4, 4, 0, 0]} maxBarSize={48} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <p className="mt-3 text-[11px] text-zinc-600">
-              Pico financeiro do periodo:{" "}
+              Pico financeiro do período:{" "}
               <span className="font-bold text-zinc-400">{formatCompact(maxValue)}</span>
             </p>
           </div>
 
           {/* Footer PDF */}
           <div className="border-t border-zinc-800 pt-4 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-700">
-            Next Level AI — Relatorio Confidencial — {new Date().toLocaleDateString("pt-BR")}
+            Next Level AI — Relatório Confidencial — {new Date().toLocaleDateString("pt-BR")}
           </div>
         </div>
       )}

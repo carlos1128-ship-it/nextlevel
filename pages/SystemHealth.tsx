@@ -130,7 +130,7 @@ const SystemHealth = () => {
       setErrorLogs(nextErrorLogs);
     } catch (error) {
       if (!silent) {
-        addToast("Nao foi possivel carregar o painel admin.", "error");
+        addToast("Não foi possível carregar o painel admin.", "error");
       }
     } finally {
       setIsLoading(false);
@@ -190,7 +190,7 @@ const SystemHealth = () => {
               Central do SuperAdmin
             </div>
             <h1 className="max-w-3xl text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-              Operacao, custos e incidentes em uma unica visao.
+              Operação, custos e incidentes em uma única visão.
             </h1>
             <p className="mt-3 max-w-2xl text-sm text-zinc-400">
               Monitoramos banco, Redis, LLMs, quotas e trilha de auditoria em tempo quase real.
@@ -249,7 +249,7 @@ const SystemHealth = () => {
           </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <div className="h-72 rounded-3xl border border-zinc-800 bg-black/20 p-4">
-              <div className="mb-4 text-xs font-black uppercase tracking-[0.22em] text-zinc-500">Tempo de resposta medio</div>
+              <div className="mb-4 text-xs font-black uppercase tracking-[0.22em] text-zinc-500">Tempo de resposta médio</div>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={health.requestTimeline}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -295,7 +295,7 @@ const SystemHealth = () => {
           </div>
         </Panel>
 
-        <Panel title="Live audit feed" subtitle="Polling automatico das alteracoes criticas">
+        <Panel title="Live audit feed" subtitle="Polling automático das alterações críticas">
           <div className="space-y-3">
             {auditFeed.length ? (
               auditFeed.slice(0, 8).map((item) => (
@@ -336,7 +336,7 @@ const SystemHealth = () => {
                   <th className="px-3 py-3">Tokens</th>
                   <th className="px-3 py-3">Msgs</th>
                   <th className="px-3 py-3">Ciclo</th>
-                  <th className="px-3 py-3">Acoes</th>
+                  <th className="px-3 py-3">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -442,7 +442,7 @@ const SystemHealth = () => {
         </Panel>
       </section>
 
-      <Panel title="Error logs" subtitle="Ultimos 50 erros para debug rapido">
+      <Panel title="Error logs" subtitle="Ultimos 50 erros para debug rápido">
         <div className="grid gap-3">
           {errorLogs.length ? (
             errorLogs.slice(0, 12).map((item) => (

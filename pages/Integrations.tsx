@@ -22,7 +22,7 @@ const channels = [
   },
   {
     title: "Shopee",
-    description: "Beta: login por senha nao e solicitado. Aguardando provider oficial.",
+    description: "Beta: login por senha não e solicitado. Aguardando provider oficial.",
   },
 ];
 
@@ -81,17 +81,17 @@ const Integrations = () => {
     if (!connection) return "Desconectado";
     if (connection.status === "not_configured") return "Desconectado";
     if (connection.status === "qr_pending" && hasQrData(connection)) return "QR pendente";
-    if (isQrPending(connection.status)) return "QR indisponivel";
+    if (isQrPending(connection.status)) return "QR indisponível";
     if (connection.status === "creating" || connection.status === "creating_instance") return "Criando instancia";
     if (connection.status === "connecting") return "Conectando";
     if (connection.status === "disconnecting") return "Desconectando";
     if (connection.status === "connected") return "Conectado";
     if (connection.status === "disconnected_pending_provider_cleanup") return "Desconectado na Next Level";
     if (connection.status === "disconnect_pending") return "Limpeza pendente";
-    if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessario";
+    if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessário";
     if (connection.status === "rate_limited") return "Limite temporario";
     if (connection.status === "provider_warming_up") return "Evolution iniciando";
-    if (connection.status === "qr_not_ready") return "QR ainda nao pronto";
+    if (connection.status === "qr_not_ready") return "QR ainda não pronto";
     if (connection.status === "repair_ready") return "Reparo pronto";
     if (connection.status === "error") return "Erro";
     if (connection.status === "idle") return "Pronto para conectar";
@@ -101,11 +101,11 @@ const Integrations = () => {
   const webhookLabel =
     connection?.webhookStatus === "configured" ? "Webhook configurado" : "Webhook pendente";
   const automationLabel =
-    connection?.automationStatus === "configured" ? "Automacao configurada" : "Automacao pendente";
+    connection?.automationStatus === "configured" ? "Automação configurada" : "Automação pendente";
   const phoneLabel =
     isConnected(connection?.status) && !connection?.phoneNumber
-      ? "Conectado, sincronizando numero"
-      : connection?.phoneNumber || "Aguardando conexao";
+      ? "Conectado, sincronizando número"
+      : connection?.phoneNumber || "Aguardando conexão";
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -124,7 +124,7 @@ const Integrations = () => {
     const status = params.get("integration_status");
     const message = params.get("integration_message");
     addToast(
-      message || (status === "connected" ? "Instagram conectado." : "Nao foi possivel conectar o Instagram."),
+      message || (status === "connected" ? "Instagram conectado." : "Não foi possível conectar o Instagram."),
       status === "connected" ? "success" : "error",
     );
     window.history.replaceState({}, "", window.location.pathname);
@@ -216,21 +216,21 @@ const Integrations = () => {
         addToast("QR Code gerado.", "success");
       } else if (next.status === "provider_warming_up") {
         addToast(
-          next.message || "Preparando conexao com WhatsApp...",
+          next.message || "Preparando conexão com WhatsApp...",
           "info",
         );
       } else if (next.status === "rate_limited") {
         addToast(
-          next.message || "A Evolution limitou as requisicoes. Aguarde alguns segundos.",
+          next.message || "A Evolution limitou as requisições. Aguarde alguns segundos.",
           "info",
         );
       } else if (next.status === "qr_not_ready") {
-        addToast(next.message || "QR ainda nao esta pronto. Tente novamente em alguns segundos.", "info");
+        addToast(next.message || "QR ainda não está pronto. Tente novamente em alguns segundos.", "info");
       } else {
         addToast(next.message || next.lastError || "Erro ao gerar QR Code.", "error");
       }
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel iniciar o WhatsApp."), "error");
+      addToast(getErrorMessage(error, "Não foi possível iniciar o WhatsApp."), "error");
     } finally {
       setLoading(false);
     }
@@ -244,18 +244,18 @@ const Integrations = () => {
       const next = await restartWhatsappConnection(selectedCompanyId);
       setConnection(next);
       if (isConnected(next.status)) {
-        addToast("Conexao verificada.", "success");
+        addToast("Conexão verificada.", "success");
       } else if (next.status === "qr_pending" && hasQrData(next)) {
         addToast("QR Code gerado.", "success");
       } else if (next.status === "provider_warming_up" || next.status === "rate_limited") {
-        addToast(next.message || "Evolution indisponivel agora.", "info");
+        addToast(next.message || "Evolution indisponível agora.", "info");
       } else if (next.status === "qr_not_ready" || next.status === "repair_ready") {
         addToast(next.message || "Clique em Conectar WhatsApp para gerar o QR.", "info");
       } else {
-        addToast(next.message || "Conexao ainda precisa de novo QR.", "info");
+        addToast(next.message || "Conexão ainda precisa de novo QR.", "info");
       }
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel reparar a conexao."), "error");
+      addToast(getErrorMessage(error, "Não foi possível reparar a conexão."), "error");
     } finally {
       setLoading(false);
     }
@@ -270,7 +270,7 @@ const Integrations = () => {
       setConnection(next);
       addToast("WhatsApp desconectado.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel desconectar."), "error");
+      addToast(getErrorMessage(error, "Não foi possível desconectar."), "error");
     } finally {
       setLoading(false);
     }
@@ -294,7 +294,7 @@ const Integrations = () => {
       const session = await getInstagramConnectUrl(selectedCompanyId, returnTo);
       window.location.assign(session.authUrl);
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel iniciar o Instagram."), "error");
+      addToast(getErrorMessage(error, "Não foi possível iniciar o Instagram."), "error");
       setInstagramLoading(false);
     }
   };
@@ -308,7 +308,7 @@ const Integrations = () => {
       await refreshInstagramStatus();
       addToast("Instagram desconectado.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel desconectar o Instagram."), "error");
+      addToast(getErrorMessage(error, "Não foi possível desconectar o Instagram."), "error");
     } finally {
       setInstagramLoading(false);
     }
@@ -318,7 +318,7 @@ const Integrations = () => {
     <main className="space-y-7">
       <section className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-          Integracoes
+          Integrações
         </p>
         <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
           Canais conectados ao lucro
@@ -346,11 +346,11 @@ const Integrations = () => {
                 <p className="mt-1 font-bold text-zinc-100">{webhookLabel}</p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Automacao</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Automação</p>
                 <p className="mt-1 font-bold text-zinc-100">{automationLabel}</p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Numero</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Número</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {phoneLabel}
                 </p>
@@ -366,7 +366,7 @@ const Integrations = () => {
                 disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
                 className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "Verificando..." : "Reparar conexao"}
+                {loading ? "Verificando..." : "Reparar conexão"}
               </button>
             ) : (
               <button
@@ -381,9 +381,9 @@ const Integrations = () => {
                 className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                   {loading
-                  ? "Preparando conexao..."
+                  ? "Preparando conexão..."
                   : connection?.status === "provider_warming_up"
-                    ? "Preparando conexao..."
+                    ? "Preparando conexão..."
                   : retryRemaining > 0
                     ? `Aguarde ${retryRemaining}s`
                   : isQrPending(connection?.status)
@@ -411,7 +411,7 @@ const Integrations = () => {
                 <img src={qrImage} alt="QR Code do WhatsApp" className="h-72 w-72" />
               ) : (
                 <p className="text-center text-sm font-bold text-zinc-900">
-                  QR indisponivel no momento
+                  QR indisponível no momento
                 </p>
               )}
             </div>
@@ -447,7 +447,7 @@ const Integrations = () => {
               ? "border-red-500/30 bg-red-950/30 text-red-200"
               : "border-amber-500/30 bg-amber-500/10 text-amber-100"
           }`}>
-            {connection.message || connection.lastError || "Nao foi possivel gerar o QR Code agora."}
+            {connection.message || connection.lastError || "Não foi possível gerar o QR Code agora."}
             {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
           </p>
         ) : null}
@@ -464,7 +464,7 @@ const Integrations = () => {
                 DMs com IA via Meta Graph API
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-                Conecte uma conta profissional vinculada a uma Pagina do Facebook para responder DMs com memoria isolada por empresa.
+                Conecte uma conta profissional vinculada a uma Página do Facebook para responder DMs com memoria isolada por empresa.
               </p>
             </div>
 
@@ -482,7 +482,7 @@ const Integrations = () => {
                 </p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Pagina</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Página</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {instagramStatus?.pageName || instagramStatus?.pageId || "Meta Business"}
                 </p>
@@ -502,7 +502,7 @@ const Integrations = () => {
             ) : null}
             {isInstagramTokenExpired(instagramStatus) ? (
               <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
-                Token expirado / Reconexao necessaria.
+                Token expirado / Reconexão necessária.
               </p>
             ) : null}
           </div>
@@ -554,11 +554,11 @@ const Integrations = () => {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-              Importacao manual
+              Importação manual
             </p>
-            <h2 className="text-2xl font-black text-zinc-50">CSV de operacao</h2>
+            <h2 className="text-2xl font-black text-zinc-50">CSV de operação</h2>
             <p className="max-w-2xl text-sm leading-6 text-zinc-400">
-              Base backend preparada para vendas, produtos, clientes, custos, anuncios e pedidos.
+              Base backend preparada para vendas, produtos, clientes, custos, anúncios e pedidos.
               O fluxo visual de upload, preview e mapeamento entra em breve nesta tela.
             </p>
           </div>

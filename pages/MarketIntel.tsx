@@ -174,7 +174,7 @@ const MarketIntel = () => {
             ) : null}
             {!loading && !comparisons.length ? (
               <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-300">
-                Nenhum produto encontrado para esta empresa.
+                Nenhum produto encontrado para está empresa.
               </div>
             ) : null}
 

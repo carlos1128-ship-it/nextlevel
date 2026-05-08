@@ -141,7 +141,7 @@ const CustomTooltip = ({
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/95 px-3 py-2 text-xs text-zinc-200 shadow-2xl">
       <p className="mb-1 text-zinc-400">{label}</p>
       <p className="font-bold text-lime-400">Receitas: {asCurrency(Number(values.Receitas || 0))}</p>
-      <p className="font-bold text-red-400">Saidas: {asCurrency(Number(values.Saidas || 0))}</p>
+      <p className="font-bold text-red-400">Saídas: {asCurrency(Number(values.Saidas || 0))}</p>
     </div>
   );
 };
@@ -179,7 +179,7 @@ const KpiCard: React.FC<
         ) : changeType === "decrease" ? (
           <ArrowDownRightIcon className="mr-1 h-3.5 w-3.5" />
         ) : null}
-        {change} <span className="ml-1 font-medium text-zinc-500">no periodo selecionado</span>
+        {change} <span className="ml-1 font-medium text-zinc-500">no período selecionado</span>
       </div>
       {reason ? <p className="mt-3 text-[11px] leading-5 text-zinc-500">{reason}</p> : null}
       {sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{sourceLabel}</p> : null}
@@ -268,21 +268,21 @@ const ADVANCED_METRICS: Array<{
   description: string;
   accentColor: string;
 }> = [
-  { key: "income_revenue", title: "Rendas/Receitas", description: "Entradas reais de vendas e transacoes de receita no periodo.", accentColor: "text-lime-300" },
-  { key: "sales_count", title: "Vendas", description: "Quantidade real de vendas e entradas comerciais registradas no periodo.", accentColor: "text-lime-400" },
-  { key: "average_ticket", title: "Ticket Medio", description: "Valor medio por venda no periodo selecionado.", accentColor: "text-cyan-400" },
-  { key: "customers_acquired", title: "Clientes adquiridos", description: "Clientes criados no periodo selecionado.", accentColor: "text-purple-400" },
-  { key: "operational_costs", title: "Custos operacionais", description: "Custos operacionais cadastrados no periodo.", accentColor: "text-amber-400" },
-  { key: "margin", title: "Margem", description: "Lucro liquido dividido pela receita, quando ha receita no periodo.", accentColor: "text-blue-400" },
-  { key: "waste_inefficiency", title: "Desperdicio", description: "Custos operacionais como percentual da receita real.", accentColor: "text-rose-400" },
-  { key: "conversion_rate", title: "Taxa de Conversao", description: "Percentual de visitantes ou leads que viraram venda.", accentColor: "text-blue-400" },
-  { key: "cac", title: "CAC", description: "Custo medio para adquirir um novo cliente.", accentColor: "text-rose-400" },
+  { key: "income_revenue", title: "Rendas/Receitas", description: "Entradas reais de vendas e transações de receita no período.", accentColor: "text-lime-300" },
+  { key: "sales_count", title: "Vendas", description: "Quantidade real de vendas e entradas comerciais registradas no período.", accentColor: "text-lime-400" },
+  { key: "average_ticket", title: "Ticket Médio", description: "Valor médio por venda no período selecionado.", accentColor: "text-cyan-400" },
+  { key: "customers_acquired", title: "Clientes adquiridos", description: "Clientes criados no período selecionado.", accentColor: "text-purple-400" },
+  { key: "operational_costs", title: "Custos operacionais", description: "Custos operacionais cadastrados no período.", accentColor: "text-amber-400" },
+  { key: "margin", title: "Margem", description: "Lucro líquido dividido pela receita, quando há receita no período.", accentColor: "text-blue-400" },
+  { key: "waste_inefficiency", title: "Desperdício", description: "Custos operacionais como percentual da receita real.", accentColor: "text-rose-400" },
+  { key: "conversion_rate", title: "Taxa de conversão", description: "Percentual de visitantes ou leads que viraram venda.", accentColor: "text-blue-400" },
+  { key: "cac", title: "CAC", description: "Custo médio para adquirir um novo cliente.", accentColor: "text-rose-400" },
   { key: "roi", title: "ROI", description: "Retorno sobre investimento, sem confundir com ROAS.", accentColor: "text-lime-300" },
-  { key: "roas", title: "ROAS", description: "Retorno de receita atribuida a anuncios.", accentColor: "text-sky-300" },
-  { key: "ltv", title: "LTV", description: "Valor medio de cliente baseado em historico de compras.", accentColor: "text-emerald-300" },
+  { key: "roas", title: "ROAS", description: "Retorno de receita atribuída a anúncios.", accentColor: "text-sky-300" },
+  { key: "ltv", title: "LTV", description: "Valor médio de cliente baseado em histórico de compras.", accentColor: "text-emerald-300" },
   { key: "repeat_customers", title: "Clientes recorrentes", description: "Clientes com mais de uma compra vinculada.", accentColor: "text-orange-300" },
   { key: "best_selling_products", title: "Mais vendidos", description: "Produtos agrupados por receita registrada.", accentColor: "text-fuchsia-300" },
-  { key: "peak_sales_hours", title: "Pico de vendas", description: "Vendas agrupadas por horario real.", accentColor: "text-teal-300" },
+  { key: "peak_sales_hours", title: "Pico de vendas", description: "Vendas agrupadas por horário real.", accentColor: "text-teal-300" },
 ];
 
 const DIRECT_RENDERED_METRIC_KEYS = new Set([
@@ -426,9 +426,9 @@ const Dashboard = () => {
   const hasForecast = forecast?.status === "ok" && forecastChartData.length > 0;
 
   const forecastStatusMessage = useMemo(() => {
-    if (!forecast) return "Carregando projecao...";
+    if (!forecast) return "Carregando projeção...";
     if (forecast.status === "insufficient_data" || forecast.status === "not_enough_data") {
-      return forecast.message || "Historico insuficiente para prever receita";
+      return forecast.message || "Histórico insuficiente para prever receita";
     }
     if (
       forecast.confidenceInterval &&
@@ -436,9 +436,9 @@ const Dashboard = () => {
       typeof forecast.confidenceInterval.lower === "number" &&
       typeof forecast.confidenceInterval.upper === "number"
     ) {
-      return `Margem estimada +/-${forecast.confidenceInterval.margin.toFixed(2)} | Confianca ${forecast.qualityLabel || "low"}`;
+      return `Margem estimada +/-${forecast.confidenceInterval.margin.toFixed(2)} | Confiança ${forecast.qualityLabel || "low"}`;
     }
-    return `Projecao simples pronta${forecast.qualityLabel ? ` - confianca ${forecast.qualityLabel}` : ""}`;
+    return `Projeção simples pronta${forecast.qualityLabel ? ` - confiança ${forecast.qualityLabel}` : ""}`;
   }, [forecast]);
 
   const loadLayout = async () => {
@@ -457,7 +457,7 @@ const Dashboard = () => {
       setLayout(Array.isArray(data?.resolvedLayout) ? data.resolvedLayout : []);
     } catch (error) {
       setLayout([]);
-      addToast(getErrorMessage(error, "Nao foi possivel carregar sua personalizacao."), "error");
+      addToast(getErrorMessage(error, "Não foi possível carregar sua personalização."), "error");
     } finally {
       setIsLayoutLoading(false);
     }
@@ -483,7 +483,7 @@ const Dashboard = () => {
       setMetricsData(data);
     } catch (error) {
       setMetricsData(null);
-      addToast(getErrorMessage(error, "Nao foi possivel carregar o dashboard."), "error");
+      addToast(getErrorMessage(error, "Não foi possível carregar o dashboard."), "error");
     } finally {
       setIsUpdating(false);
     }
@@ -525,7 +525,7 @@ const Dashboard = () => {
       setAiDashboard(data);
     } catch (error) {
       setAiDashboard(null);
-      addToast(getErrorMessage(error, "Nao foi possivel carregar a inteligencia do dashboard."), "error");
+      addToast(getErrorMessage(error, "Não foi possível carregar a inteligência do dashboard."), "error");
     } finally {
       setIsAiDashboardLoading(false);
     }
@@ -659,9 +659,9 @@ const Dashboard = () => {
     <div className="space-y-7 overflow-x-hidden">
       <header className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visao Geral</h1>
+          <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visão Geral</h1>
           <p className="mt-2 text-base font-medium text-zinc-400 md:text-lg">
-            Ola, {username || "Usuario"}. Aqui esta o panorama estrategico do periodo selecionado.
+            Ola, {username || "Usuário"}. Aqui está o panorama estratégico do período selecionado.
           </p>
         </div>
         <div className="flex w-full gap-3 md:w-auto">
@@ -675,7 +675,7 @@ const Dashboard = () => {
             onClick={handleExport}
             className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-7 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-100 transition hover:bg-zinc-900 md:flex-none"
           >
-            Exportar Dados
+            Exportar dados
           </button>
           <button
             onClick={() => void loadMetrics()}
@@ -709,7 +709,7 @@ const Dashboard = () => {
         <div className="rounded-3xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-center">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Selecione uma empresa</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
-            O dashboard carrega quando uma empresa ativa estiver definida para esta sessao.
+            O dashboard carrega quando uma empresa ativa estiver definida para esta sessão.
           </p>
           <Link
             to="/companies"
@@ -724,7 +724,7 @@ const Dashboard = () => {
         <div className="rounded-3xl border border-dashed border-lime-400/30 bg-lime-400/10 p-8 text-center">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Dashboard sem widgets ativos</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
-            Escolha os indicadores que fazem sentido para esta empresa e salve uma visao mais limpa.
+            Escolha os indicadores que fazem sentido para esta empresa e salve uma visão mais limpa.
           </p>
           <Link
             to="/settings#dashboard"
@@ -765,7 +765,7 @@ const Dashboard = () => {
           ) : null}
           {isMetricEnabled("profit") || isMetricEnabled("net_profit") ? (
             <KpiCard
-              title={isMetricEnabled("net_profit") ? "Lucro liquido" : "Lucro"}
+              title={isMetricEnabled("net_profit") ? "Lucro líquido" : "Lucro"}
               value={(metric("net_profit") || metric("profit"))?.formatted || "Carregando"}
               change={metricChange(metric("net_profit") || metric("profit")).text}
               changeType={metricChange(metric("net_profit") || metric("profit")).type || marginDirection}
@@ -778,7 +778,7 @@ const Dashboard = () => {
           ) : null}
           {isMetricEnabled("cash_flow") ? (
             <KpiCard
-              title="Fluxo de Caixa"
+              title="Fluxo de caixa"
               value={metric("cash_flow")?.formatted || "Carregando"}
               change={metricChange(metric("cash_flow")).text}
               changeType={metricChange(metric("cash_flow")).type}
@@ -834,7 +834,7 @@ const Dashboard = () => {
               ) : null}
             </div>
             <p className="whitespace-pre-line break-words text-sm leading-relaxed text-zinc-300 md:text-base">
-              {formattedInsight || "Ainda nao ha volume suficiente para um diagnostico automatico robusto. Cadastre movimentacoes financeiras, vendas e custos para liberar analises mais profundas."}
+              {formattedInsight || "Ainda não há volume suficiente para um diagnóstico automático robusto. Cadastre movimentações financeiras, vendas e custos para liberar análises mais profundas."}
             </p>
           </div>
           <Link
@@ -880,7 +880,7 @@ const Dashboard = () => {
 
       {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && !hasChartData ? (
         <div className="grid place-items-center rounded-3xl border border-zinc-900 bg-zinc-950 p-10 text-zinc-500">
-          Nenhum dado disponivel ainda para este periodo.
+          Nenhum dado disponível ainda para este período.
         </div>
       ) : (isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) ? (
         <div className="grid min-h-0 grid-cols-1 gap-5 xl:grid-cols-3">
@@ -936,7 +936,7 @@ const Dashboard = () => {
 
           {isMetricEnabled("category_mix") ? (
           <div className="flex flex-col items-center rounded-3xl border border-zinc-900 bg-zinc-950 p-7">
-            <h3 className="mb-8 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Mix do Periodo</h3>
+            <h3 className="mb-8 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Mix do Período</h3>
             <div className="w-full min-w-0">
               <ResponsiveContainer width="100%" minWidth={240} minHeight={220} height={260}>
                 <PieChart>
@@ -983,7 +983,7 @@ const Dashboard = () => {
               Projecao simples de receita
             </h3>
             <p className="text-sm text-zinc-500">
-              Media movel dos ultimos registros reais para os proximos {forecastHorizon} dias.
+              Média móvel dos últimos registros reais para os próximos {forecastHorizon} dias.
             </p>
           </div>
           <div className="flex gap-2">
@@ -1006,7 +1006,7 @@ const Dashboard = () => {
         <div className="mt-6">
           {isForecastLoading ? (
             <div className="grid place-items-center rounded-2xl border border-dashed border-zinc-800 px-6 py-12 text-zinc-500">
-              Calculando projecao...
+              Calculando projeção...
             </div>
           ) : forecast?.status === "insufficient_data" || forecast?.status === "not_enough_data" ? (
             <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 text-sm text-amber-200">
@@ -1014,7 +1014,7 @@ const Dashboard = () => {
             </div>
           ) : !hasForecast ? (
             <div className="grid place-items-center rounded-2xl border border-zinc-800 px-6 py-12 text-zinc-500">
-              Projecao indisponivel no momento.
+              Projeção indisponível no momento.
             </div>
           ) : (
             <>

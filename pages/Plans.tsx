@@ -66,7 +66,7 @@ const PlanCard = ({ plan, billingCycle }: { plan: Plan; billingCycle: BillingCyc
         disabled
         className="w-full cursor-not-allowed rounded-xl border border-amber-400/30 bg-amber-400/10 py-4 text-xs font-black uppercase tracking-widest text-amber-200"
       >
-        Gateway em configuracao
+        Gateway em configuração
       </button>
     </div>
   );
@@ -83,8 +83,8 @@ const Plans = () => {
         features: [
           "Ate 2 empresas vinculadas",
           "Dashboard em tempo real",
-          "Calculadora de margem e preco ideal",
-          "Relatorios basicos",
+          "Calculadora de margem e preço ideal",
+          "Relatórios básicos",
           "Chat IA essencial",
           "Suporte via e-mail",
         ],
@@ -97,9 +97,9 @@ const Plans = () => {
           "Ate 10 empresas vinculadas",
           "WhatsApp e Instagram",
           "Alertas de margem",
-          "Relatorios automaticos semanais",
+          "Relatórios automáticos semanais",
           "Chat IA ampliado",
-          "Recomendacoes praticas da IA",
+          "Recomendações praticas da IA",
           "Suporte prioritario",
         ],
       },
@@ -111,7 +111,7 @@ const Plans = () => {
           "Tudo do Premium",
           "Mercado Livre, Mercado Pago e Shopee",
           "Insights preditivos avancados",
-          "Integracoes customizadas via API",
+          "Integrações customizadas via API",
           "Rotinas operacionais avancadas",
           "Acompanhamento prioritario",
         ],
@@ -125,7 +125,7 @@ const Plans = () => {
       <div className="mb-10 text-center">
         <h1 className="mb-4 text-5xl font-black tracking-tighter">Escolha seu Nivel</h1>
         <p className="mx-auto max-w-xl text-lg font-medium text-zinc-500 dark:text-zinc-400">
-          Tres planos pagos para estruturar margem, automacao e comando operacional no ritmo da sua empresa.
+          Tres planos pagos para estruturar margem, automação e comando operacional no ritmo da sua empresa.
         </p>
       </div>
 
@@ -159,7 +159,7 @@ const Plans = () => {
       <div className="mt-20 rounded-3xl border border-zinc-200 bg-[#121212] p-10 text-center dark:border-zinc-800">
         <h3 className="mb-4 text-2xl font-black tracking-tighter">Checkout em preparacao</h3>
         <p className="mx-auto mb-8 max-w-lg text-zinc-500 dark:text-zinc-400">
-          Os planos ja estao definidos. A assinatura fica bloqueada ate o gateway de pagamento ser configurado com seguranca.
+          Os planos ja estão definidos. A assinatura fica bloqueada ate o gateway de pagamento ser configurado com seguranca.
         </p>
         <button disabled className="cursor-not-allowed border-b-2 border-zinc-700 pb-1 text-sm font-black uppercase tracking-widest text-zinc-500">
           Provider setup required

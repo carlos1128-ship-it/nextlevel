@@ -401,7 +401,7 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                       const url = window.URL.createObjectURL(blob);
                       const a = document.createElement("a");
                       a.href = url;
-                      a.download = `relatorio-margem-${Date.now()}.pdf`;
+                      a.download = `relatório-margem-${Date.now()}.pdf`;
                       a.click();
                       window.URL.revokeObjectURL(url);
                     } catch (err) {

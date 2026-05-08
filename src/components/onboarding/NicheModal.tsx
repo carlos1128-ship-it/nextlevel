@@ -60,7 +60,7 @@ const nicheOptions: NicheOption[] = [
   {
     value: "ECOMMERCE",
     title: "e-Commerce",
-    description: "Foco em catalogo, margem por produto e operacao multicanal.",
+    description: "Foco em catalogo, margem por produto e operação multicanal.",
     accentClassName: "text-sky-300 border-sky-400/20 bg-sky-400/10",
     Icon: CommerceIcon,
   },
@@ -73,7 +73,7 @@ const nicheOptions: NicheOption[] = [
   },
   {
     value: "SERVICOS",
-    title: "Servicos e Engenharia",
+    title: "Serviços e Engenharia",
     description: "Custos, metragem, projetos e entregas mais acessiveis desde o primeiro acesso.",
     accentClassName: "text-amber-300 border-amber-400/20 bg-amber-400/10",
     Icon: ServicesIcon,
@@ -81,14 +81,14 @@ const nicheOptions: NicheOption[] = [
   {
     value: "EDUCACAO",
     title: "Educacao",
-    description: "Fluxo orientado a alunos, agenda e acompanhamento continuo.",
+    description: "Fluxo orientado a alunos, agenda e acompanhamento contínuo.",
     accentClassName: "text-violet-300 border-violet-400/20 bg-violet-400/10",
     Icon: EducationIcon,
   },
   {
     value: "OUTROS",
     title: "Outros",
-    description: "Comece com uma estrutura flexivel e ajuste conforme sua operacao.",
+    description: "Comece com uma estrutura flexivel e ajuste conforme sua operação.",
     accentClassName: "text-emerald-300 border-emerald-400/20 bg-emerald-400/10",
     Icon: GenericIcon,
   },
@@ -107,7 +107,7 @@ const stageOptions: Array<{
   {
     value: "ESCALANDO",
     title: "Escalando",
-    description: "Operacao ganhando volume e precisando de mais velocidade sem perder margem.",
+    description: "Operação ganhando volume e precisando de mais velocidade sem perder margem.",
   },
   {
     value: "ENTERPRISE",
@@ -132,7 +132,7 @@ const NicheModal = ({
             Personalize sua experiencia
           </p>
           <h2 className="mt-3 max-w-3xl text-3xl font-black tracking-[-0.03em] text-white sm:text-4xl">
-            Ajuste o painel ao contexto real da sua operacao
+            Ajuste o painel ao contexto real da sua operação
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
             Vamos priorizar atalhos, linguagem e leitura de oportunidades de acordo com seu nicho e momento da empresa.
@@ -190,7 +190,7 @@ const NicheModal = ({
                   Nivel da empresa
                 </p>
                 <p className="text-sm text-zinc-400">
-                  Vamos guardar isso para modular o onboarding e os proximos ajustes do painel.
+                  Vamos guardar isso para modular o onboarding e os próximos ajustes do painel.
                 </p>
               </div>
             </div>

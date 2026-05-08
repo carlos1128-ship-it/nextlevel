@@ -129,7 +129,7 @@ function dispatchFriendlyApiError(error: AxiosError) {
 
   const message = getErrorMessage(
     error,
-    'Algo saiu do fluxo esperado, mas sua operacao continua protegida.',
+    'Algo saiu do fluxo esperado, mas sua operação continua protegida.',
   );
 
   window.dispatchEvent(

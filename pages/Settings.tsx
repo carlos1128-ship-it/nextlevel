@@ -98,7 +98,7 @@ const Settings = () => {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">Configuracoes</h1>
+      <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">Configurações</h1>
 
       <CompanyPersonalizationPanel companyId={selectedCompanyId} onToast={addToast} />
 

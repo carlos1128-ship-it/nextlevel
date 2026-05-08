@@ -12,9 +12,9 @@ const BUSINESS_TYPES: Array<{ value: BusinessType; label: string }> = [
   { value: "ecommerce_digital", label: "Produto digital / infoproduto" },
   { value: "saas", label: "SaaS / software" },
   { value: "agency", label: "Agencia / marketing" },
-  { value: "medical_clinic", label: "Clinica / saude" },
+  { value: "medical_clinic", label: "Clínica / saúde" },
   { value: "law_office", label: "Advocacia" },
-  { value: "local_services", label: "Servicos locais" },
+  { value: "local_services", label: "Serviços locais" },
   { value: "retail_store", label: "Loja fisica / varejo" },
   { value: "restaurant", label: "Restaurante / delivery" },
   { value: "marketplace_seller", label: "Marketplace seller" },
@@ -40,16 +40,16 @@ const EMPTY_FORM: CompanyOnboardingPayload = {
 };
 
 const TOGGLES: Array<{ key: keyof CompanyOnboardingPayload; label: string }> = [
-  { key: "usesPaidTraffic", label: "Usa trafego pago" },
-  { key: "hasPhysicalProducts", label: "Produtos fisicos" },
+  { key: "usesPaidTraffic", label: "Usa tráfego pago" },
+  { key: "hasPhysicalProducts", label: "Produtos físicos" },
   { key: "hasDigitalProducts", label: "Produtos digitais" },
-  { key: "hasServices", label: "Servicos" },
+  { key: "hasServices", label: "Serviços" },
   { key: "usesWhatsAppForSales", label: "WhatsApp em vendas/atendimento" },
   { key: "usesMarketplace", label: "Marketplace" },
   { key: "hasSupportTeam", label: "Equipe de atendimento" },
   { key: "hasOperationalCosts", label: "Custos operacionais relevantes" },
-  { key: "wantsAutomation", label: "Quer automacao" },
-  { key: "wantsMarketAnalysis", label: "Quer mercado/inteligencia" },
+  { key: "wantsAutomation", label: "Quer automação" },
+  { key: "wantsMarketAnalysis", label: "Quer mercado/inteligência" },
 ];
 
 export default function CompanyPersonalizationPanel({
@@ -72,7 +72,7 @@ export default function CompanyPersonalizationPanel({
         setData(next);
         setForm({ ...EMPTY_FORM, ...(next.profile || {}) });
       })
-      .catch((error) => onToast(getErrorMessage(error, "Nao foi possivel carregar a personalizacao."), "error"))
+      .catch((error) => onToast(getErrorMessage(error, "Não foi possível carregar a personalização."), "error"))
       .finally(() => setLoading(false));
   }, [companyId, onToast]);
 
@@ -88,7 +88,7 @@ export default function CompanyPersonalizationPanel({
       setData((current) => current ? { ...current, ...result } : current);
       onToast("Perfil empresarial salvo.", "success");
     } catch (error) {
-      onToast(getErrorMessage(error, "Nao foi possivel salvar o perfil."), "error");
+      onToast(getErrorMessage(error, "Não foi possível salvar o perfil."), "error");
     } finally {
       setSaving(false);
     }
@@ -96,7 +96,7 @@ export default function CompanyPersonalizationPanel({
 
   const reapply = async () => {
     if (!companyId) return;
-    if (!window.confirm("Reaplicar recomendacoes pode sobrescrever modulos e metricas manuais. Continuar?")) {
+    if (!window.confirm("Reaplicar recomendações pode sobrescrever módulos e métricas manuais. Continuar?")) {
       return;
     }
     try {
@@ -105,9 +105,9 @@ export default function CompanyPersonalizationPanel({
       setData(result);
       window.dispatchEvent(new CustomEvent("dashboard:preferences-updated", { detail: { companyId } }));
       window.dispatchEvent(new CustomEvent("company:personalization-updated", { detail: { companyId } }));
-      onToast("Recomendacoes reaplicadas.", "success");
+      onToast("Recomendações reaplicadas.", "success");
     } catch (error) {
-      onToast(getErrorMessage(error, "Nao foi possivel reaplicar recomendacoes."), "error");
+      onToast(getErrorMessage(error, "Não foi possível reaplicar recomendações."), "error");
     } finally {
       setSaving(false);
     }
@@ -122,7 +122,7 @@ export default function CompanyPersonalizationPanel({
             Perfil empresarial
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-zinc-500">
-            Ajuste o tipo de negocio e reaplique recomendacoes quando sua operacao mudar.
+            Ajuste o tipo de negócio e reaplique recomendações quando sua operação mudar.
           </p>
         </div>
         <button
@@ -131,13 +131,13 @@ export default function CompanyPersonalizationPanel({
           disabled={saving || loading || !data?.profile}
           className="rounded-2xl border border-lime-400/30 bg-lime-400/10 px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-lime-600 transition hover:bg-lime-400/15 disabled:opacity-50 dark:text-lime-300"
         >
-          Reaplicar recomendacoes
+          Reaplicar recomendações
         </button>
       </div>
 
       {!companyId ? (
         <div className="mt-5 rounded-2xl border border-dashed border-zinc-300 p-5 text-sm text-zinc-500 dark:border-zinc-800">
-          Selecione uma empresa para editar a personalizacao.
+          Selecione uma empresa para editar a personalização.
         </div>
       ) : loading ? (
         <div className="mt-5 rounded-2xl border border-dashed border-zinc-300 p-5 text-sm text-zinc-500 dark:border-zinc-800">
@@ -147,7 +147,7 @@ export default function CompanyPersonalizationPanel({
         <>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
-              Tipo de negocio
+              Tipo de negócio
               <select
                 value={form.businessType}
                 onChange={(event) => updateField("businessType", event.target.value as BusinessType)}
@@ -201,8 +201,8 @@ export default function CompanyPersonalizationPanel({
           <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <p className="text-xs text-zinc-500">
               {data?.recommendations
-                ? `Recomendados: ${data.recommendations.modules.length} modulos, ${data.recommendations.dashboardMetrics.length} metricas.`
-                : "Crie um perfil para gerar recomendacoes."}
+                ? `Recomendados: ${data.recommendations.modules.length} módulos, ${data.recommendations.dashboardMetrics.length} métricas.`
+                : "Crie um perfil para gerar recomendações."}
             </p>
             <button
               type="button"

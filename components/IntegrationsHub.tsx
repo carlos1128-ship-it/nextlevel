@@ -222,7 +222,7 @@ const IntegrationsHub = () => {
       await loadStatus();
       addToast("WhatsApp desconectado.", "success");
     } catch {
-      addToast("Nao foi possivel desconectar.", "error");
+      addToast("Não foi possível desconectar.", "error");
     } finally {
       setEvolutionLoading(false);
     }
@@ -245,7 +245,7 @@ const IntegrationsHub = () => {
       setMetaAccessToken("");
       addToast("WhatsApp conectado com sucesso!", "success");
     } catch {
-      addToast("Nao foi possivel conectar com a Meta.", "error");
+      addToast("Não foi possível conectar com a Meta.", "error");
     } finally {
       setOfficialLoading(false);
     }
@@ -260,7 +260,7 @@ const IntegrationsHub = () => {
       await loadStatus();
       addToast("WhatsApp desconectado.", "success");
     } catch {
-      addToast("Nao foi possivel desconectar.", "error");
+      addToast("Não foi possível desconectar.", "error");
     } finally {
       setOfficialLoading(false);
     }
@@ -278,7 +278,7 @@ const IntegrationsHub = () => {
       const { authUrl } = await getInstagramConnectUrl(selectedCompanyId, currentPath);
       window.location.assign(authUrl);
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel iniciar o OAuth do Instagram."), "error");
+      addToast(getErrorMessage(error, "Não foi possível iniciar o OAuth do Instagram."), "error");
       setInstagramLoading(false);
     }
   };
@@ -292,18 +292,18 @@ const IntegrationsHub = () => {
       await loadStatus();
       addToast("Instagram desconectado.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel desconectar o Instagram."), "error");
+      addToast(getErrorMessage(error, "Não foi possível desconectar o Instagram."), "error");
     } finally {
       setInstagramLoading(false);
     }
   };
 
   const showComingSoon = (channel: string) => {
-    addToast(`${channel} fica visivel aqui e entra em configuracao guiada em breve.`, "info");
+    addToast(`${channel} fica visivel aqui e entra em configuração guiada em breve.`, "info");
   };
 
   const formatLastSync = (value?: string | null) => {
-    if (!value) return "Aguardando primeira sincronizacao";
+    if (!value) return "Aguardando primeira sincronização";
     return new Date(value).toLocaleString("pt-BR");
   };
 
@@ -333,9 +333,9 @@ const IntegrationsHub = () => {
   const evolutionHelperMessage =
     evolutionStatus?.failureReason ||
     (qrStatus === "rate_limited"
-      ? "A Evolution limitou as requisicoes. Aguarde alguns segundos antes de tentar novamente."
+      ? "A Evolution limitou as requisições. Aguarde alguns segundos antes de tentar novamente."
       : qrStatus === "warming"
-        ? "A Evolution esta iniciando. Vamos tentar buscar o QR automaticamente."
+        ? "A Evolution está iniciando. Vamos tentar buscar o QR automaticamente."
         : null);
   const instagramNeedsReconnect = isInstagramTokenExpired(instagramConnectionStatus);
 
@@ -343,7 +343,7 @@ const IntegrationsHub = () => {
     {
       key: "INSTAGRAM",
       title: "Instagram",
-      description: "DMs e automacoes via Meta Graph API.",
+      description: "DMs e automações via Meta Graph API.",
       status: instagramStatus,
       icon: <RadarIcon className="h-6 w-6" />,
       actionLabel: instagramNeedsReconnect
@@ -377,13 +377,13 @@ const IntegrationsHub = () => {
     <section className="rounded-[30px] border border-zinc-800 bg-[#09090b] p-6 shadow-2xl shadow-black/30">
       <div className="mb-6 flex flex-col gap-2">
         <p className="text-xs font-semibold uppercase tracking-[0.26em] text-lime-300">
-          Hub de Integracoes
+          Hub de Integrações
         </p>
         <h2 className="text-2xl font-black text-zinc-50 md:text-3xl">
           Todos os 4 canais no mesmo painel
         </h2>
         <p className="max-w-3xl text-sm leading-6 text-zinc-400">
-          Conecte, acompanhe status e mantenha a operacao visivel sem esconder canais em evolucao.
+          Conecte, acompanhe status e mantenha a operação visivel sem esconder canais em evolucao.
         </p>
       </div>
 
@@ -410,7 +410,7 @@ const IntegrationsHub = () => {
                 Conecte por QR Code com Evolution API ou use a Meta API como opcao oficial.
               </p>
               <p className="mt-2 text-xs text-zinc-500">
-                Ultima sincronizacao: {formatLastSync(officialStatus?.updatedAt || null)}
+                Última sincronização: {formatLastSync(officialStatus?.updatedAt || null)}
               </p>
             </div>
           </div>
@@ -421,7 +421,7 @@ const IntegrationsHub = () => {
                 <div>
                   <h4 className="text-lg font-black text-zinc-50">Evolution API</h4>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Conexao simples por QR Code, sem Chrome no backend.
+                    Conexão simples por QR Code, sem Chrome no backend.
                   </p>
                 </div>
                 <span
@@ -441,10 +441,10 @@ const IntegrationsHub = () => {
                 <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                   <p className="text-sm font-bold text-emerald-300">✓ WhatsApp Conectado</p>
                   <p className="mt-1 text-sm text-zinc-200">
-                    Sua conexao esta pronta para o atendimento automatico.
+                    Sua conexão está pronta para o atendimento automático.
                   </p>
                   <p className="mt-2 text-xs text-emerald-200">
-                    Webhook: {evolutionStatus?.webhookStatus === "configured" ? "configurado" : "sincronizando"} - Automacao: {evolutionStatus?.automationStatus === "configured" ? "configurada" : "pendente"}
+                    Webhook: {evolutionStatus?.webhookStatus === "configured" ? "configurado" : "sincronizando"} - Automação: {evolutionStatus?.automationStatus === "configured" ? "configurada" : "pendente"}
                   </p>
                 </div>
               ) : (
@@ -462,7 +462,7 @@ const IntegrationsHub = () => {
                   disabled={evolutionLoading || evolutionRecovering || !selectedCompanyId}
                   className="mt-5 w-full rounded-2xl bg-[#B6FF00] px-4 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
                 >
-                  {evolutionLoading || evolutionRecovering ? "Preparando conexao..." : "Conectar WhatsApp"}
+                  {evolutionLoading || evolutionRecovering ? "Preparando conexão..." : "Conectar WhatsApp"}
                 </button>
               ) : (
                 <button
@@ -481,7 +481,7 @@ const IntegrationsHub = () => {
                 <div>
                   <h4 className="text-lg font-black text-zinc-50">Meta API</h4>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Opcao oficial para integracoes da Meta.
+                    Opcao oficial para integrações da Meta.
                   </p>
                 </div>
                 <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-lime-300">
@@ -493,7 +493,7 @@ const IntegrationsHub = () => {
                 <div className="mt-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-4">
                   <p className="text-sm font-bold text-lime-300">WhatsApp conectado</p>
                   <p className="mt-1 text-sm text-zinc-200">
-                    {officialStatus?.phoneNumber || "Numero conectado"}
+                    {officialStatus?.phoneNumber || "Número conectado"}
                   </p>
                 </div>
               ) : (
@@ -550,12 +550,12 @@ const IntegrationsHub = () => {
                       ? "Token expirado"
                       : card.status?.connected
                         ? "Conectado"
-                        : "Nao conectado"}
+                        : "Não conectado"}
                   </span>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{card.description}</p>
                 <p className="mt-2 text-xs text-zinc-500">
-                  Ultima sincronizacao: {formatLastSync(card.status?.updatedAt || null)}
+                  Última sincronização: {formatLastSync(card.status?.updatedAt || null)}
                 </p>
               </div>
             </div>
@@ -578,11 +578,11 @@ const IntegrationsHub = () => {
                         instagramNeedsReconnect ? "text-amber-200" : "text-emerald-300"
                       }`}>
                         {instagramNeedsReconnect
-                          ? "Token expirado / Reconexao necessaria"
+                          ? "Token expirado / Reconexão necessária"
                           : `Instagram conectado${instagramConnectionStatus.igUsername ? ` como @${instagramConnectionStatus.igUsername}` : ""}`}
                       </p>
                       <p className="mt-1 text-xs text-zinc-400">
-                        Pagina: {instagramConnectionStatus.pageName || instagramConnectionStatus.pageId || "Meta Business"}
+                        Página: {instagramConnectionStatus.pageName || instagramConnectionStatus.pageId || "Meta Business"}
                       </p>
                     </div>
                   ) : null}
@@ -664,12 +664,12 @@ const IntegrationsHub = () => {
                   </div>
                 ) : qrStatus === "rate_limited" ? (
                   <div className="space-y-3">
-                    <p>A Evolution limitou as requisicoes.</p>
+                    <p>A Evolution limitou as requisições.</p>
                     <p>Aguarde alguns segundos. Vamos tentar de novo automaticamente.</p>
                   </div>
                 ) : qrStatus === "warming" ? (
                   <div className="space-y-3">
-                    <p>Preparando conexao...</p>
+                    <p>Preparando conexão...</p>
                     <p>A Evolution pode estar acordando no Render.</p>
                   </div>
                 ) : qrCode && qrStatus === "ready" ? (
@@ -698,7 +698,7 @@ const IntegrationsHub = () => {
                 ) : qrStatus === "rate_limited" ? (
                   <p>Aguardando cooldown da Evolution.</p>
                 ) : qrStatus === "warming" ? (
-                  <p>Sem acao manual: o painel continua tentando buscar o QR.</p>
+                  <p>Sem ação manual: o painel continua tentando buscar o QR.</p>
                 ) : evolutionStatus?.pairingCode ? (
                   <p>Se preferir, use o código de pareamento no WhatsApp.</p>
                 ) : (
@@ -721,7 +721,7 @@ const IntegrationsHub = () => {
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">Conexao Oficial Meta</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">Conexão Oficial Meta</p>
                 <h3 className="mt-2 text-2xl font-black text-zinc-50">Conecte em 3 passos</h3>
               </div>
               <button
@@ -754,9 +754,9 @@ const IntegrationsHub = () => {
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-lime-300">Passo 2</p>
                 <h4 className="mt-2 text-lg font-black text-zinc-50">Gere seu token</h4>
                 <ol className="mt-3 space-y-2 text-sm text-zinc-300">
-                  <li>1. Abra Configuracoes e Usuarios do Sistema.</li>
+                  <li>1. Abra Configurações e Usuários do Sistema.</li>
                   <li>2. Gere um token com acesso ao WhatsApp.</li>
-                  <li>3. Copie o token para finalizar a conexao.</li>
+                  <li>3. Copie o token para finalizar a conexão.</li>
                 </ol>
               </div>
 
@@ -764,7 +764,7 @@ const IntegrationsHub = () => {
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-lime-300">Passo 3</p>
                 <h4 className="mt-2 text-lg font-black text-zinc-50">Cole o token</h4>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">
-                  O Next Level salva a configuracao e atualiza o status.
+                  O Next Level salva a configuração e atualiza o status.
                 </p>
                 <input
                   type="text"

@@ -36,27 +36,27 @@ const INPUT_MODES: Array<{
   {
     mode: "image",
     title: "Enviar print/imagem",
-    description: "Bom para dashboards de anuncios, delivery e marketplaces.",
+    description: "Bom para dashboards de anúncios, delivery e marketplaces.",
     accept: "image/png,image/jpeg,image/webp",
     beta: true,
   },
   {
     mode: "pdf",
     title: "Enviar PDF/documento",
-    description: "Use para relatorios exportados ou documentos financeiros.",
+    description: "Use para relatórios exportados ou documentos financeiros.",
     accept: "application/pdf,text/plain",
     beta: true,
   },
   {
     mode: "csv",
     title: "Importar CSV",
-    description: "Preview, sugestao de leitura e confirmacao antes de salvar.",
+    description: "Preview, sugestão de leitura e confirmação antes de salvar.",
     accept: ".csv,text/csv,application/vnd.ms-excel",
   },
   {
     mode: "text",
     title: "Colar texto",
-    description: "Perfeito para copiar dados de relatorios ou escrever manualmente.",
+    description: "Perfeito para copiar dados de relatórios ou escrever manualmente.",
   },
 ];
 
@@ -143,7 +143,7 @@ const AddData = () => {
   const canAnalyze = isCompanyReady && Boolean(selectedCompanyId) && hasValidInput;
 
   useEffect(() => {
-    document.title = "Adicionar Dados | Next Level";
+    document.title = "Adicionar dados | Next Level";
   }, []);
 
   const reloadActiveCompany = async () => {
@@ -194,10 +194,10 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(
         error,
-        "Nao foi possivel carregar importacoes da empresa ativa.",
+        "Não foi possível carregar importacoes da empresa ativa.",
       );
       if (!handled) {
-        const message = getErrorMessage(error, "Nao foi possivel carregar o historico.");
+        const message = getErrorMessage(error, "Não foi possível carregar o histórico.");
         setHistoryError(message);
         addToast(message, "error");
       }
@@ -256,7 +256,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Nao foi possivel analisar esta importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível analisar está importacao."), "error");
       }
     } finally {
       setIsSubmitting(false);
@@ -273,7 +273,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Nao foi possivel abrir esta importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível abrir está importacao."), "error");
       }
     }
   };
@@ -294,7 +294,7 @@ const AddData = () => {
   const handleConfirm = async () => {
     if (!selectedImport || !selectedCompanyId) return;
     if (!selectedImport.extracted && draftMetrics.length === 0 && draftEntities.length === 0) {
-      addToast("Essa importacao ainda nao tem dados para confirmar.", "error");
+      addToast("Essa importacao ainda não tem dados para confirmar.", "error");
       return;
     }
 
@@ -323,11 +323,11 @@ const AddData = () => {
       setDraftMetrics(confirmed.extracted?.metrics || []);
       setDraftEntities(confirmed.extracted?.entities || []);
       await loadHistory(confirmed.id);
-      addToast("Importacao confirmada com sucesso.", "success");
+      addToast("Importação confirmada com sucesso.", "success");
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Nao foi possivel confirmar a importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível confirmar a importacao."), "error");
       }
     } finally {
       setIsConfirming(false);
@@ -343,11 +343,11 @@ const AddData = () => {
       });
       setSelectedImport(rejected);
       await loadHistory(rejected.id);
-      addToast("Importacao rejeitada.", "success");
+      addToast("Importação rejeitada.", "success");
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Nao foi possivel rejeitar a importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível rejeitar a importacao."), "error");
       }
     } finally {
       setIsConfirming(false);
@@ -358,10 +358,10 @@ const AddData = () => {
     <main className="min-w-0 space-y-7 overflow-x-hidden">
       <section className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-          Adicionar Dados
+          Adicionar dados
         </p>
         <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-          Importacao Inteligente
+          Importação Inteligente
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-zinc-400">
           Envie prints, PDFs, planilhas ou textos e deixe a IA organizar os dados para a NEXT LEVEL.
@@ -422,12 +422,12 @@ const AddData = () => {
               {mode === "text" ? (
                 <label className="block space-y-2">
                   <span className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                    Texto ou relatorio manual
+                    Texto ou relatório manual
                   </span>
                   <textarea
                     value={textValue}
                     onChange={(event) => setTextValue(event.target.value)}
-                    placeholder="Cole aqui um relatorio, resultado de campanha, resumo financeiro ou qualquer dado bruto..."
+                    placeholder="Cole aqui um relatório, resultado de campanha, resumo financeiro ou qualquer dado bruto..."
                     className="min-h-[220px] w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-lime-400/40"
                   />
                 </label>
@@ -439,8 +439,8 @@ const AddData = () => {
                   </p>
                   <p className="mt-2 max-w-md text-xs leading-5 text-zinc-500">
                     {mode === "csv"
-                      ? "CSV com preview e sugestao de leitura."
-                      : "Analise multimodal em beta. Quando o ambiente nao tiver suporte, a importacao fica salva sem fingir extracao."}
+                      ? "CSV com preview e sugestão de leitura."
+                      : "Análise multimodal em beta. Quando o ambiente não tiver suporte, a importação fica salva sem fingir extração."}
                   </p>
                   <input
                     type="file"
@@ -478,7 +478,7 @@ const AddData = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-lime-300">
-                Historico
+                Histórico
               </p>
               <h2 className="mt-2 text-2xl font-black text-zinc-50">Importacoes recentes</h2>
             </div>
@@ -505,7 +505,7 @@ const AddData = () => {
               </div>
             ) : history.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-zinc-800 p-6 text-sm text-zinc-500">
-                Ainda nao ha dados importados.
+                Ainda não há dados importados.
               </div>
             ) : (
               history.map((item) => (
@@ -522,7 +522,7 @@ const AddData = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-black text-zinc-100">
-                        {item.fileName || item.aiSummary || "Importacao manual"}
+                        {item.fileName || item.aiSummary || "Importação manual"}
                       </p>
                       <p className="mt-1 truncate text-xs text-zinc-500">
                         {item.inputType} • {item.detectedPlatform || "unknown"} • {item.detectedCategory || "unknown"}
@@ -544,7 +544,7 @@ const AddData = () => {
           <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center">
             <h2 className="text-2xl font-black text-zinc-100">Aguardando sua primeira importacao</h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-500">
-              Envie um print, PDF, CSV ou texto e a IA vai montar uma leitura para sua revisao.
+              Envie um print, PDF, CSV ou texto e a IA vai montar uma leitura para sua revisão.
             </p>
           </div>
         ) : (
@@ -562,20 +562,20 @@ const AddData = () => {
                     {selectedImport.detectedPlatform || "unknown"}
                   </span>
                   <span className="rounded-full border border-zinc-700 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
-                    Confianca {Math.round((selectedImport.extracted?.confidence || selectedImport.confidence || 0) * 100)}%
+                    Confiança {Math.round((selectedImport.extracted?.confidence || selectedImport.confidence || 0) * 100)}%
                   </span>
                 </div>
                 <div>
                   <h2 className="break-words text-2xl font-black text-zinc-100">
-                    {selectedImport.fileName || "Importacao manual"}
+                    {selectedImport.fileName || "Importação manual"}
                   </h2>
                   <p className="mt-2 max-w-3xl break-words text-sm leading-6 text-zinc-400">
-                    {selectedImport.extracted?.summary || selectedImport.aiSummary || "Importacao carregada para revisao."}
+                    {selectedImport.extracted?.summary || selectedImport.aiSummary || "Importação carregada para revisão."}
                   </p>
                 </div>
                 {selectedImport.extracted?.period.label ? (
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                    Periodo detectado: {selectedImport.extracted.period.label}
+                    Período detectado: {selectedImport.extracted.period.label}
                   </p>
                 ) : null}
               </div>
@@ -721,8 +721,8 @@ const AddData = () => {
                     <h3 className="text-lg font-black text-zinc-100">Notas do MVP</h3>
                   </div>
                   <ul className="space-y-2 text-sm text-zinc-400">
-                    <li>• Nada entra no dashboard sem confirmacao.</li>
-                    <li>• CSV e texto estao prontos para revisao e confirmacao.</li>
+                    <li>• Nada entra no dashboard sem confirmação.</li>
+                    <li>• CSV e texto estão prontos para revisão e confirmação.</li>
                     <li>• Print/PDF dependem da capacidade multimodal ativa no backend.</li>
                   </ul>
                 </div>

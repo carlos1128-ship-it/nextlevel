@@ -19,7 +19,7 @@ export function isActiveCompanyAccessError(error: unknown) {
 export function getErrorMessage(error: unknown, fallback = "Erro na requisicao.") {
   if (error instanceof AxiosError) {
     if (!error.response) {
-      return "Nao conseguimos falar com a plataforma agora. Verifique sua conexao e tente novamente.";
+      return "Não conseguimos falar com a plataforma agora. Verifique sua conexão e tente novamente.";
     }
 
     if (isActiveCompanyAccessError(error)) {
@@ -31,7 +31,7 @@ export function getErrorMessage(error: unknown, fallback = "Erro na requisicao."
     if (payload && typeof payload === "object") {
       const errorCode = (payload as { error?: unknown }).error;
       if (errorCode === "DependencyUnavailable") {
-        return "Um servico externo nao respondeu agora. Tente novamente em instantes.";
+        return "Um servico externo não respondeu agora. Tente novamente em instantes.";
       }
       const message = (payload as { message?: unknown }).message;
       if (typeof message === "string" && message.trim()) return message;
@@ -43,7 +43,7 @@ export function getErrorMessage(error: unknown, fallback = "Erro na requisicao."
       if (typeof errorText === "string" && errorText.trim()) return errorText;
     }
     if (error.response?.status === 404) {
-      return "Nao encontramos o recurso que voce tentou acessar. Volte e tente novamente pelo menu principal.";
+      return "Não encontramos o recurso que você tentou acessar. Volte e tente novamente pelo menu principal.";
     }
     if (error.response?.status && error.response.status >= 500) {
       return "Algo saiu do fluxo esperado, mas seu painel continua protegido. Tente novamente em instantes.";

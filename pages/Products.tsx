@@ -87,7 +87,7 @@ const Products = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar os produtos.");
+      const message = getErrorMessage(err, "Não foi possível carregar os produtos.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -114,7 +114,7 @@ const Products = () => {
       return;
     }
     if (!form.price.trim() || Number.isNaN(Number(form.price)) || Number(form.price) <= 0) {
-      addToast("Preco invalido.", "info");
+      addToast("Preço invalido.", "info");
       return;
     }
 
@@ -239,7 +239,7 @@ const Products = () => {
             <input
               value={form.price}
               onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
-              placeholder="Preco venda (BRL)"
+              placeholder="Preço venda (BRL)"
               className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             <input
@@ -280,7 +280,7 @@ const Products = () => {
                 <p className="mt-2 text-2xl font-black">{preview.netMargin.toFixed(2)}%</p>
               </div>
               <div className="text-sm">
-                <p>Lucro liquido (estim.): {asCurrency(preview.grossProfit)}</p>
+                <p>Lucro líquido (estim.): {asCurrency(preview.grossProfit)}</p>
                 {preview.warningLevel === "WARNING" ? (
                   <p className="mt-1">⚠️ Margem abaixo de 10%.</p>
                 ) : null}
@@ -307,7 +307,7 @@ const Products = () => {
             className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
           />
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs text-zinc-500">Itens por pagina</label>
+            <label className="text-xs text-zinc-500">Itens por página</label>
             <select
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value) || 10)}
@@ -343,7 +343,7 @@ const Products = () => {
                 {pagination.total} produto{pagination.total === 1 ? "" : "s"}
               </p>
               <p className="text-xs text-zinc-500">
-                Pagina {pagination.page} de {pagination.totalPages || 1}
+                Página {pagination.page} de {pagination.totalPages || 1}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -359,7 +359,7 @@ const Products = () => {
                 onClick={() => changePage(page + 1)}
                 disabled={pagination.totalPages !== 0 && page >= pagination.totalPages}
               >
-                Proxima
+                Próxima
               </button>
             </div>
           </div>
@@ -371,10 +371,10 @@ const Products = () => {
                   <th className="px-3 py-2 text-left">Produto</th>
                   <th className="px-3 py-2 text-left">Categoria</th>
                   <th className="px-3 py-2 text-left">SKU</th>
-                  <th className="px-3 py-2 text-right">Preco</th>
+                  <th className="px-3 py-2 text-right">Preço</th>
                   <th className="px-3 py-2 text-right">Custo</th>
                   <th className="px-3 py-2 text-right">Margem</th>
-                  <th className="px-3 py-2 text-right">Acoes</th>
+                  <th className="px-3 py-2 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900 text-zinc-100">
