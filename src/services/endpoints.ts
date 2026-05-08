@@ -102,9 +102,45 @@ function normalizeCustomer(customer: any): Customer {
     name: customer?.name || "",
     email: customer?.email ?? null,
     phone: customer?.phone ?? null,
+    channel: customer?.channel ?? null,
+    provider: customer?.provider ?? null,
+    externalCustomerId: customer?.externalCustomerId ?? null,
+    source: customer?.source ?? null,
+    interest: customer?.interest ?? null,
+    objective: customer?.objective ?? null,
+    desiredDate: customer?.desiredDate || null,
+    desiredTime: customer?.desiredTime ?? null,
+    status: customer?.status ?? null,
+    latestAction: normalizeBusinessActionRequest(customer?.latestAction),
+    businessActionRequests: Array.isArray(customer?.businessActionRequests)
+      ? customer.businessActionRequests.map(normalizeBusinessActionRequest).filter(Boolean)
+      : [],
     createdAt,
     updatedAt,
   } as Customer;
+}
+
+function normalizeBusinessActionRequest(data: any) {
+  if (!data) return null;
+  return {
+    id: data?.id || "",
+    companyId: data?.companyId || "",
+    customerId: data?.customerId ?? null,
+    leadId: data?.leadId ?? null,
+    conversationId: data?.conversationId || "",
+    channel: data?.channel || "",
+    provider: data?.provider || "",
+    customerExternalId: data?.customerExternalId || "",
+    type: data?.type || "",
+    status: data?.status || "",
+    requestedService: data?.requestedService ?? null,
+    objective: data?.objective ?? null,
+    desiredDate: data?.desiredDate || null,
+    desiredTime: data?.desiredTime ?? null,
+    notes: data?.notes ?? null,
+    createdAt: data?.createdAt || new Date().toISOString(),
+    updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
+  };
 }
 
 function normalizeCost(cost: any): OperationalCost {
