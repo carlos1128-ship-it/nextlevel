@@ -157,6 +157,9 @@ const Customers = () => {
     return [formattedDate, time].filter(Boolean).join(" ");
   };
 
+  const formatLatestNote = (customer: Customer) =>
+    customer.latestAction?.notes || customer.objective || "-";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -292,6 +295,7 @@ const Customers = () => {
                   <th className="px-3 py-2 text-left">Interesse</th>
                   <th className="px-3 py-2 text-left">Data/Hora</th>
                   <th className="px-3 py-2 text-left">Status</th>
+                  <th className="px-3 py-2 text-left">Observacao</th>
                   <th className="px-3 py-2 text-left">Criado em</th>
                   <th className="px-3 py-2 text-right">Acoes</th>
                 </tr>
@@ -306,6 +310,7 @@ const Customers = () => {
                     <td className="px-3 py-2 max-w-[220px] truncate">{formatInterest(customer)}</td>
                     <td className="px-3 py-2">{formatDesiredDateTime(customer)}</td>
                     <td className="px-3 py-2">{customer.status || customer.latestAction?.status || "-"}</td>
+                    <td className="px-3 py-2 max-w-[260px] truncate">{formatLatestNote(customer)}</td>
                     <td className="px-3 py-2">
                       {new Date(customer.createdAt).toLocaleDateString("pt-BR")}
                     </td>
