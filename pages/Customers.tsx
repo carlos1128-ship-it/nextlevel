@@ -135,6 +135,28 @@ const Customers = () => {
     setPage(Math.max(1, Math.min(next, pagination.totalPages || 1)));
   };
 
+  const formatChannel = (customer: Customer) => {
+    const channel = customer.channel || customer.latestAction?.channel;
+    if (channel === "instagram") return "Instagram";
+    if (channel === "whatsapp") return "WhatsApp";
+    return channel || "Manual";
+  };
+
+  const formatInterest = (customer: Customer) =>
+    customer.interest ||
+    customer.objective ||
+    customer.latestAction?.requestedService ||
+    customer.latestAction?.objective ||
+    "Sem interesse registrado";
+
+  const formatDesiredDateTime = (customer: Customer) => {
+    const date = customer.desiredDate || customer.latestAction?.desiredDate;
+    const time = customer.desiredTime || customer.latestAction?.desiredTime;
+    if (!date && !time) return "-";
+    const formattedDate = date ? new Date(date).toLocaleDateString("pt-BR") : "";
+    return [formattedDate, time].filter(Boolean).join(" ");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -266,6 +288,10 @@ const Customers = () => {
                   <th className="px-3 py-2 text-left">Cliente</th>
                   <th className="px-3 py-2 text-left">Email</th>
                   <th className="px-3 py-2 text-left">Telefone</th>
+                  <th className="px-3 py-2 text-left">Origem</th>
+                  <th className="px-3 py-2 text-left">Interesse</th>
+                  <th className="px-3 py-2 text-left">Data/Hora</th>
+                  <th className="px-3 py-2 text-left">Status</th>
                   <th className="px-3 py-2 text-left">Criado em</th>
                   <th className="px-3 py-2 text-right">Acoes</th>
                 </tr>
@@ -274,8 +300,12 @@ const Customers = () => {
                 {items.map((customer) => (
                   <tr key={customer.id} className="hover:bg-zinc-900/60">
                     <td className="px-3 py-2 font-semibold">{customer.name}</td>
-                    <td className="px-3 py-2">{customer.email || "—"}</td>
-                    <td className="px-3 py-2">{customer.phone || "—"}</td>
+                    <td className="px-3 py-2">{customer.email || "-"}</td>
+                    <td className="px-3 py-2">{customer.phone || "-"}</td>
+                    <td className="px-3 py-2">{formatChannel(customer)}</td>
+                    <td className="px-3 py-2 max-w-[220px] truncate">{formatInterest(customer)}</td>
+                    <td className="px-3 py-2">{formatDesiredDateTime(customer)}</td>
+                    <td className="px-3 py-2">{customer.status || customer.latestAction?.status || "-"}</td>
                     <td className="px-3 py-2">
                       {new Date(customer.createdAt).toLocaleDateString("pt-BR")}
                     </td>

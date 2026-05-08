@@ -301,6 +301,37 @@ export interface Customer {
   name: string;
   email?: string | null;
   phone?: string | null;
+  channel?: string | null;
+  provider?: string | null;
+  externalCustomerId?: string | null;
+  source?: string | null;
+  interest?: string | null;
+  objective?: string | null;
+  desiredDate?: string | null;
+  desiredTime?: string | null;
+  status?: string | null;
+  latestAction?: BusinessActionRequest | null;
+  businessActionRequests?: BusinessActionRequest[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BusinessActionRequest {
+  id: string;
+  companyId: string;
+  customerId?: string | null;
+  leadId?: string | null;
+  conversationId: string;
+  channel: string;
+  provider: string;
+  customerExternalId: string;
+  type: string;
+  status: string;
+  requestedService: string | null;
+  objective: string | null;
+  desiredDate: string | null;
+  desiredTime: string | null;
+  notes: string | null;
   createdAt: string;
   updatedAt: string;
 }
