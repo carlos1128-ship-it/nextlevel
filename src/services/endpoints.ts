@@ -178,6 +178,26 @@ function normalizeConversationMessage(data: any) {
   };
 }
 
+function normalizeAppointmentRequest(data: any) {
+  if (!data) return null;
+  return {
+    id: data?.id || "",
+    companyId: data?.companyId || "",
+    conversationId: data?.conversationId || "",
+    channel: data?.channel || "",
+    provider: data?.provider || "",
+    customerExternalId: data?.customerExternalId || "",
+    status: data?.status || "",
+    intent: data?.intent || "",
+    requestedService: data?.requestedService ?? null,
+    requestedDate: data?.requestedDate || null,
+    requestedTime: data?.requestedTime ?? null,
+    notes: data?.notes ?? null,
+    createdAt: data?.createdAt || new Date().toISOString(),
+    updatedAt: data?.updatedAt || data?.createdAt || new Date().toISOString(),
+  };
+}
+
 export function normalizeConversation(data: any): ConversationThread {
   return {
     id: data?.id || "",
@@ -188,6 +208,9 @@ export function normalizeConversation(data: any): ConversationThread {
     isPaused: Boolean(data?.isPaused ?? false),
     pausedUntil: data?.pausedUntil || null,
     lastMessageAt: data?.lastMessageAt || data?.updatedAt || new Date().toISOString(),
+    appointmentRequests: Array.isArray(data?.appointmentRequests)
+      ? data.appointmentRequests.map(normalizeAppointmentRequest).filter(Boolean)
+      : [],
     createdAt: data?.createdAt || new Date().toISOString(),
     updatedAt: data?.updatedAt || new Date().toISOString(),
     messages: Array.isArray(data?.messages) ? data.messages.map(normalizeConversationMessage) : [],
@@ -215,6 +238,16 @@ function normalizeLead(data: any): Lead {
     lastInteraction: data?.lastInteraction || null,
     botPausedUntil: data?.botPausedUntil || null,
     lastQuotedValue: data?.lastQuotedValue === null || data?.lastQuotedValue === undefined ? null : Number(data.lastQuotedValue),
+    channel: data?.channel ?? null,
+    provider: data?.provider ?? null,
+    externalCustomerId: data?.externalCustomerId ?? null,
+    latestIntent: data?.latestIntent ?? null,
+    actionStatus: data?.actionStatus ?? null,
+    requestedService: data?.requestedService ?? null,
+    requestedDate: data?.requestedDate || null,
+    requestedTime: data?.requestedTime ?? null,
+    notes: data?.notes ?? null,
+    appointmentRequest: normalizeAppointmentRequest(data?.appointmentRequest),
     createdAt: data?.createdAt || new Date().toISOString(),
     updatedAt: data?.updatedAt || new Date().toISOString(),
     conversations,
@@ -407,6 +440,9 @@ function normalizeConversationLiveFeedItem(data: any): ConversationLiveFeedItem 
     lastMessage: data?.lastMessage || "",
     lastMessageDirection: data?.lastMessageDirection ?? null,
     lastMessageStatus: data?.lastMessageStatus ?? null,
+    intent: data?.intent ?? null,
+    actionStatus: data?.actionStatus ?? null,
+    appointmentRequest: normalizeAppointmentRequest(data?.appointmentRequest),
     lastMessageAt: data?.lastMessageAt || new Date().toISOString(),
   };
 }
