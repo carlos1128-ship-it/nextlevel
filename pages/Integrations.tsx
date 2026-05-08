@@ -18,11 +18,7 @@ import type { WhatsappConnection } from "../src/types/domain";
 const channels = [
   {
     title: "Mercado Livre",
-    description: "Provider setup required: aguardando OAuth/API oficial.",
-  },
-  {
-    title: "Shopee",
-    description: "Beta: login por senha não e solicitado. Aguardando provider oficial.",
+    description: "Configuração do provedor necessária: aguardando OAuth/API oficial.",
   },
 ];
 
@@ -82,14 +78,14 @@ const Integrations = () => {
     if (connection.status === "not_configured") return "Desconectado";
     if (connection.status === "qr_pending" && hasQrData(connection)) return "QR pendente";
     if (isQrPending(connection.status)) return "QR indisponível";
-    if (connection.status === "creating" || connection.status === "creating_instance") return "Criando instancia";
+    if (connection.status === "creating" || connection.status === "creating_instance") return "Criando instância";
     if (connection.status === "connecting") return "Conectando";
     if (connection.status === "disconnecting") return "Desconectando";
     if (connection.status === "connected") return "Conectado";
     if (connection.status === "disconnected_pending_provider_cleanup") return "Desconectado na Next Level";
     if (connection.status === "disconnect_pending") return "Limpeza pendente";
     if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessário";
-    if (connection.status === "rate_limited") return "Limite temporario";
+    if (connection.status === "rate_limited") return "Limite temporário";
     if (connection.status === "provider_warming_up") return "Evolution iniciando";
     if (connection.status === "qr_not_ready") return "QR ainda não pronto";
     if (connection.status === "repair_ready") return "Reparo pronto";
@@ -338,7 +334,7 @@ const Integrations = () => {
             </div>
             <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Sessao</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Sessão</p>
                 <p className="mt-1 font-bold text-zinc-100">{statusLabel}</p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
@@ -419,7 +415,7 @@ const Integrations = () => {
               {connection?.pairingCode ? (
                 <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    Codigo de pareamento
+                    Código de pareamento
                   </p>
                   <p className="mt-2 font-mono text-2xl font-black text-lime-300">
                     {connection.pairingCode}
@@ -428,7 +424,7 @@ const Integrations = () => {
               ) : null}
               <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                  Instancia
+                  Instância
                 </p>
                 <p className="mt-2 break-all text-sm font-semibold text-zinc-200">
                   {connection?.instanceName || "nextlevel"}
@@ -542,7 +538,7 @@ const Integrations = () => {
             className="rounded-lg border border-zinc-800 bg-zinc-950/70 p-5"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-              Em preparacao
+              Em preparação
             </p>
             <h2 className="mt-3 text-xl font-black text-zinc-50">{channel.title}</h2>
             <p className="mt-3 text-sm leading-6 text-zinc-400">{channel.description}</p>
@@ -550,27 +546,6 @@ const Integrations = () => {
         ))}
       </section>
 
-      <section className="rounded-lg border border-dashed border-zinc-700 bg-zinc-950/60 p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-              Importação manual
-            </p>
-            <h2 className="text-2xl font-black text-zinc-50">CSV de operação</h2>
-            <p className="max-w-2xl text-sm leading-6 text-zinc-400">
-              Base backend preparada para vendas, produtos, clientes, custos, anúncios e pedidos.
-              O fluxo visual de upload, preview e mapeamento entra em breve nesta tela.
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled
-            className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-500"
-          >
-            Em breve
-          </button>
-        </div>
-      </section>
     </main>
   );
 };

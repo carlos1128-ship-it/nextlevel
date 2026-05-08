@@ -112,7 +112,7 @@ const stageOptions: Array<{
   {
     value: "ENTERPRISE",
     title: "Enterprise",
-    description: "Mais previsibilidade, times maiores e padroes mais consistentes de decisao.",
+    description: "Mais previsibilidade, times maiores e padrões mais consistentes de decisão.",
   },
 ];
 
@@ -187,7 +187,7 @@ const NicheModal = ({
               </span>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                  Nivel da empresa
+                  Nível da empresa
                 </p>
                 <p className="text-sm text-zinc-400">
                   Vamos guardar isso para modular o onboarding e os próximos ajustes do painel.

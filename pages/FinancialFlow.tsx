@@ -173,9 +173,9 @@ const FinancialFlow = () => {
           onChange={(event) => setPeriodDays(Number(event.target.value) as 7 | 30 | 90)}
           className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 focus:outline-none"
         >
-          <option value={30}>Ultimos 30 dias</option>
-          <option value={7}>Ultimos 7 dias</option>
-          <option value={90}>Ultimos 90 dias</option>
+          <option value={30}>Últimos 30 dias</option>
+          <option value={7}>Últimos 7 dias</option>
+          <option value={90}>Últimos 90 dias</option>
         </select>
         <span className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm text-zinc-400">
           Empresa ativa

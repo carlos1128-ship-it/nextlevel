@@ -302,7 +302,7 @@ const AdminRoute = ({ children }: { children?: ReactNode }) => {
   return isAdmin ? <>{children}</> : <Navigate to={DASHBOARD_ROUTE} replace />;
 };
 
-const FullscreenLoading = ({ label = "Preparando experiencia" }: { label?: string }) => (
+const FullscreenLoading = ({ label = "Preparando experiência" }: { label?: string }) => (
   <div className="flex min-h-screen items-center justify-center bg-[#040507] text-zinc-100">
     <div className="text-center">
       <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>

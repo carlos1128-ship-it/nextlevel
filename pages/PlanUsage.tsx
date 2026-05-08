@@ -161,7 +161,7 @@ const PlanUsage = () => {
 
       {exceeded ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-5 text-sm font-semibold text-red-100">
-          Você atingiu o limite de IA deste mes. Faca upgrade de plano para continuar.
+          Você atingiu o limite de IA deste mês. Faça upgrade de plano para continuar.
         </div>
       ) : null}
 

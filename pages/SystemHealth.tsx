@@ -442,7 +442,7 @@ const SystemHealth = () => {
         </Panel>
       </section>
 
-      <Panel title="Error logs" subtitle="Ultimos 50 erros para debug rápido">
+      <Panel title="Error logs" subtitle="Últimos 50 erros para debug rápido">
         <div className="grid gap-3">
           {errorLogs.length ? (
             errorLogs.slice(0, 12).map((item) => (

@@ -46,7 +46,7 @@ const Settings = () => {
     try {
       setSaving(true);
       await updateUserProfile({ detailLevel: value });
-      addToast("Nivel de detalhamento atualizado.", "success");
+      addToast("Nível de detalhamento atualizado.", "success");
     } catch (error) {
       setDetailLevel(previous);
       addToast(getErrorMessage(error, "Falha ao salvar nivel de detalhamento."), "error");
@@ -164,7 +164,7 @@ const Settings = () => {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">Nivel de detalhamento da IA</p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">Nível de detalhamento da IA</p>
           <select
             value={detailLevel}
             onChange={(e) => handleDetailChange(e.target.value as DetailLevel)}

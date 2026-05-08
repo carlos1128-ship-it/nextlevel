@@ -96,7 +96,7 @@ export default function AiDashboardPanel({
 
       {data?.missingData?.length ? (
         <p className="text-xs leading-5 text-zinc-500">
-          Para melhorar a precisao: {data.missingData.join(", ")}.
+          Para melhorar a precis?o: {data.missingData.join(", ")}.
         </p>
       ) : null}
     </section>
