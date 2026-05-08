@@ -160,6 +160,21 @@ const Customers = () => {
   const formatLatestNote = (customer: Customer) =>
     customer.latestAction?.notes || customer.objective || "-";
 
+  const formatStatus = (status?: string | null) => {
+    const labels: Record<string, string> = {
+      PENDING_CONFIRMATION: "Aguardando confirmação",
+      NEEDS_INFO: "Aguardando informações",
+      PENDING_DATA: "Aguardando informações",
+      NEEDS_HUMAN: "Precisa de atendimento humano",
+      CONFIRMED: "Confirmado",
+      CANCELLED: "Cancelado",
+      COMPLETED: "Concluído",
+      LEAD: "Lead novo",
+      NEW: "Lead novo",
+    };
+    return status ? labels[status] || status : "-";
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -309,8 +324,15 @@ const Customers = () => {
                     <td className="px-3 py-2">{formatChannel(customer)}</td>
                     <td className="px-3 py-2 max-w-[220px] truncate">{formatInterest(customer)}</td>
                     <td className="px-3 py-2">{formatDesiredDateTime(customer)}</td>
-                    <td className="px-3 py-2">{customer.status || customer.latestAction?.status || "-"}</td>
-                    <td className="px-3 py-2 max-w-[260px] truncate">{formatLatestNote(customer)}</td>
+                    <td className="px-3 py-2">
+                      {formatStatus(customer.status || customer.latestAction?.status)}
+                    </td>
+                    <td
+                      className="px-3 py-2 max-w-[420px] whitespace-normal text-xs leading-5 text-zinc-300"
+                      title={formatLatestNote(customer)}
+                    >
+                      {formatLatestNote(customer)}
+                    </td>
                     <td className="px-3 py-2">
                       {new Date(customer.createdAt).toLocaleDateString("pt-BR")}
                     </td>
