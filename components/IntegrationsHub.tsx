@@ -25,7 +25,7 @@ type OfficialStatus = {
   status?: string;
   phoneNumberId: string | null;
   phoneNumber?: string | null;
-  updatedAt?: string | null;
+  updatedAté: string | null;
 };
 
 type EvolutionStatus = {
@@ -299,7 +299,7 @@ const IntegrationsHub = () => {
   };
 
   const showComingSoon = (channel: string) => {
-    addToast(`${channel} fica visivel aqui e entra em configuração guiada em breve.`, "info");
+    addToast(`${channel} fica visível aqui e entra em configuração guiada em breve.`, "info");
   };
 
   const formatLastSync = (value?: string | null) => {
@@ -380,10 +380,10 @@ const IntegrationsHub = () => {
           Hub de Integrações
         </p>
         <h2 className="text-2xl font-black text-zinc-50 md:text-3xl">
-          Todos os 4 canais no mesmo painel
+          Canais conectados no mesmo painel
         </h2>
         <p className="max-w-3xl text-sm leading-6 text-zinc-400">
-          Conecte, acompanhe status e mantenha a operação visivel sem esconder canais em evolucao.
+          Conecte, acompanhe status e mantenha a operação visível sem esconder canais em evolução.
         </p>
       </div>
 
@@ -481,7 +481,7 @@ const IntegrationsHub = () => {
                 <div>
                   <h4 className="text-lg font-black text-zinc-50">Meta API</h4>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Opcao oficial para integrações da Meta.
+                    Opção oficial para integrações da Meta.
                   </p>
                 </div>
                 <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-lime-300">

@@ -105,6 +105,39 @@ const normalizeAiText = (raw: string) => {
   return unique.join("\n");
 };
 
+const translateMetricReason = (reason?: string | null) => {
+  if (!reason) return "";
+  const normalized = reason.toLowerCase();
+
+  if (normalized.includes("delivery cost")) return "Ainda faltam dados de custos de entrega.";
+  if (normalized.includes("marketplace order fee")) return "Ainda faltam dados de taxas do marketplace.";
+  if (normalized.includes("shipping cost")) return "Ainda faltam dados de custos de frete.";
+  if (normalized.includes("appointment") || normalized.includes("booking") || normalized.includes("scheduling")) {
+    return "Ainda faltam dados de agendamentos.";
+  }
+  if (normalized.includes("patient") || normalized.includes("consultation")) return "Ainda faltam dados de clientes e atendimentos.";
+  if (normalized.includes("lead-source") || normalized.includes("funnel") || normalized.includes("conversion")) {
+    return "Ainda faltam dados de clientes e conversões.";
+  }
+  if (normalized.includes("purchase history") || normalized.includes("customer-to-sale")) {
+    return "Ainda faltam dados de histórico de compras.";
+  }
+  if (normalized.includes("paid media") || normalized.includes("ad-attributed")) {
+    return "Ainda faltam dados confiáveis de mídia paga para este cálculo.";
+  }
+  if (normalized.includes("investment cost") || normalized.includes("roi is not roas")) {
+    return "Ainda faltam dados de investimento para calcular ROI com segurança.";
+  }
+  if (normalized.includes("refund") || normalized.includes("order status")) return "Ainda faltam dados de pedidos e reembolsos.";
+  if (normalized.includes("inventory movement")) return "Ainda faltam dados de movimentação de estoque.";
+  if (normalized.includes("legal pipeline") || normalized.includes("case model")) return "Ainda faltam dados de acompanhamento de atendimentos.";
+  if (normalized.includes("task") || normalized.includes("follow-up")) return "Ainda faltam dados de tarefas e follow-ups.";
+  if (normalized.includes("subscription") || normalized.includes("billing")) return "Ainda faltam dados de assinaturas e faturamento.";
+  if (normalized.includes("missing")) return "Dados insuficientes para calcular este indicador.";
+
+  return reason;
+};
+
 type TransactionsUpdatedDetail = {
   companyId?: string;
   transaction?: TransactionItem;
@@ -181,7 +214,7 @@ const KpiCard: React.FC<
         ) : null}
         {change} <span className="ml-1 font-medium text-zinc-500">no período selecionado</span>
       </div>
-      {reason ? <p className="mt-3 text-[11px] leading-5 text-zinc-500">{reason}</p> : null}
+      {reason ? <p className="mt-3 text-[11px] leading-5 text-zinc-500">{translateMetricReason(reason)}</p> : null}
       {sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{sourceLabel}</p> : null}
     </div>
   );
@@ -318,7 +351,7 @@ const RealMetricCard: React.FC<{
       {metric?.formatted || "Carregando"}
     </p>
     <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
-    {metric?.reason ? <p className="mt-2 text-[11px] leading-5 text-zinc-600">{metric.reason}</p> : null}
+    {metric?.reason ? <p className="mt-2 text-[11px] leading-5 text-zinc-600">{translateMetricReason(metric.reason)}</p> : null}
     {metric?.sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{metric.sourceLabel}</p> : null}
   </div>
 );
@@ -661,7 +694,7 @@ const Dashboard = () => {
         <div>
           <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visão Geral</h1>
           <p className="mt-2 text-base font-medium text-zinc-400 md:text-lg">
-            Ola, {username || "Usuário"}. Aqui está o panorama estratégico do período selecionado.
+            Olá, {username || "Usuário"}. Aqui está o panorama estratégico do período selecionado.
           </p>
         </div>
         <div className="flex w-full gap-3 md:w-auto">
@@ -826,7 +859,7 @@ const Dashboard = () => {
               <div className="rounded-lg bg-lime-400/15 p-2 text-lime-400">
                 <LightbulbIcon className="h-5 w-5" />
               </div>
-              <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Insights Estrategicos</h3>
+              <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Insights estratégicos</h3>
               {strategicInsightError ? (
                 <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
                   Cache/Retry ativo
@@ -841,14 +874,14 @@ const Dashboard = () => {
             to="/insights"
             className="rounded-2xl border border-zinc-800 bg-zinc-900 px-8 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-100 transition hover:border-lime-400/40"
           >
-            Ver Insights Completos
+            Ver insights completos
           </Link>
         </div>
       ) : null}
 
       {/* ── Metricas de crescimento vindas do backend ── */}
       {visibleGrowthMetrics.length > 0 ? (
-      <section aria-label="Metricas de Crescimento">
+      <section aria-label="Métricas de crescimento">
         <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-500">LEITURA AVANÇADA</p>
@@ -978,9 +1011,9 @@ const Dashboard = () => {
       <div className="rounded-3xl border border-zinc-900 bg-zinc-950 p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Modo Futuro</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Modo futuro</p>
             <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
-              Projecao simples de receita
+              Projeção simples de receita
             </h3>
             <p className="text-sm text-zinc-500">
               Média móvel dos últimos registros reais para os próximos {forecastHorizon} dias.

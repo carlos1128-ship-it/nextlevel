@@ -42,7 +42,7 @@ const Chat = () => {
     const raw = localStorage.getItem(CHAT_STORAGE_KEY);
     const seedMessage = {
       id: 1,
-      text: `Ola ${username || "usuário"}! Estou pronto para analisar a operação da sua empresa e apontar riscos, perdas e oportunidades.`,
+      text: `Olá, ${username || "usuário"}! Estou pronto para analisar a operação da sua empresa e apontar riscos, perdas e oportunidades.`,
       sender: "ai" as const,
     };
 
@@ -130,7 +130,7 @@ const Chat = () => {
         {
           id: Date.now() + 1,
           text: isUsageLimit
-            ? "Você atingiu o limite de IA deste mes. Faca upgrade de plano para continuar."
+            ? "Você atingiu o limite de IA deste mês. Faça upgrade de plano para continuar."
             : isGeminiError
               ? "A IA está sobrecarregada no momento. Tente novamente em alguns segundos ou minutos."
               : "Não consegui responder agora. Tente novamente em alguns segundos.",
@@ -139,7 +139,7 @@ const Chat = () => {
       ]);
       addToast(
         isUsageLimit
-          ? "Você atingiu o limite de IA deste mes. Veja os planos para continuar."
+          ? "Você atingiu o limite de IA deste mês. Veja os planos para continuar."
           : isGeminiError
             ? "Aviso: IA sobrecarregada, tente novamente em alguns segundos"
             : message,
@@ -170,7 +170,7 @@ const Chat = () => {
               setMessages([
                 {
                   id: 1,
-                  text: `Ola ${username || "usuário"}! Estou pronto para analisar a operação da sua empresa e apontar riscos, perdas e oportunidades.`,
+                  text: `Olá, ${username || "usuário"}! Estou pronto para analisar a operação da sua empresa e apontar riscos, perdas e oportunidades.`,
                   sender: "ai",
                 },
               ]);

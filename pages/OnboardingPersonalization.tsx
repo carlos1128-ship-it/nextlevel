@@ -69,10 +69,10 @@ const SIZE_OPTIONS = [
 
 const REVENUE_OPTIONS = [
   { value: "no_revenue", label: "Ainda sem receita" },
-  { value: "up_to_5k", label: "Ate R$ 5 mil/mes" },
-  { value: "5k_20k", label: "R$ 5 mil a R$ 20 mil/mes" },
-  { value: "20k_100k", label: "R$ 20 mil a R$ 100 mil/mes" },
-  { value: "100k_plus", label: "Acima de R$ 100 mil/mes" },
+  { value: "up_to_5k", label: "Até R$ 5 mil/mês" },
+  { value: "5k_20k", label: "R$ 5 mil a R$ 20 mil/mês" },
+  { value: "20k_100k", label: "R$ 20 mil a R$ 100 mil/mês" },
+  { value: "100k_plus", label: "Acima de R$ 100 mil/mês" },
 ];
 
 const MATURITY_OPTIONS = [

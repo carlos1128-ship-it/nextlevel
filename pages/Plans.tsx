@@ -38,17 +38,17 @@ const PlanCard = ({ plan, billingCycle }: { plan: Plan; billingCycle: BillingCyc
         <span className="mr-1 text-sm font-bold text-zinc-500 dark:text-zinc-400">R$</span>
         <span className="text-5xl font-black tracking-tighter">{formatPrice(displayPrice)}</span>
         <span className="ml-1 text-sm font-bold text-zinc-500 dark:text-zinc-400">
-          {annual ? "/ano" : "/mes"}
+          {annual ? "/ano" : "/mês"}
         </span>
       </div>
       <div className="mb-6 flex min-h-10 flex-col items-center justify-center text-center">
         {annual ? (
           <>
             <span className="text-xs font-bold tracking-wide text-[#B6FF00]">
-              Equivale a 11 meses - 1 mes gratis
+              Equivale a 11 meses - 1 mês grátis
             </span>
             <span className="mt-1 text-[11px] font-semibold text-zinc-500">
-              equivale a R$ {effectiveMonthly.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mes
+              equivale a R$ {effectiveMonthly.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês
             </span>
           </>
         ) : null}
@@ -81,7 +81,7 @@ const Plans = () => {
         title: "Common",
         monthlyPrice: 97,
         features: [
-          "Ate 2 empresas vinculadas",
+          "Até 2 empresas vinculadas",
           "Dashboard em tempo real",
           "Calculadora de margem e preço ideal",
           "Relatórios básicos",
@@ -94,13 +94,13 @@ const Plans = () => {
         monthlyPrice: 137,
         isPopular: true,
         features: [
-          "Ate 10 empresas vinculadas",
+          "Até 10 empresas vinculadas",
           "WhatsApp e Instagram",
           "Alertas de margem",
           "Relatórios automáticos semanais",
           "Chat IA ampliado",
-          "Recomendações praticas da IA",
-          "Suporte prioritario",
+          "Recomendações práticas da IA",
+          "Suporte prioritário",
         ],
       },
       {
@@ -110,10 +110,10 @@ const Plans = () => {
           "Empresas ilimitadas",
           "Tudo do Premium",
           "Mercado Livre, Mercado Pago e Shopee",
-          "Insights preditivos avancados",
+          "Insights preditivos avançados",
           "Integrações customizadas via API",
-          "Rotinas operacionais avancadas",
-          "Acompanhamento prioritario",
+          "Rotinas operacionais avançadas",
+          "Acompanhamento prioritário",
         ],
       },
     ],
@@ -123,9 +123,9 @@ const Plans = () => {
   return (
     <div className="mx-auto max-w-5xl py-10">
       <div className="mb-10 text-center">
-        <h1 className="mb-4 text-5xl font-black tracking-tighter">Escolha seu Nivel</h1>
+        <h1 className="mb-4 text-5xl font-black tracking-tighter">Escolha seu nível</h1>
         <p className="mx-auto max-w-xl text-lg font-medium text-zinc-500 dark:text-zinc-400">
-          Tres planos pagos para estruturar margem, automação e comando operacional no ritmo da sua empresa.
+          Três planos pagos para estruturar margem, automação e comando operacional no ritmo da sua empresa.
         </p>
       </div>
 
@@ -157,12 +157,12 @@ const Plans = () => {
       </div>
 
       <div className="mt-20 rounded-3xl border border-zinc-200 bg-[#121212] p-10 text-center dark:border-zinc-800">
-        <h3 className="mb-4 text-2xl font-black tracking-tighter">Checkout em preparacao</h3>
+        <h3 className="mb-4 text-2xl font-black tracking-tighter">Checkout em preparação</h3>
         <p className="mx-auto mb-8 max-w-lg text-zinc-500 dark:text-zinc-400">
-          Os planos ja estão definidos. A assinatura fica bloqueada ate o gateway de pagamento ser configurado com seguranca.
+          Os planos já estão definidos. A assinatura fica bloqueada até o gateway de pagamento ser configurado com segurança.
         </p>
         <button disabled className="cursor-not-allowed border-b-2 border-zinc-700 pb-1 text-sm font-black uppercase tracking-widest text-zinc-500">
-          Provider setup required
+          Configuração do provedor necessária
         </button>
       </div>
     </div>

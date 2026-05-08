@@ -22,12 +22,12 @@ const formatOpenedAge = (openedAt?: string) => {
     (now.getFullYear() - opened.getFullYear()) * 12 +
     (now.getMonth() - opened.getMonth());
 
-  if (diffMonths <= 0) return "Menos de 1 mes";
-  if (diffMonths < 12) return `${diffMonths} ${diffMonths === 1 ? "mes" : "meses"}`;
+  if (diffMonths <= 0) return "Menos de 1 mês";
+  if (diffMonths < 12) return `${diffMonths} ${diffMonths === 1 ? "mês" : "meses"}`;
 
   const years = Math.floor(diffMonths / 12);
   const months = diffMonths % 12;
-  return `${years} ${years === 1 ? "ano" : "anos"}${months ? ` e ${months} ${months === 1 ? "mes" : "meses"}` : ""}`;
+  return `${years} ${years === 1 ? "ano" : "anos"}${months ? ` e ${months} ${months === 1 ? "mês" : "meses"}` : ""}`;
 };
 
 const Companies = () => {
@@ -208,7 +208,7 @@ const Companies = () => {
           onClick={() => setShowForm((v) => !v)}
           className="flex items-center gap-2 rounded-2xl bg-lime-400 px-6 py-3 text-base font-black text-zinc-900 transition hover:opacity-90"
         >
-          <PlusIcon className="h-5 w-5" /> Nova Empresa
+          <PlusIcon className="h-5 w-5" /> Nova empresa
         </button>
       </div>
 

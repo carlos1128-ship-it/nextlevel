@@ -72,7 +72,7 @@ const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolea
   if (loading) {
     return (
       <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumario Executivo IA</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
         <div className="mt-3 space-y-2">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-3 animate-pulse rounded-full bg-zinc-800" style={{ width: `${80 - i * 12}%` }} />
@@ -91,7 +91,7 @@ const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolea
 
   return (
     <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumario Executivo IA</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
       <ul className="mt-3 space-y-2">
         {lines.map((line, i) => (
           <li key={i} className="flex items-start gap-2 text-sm leading-snug text-zinc-200">
@@ -216,8 +216,8 @@ const Reports = () => {
     const eff = Math.round((totals.income / totalFlow) * 100) || 85;
     const waste = Math.round((totals.expense / totalFlow) * 100) || 15;
     return [
-      { name: "Sua empresa", Eficiência: Math.max(35, Math.min(95, eff)), Desperdicio: Math.max(5, Math.min(65, waste)) },
-      { name: "Média setor", Eficiência: Math.max(30, Math.min(90, eff - 15)), Desperdicio: Math.max(10, Math.min(70, waste + 15)) },
+      { name: "Sua empresa", Eficiência: Math.max(35, Math.min(95, eff)), Desperdício: Math.max(5, Math.min(65, waste)) },
+      { name: "Média setor", Eficiência: Math.max(30, Math.min(90, eff - 15)), Desperdício: Math.max(10, Math.min(70, waste + 15)) },
     ];
   }, [totals]);
 
@@ -253,9 +253,9 @@ const Reports = () => {
           ? response
           : response.analysis || response.insight || response.message || "";
       setAiSummary(text || null);
-      if (!text) addToast("IA não retornou sumario.", "info");
+      if (!text) addToast("IA não retornou sumário.", "info");
     } catch (err) {
-      addToast(getErrorMessage(err, "Erro ao gerar sumario com IA."), "error");
+      addToast(getErrorMessage(err, "Erro ao gerar sumário com IA."), "error");
     } finally {
       setAiLoading(false);
     }
@@ -266,7 +266,7 @@ const Reports = () => {
     if (!reportRef.current) return;
     setPdfLoading(true);
     try {
-      // Gerar sumario IA antes do PDF se ainda não tiver
+      // Gerar sumário IA antes do PDF se ainda não tiver
       if (!aiSummary && !aiLoading) {
         await generateAiSummary();
       }
@@ -337,9 +337,9 @@ const Reports = () => {
             onChange={(e) => setPeriod(e.target.value)}
             className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-300 outline-none transition hover:border-zinc-600"
           >
-            <option value="30d">Ultimos 30 dias</option>
-            <option value="90d">Ultimos 90 dias</option>
-            <option value="12m">Ultimos 12 meses</option>
+            <option value="30d">Últimos 30 dias</option>
+            <option value="90d">Últimos 90 dias</option>
+            <option value="12m">Últimos 12 meses</option>
           </select>
 
           <select
@@ -367,7 +367,7 @@ const Reports = () => {
             disabled={aiLoading || !selectedCompanyId}
             className="rounded-xl border border-lime-400/40 bg-lime-400/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-lime-400 transition hover:bg-lime-400/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {aiLoading ? "Analisando..." : "Sumario IA"}
+            {aiLoading ? "Analisando..." : "Sumário IA"}
           </button>
 
           <button
@@ -421,14 +421,14 @@ const Reports = () => {
             <KpiCard label="Receita Total" value={asCurrency(totals.income)} accent="green" />
             <KpiCard label="Despesas" value={asCurrency(totals.expense)} accent="red" />
             <KpiCard label="Saldo" value={asCurrency(totals.balance)} accent={totals.balance >= 0 ? "blue" : "red"} />
-            <KpiCard label="Margem Liquida" value={`${margin}%`} accent={margin >= 20 ? "green" : margin >= 0 ? "blue" : "red"} />
+            <KpiCard label="Margem líquida" value={`${margin}%`} accent={margin >= 20 ? "green" : margin >= 0 ? "blue" : "red"} />
           </div>
 
           {/* Charts row 1 */}
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
               <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Lucros e Perdas</h2>
-              <p className="mb-4 text-[11px] text-zinc-500">Evolucao mensal de receitas vs despesas</p>
+              <p className="mb-4 text-[11px] text-zinc-500">Evolução mensal de receitas vs despesas</p>
               <div className="h-[280px] w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={lineData} margin={{ top: 10, right: 12, left: 0, bottom: 4 }}>
@@ -445,8 +445,8 @@ const Reports = () => {
             </div>
 
             <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
-              <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Projecoes de Crescimento</h2>
-              <p className="mb-4 text-[11px] text-zinc-500">Tendencia projetada com base no saldo atual</p>
+              <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Projeções de crescimento</h2>
+              <p className="mb-4 text-[11px] text-zinc-500">Tendência projetada com base no saldo atual</p>
               <div className="h-[280px] w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={projectionData} margin={{ top: 10, right: 12, left: 0, bottom: 4 }}>
@@ -459,7 +459,7 @@ const Reports = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#18181b" />
                     <XAxis dataKey="year" stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
                     <YAxis stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} tickFormatter={(v) => formatCompact(Number(v))} />
-                    <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: number) => [asCurrency(Number(v)), "Projecao"]} />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: number) => [asCurrency(Number(v)), "Projeção"]} />
                     <Area type="monotone" dataKey="total" stroke="#B6FF00" strokeWidth={2} fill="url(#rptGrowth)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -470,7 +470,7 @@ const Reports = () => {
           {/* Chart row 2 */}
           <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
             <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Eficiência vs Média do Setor</h2>
-            <p className="mb-4 text-[11px] text-zinc-500">Comparativo de eficiencia e desperdicio financeiro</p>
+            <p className="mb-4 text-[11px] text-zinc-500">Comparativo de eficiência e desperdício financeiro</p>
             <div className="h-[260px] w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={comparisonData} margin={{ top: 10, right: 12, left: 0, bottom: 4 }}>
@@ -478,8 +478,8 @@ const Reports = () => {
                   <XAxis dataKey="name" stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
                   <YAxis stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
                   <Tooltip contentStyle={TOOLTIP_STYLE} />
-                  <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} formatter={(v) => <span className={v === "Desperdicio" ? "text-red-400" : "text-lime-400"}>{v === "Desperdicio" ? "Desperdício" : v}</span>} />
-                  <Bar dataKey="Desperdicio" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={48} />
+                  <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} formatter={(v) => <span className={v === "Desperdício" ? "text-red-400" : "text-lime-400"}>{v === "Desperdício" ? "Desperdício" : v}</span>} />
+                  <Bar dataKey="Desperdício" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={48} />
                   <Bar dataKey="Eficiência" fill="#B6FF00" radius={[4, 4, 0, 0]} maxBarSize={48} />
                 </BarChart>
               </ResponsiveContainer>

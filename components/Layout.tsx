@@ -31,7 +31,7 @@ import { DASHBOARD_ROUTE } from "../src/app/routes";
 type SidebarNavItem = NavItem & { id: string };
 
 const navItems: SidebarNavItem[] = [
-  { id: "home", path: DASHBOARD_ROUTE, name: "Inicio", icon: HomeIcon, isPrimary: true },
+  { id: "home", path: DASHBOARD_ROUTE, name: "Início", icon: HomeIcon, isPrimary: true },
   { id: "reports", path: "/reports", name: "Relatórios", icon: BarChartIcon, isPrimary: true },
   { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },
@@ -180,7 +180,7 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
         <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operação Segura</p>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
-        <nav aria-label="Menu Principal">
+        <nav aria-label="Menu principal">
           <ul className="space-y-1">
             {(Array.isArray(primaryItems) ? primaryItems : []).map((item) => (
               <li key={item.path}>
@@ -235,7 +235,7 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
         </div>
         <div className="min-w-0">
           <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{username || "Usuário"}</p>
-          <p className="text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ver Perfil</p>
+          <p className="text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ver perfil</p>
         </div>
       </Link>
     </aside>
@@ -294,7 +294,7 @@ const FloatingActionButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const actions = [
-    { name: "Nova Empresa", icon: BuildingIcon, path: "/companies" },
+    { name: "Nova empresa", icon: BuildingIcon, path: "/companies" },
     { name: "Novo Relatório", icon: BarChartIcon, path: "/reports" },
     { name: "Nova conversa", icon: MessageSquareIcon, path: "/chat" },
   ];
