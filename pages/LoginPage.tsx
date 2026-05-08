@@ -854,7 +854,7 @@ const LoginPage: React.FC = () => {
               Calcule seu lucro real.<br /><span className="text-lime-300">Agora, ao vivo.</span>
             </h2>
               <p className="mt-4 text-sm text-zinc-400 max-w-2xl mx-auto">
-                Esta calculadora é apenas uma pequena amostra do que a Next Level faz. Dentro da plataforma, você cruza vendas, custos, atendimento, canais e oportunidades para entender seu negócio com muito mais profundidade.
+                Está calculadora é apenas uma pequena amostra do que a Next Level faz. Dentro da plataforma, você cruza vendas, custos, atendimento, canais e oportunidades para entender seu negócio com muito mais profundidade.
               </p>
           </div>
           <MarginCalculator />

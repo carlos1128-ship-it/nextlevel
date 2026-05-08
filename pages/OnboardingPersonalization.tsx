@@ -19,32 +19,32 @@ type OnboardingForm = CompanyOnboardingPayload & {
 };
 
 const BUSINESS_OPTIONS: Array<{ key: BusinessType; label: string; description: string }> = [
-  { key: "ecommerce_physical", label: "E-commerce fisico", description: "Produtos, margem, estoque, WhatsApp e trafego." },
+  { key: "ecommerce_physical", label: "E-commerce fisico", description: "Produtos, margem, estoque, WhatsApp e tráfego." },
   { key: "ecommerce_digital", label: "Produto digital", description: "Funil, conversao, CAC, ROAS e reembolsos." },
   { key: "saas", label: "SaaS / software", description: "MRR, churn, LTV, ativacao e retencao." },
   { key: "agency", label: "Agencia / marketing", description: "Clientes, contratos, margem e recorrencia." },
-  { key: "medical_clinic", label: "Clinica / saude", description: "Agenda, pacientes, no-show e atendimento seguro." },
+  { key: "medical_clinic", label: "Clínica / saúde", description: "Agenda, pacientes, no-show e atendimento seguro." },
   { key: "law_office", label: "Advocacia", description: "Leads, consultas, pipeline e follow-up juridico." },
-  { key: "local_services", label: "Servicos locais", description: "Agendamentos, recorrencia e custos operacionais." },
-  { key: "retail_store", label: "Loja fisica / varejo", description: "Produtos, horarios de pico e ticket medio." },
+  { key: "local_services", label: "Serviços locais", description: "Agendamentos, recorrencia e custos operacionais." },
+  { key: "retail_store", label: "Loja fisica / varejo", description: "Produtos, horarios de pico e ticket médio." },
   { key: "restaurant", label: "Restaurante / delivery", description: "Cardapio, pedidos, pico e custos de entrega." },
   { key: "marketplace_seller", label: "Marketplace seller", description: "Taxas, frete, margem e produtos campeoes." },
-  { key: "other", label: "Outro", description: "Configuracao balanceada para comecar rapido." },
+  { key: "other", label: "Outro", description: "Configuração balanceada para comecar rápido." },
 ];
 
 const BUSINESS_LABELS = Object.fromEntries(BUSINESS_OPTIONS.map((item) => [item.key, item.label])) as Record<BusinessType, string>;
 
 const OPERATION_TOGGLES: Array<{ key: keyof OnboardingForm; label: string; hint: string }> = [
-  { key: "hasPhysicalProducts", label: "Vende produtos fisicos?", hint: "Ativa produtos, margem e mix." },
+  { key: "hasPhysicalProducts", label: "Vende produtos físicos?", hint: "Ativa produtos, margem e mix." },
   { key: "hasDigitalProducts", label: "Vende produtos digitais?", hint: "Ativa funil, conversao e reembolso." },
-  { key: "hasServices", label: "Vende servicos?", hint: "Ativa receita por servico e agenda." },
-  { key: "usesPaidTraffic", label: "Usa trafego pago?", hint: "Recomenda CAC, ROAS e campanhas." },
-  { key: "usesWhatsAppForSales", label: "Usa WhatsApp para vendas/atendimento?", hint: "Prepara Atendente IA e integracao." },
+  { key: "hasServices", label: "Vende serviços?", hint: "Ativa receita por servico e agenda." },
+  { key: "usesPaidTraffic", label: "Usa tráfego pago?", hint: "Recomenda CAC, ROAS e campanhas." },
+  { key: "usesWhatsAppForSales", label: "Usa WhatsApp para vendas/atendimento?", hint: "Prepara Atendente IA e integração." },
   { key: "usesMarketplace", label: "Vende em marketplace?", hint: "Recomenda taxas, frete e margem." },
   { key: "hasSupportTeam", label: "Tem equipe de atendimento?", hint: "Liga pausa humana e handoff." },
   { key: "hasOperationalCosts", label: "Tem custos operacionais relevantes?", hint: "Mostra custos e desperdicio." },
-  { key: "wantsAutomation", label: "Quer automacao?", hint: "Recomenda projetos e IA operacional." },
-  { key: "wantsMarketAnalysis", label: "Quer analise de mercado?", hint: "Ativa radar de mercado e oportunidades." },
+  { key: "wantsAutomation", label: "Quer automação?", hint: "Recomenda projetos e IA operacional." },
+  { key: "wantsMarketAnalysis", label: "Quer análise de mercado?", hint: "Ativa radar de mercado e oportunidades." },
 ];
 
 const GOALS = [
@@ -55,15 +55,15 @@ const GOALS = [
   "Melhorar marketing",
   "Controlar clientes",
   "Analisar mercado",
-  "Melhorar operacao",
+  "Melhorar operação",
   "Melhorar retencao",
-  "Organizar relatorios",
+  "Organizar relatórios",
 ];
 
 const SIZE_OPTIONS = [
   { value: "solo", label: "Solo" },
   { value: "small_team", label: "Time pequeno" },
-  { value: "medium_team", label: "Time medio" },
+  { value: "medium_team", label: "Time médio" },
   { value: "large_team", label: "Time grande" },
 ];
 
@@ -76,30 +76,30 @@ const REVENUE_OPTIONS = [
 ];
 
 const MATURITY_OPTIONS = [
-  "Ainda nao registro dados",
+  "Ainda não registro dados",
   "Uso planilhas",
   "Uso sistema de vendas",
   "Uso ERP/CRM",
-  "Tenho varias integracoes",
+  "Tenho varias integrações",
 ];
 
 const METRIC_LABELS: Record<string, string> = {
   revenue: "Receita",
-  net_profit: "Lucro liquido",
+  net_profit: "Lucro líquido",
   margin: "Margem",
-  average_ticket: "Ticket medio",
+  average_ticket: "Ticket médio",
   cac: "CAC",
   roas: "ROAS",
   best_selling_products: "Produtos mais vendidos",
   profit_by_product: "Lucro por produto",
   operational_costs: "Custos operacionais",
-  peak_sales_hours: "Horarios de pico",
-  conversion_rate: "Conversao",
+  peak_sales_hours: "Horários de pico",
+  conversion_rate: "Conversão",
   mrr: "MRR",
   churn: "Churn",
   ltv: "LTV",
   appointments: "Consultas",
-  service_revenue: "Receita de servicos",
+  service_revenue: "Receita de serviços",
   leads: "Leads",
 };
 
@@ -108,11 +108,11 @@ const MODULE_LABELS: Record<string, string> = {
   products: "Produtos",
   customers: "Clientes",
   financial: "Financeiro",
-  reports: "Relatorios",
+  reports: "Relatórios",
   attendant: "Atendente IA",
-  integrations: "Integracoes",
+  integrations: "Integrações",
   market_intelligence: "Mercado",
-  automations: "Automacoes",
+  automations: "Automações",
   costs: "Custos",
   insights: "Insights",
 };
@@ -185,7 +185,7 @@ const OnboardingPersonalization = () => {
         if (!cancelled) setPreview(data.recommendations);
       })
       .catch((err) => {
-        if (!cancelled) setError(getErrorMessage(err, "Nao foi possivel gerar a recomendacao agora."));
+        if (!cancelled) setError(getErrorMessage(err, "Não foi possível gerar a recomendação agora."));
       })
       .finally(() => {
         if (!cancelled) setPreviewLoading(false);
@@ -220,7 +220,7 @@ const OnboardingPersonalization = () => {
 
   const goNext = () => {
     if (!canGoNext) {
-      setError("Preencha esta etapa para montarmos uma recomendacao precisa.");
+      setError("Preencha esta etapa para montarmos uma recomendação precisa.");
       return;
     }
     setError(null);
@@ -246,8 +246,8 @@ const OnboardingPersonalization = () => {
       addToast("Experiencia personalizada com sucesso.", "success");
       navigate(applyRecommendedSetup ? safeReturnTo : "/settings#dashboard", { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err, "Nao foi possivel salvar a personalizacao."));
-      addToast(getErrorMessage(err, "Nao foi possivel salvar a personalizacao."), "error");
+      setError(getErrorMessage(err, "Não foi possível salvar a personalização."));
+      addToast(getErrorMessage(err, "Não foi possível salvar a personalização."), "error");
     } finally {
       setSaving(false);
     }
@@ -262,7 +262,7 @@ const OnboardingPersonalization = () => {
             <p className="text-[10px] font-black uppercase tracking-[0.32em] text-lime-300">NEXT LEVEL SETUP</p>
             <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-6xl">Personalize sua experiencia na NEXT LEVEL</h1>
             <p className="mt-4 max-w-3xl text-sm font-medium text-zinc-400 md:text-base">
-              Responda algumas perguntas rapidas para montarmos um painel, ferramentas e IA alinhados ao seu tipo de negocio.
+              Responda algumas perguntas rápidas para montarmos um painel, ferramentas e IA alinhados ao seu tipo de negócio.
             </p>
           </div>
           <div className="hidden rounded-3xl border border-lime-400/20 bg-lime-400/10 px-5 py-4 text-right md:block">
@@ -278,9 +278,9 @@ const OnboardingPersonalization = () => {
         <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950/78 p-5 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
           {step === 0 ? (
             <section>
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Tipo de negocio</p>
-              <h2 className="mt-2 text-3xl font-black tracking-tighter">Qual tipo de negocio voce administra?</h2>
-              <p className="mt-2 text-sm text-zinc-500">Isso define as metricas, modulos e limites seguros do Atendente IA.</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Tipo de negócio</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tighter">Qual tipo de negócio você administra?</h2>
+              <p className="mt-2 text-sm text-zinc-500">Isso define as métricas, módulos e limites seguros do Atendente IA.</p>
               <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {BUSINESS_OPTIONS.map((option) => {
                   const active = form.businessType === option.key;
@@ -304,7 +304,7 @@ const OnboardingPersonalization = () => {
               {form.businessType === "other" ? (
                 <label className="mt-5 block rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
                   <span className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
-                    Descricao livre
+                    Descrição livre
                   </span>
                   <span className="mt-2 block text-sm font-bold text-zinc-200">
                     Descreva com o que sua empresa trabalha
@@ -323,9 +323,9 @@ const OnboardingPersonalization = () => {
 
           {step === 1 ? (
             <section>
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Operacao</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Operação</p>
               <h2 className="mt-2 text-3xl font-black tracking-tighter">Como sua empresa funciona hoje?</h2>
-              <p className="mt-2 text-sm text-zinc-500">Cada resposta liga ou desliga recomendacoes, sem encher seu painel de coisa inutil.</p>
+              <p className="mt-2 text-sm text-zinc-500">Cada resposta liga ou desliga recomendações, sem encher seu painel de coisa inutil.</p>
               <div className="mt-6 grid gap-3 md:grid-cols-2">
                 {OPERATION_TOGGLES.map((item) => {
                   const checked = Boolean(form[item.key]);
@@ -355,8 +355,8 @@ const OnboardingPersonalization = () => {
           {step === 2 ? (
             <section>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Objetivo principal</p>
-              <h2 className="mt-2 text-3xl font-black tracking-tighter">Qual e seu principal objetivo agora?</h2>
-              <p className="mt-2 text-sm text-zinc-500">Vamos priorizar atalhos, insights e primeiras acoes com base nisso.</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tighter">Qual é seu principal objetivo agora?</h2>
+              <p className="mt-2 text-sm text-zinc-500">Vamos priorizar atalhos, insights e primeiras ações com base nisso.</p>
               <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {GOALS.map((goal) => (
                   <button
@@ -377,8 +377,8 @@ const OnboardingPersonalization = () => {
           {step === 3 ? (
             <section>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Tamanho e dados</p>
-              <h2 className="mt-2 text-3xl font-black tracking-tighter">Qual o tamanho e maturidade do seu negocio?</h2>
-              <p className="mt-2 text-sm text-zinc-500">Isso evita recomendar metricas que dependem de dados que voce ainda nao registra.</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tighter">Qual o tamanho e maturidade do seu negócio?</h2>
+              <p className="mt-2 text-sm text-zinc-500">Isso evita recomendar métricas que dependem de dados que você ainda não registra.</p>
               <div className="mt-6 grid gap-4 md:grid-cols-3">
                 <SelectCard title="Tamanho" value={form.companySize || ""} options={SIZE_OPTIONS} onChange={(value) => updateField("companySize", value)} />
                 <SelectCard title="Receita mensal" value={form.monthlyRevenueRange || ""} options={REVENUE_OPTIONS} onChange={(value) => updateField("monthlyRevenueRange", value)} />
@@ -394,11 +394,11 @@ const OnboardingPersonalization = () => {
 
           {step === 4 ? (
             <section>
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Configuracao recomendada</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Configuração recomendada</p>
               <h2 className="mt-2 text-3xl font-black tracking-tighter">Seu painel vai nascer com foco em {selectedBusiness.label}</h2>
-              <p className="mt-2 text-sm text-zinc-500">O dashboard inicial fica limpo; as metricas abaixo entram como sugestoes para voce ativar quando fizer sentido.</p>
+              <p className="mt-2 text-sm text-zinc-500">O dashboard inicial fica limpo; as métricas abaixo entram como sugestões para você ativar quando fizer sentido.</p>
               {previewLoading ? (
-                <div className="mt-8 rounded-3xl border border-dashed border-zinc-800 p-8 text-center text-zinc-500">Gerando recomendacao real no backend...</div>
+                <div className="mt-8 rounded-3xl border border-dashed border-zinc-800 p-8 text-center text-zinc-500">Gerando recomendação real no backend...</div>
               ) : preview ? (
                 <div className="mt-8 grid gap-4 lg:grid-cols-3">
                   {form.businessType === "other" ? (
@@ -406,13 +406,13 @@ const OnboardingPersonalization = () => {
                       <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Perfil sugerido</p>
                       <p className="mt-2 text-lg font-black">{BUSINESS_LABELS[preview.businessType] || "Outro"}</p>
                       <p className="mt-2 text-sm text-zinc-400">
-                        Voce pode aceitar esta sugestao agora ou voltar para escolher outro perfil manualmente.
+                        Você pode aceitar está sugestão agora ou voltar para escolher outro perfil manualmente.
                       </p>
                     </div>
                   ) : null}
                   <PreviewCard title="Metricas sugeridas" items={preview.dashboardMetrics.slice(0, 10).map(formatKey)} />
                   <PreviewCard title="Modulos" items={preview.modules.slice(0, 10).map(formatKey)} />
-                  <PreviewCard title="Primeiras acoes" items={preview.firstActions.slice(0, 6)} />
+                  <PreviewCard title="Primeiras ações" items={preview.firstActions.slice(0, 6)} />
                   <div className="rounded-3xl border border-lime-400/25 bg-lime-400/10 p-5 lg:col-span-3">
                     <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Atendente IA</p>
                     <p className="mt-2 text-lg font-black">{preview.agent.tone}</p>
@@ -469,7 +469,7 @@ const OnboardingPersonalization = () => {
                   disabled={saving || previewLoading}
                   className="rounded-2xl bg-lime-400 px-7 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-950 transition hover:opacity-90 disabled:opacity-50"
                 >
-                  {saving ? "Salvando..." : "Usar configuracao recomendada"}
+                  {saving ? "Salvando..." : "Usar configuração recomendada"}
                 </button>
               </div>
             )}

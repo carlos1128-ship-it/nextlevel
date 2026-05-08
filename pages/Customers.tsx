@@ -54,7 +54,7 @@ const Customers = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar os clientes.");
+      const message = getErrorMessage(err, "Não foi possível carregar os clientes.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -228,7 +228,7 @@ const Customers = () => {
               type="submit"
               className="rounded-xl bg-lime-400 px-3 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
             >
-              {editingId ? "Salvar alteracoes" : "Adicionar"}
+              {editingId ? "Salvar alterações" : "Adicionar"}
             </button>
           </form>
         </div>
@@ -242,7 +242,7 @@ const Customers = () => {
             className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
           />
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs text-zinc-500">Itens por pagina</label>
+            <label className="text-xs text-zinc-500">Itens por página</label>
             <select
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value) || 10)}
@@ -268,7 +268,7 @@ const Customers = () => {
       ) : items.length === 0 ? (
         <EmptyState
           title="Nenhum cliente cadastrado"
-          description="Cadastre clientes para calcular LTV, ticket medio e segmentar vendas."
+          description="Cadastre clientes para calcular LTV, ticket médio e segmentar vendas."
         />
       ) : (
         <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 shadow-sm">
@@ -278,7 +278,7 @@ const Customers = () => {
                 {pagination.total} cliente{pagination.total === 1 ? "" : "s"}
               </p>
               <p className="text-xs text-zinc-500">
-                Pagina {pagination.page} de {pagination.totalPages || 1}
+                Página {pagination.page} de {pagination.totalPages || 1}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -294,7 +294,7 @@ const Customers = () => {
                 onClick={() => changePage(page + 1)}
                 disabled={pagination.totalPages !== 0 && page >= pagination.totalPages}
               >
-                Proxima
+                Próxima
               </button>
             </div>
           </div>
@@ -310,9 +310,9 @@ const Customers = () => {
                   <th className="px-3 py-2 text-left">Interesse</th>
                   <th className="px-3 py-2 text-left">Data/Hora</th>
                   <th className="px-3 py-2 text-left">Status</th>
-                  <th className="px-3 py-2 text-left">Observacao</th>
+                  <th className="px-3 py-2 text-left">Observação</th>
                   <th className="px-3 py-2 text-left">Criado em</th>
-                  <th className="px-3 py-2 text-right">Acoes</th>
+                  <th className="px-3 py-2 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900 text-zinc-100">

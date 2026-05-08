@@ -51,9 +51,9 @@ function inferCategory(content: string): string {
   const text = content.toLowerCase();
   if (text.includes("risco") || text.includes("ameaca")) return "Risco";
   if (text.includes("oportunidade")) return "Oportunidade";
-  if (text.includes("recomend")) return "Recomendacao";
-  if (text.includes("padrao") || text.includes("tendencia")) return "Padrao";
-  return "Sugestao da IA";
+  if (text.includes("recomend")) return "Recomendação";
+  if (text.includes("padrao") || text.includes("tendencia")) return "Padrão";
+  return "Sugestão da IA";
 }
 
 function inferColor(category: string): StrategicInsightCard["color"] {
@@ -96,7 +96,7 @@ function stripInsightLead(value: string) {
 
 function normalizeInsightLine(value: string) {
   const compact = sanitizeInsight(value)
-    .replace(/^(padroes|riscos|oportunidades|recomendacoes)\s*:\s*/i, "")
+    .replace(/^(padroes|padrões|riscos|oportunidades|recomendacoes|recomendações)\s*:\s*/i, "")
     .replace(/^[-*•]\s*/, "")
     .split(/[.!?](?:\s|$)/)
     .map((sentence) => sentence.trim())

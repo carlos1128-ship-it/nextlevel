@@ -44,7 +44,7 @@ const InsightCard: React.FC<StrategicInsightCard> = ({ title, description, categ
 const benchmarkData = [
   { name: "E-commerce", total: 18 },
   { name: "Industria", total: 7 },
-  { name: "Servicos", total: 12 },
+  { name: "Serviços", total: 12 },
   { name: "Tecnologia", total: 25 },
 ];
 

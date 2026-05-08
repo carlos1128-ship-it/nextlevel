@@ -39,7 +39,7 @@ class AppErrorBoundary extends React.Component<
               Algo saiu do trilho, mas o painel continua seguro
             </h1>
             <p className="mt-4 text-base leading-8 text-zinc-300">
-              Recarregue a pagina ou volte para o dashboard. Se o problema persistir, tente novamente
+              Recarregue a página ou volte para o dashboard. Se o problema persistir, tente novamente
               em instantes.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
@@ -55,7 +55,7 @@ class AppErrorBoundary extends React.Component<
                 onClick={() => window.location.reload()}
                 className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
               >
-                Recarregar pagina
+                Recarregar página
               </button>
             </div>
           </section>

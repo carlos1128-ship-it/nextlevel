@@ -32,23 +32,23 @@ type SidebarNavItem = NavItem & { id: string };
 
 const navItems: SidebarNavItem[] = [
   { id: "home", path: DASHBOARD_ROUTE, name: "Inicio", icon: HomeIcon, isPrimary: true },
-  { id: "reports", path: "/reports", name: "Relatorios", icon: BarChartIcon, isPrimary: true },
+  { id: "reports", path: "/reports", name: "Relatórios", icon: BarChartIcon, isPrimary: true },
   { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "insights", path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
   { id: "market", path: "/market-intel", name: "Mercado", icon: RadarIcon, isPrimary: true },
   { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
-  { id: "add-data", path: "/add-data", name: "Adicionar Dados", icon: PlusIcon },
+  { id: "add-data", path: "/add-data", name: "Adicionar dados", icon: PlusIcon },
   { id: "products", path: "/products", name: "Produtos", icon: PackageIcon },
   { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
   { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
   { id: "plans", path: "/plans", name: "Planos", icon: CreditCardIcon },
-  { id: "usage", path: "/usage", name: "Uso do Plano", icon: ActivityIcon },
-  { id: "settings", path: "/settings", name: "Configuracoes", icon: SettingsIcon },
+  { id: "usage", path: "/usage", name: "Uso do plano", icon: ActivityIcon },
+  { id: "settings", path: "/settings", name: "Configurações", icon: SettingsIcon },
   { id: "profile", path: "/profile", name: "Perfil", icon: UserIcon },
-  { id: "integrations", path: "/integrations", name: "Integracoes", icon: PuzzleIcon },
+  { id: "integrations", path: "/integrations", name: "Integrações", icon: PuzzleIcon },
   { id: "companies", path: "/companies", name: "Empresas", icon: BuildingIcon },
-  { id: "financial-flow", path: "/financial-flow", name: "Fluxo Financeiro", icon: DollarSignIcon },
+  { id: "financial-flow", path: "/financial-flow", name: "Fluxo financeiro", icon: DollarSignIcon },
 ];
 
 const adminNavItem: SidebarNavItem = {
@@ -101,7 +101,7 @@ function moveItemsToFront(items: SidebarNavItem[], ids: string[]) {
 function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavItem[] {
   let items = navItems.map((item) =>
     item.id === "products" && niche === "MEDICINA"
-      ? { ...item, name: "Servicos/Consultas" }
+      ? { ...item, name: "Serviços/Consultas" }
       : item.id === "projects" && niche === "SERVICOS"
         ? { ...item, name: "Projetos/Metragem" }
         : item.id === "costs" && niche === "SERVICOS"
@@ -177,7 +177,7 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
     <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-zinc-200 bg-white p-6 text-zinc-800 dark:border-zinc-900 dark:bg-[#080b10] dark:text-zinc-100 lg:flex">
       <div className="shrink-0">
         <div className="mb-8 text-4xl font-black tracking-tight text-lime-500 dark:text-lime-400">NEXT LEVEL</div>
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operacao Segura</p>
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operação Segura</p>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
         <nav aria-label="Menu Principal">
@@ -234,7 +234,7 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
           {username?.charAt(0).toUpperCase() || "U"}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{username || "Usuario"}</p>
+          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{username || "Usuário"}</p>
           <p className="text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ver Perfil</p>
         </div>
       </Link>
@@ -254,13 +254,13 @@ const Header = () => {
             <ShieldIcon className="h-5 w-5" />
           </Link>
         ) : null}
-        <Link to="/settings" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Configuracoes">
+        <Link to="/settings" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Configurações">
           <SettingsIcon className="h-5 w-5" />
         </Link>
-        <Link to="/profile" className="group flex items-center gap-2.5" aria-label="Menu do usuario">
+        <Link to="/profile" className="group flex items-center gap-2.5" aria-label="Menu do usuário">
           <div className="hidden text-right sm:block">
-            <p className="text-xs font-bold text-zinc-800 transition-colors group-hover:text-lime-500 dark:text-zinc-100 dark:group-hover:text-lime-400">{username || "Usuario"}</p>
-            <p className="text-[9px] uppercase tracking-tighter text-zinc-400 dark:text-zinc-500">Estrategico</p>
+            <p className="text-xs font-bold text-zinc-800 transition-colors group-hover:text-lime-500 dark:text-zinc-100 dark:group-hover:text-lime-400">{username || "Usuário"}</p>
+            <p className="text-[9px] uppercase tracking-tighter text-zinc-400 dark:text-zinc-500">Estratégico</p>
           </div>
           <div className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 text-xs font-black text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
             {username?.charAt(0).toUpperCase() || "U"}
@@ -295,8 +295,8 @@ const FloatingActionButton = () => {
 
   const actions = [
     { name: "Nova Empresa", icon: BuildingIcon, path: "/companies" },
-    { name: "Novo Relatorio", icon: BarChartIcon, path: "/reports" },
-    { name: "Nova Conversa", icon: MessageSquareIcon, path: "/chat" },
+    { name: "Novo Relatório", icon: BarChartIcon, path: "/reports" },
+    { name: "Nova conversa", icon: MessageSquareIcon, path: "/chat" },
   ];
 
   return (
@@ -322,7 +322,7 @@ const FloatingActionButton = () => {
         className={`flex h-14 w-14 items-center justify-center rounded-full text-zinc-900 shadow-2xl transition-all duration-300 ${
           isOpen ? "bg-red-500 text-white" : "bg-lime-400"
         }`}
-        aria-label={isOpen ? "Fechar menu de acoes" : "Abrir menu de acoes"}
+        aria-label={isOpen ? "Fechar menu de ações" : "Abrir menu de ações"}
         aria-expanded={isOpen}
       >
         <PlusIcon className="h-7 w-7" />
@@ -407,7 +407,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       setNiche(updatedProfile.niche || selectedNiche);
       addToast("Painel personalizado com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel salvar o nicho agora."), "error");
+      addToast(getErrorMessage(error, "Não foi possível salvar o nicho agora."), "error");
     } finally {
       setSavingNiche(false);
     }

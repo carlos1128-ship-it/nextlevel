@@ -14,7 +14,7 @@ const emptyConfig: Partial<AgentConfig> = {
   welcomeMessage: "Oi! Sou o atendimento da empresa. Como posso ajudar?",
   companyDescription: "",
   systemPrompt:
-    "Voce e um atendente comercial claro, util e focado em gerar ROI para o cliente.",
+    "Você e um atendente comercial claro, util e focado em gerar ROI para o cliente.",
   toneOfVoice: "consultivo",
   internetSearchEnabled: false,
   speechToTextEnabled: false,
@@ -61,7 +61,7 @@ const Attendant = () => {
     getAgentConfig(selectedCompanyId)
       .then((data) => setConfig(data))
       .catch((error) => {
-        addToast(getErrorMessage(error, "Nao foi possivel carregar o atendente."), "error");
+        addToast(getErrorMessage(error, "Não foi possível carregar o atendente."), "error");
       })
       .finally(() => setLoading(false));
   }, [addToast, selectedCompanyId]);
@@ -115,7 +115,7 @@ const Attendant = () => {
       setConfig(saved);
       addToast("Atendente IA salvo.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel salvar o atendente."), "error");
+      addToast(getErrorMessage(error, "Não foi possível salvar o atendente."), "error");
     } finally {
       setSaving(false);
     }
@@ -128,7 +128,7 @@ const Attendant = () => {
           Atendente IA
         </p>
         <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-          Configuracao do agente
+          Configuração do agente
         </h1>
       </section>
 
@@ -158,7 +158,7 @@ const Attendant = () => {
 
           <label className="space-y-2 lg:col-span-2">
             <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Descricao da empresa
+              Descrição da empresa
             </span>
             <textarea
               value={config.companyDescription || ""}

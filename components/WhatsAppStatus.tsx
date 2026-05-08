@@ -22,7 +22,7 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
       await refetch();
       addToast("Gerando QR Code... aguarde alguns segundos.", "info");
     } catch {
-      addToast("Nao foi possivel conectar. Tente novamente.", "error");
+      addToast("Não foi possível conectar. Tente novamente.", "error");
     } finally {
       setBusyAction(null);
     }
@@ -37,7 +37,7 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
       await refetch();
       addToast("WhatsApp desconectado.", "success");
     } catch {
-      addToast("Nao foi possivel desconectar.", "error");
+      addToast("Não foi possível desconectar.", "error");
     } finally {
       setBusyAction(null);
     }
@@ -74,10 +74,10 @@ export const WhatsAppStatus = ({ companyId, showDetails = false }: WhatsAppStatu
       {showDetails ? (
         <p className="px-1 text-[11px] leading-5 text-zinc-400">
           {connected
-            ? "Sua conexao esta pronta para o atendimento automatico."
+            ? "Sua conexão está pronta para o atendimento automático."
             : state === "open"
-              ? "Conexao em atualizacao."
-              : "Conecte o WhatsApp na aba Integracoes para ativar o agente."}
+              ? "Conexão em atualização."
+              : "Conecte o WhatsApp na aba Integrações para ativar o agente."}
         </p>
       ) : null}
 

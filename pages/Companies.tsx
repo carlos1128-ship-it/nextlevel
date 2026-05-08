@@ -13,9 +13,9 @@ const getCompanyId = (company: Partial<Company> | null | undefined) =>
 const formatDocument = (value: string) => value.replace(/\D/g, "").slice(0, 14);
 
 const formatOpenedAge = (openedAt?: string) => {
-  if (!openedAt) return "Nao informado";
+  if (!openedAt) return "Não informado";
   const opened = new Date(openedAt);
-  if (Number.isNaN(opened.getTime())) return "Nao informado";
+  if (Number.isNaN(opened.getTime())) return "Não informado";
 
   const now = new Date();
   const diffMonths =
@@ -71,7 +71,7 @@ const Companies = () => {
       return list;
     } catch (error) {
       setCompanies([]);
-      const message = getErrorMessage(error, "Nao foi possivel carregar as empresas.");
+      const message = getErrorMessage(error, "Não foi possível carregar as empresas.");
       setLoadError(message);
       addToast(message, "error");
       return [];
@@ -117,11 +117,11 @@ const Companies = () => {
       return;
     }
     if (!form.openedAt) {
-      addToast("Informe desde quando a empresa esta aberta.", "info");
+      addToast("Informe desde quando a empresa está aberta.", "info");
       return;
     }
     if (!form.description.trim()) {
-      addToast("Adicione uma descricao curta da empresa.", "info");
+      addToast("Adicione uma descrição curta da empresa.", "info");
       return;
     }
 
@@ -147,7 +147,7 @@ const Companies = () => {
       window.dispatchEvent(new Event("companies:updated"));
       addToast("Empresa criada com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel criar a empresa."), "error");
+      addToast(getErrorMessage(error, "Não foi possível criar a empresa."), "error");
     } finally {
       setLoadingSubmit(false);
     }
@@ -184,7 +184,7 @@ const Companies = () => {
       if (selectedCompanyId) {
         setSelectedCompanyId(selectedCompanyId);
       }
-      addToast(getErrorMessage(error, "Nao foi possivel remover a empresa."), "error");
+      addToast(getErrorMessage(error, "Não foi possível remover a empresa."), "error");
       await loadCompanies();
     } finally {
       setDeletingCompanyId(null);
@@ -192,7 +192,7 @@ const Companies = () => {
   };
 
   const summaryText = useMemo(() => {
-    if (!companies.length) return "Cadastre a primeira empresa para liberar os modulos.";
+    if (!companies.length) return "Cadastre a primeira empresa para liberar os módulos.";
     return `${companies.length} empresa${companies.length === 1 ? "" : "s"} vinculada${companies.length === 1 ? "" : "s"} ao seu ambiente.`;
   }, [companies.length]);
 
@@ -250,7 +250,7 @@ const Companies = () => {
           <textarea
             value={form.description}
             onChange={(e) => onChangeForm("description", e.target.value)}
-            placeholder="Descricao curta do que a empresa faz"
+            placeholder="Descrição curta do que a empresa faz"
             rows={4}
             className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400 md:col-span-2 xl:col-span-2"
           />
@@ -276,7 +276,7 @@ const Companies = () => {
       ) : companies.length === 0 ? (
         <EmptyState
           title="Nenhuma empresa cadastrada"
-          description="Cadastre a primeira empresa para liberar os modulos de analise."
+          description="Cadastre a primeira empresa para liberar os módulos de análise."
           actionLabel="Criar primeira empresa"
           onAction={() => setShowForm(true)}
         />
@@ -289,9 +289,9 @@ const Companies = () => {
                 <th className="p-4">Setor / Segmento</th>
                 <th className="p-4">Documento</th>
                 <th className="p-4">Tempo Aberta</th>
-                <th className="p-4">Descricao</th>
+                <th className="p-4">Descrição</th>
                 <th className="p-4">Status</th>
-                <th className="p-4">Acoes</th>
+                <th className="p-4">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -301,14 +301,14 @@ const Companies = () => {
                   <tr key={getCompanyId(company) || company.name} className="border-b border-zinc-900 last:border-b-0">
                     <td className="p-4 font-semibold text-zinc-100">{company.name || "-"}</td>
                     <td className="p-4 text-zinc-300">
-                      {[company.sector, company.segment].filter(Boolean).join(" / ") || "Nao informado"}
+                      {[company.sector, company.segment].filter(Boolean).join(" / ") || "Não informado"}
                     </td>
-                    <td className="p-4 text-zinc-300">{company.document || "Nao informado"}</td>
+                    <td className="p-4 text-zinc-300">{company.document || "Não informado"}</td>
                     <td className="p-4 text-zinc-300">{formatOpenedAge(company.openedAt)}</td>
-                    <td className="max-w-xs p-4 text-zinc-400">{company.description || "Sem descricao"}</td>
+                    <td className="max-w-xs p-4 text-zinc-400">{company.description || "Sem descrição"}</td>
                     <td className="p-4">
                       <span className={`rounded-full px-3 py-1 text-sm font-bold ${isSelected ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-300"}`}>
-                        {isSelected ? "Ativa" : "Disponivel"}
+                        {isSelected ? "Ativa" : "Disponível"}
                       </span>
                     </td>
                     <td className="p-4">
@@ -361,8 +361,8 @@ const Companies = () => {
                 Tem certeza que deseja excluir <span className="font-bold text-zinc-100">{companyToDelete.name}</span>?
               </p>
               <p className="mt-2 text-zinc-400">
-                Esta acao nao pode ser desfeita e removera dados associados, incluindo transacoes, produtos,
-                clientes, custos, leads, insights e configuracoes ligadas a esta empresa.
+                Está ação não pode ser desfeita e removerá dados associados, incluindo transações, produtos,
+                clientes, custos, leads, insights e configurações ligadas a está empresa.
               </p>
             </div>
 

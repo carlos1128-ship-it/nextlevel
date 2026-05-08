@@ -89,7 +89,7 @@ const PlanUsage = () => {
         if (!cancelled) setUsage(data);
       })
       .catch((err) => {
-        if (!cancelled) setError(getErrorMessage(err, "Nao foi possivel carregar o uso do plano."));
+        if (!cancelled) setError(getErrorMessage(err, "Não foi possível carregar o uso do plano."));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -121,7 +121,7 @@ const PlanUsage = () => {
   if (error) {
     return (
       <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-red-100">
-        <h1 className="text-xl font-black">Uso do plano indisponivel</h1>
+        <h1 className="text-xl font-black">Uso do plano indisponível</h1>
         <p className="mt-2 text-sm text-red-200">{error}</p>
       </div>
     );
@@ -141,7 +141,7 @@ const PlanUsage = () => {
       <header className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-900 dark:bg-zinc-950">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-lime-500 dark:text-lime-400">Uso do Plano</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-lime-500 dark:text-lime-400">Uso do plano</p>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">
               Plano {planLabels[usage.planKey] || usage.planKey}
             </h1>
@@ -161,7 +161,7 @@ const PlanUsage = () => {
 
       {exceeded ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-5 text-sm font-semibold text-red-100">
-          Voce atingiu o limite de IA deste mes. Faca upgrade de plano para continuar.
+          Você atingiu o limite de IA deste mes. Faca upgrade de plano para continuar.
         </div>
       ) : null}
 
@@ -174,7 +174,7 @@ const PlanUsage = () => {
       <footer className="flex items-start gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 text-sm text-zinc-600 dark:border-zinc-900 dark:bg-zinc-950/70 dark:text-zinc-400">
         <ActivityIcon className="mt-0.5 h-5 w-5 shrink-0 text-lime-500" />
         <p>
-          O painel considera chamadas de Chat IA, Atendente WhatsApp e Importacao Inteligente. Custos internos ficam disponiveis apenas no painel admin.
+          O painel considera chamadas de Chat IA, Atendente WhatsApp e Importação Inteligente. Custos internos ficam disponíveis apenas no painel admin.
         </p>
       </footer>
     </div>

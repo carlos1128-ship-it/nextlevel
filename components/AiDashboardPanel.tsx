@@ -54,7 +54,7 @@ export default function AiDashboardPanel({
   if (loading) {
     return (
       <section className="rounded-3xl border border-zinc-900 bg-zinc-950 p-7">
-        <p className="text-sm font-bold text-zinc-400">Analisando sinais do negocio...</p>
+        <p className="text-sm font-bold text-zinc-400">Analisando sinais do negócio...</p>
       </section>
     );
   }
@@ -65,7 +65,7 @@ export default function AiDashboardPanel({
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Camada inteligente</p>
           <h2 className="mt-2 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
-            NEXT LEVEL entende o negocio inteiro
+            NEXT LEVEL entende o negócio inteiro
           </h2>
         </div>
         <span className="rounded-full border border-zinc-800 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
@@ -82,7 +82,7 @@ export default function AiDashboardPanel({
 
       {data?.nextBestActions?.length ? (
         <div className="rounded-3xl border border-zinc-800/90 bg-black/40 p-5">
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Proximas acoes</p>
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Próximas ações</p>
           <div className="grid gap-3 md:grid-cols-3">
             {data.nextBestActions.map((action) => (
               <div key={`${action.type}-${action.title}`} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">

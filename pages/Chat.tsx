@@ -10,8 +10,8 @@ import { getErrorMessage } from "../src/services/error";
 const CHAT_STORAGE_KEY = "chat_history_v1";
 const QUICK_PROMPTS = [
   "Resuma as perdas de hoje e me diga onde agir primeiro.",
-  "Quais setores da empresa merecem mais atencao agora?",
-  "Monte um plano de otimização de custos para esta semana.",
+  "Quais setores da empresa merecem mais atenção agora?",
+  "Monte um plano de otimização de custos para está semana.",
 ];
 
 const TypingIndicator = () => (
@@ -42,7 +42,7 @@ const Chat = () => {
     const raw = localStorage.getItem(CHAT_STORAGE_KEY);
     const seedMessage = {
       id: 1,
-      text: `Ola ${username || "usuario"}! Estou pronto para analisar a operacao da sua empresa e apontar riscos, perdas e oportunidades.`,
+      text: `Ola ${username || "usuário"}! Estou pronto para analisar a operação da sua empresa e apontar riscos, perdas e oportunidades.`,
       sender: "ai" as const,
     };
 
@@ -130,16 +130,16 @@ const Chat = () => {
         {
           id: Date.now() + 1,
           text: isUsageLimit
-            ? "Voce atingiu o limite de IA deste mes. Faca upgrade de plano para continuar."
+            ? "Você atingiu o limite de IA deste mes. Faca upgrade de plano para continuar."
             : isGeminiError
-              ? "A IA esta sobrecarregada no momento. Tente novamente em alguns segundos ou minutos."
-              : "Nao consegui responder agora. Tente novamente em alguns segundos.",
+              ? "A IA está sobrecarregada no momento. Tente novamente em alguns segundos ou minutos."
+              : "Não consegui responder agora. Tente novamente em alguns segundos.",
           sender: "ai",
         },
       ]);
       addToast(
         isUsageLimit
-          ? "Voce atingiu o limite de IA deste mes. Veja os planos para continuar."
+          ? "Você atingiu o limite de IA deste mes. Veja os planos para continuar."
           : isGeminiError
             ? "Aviso: IA sobrecarregada, tente novamente em alguns segundos"
             : message,
@@ -159,7 +159,7 @@ const Chat = () => {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-lime-400">Assistente IA</p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-100">Chat estrategico</h1>
+            <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-100">Chat estratégico</h1>
             <p className="mt-1 text-sm text-zinc-400">
               Conversando sobre <span className="text-zinc-200">{companyName}</span>
             </p>
@@ -170,7 +170,7 @@ const Chat = () => {
               setMessages([
                 {
                   id: 1,
-                  text: `Ola ${username || "usuario"}! Estou pronto para analisar a operacao da sua empresa e apontar riscos, perdas e oportunidades.`,
+                  text: `Ola ${username || "usuário"}! Estou pronto para analisar a operação da sua empresa e apontar riscos, perdas e oportunidades.`,
                   sender: "ai",
                 },
               ]);
@@ -249,7 +249,7 @@ const Chat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && void sendMessage()}
-            placeholder="Pergunte sobre perdas, fluxo de caixa, operacao, vendas ou oportunidades..."
+            placeholder="Pergunte sobre perdas, fluxo de caixa, operação, vendas ou oportunidades..."
             className="w-full rounded-full border border-zinc-800 bg-zinc-900 py-3 pl-5 pr-14 text-zinc-100 transition focus:border-lime-400 focus:outline-none"
           />
           <button

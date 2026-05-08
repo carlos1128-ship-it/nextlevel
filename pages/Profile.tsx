@@ -44,7 +44,7 @@ const Profile = () => {
       await updateUserProfile({ name });
       addToast("Perfil atualizado com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel atualizar o perfil."), "error");
+      addToast(getErrorMessage(error, "Não foi possível atualizar o perfil."), "error");
     } finally {
       setSavingProfile(false);
     }
@@ -62,7 +62,7 @@ const Profile = () => {
       setNewPassword("");
       addToast("Senha alterada com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel alterar a senha."), "error");
+      addToast(getErrorMessage(error, "Não foi possível alterar a senha."), "error");
     } finally {
       setSavingPassword(false);
     }
@@ -76,7 +76,7 @@ const Profile = () => {
       addToast("Conta excluida com sucesso.", "success");
       logout();
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel excluir a conta."), "error");
+      addToast(getErrorMessage(error, "Não foi possível excluir a conta."), "error");
     } finally {
       setDeleting(false);
     }
@@ -93,8 +93,8 @@ const Profile = () => {
               {avatarLabel}
             </div>
             <div>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{name || username || "Usuario"}</p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">{email || "Email nao informado"}</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{name || username || "Usuário"}</p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">{email || "Email não informado"}</p>
             </div>
           </div>
           <div className="rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-700">

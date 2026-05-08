@@ -28,14 +28,14 @@ export default function NotFound() {
           </div>
 
           <p className="mt-8 text-center text-xs font-semibold uppercase tracking-[0.24em] text-lime-200/70">
-            Pagina nao encontrada
+            Página não encontrada
           </p>
           <h1 className="mt-3 text-center text-4xl font-black tracking-tight text-white md:text-6xl">
             Esse caminho saiu do mapa
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-center text-base leading-8 text-zinc-300">
-            A rota que voce tentou abrir nao esta disponivel agora. Volte rapido para a area principal
-            e continue a operacao sem perder contexto.
+            A rota que você tentou abrir não está disponível agora. Volte rápido para a Area principal
+            e continue a operação sem perder contexto.
           </p>
 
           <div className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
@@ -71,7 +71,7 @@ export default function NotFound() {
             onClick={() => window.history.back()}
             className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-transparent px-6 py-4 text-sm font-semibold text-zinc-300 transition hover:border-lime-400/20 hover:text-white"
           >
-            Voltar uma pagina
+            Voltar uma página
           </button>
           </div>
         </div>

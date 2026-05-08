@@ -68,7 +68,7 @@ const Costs = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar custos.");
+      const message = getErrorMessage(err, "Não foi possível carregar custos.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -226,7 +226,7 @@ const Costs = () => {
               type="submit"
               className="rounded-xl bg-lime-400 px-3 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
             >
-              {editingId ? "Salvar alteracoes" : "Registrar"}
+              {editingId ? "Salvar alterações" : "Registrar"}
             </button>
           </form>
         </div>
@@ -260,7 +260,7 @@ const Costs = () => {
             />
           </div>
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs text-zinc-500">Itens por pagina</label>
+            <label className="text-xs text-zinc-500">Itens por página</label>
             <select
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value) || 10)}
@@ -303,7 +303,7 @@ const Costs = () => {
                 {pagination.total} custo{pagination.total === 1 ? "" : "s"}
               </p>
               <p className="text-xs text-zinc-500">
-                Pagina {pagination.page} de {pagination.totalPages || 1}
+                Página {pagination.page} de {pagination.totalPages || 1}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -319,7 +319,7 @@ const Costs = () => {
                 onClick={() => changePage(page + 1)}
                 disabled={pagination.totalPages !== 0 && page >= pagination.totalPages}
               >
-                Proxima
+                Próxima
               </button>
             </div>
           </div>
@@ -332,7 +332,7 @@ const Costs = () => {
                   <th className="px-3 py-2 text-left">Categoria</th>
                   <th className="px-3 py-2 text-left">Data</th>
                   <th className="px-3 py-2 text-right">Valor</th>
-                  <th className="px-3 py-2 text-right">Acoes</th>
+                  <th className="px-3 py-2 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900 text-zinc-100">

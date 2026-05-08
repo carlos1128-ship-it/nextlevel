@@ -14,7 +14,7 @@ const CATEGORY_LABELS: Record<DashboardMetricCategory | "all", string> = {
   marketing: "Marketing",
   products: "Produtos",
   customers: "Clientes",
-  operations: "Operacao",
+  operations: "Operação",
   ai_insights: "IA/Insights",
 };
 
@@ -97,7 +97,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
       setAvailableMetrics(metrics);
       setPreferences(sortPreferences(prefs));
     } catch (err) {
-      setError(getErrorMessage(err, "Nao foi possivel carregar as preferencias."));
+      setError(getErrorMessage(err, "Não foi possível carregar as preferencias."));
     } finally {
       setLoading(false);
     }
@@ -141,7 +141,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
       window.dispatchEvent(new Event("dashboard:preferences-updated"));
       onToast("Dashboard personalizado salvo.", "success");
     } catch (err) {
-      onToast(getErrorMessage(err, "Falha ao salvar personalizacao."), "error");
+      onToast(getErrorMessage(err, "Falha ao salvar personalização."), "error");
     } finally {
       setSaving(false);
     }
@@ -173,7 +173,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
             Dashboard
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
-            Escolha quais indicadores aparecem para esta empresa. A preferencia fica salva por empresa, nao apenas neste navegador.
+            Escolha quais indicadores aparecem para esta empresa. A preferência fica salva por empresa, não apenas neste navegador.
           </p>
         </div>
         <div className="flex gap-2">
@@ -231,7 +231,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
         </div>
       ) : loading ? (
         <div className="rounded-2xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800">
-          Carregando metricas...
+          Carregando métricas...
         </div>
       ) : error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">

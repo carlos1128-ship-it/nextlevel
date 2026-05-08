@@ -35,17 +35,17 @@ export const metadata: Metadata = {
   keywords: [
     "Lucro Real",
     "Margem Verdadeira",
-    "Automacao de Vendas",
+    "Automação de Vendas",
     "WhatsApp",
     "Mercado Livre",
     "Shopee",
-    "Operacao Tatica",
+    "Operação Tática",
     "Next Level",
   ],
   openGraph: {
     title: "Next Level | Lucro Real ou Colapso",
     description:
-      "O cerebro tatico do seu negocio para enxergar a margem que sua operacao queima sem saber.",
+      "O cérebro tático do seu negócio para enxergar a margem que sua operação queima sem saber.",
     image: `${defaultSiteUrl}/og-sales-ai.svg`,
     url: defaultSiteUrl,
     type: "website",
@@ -69,25 +69,25 @@ export function resolveMetadata(pathname: string): Metadata {
     "/inicio": "Dashboard | Next Level",
     "/home": "Dashboard | Next Level",
     "/painel": "Dashboard | Next Level",
-    "/reports": "Relatorios | Next Level",
+    "/reports": "Relatórios | Next Level",
     "/chat": "Chat IA | Next Level",
-    "/settings": "Configuracoes | Next Level",
+    "/settings": "Configurações | Next Level",
     "/profile": "Perfil | Next Level",
-    "/integrations": "Integracoes | Next Level",
+    "/integrations": "Integrações | Next Level",
     "/companies": "Empresas | Next Level",
     "/insights": "Insights | Next Level",
     "/market-intel": "Mercado | Next Level",
-    "/financial-flow": "Fluxo Financeiro | Next Level",
-    "/finance": "Fluxo Financeiro | Next Level",
+    "/financial-flow": "Fluxo financeiro | Next Level",
+    "/finance": "Fluxo financeiro | Next Level",
     "/products": "Produtos | Next Level",
     "/customers": "Clientes | Next Level",
     "/costs": "Custos | Next Level",
     "/attendant": "Atendente IA | Next Level",
     "/command-center": "Projetos | Next Level",
     "/plans": "Planos | Next Level",
-    "/add-data": "Adicionar Dados | Next Level",
-    "/usage": "Uso do Plano | Next Level",
-    "/plan-usage": "Uso do Plano | Next Level",
+    "/add-data": "Adicionar dados | Next Level",
+    "/usage": "Uso do plano | Next Level",
+    "/plan-usage": "Uso do plano | Next Level",
     "/admin/system-health": "System Health | Next Level",
   };
 
@@ -101,7 +101,7 @@ export function resolveMetadata(pathname: string): Metadata {
 
   const description =
     isNotFoundRoute
-      ? "A rota procurada nao foi encontrada. Volte rapido para a operacao principal."
+      ? "A rota procurada não foi encontrada. Volte rápido para a operação principal."
       : metadata.description;
 
   const canonicalUrl = `${defaultSiteUrl}${normalizedPath === "/" ? "" : normalizedPath}`;

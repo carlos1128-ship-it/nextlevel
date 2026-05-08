@@ -104,7 +104,7 @@ const ChromeShieldStage = () => (
 
           <div className="absolute bottom-4 right-4 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 backdrop-blur">
             <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">
-              alerta tatico
+              alerta tático
             </p>
             <p className="mt-1 text-sm font-bold text-lime-200">Frete ajustado antes do prejuizo</p>
           </div>
@@ -140,7 +140,7 @@ const ChromeShieldStage = () => (
             <ArrowUpRightIcon className="h-8 w-8 text-lime-200" />
           </div>
           <p className="mt-3 text-sm leading-6 text-lime-50/80">
-            A linha da vida vira comando. Preco, custo e canal entram em harmonia.
+            A linha da vida vira comando. Preço, custo e canal entram em harmonia.
           </p>
         </article>
 
@@ -149,7 +149,7 @@ const ChromeShieldStage = () => (
             Presenting
           </p>
           <p className="mt-2 text-base font-black tracking-[-0.03em] text-white">
-            O cerebro tatico do seu negocio
+            O cérebro tático do seu negócio
           </p>
           <p className="mt-3 text-sm leading-6 text-zinc-400">
             Uma camada de leitura simples para uma batalha que nunca foi simples.
