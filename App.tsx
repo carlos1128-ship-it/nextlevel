@@ -15,7 +15,7 @@ import { useTheme } from './src/hooks/useTheme';
 import type { Company, DetailLevel, UserNiche } from './src/types/domain';
 import NotFound from './src/app/not-found';
 import { applyMetadata, resolveMetadata } from './src/app/layout';
-import { getCompanies, getCompanyPersonalizationStatus, getUserProfile } from './src/services/endpoints';
+import { getBillingMe, getCompanies, getCompanyPersonalizationStatus, getUserProfile } from './src/services/endpoints';
 import api from './src/services/api';
 
 // Lazy load pages with heavy dependencies
@@ -24,6 +24,7 @@ const Reports = lazy(() => import('./pages/Reports'));
 const Insights = lazy(() => import('./pages/Insights'));
 const FinancialFlow = lazy(() => import('./pages/FinancialFlow'));
 const Plans = lazy(() => import('./pages/Plans'));
+const BillingSuccess = lazy(() => import('./pages/BillingSuccess'));
 const PlanUsage = lazy(() => import('./pages/PlanUsage'));
 const Products = lazy(() => import('./pages/Products'));
 const Customers = lazy(() => import('./pages/Customers'));
@@ -374,6 +375,44 @@ const OnboardingGate = ({ children }: { children?: ReactNode }) => {
   return <>{children}</>;
 };
 
+const BillingGate = ({ children }: { children?: ReactNode }) => {
+  const location = useLocation();
+  const { isLoggedIn, isAdmin, isProfileReady } = useAuth();
+  const [checking, setChecking] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!isLoggedIn || !isProfileReady || isAdmin) {
+      setChecking(false);
+      setHasAccess(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setChecking(true);
+    getBillingMe()
+      .then((billing) => {
+        if (!cancelled) setHasAccess(Boolean(billing.hasActiveSubscription));
+      })
+      .catch(() => {
+        if (!cancelled) setHasAccess(false);
+      })
+      .finally(() => {
+        if (!cancelled) setChecking(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, isProfileReady, isAdmin, location.pathname]);
+
+  if (checking) return <FullscreenLoading label="Validando assinatura" />;
+  if (!hasAccess) return <Navigate to="/planos" replace />;
+  return <>{children}</>;
+};
+
 const App = () => {
   return (
     <AuthProvider>
@@ -415,7 +454,11 @@ const GoogleAuthCallback = () => {
         localStorage.setItem('refresh_token', refreshToken);
       }
       login({ name, email, admin, niche: null });
-      navigate(DASHBOARD_ROUTE, { replace: true });
+      getBillingMe()
+        .then((billing) => {
+          navigate(billing.hasActiveSubscription || admin ? DASHBOARD_ROUTE : '/planos', { replace: true });
+        })
+        .catch(() => navigate('/planos', { replace: true }));
     } else {
       navigate('/login?error=google_auth_failed', { replace: true });
     }
@@ -437,18 +480,22 @@ const AppContent = () => {
   const { isLoggedIn } = useAuth();
   const personalizedShell = (page: ReactNode) => (
     <ProtectedRoute>
-      <OnboardingGate>
-        <Layout>
-          {page}
-        </Layout>
-      </OnboardingGate>
+      <BillingGate>
+        <OnboardingGate>
+          <Layout>
+            {page}
+          </Layout>
+        </OnboardingGate>
+      </BillingGate>
     </ProtectedRoute>
   );
   const plainShell = (page: ReactNode) => (
     <ProtectedRoute>
-      <Layout>
-        {page}
-      </Layout>
+      <BillingGate>
+        <Layout>
+          {page}
+        </Layout>
+      </BillingGate>
     </ProtectedRoute>
   );
   const dashboardShell = personalizedShell(<Dashboard />);
@@ -468,7 +515,9 @@ const AppContent = () => {
       }>
         <Routes>
           <Route path="/auth/callback" element={<GoogleAuthCallback />} />
-          <Route path="/login" element={isLoggedIn ? <Navigate to={DASHBOARD_ROUTE} replace /> : <LoginPage />} />
+          <Route path="/login" element={isLoggedIn ? <Navigate to="/planos" replace /> : <LoginPage />} />
+          <Route path="/planos" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
+          <Route path="/billing/success" element={<ProtectedRoute><BillingSuccess /></ProtectedRoute>} />
           <Route path="/onboarding/personalization" element={<ProtectedRoute><OnboardingPersonalization /></ProtectedRoute>} />
           <Route path="/" element={isLoggedIn ? <Navigate to={DASHBOARD_ROUTE} replace /> : <LoginPage />} />
           <Route path="/inicio" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
@@ -495,7 +544,7 @@ const AppContent = () => {
           <Route path="/attendant" element={personalizedShell(<Attendant />)} />
           <Route path="/admin/system-health" element={<AdminRoute><Layout><SystemHealth /></Layout></AdminRoute>} />
           <Route path="/command-center" element={personalizedShell(<CommandCenter />)} />
-          <Route path="/plans" element={plainShell(<Plans />)} />
+          <Route path="/plans" element={<Navigate to="/planos" replace />} />
           <Route path="/usage" element={personalizedShell(<PlanUsage />)} />
           <Route path="/plan-usage" element={<Navigate to="/usage" replace />} />
           <Route path="*" element={<NotFound />} />

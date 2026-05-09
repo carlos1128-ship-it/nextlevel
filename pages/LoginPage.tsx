@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
 import { api } from "../services/api";
+import { BillingCycle, BillingPlanKey, getBillingMe } from "../src/services/endpoints";
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Helpers
@@ -210,27 +211,30 @@ const INTEGRATIONS = [
 
 const PRICING = [
   {
-    name: "Common",
-    monthlyPrice: "R$ 97", annualPrice: "R$ 1.067",
+    key: "COMMON" as BillingPlanKey,
+    name: "Comum",
+    monthlyPrice: "R$ 49,90", annualPrice: "R$ 499",
     summary: "A base para organizar sua operação e ter visibilidade real desde o primeiro acesso.",
     features: ["Calculadora de margem inteligente", "Até 2 empresas vinculadas", "Dashboard em tempo real", "IA básica de análise", "Suporte via e-mail"],
     cta: "Assinar agora", recommended: false,
-    microcopy: "Acesso imediato - Sem fidelidade",
+    microcopy: "Checkout seguro via AbacatePay",
   },
   {
+    key: "PREMIUM" as BillingPlanKey,
     name: "Premium",
-    monthlyPrice: "R$ 137", annualPrice: "R$ 1.507",
+    monthlyPrice: "R$ 97", annualPrice: "R$ 970",
     summary: "A camada que organiza vendas, margem e atendimento no ritmo real da sua operação.",
     features: ["Até 10 empresas vinculadas", "WhatsApp + Instagram integrados", "Alertas inteligentes de margem", "Relatórios automáticos semanais", "Recomendações táticas da IA", "Suporte prioritário"],
     cta: "Ativar Premium", recommended: true,
     microcopy: "Pensado pra escalar sem queimar lucro",
   },
   {
+    key: "PRO_BUSINESS" as BillingPlanKey,
     name: "Pro Business",
-    monthlyPrice: "R$ 247", annualPrice: "R$ 2.717",
+    monthlyPrice: "R$ 197", annualPrice: "R$ 1.970",
     summary: "Para operações em expansão que precisam de previsibilidade, velocidade e zero improviso.",
     features: ["Empresas ilimitadas", "Tudo do Premium", "Mercado Livre + Utmify + marketplaces", "Previsões e alertas avançados", "Integrações guiadas", "Acompanhamento dedicado"],
-    cta: "Falar com consultor", recommended: false,
+    cta: "Assinar Pro Business", recommended: false,
     microcopy: "Para quem opera em outro nível",
   },
 ];
@@ -537,6 +541,22 @@ const LoginPage: React.FC = () => {
     document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  const selectPlanAndLogin = (planKey: BillingPlanKey, register = true) => {
+    const billingCycle: BillingCycle = billingAnnual ? "ANNUAL" : "MONTHLY";
+    localStorage.setItem("selectedPlan", JSON.stringify({ planKey, billingCycle }));
+    focusAuth(register);
+  };
+
+  const goAfterAuth = async (user: any) => {
+    login(user);
+    try {
+      const billing = await getBillingMe();
+      navigate(billing.hasActiveSubscription || user?.admin ? "/dashboard" : "/planos", { replace: true });
+    } catch {
+      navigate("/planos", { replace: true });
+    }
+  };
+
   const scrollToWhatWeDo = () => {
     document.getElementById("o-que-fazemos")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -560,8 +580,13 @@ const LoginPage: React.FC = () => {
     setLoading(true); setError("");
     try {
       const res = await api.post("/auth/login", { email, password });
-      const token = res.data?.token || res.data?.data?.token;
-      if (token) { login(token, res.data?.user || res.data?.data?.user); navigate("/dashboard"); }
+      const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
+      const refreshToken = res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
+      if (token) {
+        localStorage.setItem("access_token", token);
+        if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
+        await goAfterAuth(res.data?.user || res.data?.data?.user || {});
+      }
       else setError("Resposta inesperada do servidor.");
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.response?.data?.error || "Credenciais inválidas.");
@@ -571,12 +596,17 @@ const LoginPage: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) { setError("Preencha todos os campos."); return; }
-    if (password.length < 6) { setError("Senha deve ter pelo menos 6 caracteres."); return; }
+    if (password.length < 8) { setError("Senha deve ter pelo menos 8 caracteres."); return; }
     setLoading(true); setError("");
     try {
-      const res = await api.post("/auth/register", { name, email, password });
-      const token = res.data?.token || res.data?.data?.token;
-      if (token) { login(token, res.data?.user || res.data?.data?.user); navigate("/dashboard"); }
+      const res = await api.post("/auth/register", { name, email, password, companyName: name || "Minha Empresa" });
+      const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
+      const refreshToken = res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
+      if (token) {
+        localStorage.setItem("access_token", token);
+        if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
+        await goAfterAuth(res.data?.user || res.data?.data?.user || {});
+      }
       else setError("Erro ao criar conta.");
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.response?.data?.error || "Erro ao criar conta.");
@@ -925,7 +955,7 @@ const LoginPage: React.FC = () => {
                     </li>
                   ))}
                 </ul>
-                <button type="button" onClick={() => focusAuth(true)}
+                <button type="button" onClick={() => selectPlanAndLogin(plan.key, true)}
                   className={`mt-6 w-full rounded-[18px] py-3.5 text-sm font-black uppercase tracking-[0.14em] transition hover:-translate-y-0.5 ${
                     plan.recommended
                       ? "bg-lime-300 text-zinc-950 shadow-[0_0_24px_rgba(182,255,0,0.2)] hover:brightness-105"
