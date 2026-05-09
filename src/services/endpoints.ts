@@ -1693,3 +1693,55 @@ export async function getAIUsageLimits(params?: { companyId?: string | null }) {
   });
   return data;
 }
+
+export type BillingCycle = "MONTHLY" | "ANNUAL";
+export type BillingPlanKey = "COMMON" | "PREMIUM" | "PRO_BUSINESS";
+
+export type BillingPlanPrice = {
+  amountInCents: number;
+  currency: string;
+  available: boolean;
+};
+
+export type BillingPlan = {
+  key: BillingPlanKey;
+  name: string;
+  description: string | null;
+  level: number;
+  features: string[];
+  prices: Partial<Record<BillingCycle, BillingPlanPrice>>;
+};
+
+export type BillingMeResponse = {
+  hasActiveSubscription: boolean;
+  subscription: null | {
+    id: string;
+    planKey: BillingPlanKey;
+    billingCycle: BillingCycle;
+    status: string;
+    currentPeriodEnd: string | null;
+    expiresAt: string | null;
+  };
+};
+
+export async function getBillingPlans() {
+  const { data } = await api.get<{ plans: BillingPlan[] }>("/billing/plans");
+  return Array.isArray(data?.plans) ? data.plans : [];
+}
+
+export async function getBillingMe() {
+  const { data } = await api.get<BillingMeResponse>("/billing/me");
+  return data;
+}
+
+export async function createBillingCheckout(payload: {
+  planKey: BillingPlanKey;
+  billingCycle: BillingCycle;
+}) {
+  const { data } = await api.post<{
+    checkoutUrl: string;
+    subscriptionId: string;
+    status: string;
+  }>("/billing/checkout", payload);
+  return data;
+}

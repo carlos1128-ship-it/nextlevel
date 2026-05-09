@@ -127,6 +127,18 @@ function dispatchFriendlyApiError(error: AxiosError) {
     window.dispatchEvent(new CustomEvent(COMPANY_ACCESS_INVALID_EVENT));
   }
 
+  const payload = error.response?.data as { code?: string } | undefined;
+  if (
+    error.response?.status === 402 ||
+    payload?.code === 'SUBSCRIPTION_REQUIRED' ||
+    payload?.code === 'PLAN_UPGRADE_REQUIRED'
+  ) {
+    if (!window.location.pathname.startsWith('/planos')) {
+      window.location.assign(payload?.code === 'PLAN_UPGRADE_REQUIRED' ? '/planos?upgrade=true' : '/planos');
+    }
+    return;
+  }
+
   const message = getErrorMessage(
     error,
     'Algo saiu do fluxo esperado, mas sua operação continua protegida.',
