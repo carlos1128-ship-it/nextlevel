@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../App";
 import { api } from "../services/api";
 import { BillingCycle, BillingPlanKey, getBillingMe } from "../src/services/endpoints";
+import {
+  buildPlanosSubscribeUrl,
+  clearPendingSelectedPlan,
+  planSelectionLabel,
+  PendingPlanSelection,
+  readPendingSelectedPlan,
+  readPlanSelectionFromSearch,
+  savePendingSelectedPlan,
+} from "../src/utils/billingSelection";
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Helpers
@@ -395,12 +404,16 @@ interface AuthPanelProps {
   password: string; setPassword: (v: string) => void;
   showPassword: boolean; setShowPassword: (v: boolean) => void;
   error: string; loading: boolean; setError: (v: string) => void;
+  selectedPlanLabel?: string | null;
+  subscribeIntent?: boolean;
+  onGoogleLogin: () => void;
 }
 
 const AuthPanel: React.FC<AuthPanelProps> = ({
   isRegisterView, setIsRegisterView, onLogin, onRegister,
   name, setName, email, setEmail, password, setPassword,
   showPassword, setShowPassword, error, loading, setError,
+  selectedPlanLabel, subscribeIntent, onGoogleLogin,
 }) => (
   <aside id="auth-panel" className="sticky top-6 self-start">
     <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.14] bg-[linear-gradient(200deg,rgba(14,20,28,0.99),rgba(6,8,12,0.99))] shadow-[0_32px_100px_rgba(0,0,0,0.6),0_0_0_1px_rgba(182,255,0,0.03),inset_0_1px_0_rgba(255,255,255,0.04)]">
@@ -419,6 +432,19 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
           </div>
         </div>
 
+        {(subscribeIntent || selectedPlanLabel) && (
+          <div className="mb-5 rounded-[18px] border border-lime-400/20 bg-lime-400/10 p-4">
+            <p className="text-sm font-bold text-lime-100">
+              Entre ou crie sua conta para continuar sua assinatura.
+            </p>
+            {selectedPlanLabel ? (
+              <p className="mt-1 text-xs font-semibold text-lime-300">
+                Você selecionou: {selectedPlanLabel}
+              </p>
+            ) : null}
+          </div>
+        )}
+
         {/* Tab selector */}
         <div className="grid grid-cols-2 rounded-[20px] border border-white/10 bg-white/[0.03] p-1 mb-5">
           <button type="button" onClick={() => { setIsRegisterView(false); setError(""); }}
@@ -433,11 +459,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
 
         {/* Google */}
         <button type="button"
-          onClick={() => {
-            const raw = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
-            const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
-            window.location.href = `${base}/auth/google`;
-          }}
+          onClick={onGoogleLogin}
           className="flex w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] mb-4">
           <GoogleIcon /> Google
         </button>
@@ -509,6 +531,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const [isRegisterView, setIsRegisterView] = useState(false);
   const [name, setName] = useState("");
@@ -518,6 +541,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [billingAnnual, setBillingAnnual] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<PendingPlanSelection | null>(null);
   const [activeStat, setActiveStat] = useState(0);
   const [isInsightPaused, setIsInsightPaused] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: -400, y: -400 });
@@ -541,20 +565,51 @@ const LoginPage: React.FC = () => {
     document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  useEffect(() => {
+    const nextSelection = readPlanSelectionFromSearch(searchParams) || readPendingSelectedPlan();
+    if (!nextSelection) return;
+
+    setSelectedPlan(nextSelection);
+    setBillingAnnual(nextSelection.billingCycle === "ANNUAL");
+    savePendingSelectedPlan(nextSelection);
+
+    if (searchParams.get("intent") === "subscribe") {
+      window.setTimeout(() => focusAuth(false), 120);
+    }
+  }, [searchParams]);
+
   const selectPlanAndLogin = (planKey: BillingPlanKey, register = true) => {
     const billingCycle: BillingCycle = billingAnnual ? "ANNUAL" : "MONTHLY";
-    localStorage.setItem("selectedPlan", JSON.stringify({ planKey, billingCycle }));
+    const selection = { planKey, billingCycle };
+    savePendingSelectedPlan(selection);
+    setSelectedPlan(selection);
+    navigate(`/login?intent=subscribe&plan=${planKey}&cycle=${billingCycle}`, { replace: false });
     focusAuth(register);
   };
 
   const goAfterAuth = async (user: any) => {
     login(user);
+    const pendingPlan = readPlanSelectionFromSearch(searchParams) || readPendingSelectedPlan();
     try {
       const billing = await getBillingMe();
-      navigate(billing.hasActiveSubscription || user?.admin ? "/dashboard" : "/planos", { replace: true });
+      if (billing.hasActiveSubscription) {
+        clearPendingSelectedPlan();
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+      navigate(pendingPlan ? buildPlanosSubscribeUrl(pendingPlan) : "/planos", { replace: true });
     } catch {
-      navigate("/planos", { replace: true });
+      navigate(pendingPlan ? buildPlanosSubscribeUrl(pendingPlan) : "/planos", { replace: true });
     }
+  };
+
+  const handleGoogleLogin = () => {
+    const pendingPlan = readPlanSelectionFromSearch(searchParams) || selectedPlan || readPendingSelectedPlan();
+    if (pendingPlan) savePendingSelectedPlan(pendingPlan);
+
+    const raw = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+    const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
+    window.location.href = `${base}/auth/google`;
   };
 
   const scrollToWhatWeDo = () => {
@@ -727,6 +782,9 @@ const LoginPage: React.FC = () => {
             password={password} setPassword={setPassword}
             showPassword={showPassword} setShowPassword={setShowPassword}
             error={error} loading={loading} setError={setError}
+            selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
+            subscribeIntent={searchParams.get("intent") === "subscribe"}
+            onGoogleLogin={handleGoogleLogin}
           />
         </section>
 

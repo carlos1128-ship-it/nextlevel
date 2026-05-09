@@ -17,6 +17,12 @@ import NotFound from './src/app/not-found';
 import { applyMetadata, resolveMetadata } from './src/app/layout';
 import { getBillingMe, getCompanies, getCompanyPersonalizationStatus, getUserProfile } from './src/services/endpoints';
 import api from './src/services/api';
+import {
+  buildPlanosSubscribeUrl,
+  clearPendingSelectedPlan,
+  readPendingSelectedPlan,
+  readPlanSelectionFromSearch,
+} from './src/utils/billingSelection';
 
 // Lazy load pages with heavy dependencies
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -377,15 +383,15 @@ const OnboardingGate = ({ children }: { children?: ReactNode }) => {
 
 const BillingGate = ({ children }: { children?: ReactNode }) => {
   const location = useLocation();
-  const { isLoggedIn, isAdmin, isProfileReady } = useAuth();
+  const { isLoggedIn, isProfileReady } = useAuth();
   const [checking, setChecking] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    if (!isLoggedIn || !isProfileReady || isAdmin) {
+    if (!isLoggedIn || !isProfileReady) {
       setChecking(false);
-      setHasAccess(true);
+      setHasAccess(!isLoggedIn);
       return () => {
         cancelled = true;
       };
@@ -406,7 +412,7 @@ const BillingGate = ({ children }: { children?: ReactNode }) => {
     return () => {
       cancelled = true;
     };
-  }, [isLoggedIn, isProfileReady, isAdmin, location.pathname]);
+  }, [isLoggedIn, isProfileReady, location.pathname]);
 
   if (checking) return <FullscreenLoading label="Validando assinatura" />;
   if (!hasAccess) return <Navigate to="/planos" replace />;
@@ -447,6 +453,7 @@ const GoogleAuthCallback = () => {
     const name = searchParams.get('name');
     const email = searchParams.get('email');
     const admin = searchParams.get('admin') === 'true';
+    const selectedPlan = readPendingSelectedPlan();
 
     if (token) {
       localStorage.setItem('access_token', token);
@@ -456,9 +463,14 @@ const GoogleAuthCallback = () => {
       login({ name, email, admin, niche: null });
       getBillingMe()
         .then((billing) => {
-          navigate(billing.hasActiveSubscription || admin ? DASHBOARD_ROUTE : '/planos', { replace: true });
+          if (billing.hasActiveSubscription) {
+            clearPendingSelectedPlan();
+            navigate(DASHBOARD_ROUTE, { replace: true });
+            return;
+          }
+          navigate(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos', { replace: true });
         })
-        .catch(() => navigate('/planos', { replace: true }));
+        .catch(() => navigate(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos', { replace: true }));
     } else {
       navigate('/login?error=google_auth_failed', { replace: true });
     }
@@ -474,6 +486,12 @@ const GoogleAuthCallback = () => {
       </div>
     </div>
   );
+};
+
+const LoggedInLoginRedirect = () => {
+  const [searchParams] = useSearchParams();
+  const selectedPlan = readPlanSelectionFromSearch(searchParams) || readPendingSelectedPlan();
+  return <Navigate to={selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : "/planos"} replace />;
 };
 
 const AppContent = () => {
@@ -515,7 +533,7 @@ const AppContent = () => {
       }>
         <Routes>
           <Route path="/auth/callback" element={<GoogleAuthCallback />} />
-          <Route path="/login" element={isLoggedIn ? <Navigate to="/planos" replace /> : <LoginPage />} />
+          <Route path="/login" element={isLoggedIn ? <LoggedInLoginRedirect /> : <LoginPage />} />
           <Route path="/planos" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
           <Route path="/billing/success" element={<ProtectedRoute><BillingSuccess /></ProtectedRoute>} />
           <Route path="/onboarding/personalization" element={<ProtectedRoute><OnboardingPersonalization /></ProtectedRoute>} />
