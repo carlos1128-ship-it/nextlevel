@@ -9,8 +9,15 @@ import {
   getBillingMe,
   getBillingPlans,
 } from "../src/services/endpoints";
-
-const SELECTED_PLAN_KEY = "selectedPlan";
+import {
+  clearPendingSelectedPlan,
+  planLabel,
+  planSelectionLabel,
+  PendingPlanSelection,
+  readPendingSelectedPlan,
+  readPlanSelectionFromSearch,
+  savePendingSelectedPlan,
+} from "../src/utils/billingSelection";
 
 const fallbackPlans: BillingPlan[] = [
   {
@@ -77,28 +84,30 @@ const formatMoney = (amountInCents: number) =>
     currency: "BRL",
   });
 
-const readSelectedPlan = (): { planKey: BillingPlanKey; billingCycle: BillingCycle } | null => {
-  try {
-    const raw = localStorage.getItem(SELECTED_PLAN_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
 const Plans = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { isLoggedIn, logout } = useAuth();
-  const saved = readSelectedPlan();
+  const saved = readPlanSelectionFromSearch(params) || readPendingSelectedPlan();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     saved?.billingCycle || "MONTHLY",
   );
+  const [selectedPlan, setSelectedPlan] = useState<PendingPlanSelection | null>(saved);
   const [plans, setPlans] = useState<BillingPlan[]>(fallbackPlans);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [currentSource, setCurrentSource] = useState<string | null>(null);
   const [loadingPlanKey, setLoadingPlanKey] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const nextSelection = readPlanSelectionFromSearch(params) || readPendingSelectedPlan();
+    if (!nextSelection) return;
+    setSelectedPlan(nextSelection);
+    setBillingCycle(nextSelection.billingCycle);
+    savePendingSelectedPlan(nextSelection);
+    setMessage(`Você escolheu o plano ${planSelectionLabel(nextSelection)}. Continue para finalizar o pagamento com segurança.`);
+  }, [params]);
 
   useEffect(() => {
     getBillingPlans()
@@ -114,6 +123,7 @@ const Plans = () => {
       .then((billing) => {
         setHasActiveSubscription(Boolean(billing.hasActiveSubscription));
         setCurrentPlan(billing.subscription?.planKey || null);
+        setCurrentSource(billing.subscription?.source || null);
       })
       .catch(() => {
         setHasActiveSubscription(false);
@@ -125,10 +135,21 @@ const Plans = () => {
     [plans],
   );
 
+  const updateBillingCycle = (cycle: BillingCycle) => {
+    setBillingCycle(cycle);
+    if (!selectedPlan) return;
+    const nextSelection = { ...selectedPlan, billingCycle: cycle };
+    setSelectedPlan(nextSelection);
+    savePendingSelectedPlan(nextSelection);
+  };
+
   const subscribe = async (planKey: BillingPlanKey) => {
+    const nextSelection = { planKey, billingCycle };
+    setSelectedPlan(nextSelection);
+    savePendingSelectedPlan(nextSelection);
+
     if (!isLoggedIn) {
-      localStorage.setItem(SELECTED_PLAN_KEY, JSON.stringify({ planKey, billingCycle }));
-      navigate("/login");
+      navigate(`/login?intent=subscribe&plan=${planKey}&cycle=${billingCycle}`);
       return;
     }
 
@@ -136,6 +157,7 @@ const Plans = () => {
     setMessage("Criando checkout seguro...");
     try {
       const checkout = await createBillingCheckout({ planKey, billingCycle });
+      clearPendingSelectedPlan();
       window.location.href = checkout.checkoutUrl;
     } catch (error: any) {
       const code = error?.response?.data?.code;
@@ -155,7 +177,9 @@ const Plans = () => {
         <div className="mx-auto max-w-3xl rounded-[28px] border border-lime-400/20 bg-white/[0.04] p-8 text-center shadow-[0_0_60px_rgba(182,255,0,0.08)]">
           <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Assinatura ativa</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight">Seu acesso está liberado</h1>
-          <p className="mt-4 text-zinc-400">Plano atual: {currentPlan || "ativo"}.</p>
+          <p className="mt-4 text-zinc-400">
+            Plano atual: {planLabel(currentPlan)}{currentSource ? ` (${currentSource})` : ""}.
+          </p>
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
@@ -190,19 +214,24 @@ const Plans = () => {
                 Seu plano atual não dá acesso a esse recurso.
               </p>
             ) : null}
+            {selectedPlan ? (
+              <p className="mt-3 text-sm font-bold text-lime-300">
+                Você escolheu o plano {planSelectionLabel(selectedPlan)}. Continue para finalizar o pagamento com segurança.
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex rounded-2xl border border-white/10 bg-white/[0.04] p-1">
               <button
                 type="button"
-                onClick={() => setBillingCycle("MONTHLY")}
+                onClick={() => updateBillingCycle("MONTHLY")}
                 className={`rounded-[14px] px-5 py-2 text-xs font-black uppercase tracking-[0.14em] ${billingCycle === "MONTHLY" ? "bg-white text-zinc-950" : "text-zinc-400"}`}
               >
                 Mensal
               </button>
               <button
                 type="button"
-                onClick={() => setBillingCycle("ANNUAL")}
+                onClick={() => updateBillingCycle("ANNUAL")}
                 className={`rounded-[14px] px-5 py-2 text-xs font-black uppercase tracking-[0.14em] ${billingCycle === "ANNUAL" ? "bg-lime-300 text-zinc-950" : "text-zinc-400"}`}
               >
                 Anual
@@ -231,15 +260,23 @@ const Plans = () => {
             const price = plan.prices[billingCycle];
             const available = Boolean(price?.available);
             const loading = loadingPlanKey === plan.key;
+            const isSelected = selectedPlan?.planKey === plan.key;
             return (
               <article
                 key={plan.key}
                 className={`relative flex min-h-[520px] flex-col rounded-[24px] border p-6 ${
-                  plan.key === "PREMIUM"
+                  isSelected
+                    ? "border-lime-300 bg-[linear-gradient(160deg,rgba(182,255,0,0.14),rgba(8,10,14,1)_58%)] shadow-[0_0_65px_rgba(182,255,0,0.18)]"
+                    : plan.key === "PREMIUM"
                     ? "border-lime-400/35 bg-[linear-gradient(160deg,rgba(182,255,0,0.1),rgba(8,10,14,1)_60%)] shadow-[0_0_55px_rgba(182,255,0,0.1)]"
                     : "border-white/[0.08] bg-white/[0.035]"
                 }`}
               >
+                {isSelected ? (
+                  <span className="absolute left-5 top-5 rounded-full border border-lime-300/40 bg-lime-300/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-lime-200">
+                    Selecionado
+                  </span>
+                ) : null}
                 {plan.key === "PREMIUM" ? (
                   <span className="absolute right-5 top-5 rounded-full bg-lime-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-950">
                     Mais escolhido
@@ -278,7 +315,7 @@ const Plans = () => {
                       : "cursor-not-allowed border border-amber-400/25 bg-amber-400/10 text-amber-200"
                   }`}
                 >
-                  {loading ? "Criando checkout seguro..." : available ? "Assinar agora" : "Indisponível no momento"}
+                  {loading ? "Criando checkout seguro..." : available ? "Continuar para pagamento" : "Indisponível no momento"}
                 </button>
               </article>
             );
