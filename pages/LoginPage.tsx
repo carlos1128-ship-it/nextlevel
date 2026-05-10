@@ -226,7 +226,7 @@ const PRICING = [
     summary: "A base para organizar sua operação e ter visibilidade real desde o primeiro acesso.",
     features: ["Calculadora de margem inteligente", "Até 2 empresas vinculadas", "Dashboard em tempo real", "IA básica de análise", "Suporte via e-mail"],
     cta: "Assinar agora", recommended: false,
-    microcopy: "Checkout seguro via AbacatePay",
+    microcopy: "Pagamento seguro via Cakto",
   },
   {
     key: "PREMIUM" as BillingPlanKey,

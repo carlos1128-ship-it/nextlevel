@@ -1701,6 +1701,7 @@ export type BillingPlanPrice = {
   amountInCents: number;
   currency: string;
   available: boolean;
+  provider?: string;
 };
 
 export type BillingPlan = {
@@ -1725,9 +1726,21 @@ export type BillingMeResponse = {
   };
 };
 
+export type BillingConfigResponse = {
+  paymentProvider: "MANUAL" | "ABACATEPAY" | "CAKTO" | "ASAAS" | "MERCADO_PAGO" | string;
+  checkoutEnabled: boolean;
+  message: string | null;
+  webhookUrl?: string | null;
+};
+
 export async function getBillingPlans() {
   const { data } = await api.get<{ plans: BillingPlan[] }>("/billing/plans");
   return Array.isArray(data?.plans) ? data.plans : [];
+}
+
+export async function getBillingConfig() {
+  const { data } = await api.get<BillingConfigResponse>("/billing/config");
+  return data;
 }
 
 export async function getBillingMe() {
@@ -1742,6 +1755,7 @@ export async function createBillingCheckout(payload: {
   const { data } = await api.post<{
     checkoutUrl: string;
     subscriptionId: string;
+    provider: string;
     status: string;
   }>("/billing/checkout", payload);
   return data;

@@ -48,6 +48,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isProfileReady: boolean;
   isCompanyReady: boolean;
+  authSessionKey: string | null;
   username: string | null;
   email: string | null;
   niche: UserNiche | null;
@@ -63,11 +64,38 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+const BillingContext = createContext<BillingContextType | null>(null);
 const COMPANY_ID_STORAGE_KEY = "selectedCompanyId";
 const AUTH_USER_STORAGE_KEY = "auth_user";
 const ONBOARDING_STATUS_CACHE_PREFIX = "nextlevel:onboarding-status:";
 const COMPANY_ACCESS_INVALID_EVENT = "nextlevel:company-access-invalid";
+const AUTH_CHANGED_EVENT = "nextlevel:auth-changed";
+const BILLING_ACCESS_INVALID_EVENT = "nextlevel:billing-access-invalid";
+const BILLING_CACHE_PREFIX = "nextlevel:billing:";
+const BILLING_CACHE_TTL_MS = 5 * 60 * 1000;
 const getCompanyId = (company: Partial<Company> | null | undefined) => company?.id || company?._id || null;
+
+type BillingStatus = "UNKNOWN" | "ACTIVE" | "INACTIVE";
+
+type BillingCacheEntry = {
+  userKey: string;
+  status: BillingStatus;
+  hasActiveSubscription: boolean;
+  currentPlan: string | null;
+  checkedAt: number;
+};
+
+type BillingContextType = {
+  billingStatus: BillingStatus;
+  hasActiveSubscription: boolean;
+  currentPlan: string | null;
+  isBillingLoaded: boolean;
+  isBillingValidating: boolean;
+  lastCheckedAt: number | null;
+  hasCachedBillingStatus: boolean;
+  refreshBilling: (force?: boolean) => Promise<BillingCacheEntry | null>;
+  clearBilling: () => void;
+};
 
 function readCachedOnboardingRedirect(companyId: string | null) {
   if (!companyId) return null;
@@ -111,10 +139,59 @@ function readStoredUser() {
   }
 }
 
+function tokenFingerprint() {
+  const token = localStorage.getItem('access_token') || '';
+  if (!token) return null;
+  return `${token.length}:${token.slice(0, 16)}:${token.slice(-8)}`;
+}
+
+function billingUserKey(email: string | null, authSessionKey: string | null) {
+  const normalizedEmail = email?.trim().toLowerCase();
+  if (normalizedEmail) return `email:${normalizedEmail}:${authSessionKey || 'no-token'}`;
+  if (authSessionKey) return `token:${authSessionKey}`;
+  return null;
+}
+
+function billingCacheKey(userKey: string) {
+  return `${BILLING_CACHE_PREFIX}${userKey}`;
+}
+
+function readBillingCache(userKey: string | null): BillingCacheEntry | null {
+  if (!userKey) return null;
+  const raw = sessionStorage.getItem(billingCacheKey(userKey));
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as BillingCacheEntry;
+    if (parsed.userKey !== userKey) return null;
+    if (Date.now() - Number(parsed.checkedAt || 0) > BILLING_CACHE_TTL_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeBillingCache(entry: BillingCacheEntry) {
+  sessionStorage.setItem(billingCacheKey(entry.userKey), JSON.stringify(entry));
+}
+
+function clearAllBillingCache() {
+  Object.keys(sessionStorage)
+    .filter((key) => key.startsWith(BILLING_CACHE_PREFIX))
+    .forEach((key) => sessionStorage.removeItem(key));
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const useBilling = () => {
+  const context = useContext(BillingContext);
+  if (!context) {
+    throw new Error('useBilling must be used within a BillingProvider');
   }
   return context;
 };
@@ -127,6 +204,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(Boolean(storedUser.admin));
   const [isProfileReady, setIsProfileReady] = useState(!hasStoredToken);
   const [isCompanyReady, setIsCompanyReady] = useState(!hasStoredToken);
+  const [authSessionKey, setAuthSessionKey] = useState<string | null>(tokenFingerprint());
   const [username, setUsername] = useState<string | null>(storedUser.name);
   const [email, setEmail] = useState<string | null>(storedUser.email);
   const [niche, setNicheState] = useState<UserNiche | null>(storedUser.niche);
@@ -164,7 +242,10 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const login = (user: { name?: string | null; email?: string | null; admin?: boolean; niche?: UserNiche | null }) => {
+    clearAllBillingCache();
+    const nextSessionKey = tokenFingerprint();
     setIsLoggedIn(true);
+    setAuthSessionKey(nextSessionKey);
     setIsAdmin(Boolean(user.admin));
     setIsProfileReady(true);
     setIsCompanyReady(false);
@@ -178,6 +259,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
       admin: Boolean(user.admin),
       niche: user.niche || null,
     });
+    window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
   };
 
   const logout = () => {
@@ -188,7 +270,9 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
       });
     }
 
+    clearAllBillingCache();
     setIsLoggedIn(false);
+    setAuthSessionKey(null);
     setIsAdmin(false);
     setIsProfileReady(true);
     setIsCompanyReady(true);
@@ -199,7 +283,16 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+    window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
   };
+
+  useEffect(() => {
+    const handleAuthChanged = () => {
+      setAuthSessionKey(tokenFingerprint());
+    };
+    window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+    return () => window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+  }, []);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -277,6 +370,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     isAdmin,
     isProfileReady,
     isCompanyReady,
+    authSessionKey,
     username,
     email,
     niche,
@@ -292,6 +386,127 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+const BillingProvider = ({ children }: { children?: ReactNode }) => {
+  const { isLoggedIn, isProfileReady, email, authSessionKey } = useAuth();
+  const userKey = billingUserKey(email, authSessionKey);
+  const cached = readBillingCache(userKey);
+  const [billingStatus, setBillingStatus] = useState<BillingStatus>(cached?.status || "UNKNOWN");
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(Boolean(cached?.hasActiveSubscription));
+  const [currentPlan, setCurrentPlan] = useState<string | null>(cached?.currentPlan || null);
+  const [isBillingLoaded, setIsBillingLoaded] = useState(Boolean(cached));
+  const [isBillingValidating, setIsBillingValidating] = useState(false);
+  const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(cached?.checkedAt || null);
+  const [hasCachedBillingStatus, setHasCachedBillingStatus] = useState(Boolean(cached));
+
+  const clearBilling = () => {
+    setBillingStatus("UNKNOWN");
+    setHasActiveSubscription(false);
+    setCurrentPlan(null);
+    setIsBillingLoaded(false);
+    setIsBillingValidating(false);
+    setLastCheckedAt(null);
+    setHasCachedBillingStatus(false);
+  };
+
+  const applyBilling = (entry: BillingCacheEntry, fromCache: boolean) => {
+    setBillingStatus(entry.status);
+    setHasActiveSubscription(entry.hasActiveSubscription);
+    setCurrentPlan(entry.currentPlan);
+    setIsBillingLoaded(true);
+    setLastCheckedAt(entry.checkedAt);
+    setHasCachedBillingStatus(fromCache);
+  };
+
+  const refreshBilling = async (force = false) => {
+    if (!isLoggedIn || !isProfileReady || !userKey) {
+      clearBilling();
+      return null;
+    }
+
+    const freshCached = readBillingCache(userKey);
+    if (!force && freshCached) {
+      applyBilling(freshCached, true);
+      return freshCached;
+    }
+
+    setIsBillingValidating(true);
+    try {
+      const billing = await getBillingMe();
+      const entry: BillingCacheEntry = {
+        userKey,
+        status: billing.hasActiveSubscription ? "ACTIVE" : "INACTIVE",
+        hasActiveSubscription: Boolean(billing.hasActiveSubscription),
+        currentPlan: billing.subscription?.planKey || null,
+        checkedAt: Date.now(),
+      };
+      writeBillingCache(entry);
+      applyBilling(entry, false);
+      return entry;
+    } catch {
+      const entry: BillingCacheEntry = {
+        userKey,
+        status: "INACTIVE",
+        hasActiveSubscription: false,
+        currentPlan: null,
+        checkedAt: Date.now(),
+      };
+      applyBilling(entry, false);
+      return entry;
+    } finally {
+      setIsBillingValidating(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn || !isProfileReady || !userKey) {
+      clearBilling();
+      return;
+    }
+
+    const freshCached = readBillingCache(userKey);
+    if (freshCached) {
+      applyBilling(freshCached, true);
+      return;
+    }
+
+    void refreshBilling(false);
+  }, [isLoggedIn, isProfileReady, userKey]);
+
+  useEffect(() => {
+    const handleBillingInvalid = () => {
+      clearAllBillingCache();
+      clearBilling();
+    };
+    const handleAuthChanged = () => {
+      clearBilling();
+    };
+    window.addEventListener(BILLING_ACCESS_INVALID_EVENT, handleBillingInvalid);
+    window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+    return () => {
+      window.removeEventListener(BILLING_ACCESS_INVALID_EVENT, handleBillingInvalid);
+      window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
+    };
+  }, []);
+
+  return (
+    <BillingContext.Provider
+      value={{
+        billingStatus,
+        hasActiveSubscription,
+        currentPlan,
+        isBillingLoaded,
+        isBillingValidating,
+        lastCheckedAt,
+        hasCachedBillingStatus,
+        refreshBilling,
+        clearBilling,
+      }}
+    >
+      {children}
+    </BillingContext.Provider>
+  );
 };
 
 const ProtectedRoute = ({ children }: { children?: ReactNode }) => {
@@ -382,51 +597,41 @@ const OnboardingGate = ({ children }: { children?: ReactNode }) => {
 };
 
 const BillingGate = ({ children }: { children?: ReactNode }) => {
-  const location = useLocation();
   const { isLoggedIn, isProfileReady } = useAuth();
-  const [checking, setChecking] = useState(true);
-  const [hasAccess, setHasAccess] = useState(false);
+  const {
+    hasActiveSubscription,
+    isBillingLoaded,
+    isBillingValidating,
+    hasCachedBillingStatus,
+  } = useBilling();
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!isLoggedIn || !isProfileReady) {
-      setChecking(false);
-      setHasAccess(!isLoggedIn);
-      return () => {
-        cancelled = true;
-      };
-    }
+  const shouldShowFullScreenValidation =
+    isLoggedIn &&
+    isProfileReady &&
+    !isBillingLoaded &&
+    !hasCachedBillingStatus &&
+    isBillingValidating;
 
-    setChecking(true);
-    getBillingMe()
-      .then((billing) => {
-        if (!cancelled) setHasAccess(Boolean(billing.hasActiveSubscription));
-      })
-      .catch(() => {
-        if (!cancelled) setHasAccess(false);
-      })
-      .finally(() => {
-        if (!cancelled) setChecking(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoggedIn, isProfileReady, location.pathname]);
-
-  if (checking) return <FullscreenLoading label="Validando assinatura" />;
-  if (!hasAccess) return <Navigate to="/planos" replace />;
+  if (shouldShowFullScreenValidation) return <FullscreenLoading label="Validando assinatura" />;
+  if (isLoggedIn && isProfileReady && isBillingLoaded && !hasActiveSubscription) {
+    return <Navigate to="/planos" replace />;
+  }
+  if (isLoggedIn && isProfileReady && !isBillingLoaded) {
+    return <FullscreenLoading label="Validando assinatura" />;
+  }
   return <>{children}</>;
 };
 
 const App = () => {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <AppErrorBoundary>
-          <AppContent />
-        </AppErrorBoundary>
-      </ToastProvider>
+      <BillingProvider>
+        <ToastProvider>
+          <AppErrorBoundary>
+            <AppContent />
+          </AppErrorBoundary>
+        </ToastProvider>
+      </BillingProvider>
     </AuthProvider>
   );
 };

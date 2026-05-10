@@ -5,6 +5,9 @@ const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const GLOBAL_FEEDBACK_EVENT = 'nextlevel:error-feedback';
 const COMPANY_ACCESS_INVALID_EVENT = 'nextlevel:company-access-invalid';
+const AUTH_CHANGED_EVENT = 'nextlevel:auth-changed';
+const BILLING_ACCESS_INVALID_EVENT = 'nextlevel:billing-access-invalid';
+const BILLING_CACHE_PREFIX = 'nextlevel:billing:';
 
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
@@ -21,6 +24,7 @@ function getFirstString(values: unknown[]): string | null {
 }
 
 function clearAuthStorage() {
+  clearBillingStorage();
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem('selectedCompanyId');
@@ -29,6 +33,12 @@ function clearAuthStorage() {
   if (window.location.pathname !== '/login') {
     window.location.assign('/login');
   }
+}
+
+function clearBillingStorage() {
+  Object.keys(sessionStorage)
+    .filter((key) => key.startsWith(BILLING_CACHE_PREFIX))
+    .forEach((key) => sessionStorage.removeItem(key));
 }
 
 async function refreshAccessToken(): Promise<string | null> {
@@ -75,6 +85,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
     localStorage.setItem(ACCESS_TOKEN_KEY, nextAccessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, nextRefreshToken);
+    window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
     return nextAccessToken;
   } catch {
     clearAuthStorage();
@@ -133,6 +144,8 @@ function dispatchFriendlyApiError(error: AxiosError) {
     payload?.code === 'SUBSCRIPTION_REQUIRED' ||
     payload?.code === 'PLAN_UPGRADE_REQUIRED'
   ) {
+    clearBillingStorage();
+    window.dispatchEvent(new CustomEvent(BILLING_ACCESS_INVALID_EVENT));
     if (!window.location.pathname.startsWith('/planos')) {
       window.location.assign(payload?.code === 'PLAN_UPGRADE_REQUIRED' ? '/planos?upgrade=true' : '/planos');
     }
