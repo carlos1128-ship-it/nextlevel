@@ -78,6 +78,7 @@ const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   "financial-flow": "financial",
 };
 const COMPANY_STAGE_STORAGE_KEY = "nextlevel:onboarding-company-stage";
+const NICHE_MODAL_DONE_PREFIX = "nextlevel:niche-modal-done:";
 const SIDEBAR_PREF_CACHE_PREFIX = "nextlevel:sidebar-module-preferences:";
 const DEFAULT_COMPANY_STAGE: CompanyStage = "ESCALANDO";
 const DEFAULT_VISIBLE_NAV_IDS = new Set(["home", "reports", "chat", "attendant", "insights", "settings", "profile", "plans", "companies"]);
@@ -169,6 +170,14 @@ function readCachedModulePreferences(companyId: string | null): CompanyModulePre
 function writeCachedModulePreferences(companyId: string | null, preferences: CompanyModulePreference[]) {
   if (!companyId) return;
   sessionStorage.setItem(`${SIDEBAR_PREF_CACHE_PREFIX}${companyId}`, JSON.stringify(preferences));
+}
+
+function readNicheModalDone(key: string) {
+  return localStorage.getItem(`${NICHE_MODAL_DONE_PREFIX}${key}`) === "1";
+}
+
+function writeNicheModalDone(key: string) {
+  localStorage.setItem(`${NICHE_MODAL_DONE_PREFIX}${key}`, "1");
 }
 
 const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
@@ -332,11 +341,13 @@ const FloatingActionButton = () => {
 };
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const { isAdmin, niche, selectedCompanyId, setNiche } = useAuth();
+  const { isAdmin, niche, selectedCompanyId, email, setNiche } = useAuth();
   const { addToast } = useToast();
+  const nicheModalKey = selectedCompanyId || email?.trim().toLowerCase() || "global";
   const [selectedNiche, setSelectedNiche] = useState<UserNiche | null>(niche);
   const [selectedStage, setSelectedStage] = useState<CompanyStage>(() => readStoredCompanyStage());
   const [savingNiche, setSavingNiche] = useState(false);
+  const [nicheModalDismissed, setNicheModalDismissed] = useState(() => readNicheModalDone(nicheModalKey));
   const [modulePreferences, setModulePreferences] = useState<CompanyModulePreference[] | null>(() =>
     readCachedModulePreferences(selectedCompanyId),
   );
@@ -345,11 +356,19 @@ const Layout = ({ children }: { children: ReactNode }) => {
     () => splitNavItemsByModulePreferences(items, modulePreferences),
     [items, modulePreferences],
   );
-  const showNicheModal = niche === null;
+  const showNicheModal = !isAdmin && niche === null && !nicheModalDismissed;
 
   useEffect(() => {
     setSelectedNiche(niche);
-  }, [niche]);
+    if (niche) {
+      writeNicheModalDone(nicheModalKey);
+      setNicheModalDismissed(true);
+    }
+  }, [niche, nicheModalKey]);
+
+  useEffect(() => {
+    setNicheModalDismissed(readNicheModalDone(nicheModalKey));
+  }, [nicheModalKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -404,6 +423,8 @@ const Layout = ({ children }: { children: ReactNode }) => {
       setSavingNiche(true);
       const updatedProfile = await updateUserProfile({ niche: selectedNiche });
       localStorage.setItem(COMPANY_STAGE_STORAGE_KEY, selectedStage);
+      writeNicheModalDone(nicheModalKey);
+      setNicheModalDismissed(true);
       setNiche(updatedProfile.niche || selectedNiche);
       addToast("Painel personalizado com sucesso.", "success");
     } catch (error) {

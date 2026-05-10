@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
-import { useAuth } from "../App";
+import { useAuth, useBilling } from "../App";
 import { useToast } from "../components/Toast";
 import {
   disconnectWhatsapp,
@@ -65,6 +65,7 @@ function isCooldownStatus(status?: string | null) {
 
 const Integrations = () => {
   const { selectedCompanyId } = useAuth();
+  const { currentPlan } = useBilling();
   const { addToast } = useToast();
   const [connection, setConnection] = useState<WhatsappConnection | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
@@ -72,6 +73,9 @@ const Integrations = () => {
   const [instagramLoading, setInstagramLoading] = useState(false);
   const [instagramStatus, setInstagramStatus] = useState<InstagramConnectionStatus | null>(null);
   const [retryRemaining, setRetryRemaining] = useState(0);
+  const normalizedPlan = String(currentPlan || "").toUpperCase();
+  const canUseMainIntegrations = normalizedPlan === "PREMIUM" || normalizedPlan === "PRO_BUSINESS";
+  const canUseMarketplaces = normalizedPlan === "PRO_BUSINESS";
 
   const statusLabel = useMemo(() => {
     if (!connection) return "Desconectado";
@@ -371,6 +375,7 @@ const Integrations = () => {
                 disabled={
                   loading ||
                   !selectedCompanyId ||
+                  !canUseMainIntegrations ||
                   isOperationStatus(connection?.status) ||
                   retryRemaining > 0
                 }
@@ -378,6 +383,8 @@ const Integrations = () => {
               >
                   {loading
                   ? "Preparando conexão..."
+                  : !canUseMainIntegrations
+                    ? "Disponivel no Premium"
                   : connection?.status === "provider_warming_up"
                     ? "Preparando conexão..."
                   : retryRemaining > 0
@@ -445,6 +452,11 @@ const Integrations = () => {
           }`}>
             {connection.message || connection.lastError || "Não foi possível gerar o QR Code agora."}
             {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
+          </p>
+        ) : null}
+        {!canUseMainIntegrations ? (
+          <p className="mt-4 rounded-md border border-lime-400/25 bg-lime-400/10 p-3 text-sm font-semibold text-lime-100">
+            Integracoes com WhatsApp e Instagram estao disponiveis a partir do plano Premium.
           </p>
         ) : null}
       </section>
@@ -517,11 +529,13 @@ const Integrations = () => {
               <button
                 type="button"
                 onClick={handleInstagramConnect}
-                disabled={instagramLoading || Boolean(instagramStatus?.provider_setup_required)}
+                disabled={instagramLoading || !canUseMainIntegrations || Boolean(instagramStatus?.provider_setup_required)}
                 className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {instagramLoading
                   ? "Abrindo Instagram..."
+                  : !canUseMainIntegrations
+                    ? "Disponivel no Premium"
                   : isInstagramTokenExpired(instagramStatus)
                     ? "Reconectar Instagram"
                     : "Conectar Instagram"}
@@ -544,6 +558,11 @@ const Integrations = () => {
             <p className="mt-3 text-sm leading-6 text-zinc-400">{channel.description}</p>
           </article>
         ))}
+        {!canUseMarketplaces ? (
+          <p className="rounded-lg border border-lime-400/20 bg-lime-400/10 p-4 text-sm font-semibold text-lime-100 md:col-span-3">
+            Mercado Livre, Utmify e marketplaces estao disponiveis no plano Pro Business.
+          </p>
+        ) : null}
       </section>
 
     </main>

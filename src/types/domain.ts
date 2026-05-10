@@ -859,6 +859,7 @@ export interface AuditFeedItem {
 export type AIUsageFeatureKey =
   | "chat_ia"
   | "whatsapp_agent"
+  | "instagram_agent"
   | "image_analysis"
   | "audio_transcription"
   | "web_search"
@@ -866,7 +867,7 @@ export type AIUsageFeatureKey =
   | "intelligent_import"
   | "other";
 
-export type AIUsageFeatureStatus = "ok" | "near_limit" | "exceeded";
+export type AIUsageFeatureStatus = "ok" | "near_limit" | "exceeded" | "blocked";
 
 export interface AIUsageFeatureSummary {
   feature: AIUsageFeatureKey;

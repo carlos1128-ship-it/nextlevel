@@ -24,34 +24,38 @@ const fallbackPlans: BillingPlan[] = [
   {
     key: "COMMON",
     name: "Comum",
-    description: "Plano inicial para organizar dados e acompanhar indicadores basicos.",
+    description: "Plano inicial para organizar dados, acompanhar indicadores e usar IA basica sem integracoes automaticas.",
     level: 1,
     features: [
       "Dashboard essencial",
       "Cadastro manual de dados",
       "Visao basica de vendas e financas",
       "Relatorios simples",
-      "Insights limitados de IA",
-      "Suporte padrao",
+      "Chat IA basico: 400 mensagens/mes",
+      "1 importacao inteligente por dia",
+      "Sem integracoes automaticas",
+      "Suporte via e-mail",
     ],
     prices: {
-      MONTHLY: { amountInCents: 4990, currency: "BRL", available: false },
-      ANNUAL: { amountInCents: 49900, currency: "BRL", available: false },
+      MONTHLY: { amountInCents: 5700, currency: "BRL", available: false },
+      ANNUAL: { amountInCents: 57000, currency: "BRL", available: false },
     },
   },
   {
     key: "PREMIUM",
     name: "Premium",
-    description: "Plano para usar IA de verdade na gestao e enxergar oportunidades.",
+    description: "Plano para usar IA, atendimento automatico e integracoes principais para crescer com mais clareza.",
     level: 2,
     features: [
       "Tudo do Comum",
-      "Chat IA com contexto do negocio",
-      "Analises financeiras avancadas",
-      "Alertas inteligentes",
-      "Relatorios completos",
-      "Integracoes principais",
-      "Atendente IA, se disponivel",
+      "Ate 10 empresas vinculadas",
+      "WhatsApp + Instagram integrados",
+      "Atendente IA para WhatsApp e Instagram",
+      "Alertas inteligentes de margem",
+      "Relatorios automaticos semanais",
+      "Recomendacoes taticas da IA",
+      "Suporte prioritario",
+      "Sem Mercado Livre e Utmify",
     ],
     prices: {
       MONTHLY: { amountInCents: 9700, currency: "BRL", available: false },
@@ -61,15 +65,17 @@ const fallbackPlans: BillingPlan[] = [
   {
     key: "PRO_BUSINESS",
     name: "Pro Business",
-    description: "Plano completo para automacao, market intelligence e previsoes.",
+    description: "Plano completo para automacao, previsibilidade, market intelligence e escala.",
     level: 3,
     features: [
       "Tudo do Premium",
+      "Empresas ilimitadas",
+      "Mercado Livre + Utmify + marketplaces",
       "IA estrategica avancada",
       "Automacoes inteligentes",
       "Market intelligence",
-      "Maior limite de dados",
-      "Previsoes avancadas",
+      "Previsoes e alertas avancados",
+      "Importacoes inteligentes ilimitadas",
       "Prioridade em novas funcionalidades",
     ],
     prices: {
@@ -236,6 +242,9 @@ const Plans = () => {
             </p>
             <p className="mt-2 text-xs font-semibold text-zinc-500">
               Seu acesso será liberado automaticamente após a confirmação do pagamento.
+            </p>
+            <p className="mt-2 text-xs font-semibold text-zinc-500">
+              Os limites de mensagens sao renovados mensalmente.
             </p>
             <p className="mt-2 text-xs font-semibold text-zinc-500">
               {isInitialBillingLoading
