@@ -99,9 +99,11 @@ const Plans = () => {
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [currentSource, setCurrentSource] = useState<string | null>(null);
   const [loadingPlanKey, setLoadingPlanKey] = useState<string | null>(null);
-  const [checkoutEnabled, setCheckoutEnabled] = useState(false);
+  const [checkoutEnabled, setCheckoutEnabled] = useState<boolean | null>(null);
   const [paymentProvider, setPaymentProvider] = useState<string>("MANUAL");
   const [billingConfigMessage, setBillingConfigMessage] = useState<string | null>(null);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -119,15 +121,23 @@ const Plans = () => {
         if (plansResult.status === "fulfilled" && plansResult.value.length) {
           setPlans(plansResult.value);
         }
+        setIsLoadingPlans(false);
         if (configResult.status === "fulfilled") {
           setCheckoutEnabled(Boolean(configResult.value.checkoutEnabled));
           setPaymentProvider(configResult.value.paymentProvider);
           setBillingConfigMessage(configResult.value.message);
+        } else {
+          setCheckoutEnabled(false);
+          setBillingConfigMessage("Gateway de pagamento temporariamente indisponivel.");
         }
+        setIsLoadingConfig(false);
       })
       .catch(() => {
         setPlans(fallbackPlans);
         setCheckoutEnabled(false);
+        setBillingConfigMessage("Gateway de pagamento temporariamente indisponivel.");
+        setIsLoadingPlans(false);
+        setIsLoadingConfig(false);
       });
   }, []);
 
@@ -148,6 +158,8 @@ const Plans = () => {
     () => [...plans].sort((a, b) => a.level - b.level),
     [plans],
   );
+  const isInitialBillingLoading = isLoadingPlans || isLoadingConfig;
+  const isActuallyUnavailable = !isInitialBillingLoading && checkoutEnabled === false;
 
   const updateBillingCycle = (cycle: BillingCycle) => {
     setBillingCycle(cycle);
@@ -226,7 +238,11 @@ const Plans = () => {
               Seu acesso será liberado automaticamente após a confirmação do pagamento.
             </p>
             <p className="mt-2 text-xs font-semibold text-zinc-500">
-              {paymentProvider === "CAKTO" ? "Pagamento seguro via Cakto" : "Gateway de pagamento temporariamente indisponível."}
+              {isInitialBillingLoading
+                ? "Preparando pagamento..."
+                : paymentProvider === "CAKTO" && checkoutEnabled
+                ? "Pagamento seguro via Cakto"
+                : "Gateway de pagamento temporariamente indisponivel."}
             </p>
             {params.get("upgrade") ? (
               <p className="mt-3 text-sm font-bold text-lime-300">
@@ -274,7 +290,7 @@ const Plans = () => {
           </div>
         ) : null}
 
-        {!checkoutEnabled && billingConfigMessage ? (
+        {isActuallyUnavailable && billingConfigMessage ? (
           <div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm font-bold text-amber-100">
             {billingConfigMessage}
           </div>
@@ -283,9 +299,29 @@ const Plans = () => {
         <section className="mt-8 grid gap-5 lg:grid-cols-3">
           {orderedPlans.map((plan) => {
             const price = plan.prices[billingCycle];
-            const available = Boolean(price?.available) && checkoutEnabled;
+            const available = !isInitialBillingLoading && Boolean(price?.available) && checkoutEnabled === true;
+            const planUnavailable = !isInitialBillingLoading && checkoutEnabled === true && Boolean(price) && !price.available;
+            const providerUnavailable = !isInitialBillingLoading && checkoutEnabled === false;
             const loading = loadingPlanKey === plan.key;
             const isSelected = selectedPlan?.planKey === plan.key;
+            const buttonLabel = loading
+              ? "Preparando checkout..."
+              : isInitialBillingLoading
+              ? "Carregando..."
+              : available
+              ? "Continuar para pagamento"
+              : providerUnavailable
+              ? "Pagamento temporariamente indisponivel"
+              : planUnavailable
+              ? "Plano indisponivel"
+              : "Plano indisponivel";
+            const helperCopy = isInitialBillingLoading
+              ? "Preparando pagamento..."
+              : available
+              ? "Pagamento seguro via Cakto"
+              : providerUnavailable
+              ? "Estamos ajustando o gateway de pagamento. Tente novamente em alguns instantes."
+              : "Este plano ainda nao possui link de checkout configurado.";
             return (
               <article
                 key={plan.key}
@@ -332,7 +368,7 @@ const Plans = () => {
                 </ul>
                 <button
                   type="button"
-                  disabled={!available || loading}
+                  disabled={!available || loading || isInitialBillingLoading}
                   onClick={() => subscribe(plan.key)}
                   className={`mt-7 rounded-[18px] px-5 py-4 text-sm font-black uppercase tracking-[0.14em] transition ${
                     available
@@ -340,8 +376,11 @@ const Plans = () => {
                       : "cursor-not-allowed border border-amber-400/25 bg-amber-400/10 text-amber-200"
                   }`}
                 >
-                  {loading ? "Criando checkout seguro..." : available ? "Continuar para pagamento" : "Indisponível no momento"}
+                  {buttonLabel}
                 </button>
+                <p className={`mt-3 min-h-10 text-xs font-semibold leading-5 ${available ? "text-lime-200" : "text-zinc-500"}`}>
+                  {helperCopy}
+                </p>
               </article>
             );
           })}
