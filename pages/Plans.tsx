@@ -6,6 +6,7 @@ import {
   BillingPlan,
   BillingPlanKey,
   createBillingCheckout,
+  getBillingConfig,
   getBillingMe,
   getBillingPlans,
 } from "../src/services/endpoints";
@@ -98,6 +99,9 @@ const Plans = () => {
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [currentSource, setCurrentSource] = useState<string | null>(null);
   const [loadingPlanKey, setLoadingPlanKey] = useState<string | null>(null);
+  const [checkoutEnabled, setCheckoutEnabled] = useState(false);
+  const [paymentProvider, setPaymentProvider] = useState<string>("MANUAL");
+  const [billingConfigMessage, setBillingConfigMessage] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -110,11 +114,21 @@ const Plans = () => {
   }, [params]);
 
   useEffect(() => {
-    getBillingPlans()
-      .then((items) => {
-        if (items.length) setPlans(items);
+    Promise.allSettled([getBillingPlans(), getBillingConfig()])
+      .then(([plansResult, configResult]) => {
+        if (plansResult.status === "fulfilled" && plansResult.value.length) {
+          setPlans(plansResult.value);
+        }
+        if (configResult.status === "fulfilled") {
+          setCheckoutEnabled(Boolean(configResult.value.checkoutEnabled));
+          setPaymentProvider(configResult.value.paymentProvider);
+          setBillingConfigMessage(configResult.value.message);
+        }
       })
-      .catch(() => setPlans(fallbackPlans));
+      .catch(() => {
+        setPlans(fallbackPlans);
+        setCheckoutEnabled(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -164,6 +178,8 @@ const Plans = () => {
       setMessage(
         code === "PLAN_PRICE_UNAVAILABLE"
           ? "Este plano está indisponível no momento."
+          : code === "PAYMENT_PROVIDER_UNAVAILABLE"
+          ? "Gateway de pagamento temporariamente indisponível."
           : "Não foi possível iniciar o pagamento agora. Tente novamente em alguns instantes.",
       );
     } finally {
@@ -208,6 +224,9 @@ const Plans = () => {
             </p>
             <p className="mt-2 text-xs font-semibold text-zinc-500">
               Seu acesso será liberado automaticamente após a confirmação do pagamento.
+            </p>
+            <p className="mt-2 text-xs font-semibold text-zinc-500">
+              {paymentProvider === "CAKTO" ? "Pagamento seguro via Cakto" : "Gateway de pagamento temporariamente indisponível."}
             </p>
             {params.get("upgrade") ? (
               <p className="mt-3 text-sm font-bold text-lime-300">
@@ -255,10 +274,16 @@ const Plans = () => {
           </div>
         ) : null}
 
+        {!checkoutEnabled && billingConfigMessage ? (
+          <div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm font-bold text-amber-100">
+            {billingConfigMessage}
+          </div>
+        ) : null}
+
         <section className="mt-8 grid gap-5 lg:grid-cols-3">
           {orderedPlans.map((plan) => {
             const price = plan.prices[billingCycle];
-            const available = Boolean(price?.available);
+            const available = Boolean(price?.available) && checkoutEnabled;
             const loading = loadingPlanKey === plan.key;
             const isSelected = selectedPlan?.planKey === plan.key;
             return (

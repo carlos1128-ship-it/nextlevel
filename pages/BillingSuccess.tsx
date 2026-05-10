@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getBillingMe } from "../src/services/endpoints";
+import { useBilling } from "../App";
 
 const BillingSuccess = () => {
   const navigate = useNavigate();
+  const { refreshBilling } = useBilling();
   const [checking, setChecking] = useState(true);
   const [active, setActive] = useState(false);
 
   const verify = async () => {
     setChecking(true);
     try {
-      const billing = await getBillingMe();
-      if (billing.hasActiveSubscription) {
+      const billing = await refreshBilling(true);
+      if (billing?.hasActiveSubscription) {
         setActive(true);
         navigate("/dashboard", { replace: true });
         return;
@@ -46,7 +47,7 @@ const BillingSuccess = () => {
         <p className="mt-4 text-sm leading-7 text-zinc-400">
           {active
             ? "Assinatura ativa. Redirecionando para o dashboard."
-            : "Pagamento em processamento. Assim que a AbacatePay confirmar, seu acesso será liberado."}
+            : "Pagamento em processamento. Assim que a Cakto confirmar, seu acesso será liberado."}
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
