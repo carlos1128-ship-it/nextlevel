@@ -9,8 +9,8 @@ import type { AIUsageCurrentResponse, AIUsageFeatureSummary } from "../src/types
 const planLabels: Record<string, string> = {
   free: "Teste",
   test: "Teste",
-  common: "Common",
-  basic: "Common",
+  common: "Comum",
+  basic: "Comum",
   premium: "Premium",
   pro_business: "Pro Business",
   business: "Pro Business",
@@ -20,25 +20,31 @@ const statusLabel: Record<AIUsageFeatureSummary["status"], string> = {
   ok: "ok",
   near_limit: "perto do limite",
   exceeded: "excedido",
+  blocked: "bloqueado",
 };
 
 const statusClass: Record<AIUsageFeatureSummary["status"], string> = {
   ok: "border-lime-400/30 bg-lime-400/10 text-lime-300",
   near_limit: "border-yellow-400/30 bg-yellow-400/10 text-yellow-200",
   exceeded: "border-red-400/40 bg-red-500/10 text-red-200",
+  blocked: "border-zinc-500/30 bg-zinc-500/10 text-zinc-300",
 };
 
 function formatLimit(item: AIUsageFeatureSummary) {
+  if (!item.enabled) {
+    return `Disponivel no ${item.feature === "whatsapp_agent" || item.feature === "instagram_agent" ? "Premium" : "plano superior"}`;
+  }
   const used = item.requestCount.toLocaleString("pt-BR");
-  if (!item.monthlyRequestLimit) {
-    return `${used} ${item.unit}`;
+  if (item.monthlyRequestLimit === null) {
+    return `${used} ${item.unit} / ilimitado`;
   }
   return `${used} / ${item.monthlyRequestLimit.toLocaleString("pt-BR")} ${item.unit}`;
 }
 
 const UsageRow = ({ item }: { item: AIUsageFeatureSummary; key?: React.Key }) => {
   const exceeded = item.status === "exceeded";
-  const barColor = exceeded ? "bg-red-400" : item.status === "near_limit" ? "bg-yellow-300" : "bg-lime-400";
+  const blocked = item.status === "blocked" || !item.enabled;
+  const barColor = blocked ? "bg-zinc-500" : exceeded ? "bg-red-400" : item.status === "near_limit" ? "bg-yellow-300" : "bg-lime-400";
 
   return (
     <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-900 dark:bg-zinc-950">
@@ -55,13 +61,23 @@ const UsageRow = ({ item }: { item: AIUsageFeatureSummary; key?: React.Key }) =>
       <div className="mt-5 h-3 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-900">
         <div
           className={`h-full rounded-full ${barColor}`}
-          style={{ width: `${Math.min(100, Math.max(0, item.progressPercent))}%` }}
+          style={{ width: `${blocked ? 0 : Math.min(100, Math.max(0, item.progressPercent))}%` }}
         />
       </div>
       <div className="mt-2 flex justify-between text-xs font-semibold text-zinc-500 dark:text-zinc-500">
-        <span>{item.progressPercent}% usado</span>
+        <span>{blocked ? "Bloqueado neste plano" : `${item.progressPercent}% usado`}</span>
         <span>{item.tokenCount.toLocaleString("pt-BR")} tokens</span>
       </div>
+      {item.status === "near_limit" ? (
+        <p className="mt-3 text-sm font-semibold text-yellow-700 dark:text-yellow-200">
+          Voce esta perto do limite do seu plano.
+        </p>
+      ) : null}
+      {item.status === "exceeded" ? (
+        <p className="mt-3 text-sm font-semibold text-red-700 dark:text-red-200">
+          Limite atingido. Faca upgrade para continuar.
+        </p>
+      ) : null}
     </section>
   );
 };
@@ -102,6 +118,10 @@ const PlanUsage = () => {
 
   const exceeded = useMemo(
     () => usage?.features.some((item) => item.status === "exceeded") || false,
+    [usage],
+  );
+  const nearLimit = useMemo(
+    () => usage?.features.some((item) => item.status === "near_limit") || false,
     [usage],
   );
 
@@ -165,6 +185,12 @@ const PlanUsage = () => {
         </div>
       ) : null}
 
+      {!exceeded && nearLimit ? (
+        <div className="rounded-2xl border border-yellow-400/30 bg-yellow-400/10 p-5 text-sm font-semibold text-yellow-100">
+          Voce esta perto do limite do seu plano.
+        </div>
+      ) : null}
+
       <div className="grid gap-4">
         {usage.features.map((item) => (
           <UsageRow key={item.feature} item={item} />
@@ -175,6 +201,9 @@ const PlanUsage = () => {
         <ActivityIcon className="mt-0.5 h-5 w-5 shrink-0 text-lime-500" />
         <p>
           O painel considera chamadas de Chat IA, Atendente WhatsApp e Importação Inteligente. Custos internos ficam disponíveis apenas no painel admin.
+        </p>
+        <p>
+          Tambem considera Atendente Instagram.
         </p>
       </footer>
     </div>

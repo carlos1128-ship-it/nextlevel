@@ -222,7 +222,7 @@ const PRICING = [
   {
     key: "COMMON" as BillingPlanKey,
     name: "Comum",
-    monthlyPrice: "R$ 49,90", annualPrice: "R$ 499",
+    monthlyPrice: "R$ 57", annualPrice: "R$ 570",
     summary: "A base para organizar sua operação e ter visibilidade real desde o primeiro acesso.",
     features: ["Calculadora de margem inteligente", "Até 2 empresas vinculadas", "Dashboard em tempo real", "IA básica de análise", "Suporte via e-mail"],
     cta: "Assinar agora", recommended: false,
@@ -251,6 +251,54 @@ const PRICING = [
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Margin Calculator
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const UPDATED_PRICING = PRICING.map((plan) => {
+  const copy: Record<BillingPlanKey, Partial<(typeof PRICING)[number]>> = {
+    COMMON: {
+      monthlyPrice: "R$ 57",
+      annualPrice: "R$ 570",
+      summary: "Para organizar dados, acompanhar indicadores e usar IA basica sem integracoes automaticas.",
+      features: [
+        "Dashboard essencial",
+        "Cadastro manual de dados",
+        "Chat IA basico: 400 mensagens/mes",
+        "30 importacoes inteligentes/mes",
+        "Relatorios simples",
+        "Sem integracoes automaticas",
+      ],
+      cta: "Assinar agora",
+    },
+    PREMIUM: {
+      monthlyPrice: "R$ 97",
+      annualPrice: "R$ 970",
+      summary: "Para usar IA, atendimento automatico e integracoes principais para crescer com clareza.",
+      features: [
+        "Tudo do Comum",
+        "Chat IA: 1.000 mensagens/mes",
+        "WhatsApp + Instagram integrados",
+        "Atendente IA: 3.000 mensagens/mes por canal",
+        "200 importacoes inteligentes/mes",
+        "Suporte prioritario",
+      ],
+      cta: "Ativar Premium",
+    },
+    PRO_BUSINESS: {
+      monthlyPrice: "R$ 197",
+      annualPrice: "R$ 1.970",
+      summary: "Para operacoes que precisam de automacao, previsibilidade, market intelligence e escala.",
+      features: [
+        "Tudo do Premium",
+        "Chat IA: 5.000 mensagens/mes",
+        "WhatsApp/Instagram: 10.000 mensagens/mes por canal",
+        "Mercado Livre + Utmify + marketplaces",
+        "Importacoes inteligentes ilimitadas",
+        "Market intelligence e previsoes avancadas",
+      ],
+      cta: "Assinar Pro Business",
+    },
+  };
+  return { ...plan, ...copy[plan.key] };
+});
+
 const MarginCalculator: React.FC = () => {
   const [tab, setTab] = useState<"lucro" | "preço">("lucro");
   const [cost, setCost] = useState("");
@@ -981,7 +1029,7 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            {PRICING.map((plan) => (
+            {UPDATED_PRICING.map((plan) => (
               <div key={plan.name} className={`relative flex flex-col rounded-[28px] border p-6 transition hover:-translate-y-1 duration-300 ${
                 plan.recommended
                   ? "border-lime-400/30 bg-[linear-gradient(160deg,rgba(182,255,0,0.09),rgba(5,7,11,1)_60%)] shadow-[0_0_50px_rgba(182,255,0,0.08)]"
