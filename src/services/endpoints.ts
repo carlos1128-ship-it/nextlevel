@@ -1720,6 +1720,7 @@ export type BillingMeResponse = {
     planKey: BillingPlanKey;
     billingCycle: BillingCycle;
     status: string;
+    provider?: string | null;
     source?: string | null;
     currentPeriodEnd: string | null;
     expiresAt: string | null;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext, useContext, ReactNode, lazy, Suspense } from 'react';
+import React, { useEffect, useState, createContext, useContext, ReactNode, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import Chat from './pages/Chat';
@@ -73,6 +73,7 @@ const AUTH_CHANGED_EVENT = "nextlevel:auth-changed";
 const BILLING_ACCESS_INVALID_EVENT = "nextlevel:billing-access-invalid";
 const BILLING_CACHE_PREFIX = "nextlevel:billing:";
 const BILLING_CACHE_TTL_MS = 5 * 60 * 1000;
+const BILLING_VALIDATION_TIMEOUT_MS = 15000;
 const getCompanyId = (company: Partial<Company> | null | undefined) => company?.id || company?._id || null;
 
 type BillingStatus = "UNKNOWN" | "ACTIVE" | "INACTIVE";
@@ -91,6 +92,7 @@ type BillingContextType = {
   currentPlan: string | null;
   isBillingLoaded: boolean;
   isBillingValidating: boolean;
+  billingError: string | null;
   lastCheckedAt: number | null;
   hasCachedBillingStatus: boolean;
   refreshBilling: (force?: boolean) => Promise<BillingCacheEntry | null>;
@@ -397,8 +399,10 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
   const [currentPlan, setCurrentPlan] = useState<string | null>(cached?.currentPlan || null);
   const [isBillingLoaded, setIsBillingLoaded] = useState(Boolean(cached));
   const [isBillingValidating, setIsBillingValidating] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
   const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(cached?.checkedAt || null);
   const [hasCachedBillingStatus, setHasCachedBillingStatus] = useState(Boolean(cached));
+  const validationSeqRef = useRef(0);
 
   const clearBilling = () => {
     setBillingStatus("UNKNOWN");
@@ -406,6 +410,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
     setCurrentPlan(null);
     setIsBillingLoaded(false);
     setIsBillingValidating(false);
+    setBillingError(null);
     setLastCheckedAt(null);
     setHasCachedBillingStatus(false);
   };
@@ -415,6 +420,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
     setHasActiveSubscription(entry.hasActiveSubscription);
     setCurrentPlan(entry.currentPlan);
     setIsBillingLoaded(true);
+    setBillingError(null);
     setLastCheckedAt(entry.checkedAt);
     setHasCachedBillingStatus(fromCache);
   };
@@ -431,9 +437,18 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
       return freshCached;
     }
 
+    const validationSeq = validationSeqRef.current + 1;
+    validationSeqRef.current = validationSeq;
+    setBillingError(null);
     setIsBillingValidating(true);
     try {
-      const billing = await getBillingMe();
+      const billing = await Promise.race([
+        getBillingMe(),
+        new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(new Error("billing_validation_timeout")), BILLING_VALIDATION_TIMEOUT_MS);
+        }),
+      ]);
+      if (validationSeq !== validationSeqRef.current) return null;
       const entry: BillingCacheEntry = {
         userKey,
         status: billing.hasActiveSubscription ? "ACTIVE" : "INACTIVE",
@@ -444,18 +459,24 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
       writeBillingCache(entry);
       applyBilling(entry, false);
       return entry;
-    } catch {
-      const entry: BillingCacheEntry = {
-        userKey,
-        status: "INACTIVE",
-        hasActiveSubscription: false,
-        currentPlan: null,
-        checkedAt: Date.now(),
-      };
-      applyBilling(entry, false);
-      return entry;
+    } catch (error) {
+      if (validationSeq !== validationSeqRef.current) return null;
+      const message =
+        error instanceof Error && error.message === "billing_validation_timeout"
+          ? "Tempo limite ao validar assinatura."
+          : "Nao foi possivel validar sua assinatura agora.";
+      setBillingError(message);
+      if (!isBillingLoaded && !hasCachedBillingStatus) {
+        setIsBillingLoaded(false);
+        setBillingStatus("UNKNOWN");
+        setHasActiveSubscription(false);
+        setCurrentPlan(null);
+      }
+      return null;
     } finally {
-      setIsBillingValidating(false);
+      if (validationSeq === validationSeqRef.current) {
+        setIsBillingValidating(false);
+      }
     }
   };
 
@@ -498,6 +519,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
         currentPlan,
         isBillingLoaded,
         isBillingValidating,
+        billingError,
         lastCheckedAt,
         hasCachedBillingStatus,
         refreshBilling,
@@ -529,6 +551,38 @@ const FullscreenLoading = ({ label = "Preparando experiência" }: { label?: stri
     <div className="text-center">
       <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
       <p className="mt-3 text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">{label}</p>
+    </div>
+  </div>
+);
+
+const BillingValidationError = ({
+  onRetry,
+  onLogout,
+}: {
+  onRetry: () => void;
+  onLogout: () => void;
+}) => (
+  <div className="flex min-h-screen items-center justify-center bg-[#040507] px-5 text-zinc-100">
+    <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-white/[0.04] p-7 text-center shadow-[0_0_70px_rgba(182,255,0,0.08)]">
+      <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
+      <p className="mt-4 text-sm font-bold text-zinc-200">Nao foi possivel validar sua assinatura agora.</p>
+      <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessao continua protegida. Tente novamente ou saia para iniciar uma nova sessao.</p>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="flex-1 rounded-[16px] bg-lime-300 px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-zinc-950"
+        >
+          Tentar novamente
+        </button>
+        <button
+          type="button"
+          onClick={onLogout}
+          className="flex-1 rounded-[16px] border border-white/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-zinc-300"
+        >
+          Sair
+        </button>
+      </div>
     </div>
   </div>
 );
@@ -597,12 +651,14 @@ const OnboardingGate = ({ children }: { children?: ReactNode }) => {
 };
 
 const BillingGate = ({ children }: { children?: ReactNode }) => {
-  const { isLoggedIn, isProfileReady } = useAuth();
+  const { isLoggedIn, isProfileReady, logout } = useAuth();
   const {
     hasActiveSubscription,
     isBillingLoaded,
     isBillingValidating,
     hasCachedBillingStatus,
+    billingError,
+    refreshBilling,
   } = useBilling();
 
   const shouldShowFullScreenValidation =
@@ -613,6 +669,9 @@ const BillingGate = ({ children }: { children?: ReactNode }) => {
     isBillingValidating;
 
   if (shouldShowFullScreenValidation) return <FullscreenLoading label="Validando assinatura" />;
+  if (isLoggedIn && isProfileReady && billingError && !isBillingLoaded) {
+    return <BillingValidationError onRetry={() => void refreshBilling(true)} onLogout={logout} />;
+  }
   if (isLoggedIn && isProfileReady && isBillingLoaded && !hasActiveSubscription) {
     return <Navigate to="/planos" replace />;
   }
