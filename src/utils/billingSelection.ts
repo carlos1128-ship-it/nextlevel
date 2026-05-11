@@ -9,9 +9,9 @@ export const PENDING_SELECTED_PLAN_KEY = "pendingSelectedPlan";
 const LEGACY_SELECTED_PLAN_KEY = "selectedPlan";
 
 const PLAN_LABELS: Record<BillingPlanKey, string> = {
-  COMMON: "Comum",
+  COMMON: "Essencial",
   PREMIUM: "Premium",
-  PRO_BUSINESS: "Pro Business",
+  PRO_BUSINESS: "Business",
 };
 
 const CYCLE_LABELS: Record<BillingCycle, string> = {
