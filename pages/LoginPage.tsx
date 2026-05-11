@@ -494,7 +494,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
   showPassword, setShowPassword, error, loading, setError,
   selectedPlanLabel, subscribeIntent, onGoogleLogin,
 }) => (
-  <aside id="auth-panel" className="sticky top-6 w-full min-w-0 max-w-full self-start">
+  <aside id="auth-panel" className="w-full min-w-0 max-w-full self-start">
     <div className="relative max-w-full overflow-hidden rounded-[32px] border border-lime-400/[0.14] bg-[linear-gradient(200deg,rgba(14,20,28,0.99),rgba(6,8,12,0.99))] shadow-[0_32px_100px_rgba(0,0,0,0.6),0_0_0_1px_rgba(182,255,0,0.03),inset_0_1px_0_rgba(255,255,255,0.04)]">
       {/* Glow top */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(182,255,0,0.18),transparent_60%)]" />
@@ -782,65 +782,39 @@ const LoginPage: React.FC = () => {
           <button onClick={() => scrollToSection("como-funciona")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Como funciona</button>
           <button onClick={() => scrollToSection("pricing")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Planos</button>
           <button onClick={() => focusAuth(false)} className="hidden rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-200 transition hover:bg-white/[0.1] sm:block">Entrar</button>
-          <button onClick={() => focusAuth(true)} className="hidden rounded-xl bg-lime-400 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_18px_rgba(182,255,0,0.3)] transition hover:brightness-105 sm:block">Assinar agora</button>
+          <button onClick={() => scrollToSection("pricing")} className="hidden rounded-xl bg-lime-400 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_18px_rgba(182,255,0,0.3)] transition hover:brightness-105 sm:block">Assinar agora</button>
         </div>
       </nav>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
 
         {/* â”€â”€â”€ HERO â”€â”€â”€ */}
-        <section className="grid min-w-0 gap-14 pt-8 pb-14 lg:grid-cols-[1fr_400px] items-start">
-          {/* Left */}
-          <div className="min-w-0 max-w-[calc(100vw-32px)] sm:max-w-none">
-            {/* Badge */}
-            <div className="mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2">
+        <section className="flex min-h-[74vh] items-center justify-center py-20 text-center sm:py-28">
+          <div className="mx-auto flex max-w-5xl flex-col items-center">
+            <div className="mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
               <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
               <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Plataforma de gestão com IA</span>
             </div>
 
-            {/* Headline */}
-            <h1 className="max-w-[18ch] whitespace-normal break-words text-[2rem] font-black leading-[1.05] text-white sm:max-w-[32ch] sm:text-6xl xl:text-7xl">
-              Gestão,<br />
-              atendimento e lucro<br />
-              <span className="relative inline-block">
-                <span className="relative z-10 text-lime-300">em uma única</span>
-                <span className="absolute -inset-x-2 inset-y-0 rounded-lg bg-lime-400/8 -z-0"></span>
-              </span><br />
-              plataforma com IA.
+            <h1 className="max-w-[12ch] break-words text-[2.6rem] font-black leading-[0.98] tracking-tight text-white sm:max-w-5xl sm:text-7xl sm:leading-[0.92] xl:text-8xl">
+              Gestão, atendimento e lucro em uma única plataforma com <span className="text-lime-300">IA.</span>
             </h1>
-            <p className="mt-4 max-w-[28ch] text-base font-black leading-7 text-white sm:max-w-2xl sm:text-2xl">
-              Seja administrador, vendedor e analista do seu negócio.<br />
-              <span className="text-lime-300">Seja Next Level.</span>
-            </p>
 
-            <p className="mt-6 max-w-[30ch] text-base leading-7 text-zinc-400 font-light sm:max-w-xl">
+            <p className="mt-7 max-w-[32ch] text-base leading-8 text-zinc-300 sm:max-w-3xl sm:text-xl sm:leading-9">
               A Next Level conecta WhatsApp, Instagram, Mercado Livre, Utmify e dados do seu negócio para mostrar onde você está ganhando, onde está perdendo e o que fazer para vender com mais margem.
             </p>
 
-            {/* CTAs */}
-            <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <button onClick={() => focusAuth(true)}
-                className="flex items-center gap-2.5 rounded-[18px] bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_36px_rgba(182,255,0,0.25)] hover:-translate-y-0.5 hover:brightness-105 transition">
+            <div className="mt-9 flex flex-col items-center gap-4">
+              <button onClick={() => scrollToSection("pricing")}
+                className="flex items-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105">
                 Assinar agora <ArrowRight />
               </button>
-              <button onClick={scrollToWhatWeDo}
-                className="flex items-center gap-2.5 rounded-[18px] border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-zinc-200 hover:bg-white/[0.08] transition">
-                Entenda o que fazemos
-              </button>
-              <button onClick={() => focusAuth(false)}
-                className="flex items-center gap-2.5 rounded-[18px] border border-lime-300/20 bg-lime-300/10 px-6 py-4 text-sm font-semibold text-lime-200 hover:bg-lime-300/15 transition">
-                Entrar
+              <button onClick={scrollToWhatWeDo} className="text-sm font-semibold text-zinc-500 transition hover:text-zinc-200">
+                Entenda primeiro o que a plataforma faz
               </button>
             </div>
 
-            <div className="mt-8 rounded-[24px] border border-lime-400/15 bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(255,255,255,0.03))] p-5">
-              <p className="text-base font-black leading-7 text-white">
-                A Next Level é uma plataforma SaaS que centraliza gestão, atendimento e dados do negócio com inteligência artificial.
-              </p>
-            </div>
-
-            {/* Integrations row */}
-            <div className="mt-8 flex max-w-full flex-wrap items-center gap-2">
+            <div className="mt-10 flex max-w-4xl flex-wrap items-center justify-center gap-2">
               <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-600 mr-1">Integra com:</span>
               {INTEGRATIONS.map(i => (
                 <span key={i.name} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold ${i.bg}`} style={{ color: i.color }}>
@@ -848,9 +822,15 @@ const LoginPage: React.FC = () => {
                 </span>
               ))}
             </div>
+          </div>
+        </section>
 
-            {/* Metrics */}
-            <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-4">
+        <section className="pb-16">
+          <div className="rounded-[28px] border border-lime-400/15 bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(255,255,255,0.025),rgba(3,5,8,0.92))] p-6 sm:p-8">
+            <p className="mx-auto max-w-4xl text-center text-lg font-black leading-8 text-white sm:text-2xl">
+              A Next Level é uma plataforma SaaS que centraliza gestão, atendimento e dados do negócio com inteligência artificial.
+            </p>
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {METRICS.map((m) => (
                 <div key={m.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -865,21 +845,7 @@ const LoginPage: React.FC = () => {
                 </div>
               ))}
             </div>
-
           </div>
-
-          {/* Auth Panel */}
-          <AuthPanel
-            isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
-            onLogin={handleLogin} onRegister={handleRegister}
-            name={name} setName={setName} email={email} setEmail={setEmail}
-            password={password} setPassword={setPassword}
-            showPassword={showPassword} setShowPassword={setShowPassword}
-            error={error} loading={loading} setError={setError}
-            selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
-            subscribeIntent={searchParams.get("intent") === "subscribe"}
-            onGoogleLogin={handleGoogleLogin}
-          />
         </section>
 
         <section id="problemas" className="pb-16 scroll-mt-20">
@@ -1096,6 +1062,37 @@ const LoginPage: React.FC = () => {
                 </p>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="py-20 scroll-mt-20">
+          <div className="grid gap-10 rounded-[32px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.035),rgba(3,5,8,0.96))] p-6 sm:p-10 lg:grid-cols-[1fr_420px] lg:items-center">
+            <div className="max-w-2xl">
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Acesso Next Level</p>
+              <h2 className="text-3xl font-black leading-[0.96] tracking-tight text-white sm:text-5xl">
+                Crie sua conta ou entre no painel sem perder o contexto do plano.
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-zinc-400">
+                O formulário fica em uma etapa dedicada para manter a primeira tela limpa e deixar claro se você está criando uma conta, entrando ou continuando uma assinatura.
+              </p>
+              {selectedPlan ? (
+                <div className="mt-6 inline-flex rounded-full border border-lime-400/25 bg-lime-400/10 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-lime-300">
+                  Você selecionou: {planSelectionLabel(selectedPlan)}
+                </div>
+              ) : null}
+            </div>
+
+            <AuthPanel
+              isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
+              onLogin={handleLogin} onRegister={handleRegister}
+              name={name} setName={setName} email={email} setEmail={setEmail}
+              password={password} setPassword={setPassword}
+              showPassword={showPassword} setShowPassword={setShowPassword}
+              error={error} loading={loading} setError={setError}
+              selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
+              subscribeIntent={searchParams.get("intent") === "subscribe"}
+              onGoogleLogin={handleGoogleLogin}
+            />
           </div>
         </section>
 
