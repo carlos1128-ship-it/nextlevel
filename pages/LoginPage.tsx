@@ -255,6 +255,17 @@ const PRICING = [
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const UPDATED_PRICING = PRICING;
 
+type NeonParticle = {
+  baseX: number;
+  y: number;
+  radius: number;
+  speed: number;
+  opacity: number;
+  drift: number;
+  driftSpeed: number;
+  driftPhase: number;
+};
+
 const NeonSnowBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -269,7 +280,19 @@ const NeonSnowBackground: React.FC = () => {
     let frame = 0;
     let width = 0;
     let height = 0;
-    let particles: Array<{ x: number; y: number; r: number; speed: number; opacity: number; drift: number; phase: number }> = [];
+    let lastTime = performance.now();
+    let particles: NeonParticle[] = [];
+
+    const createParticle = (startY = Math.random() * height): NeonParticle => ({
+      baseX: Math.random() * width,
+      y: startY,
+      radius: Math.random() * 1.6 + 0.8,
+      speed: (prefersReducedMotion ? 10 : 34) + Math.random() * (prefersReducedMotion ? 12 : 58),
+      opacity: Math.random() * 0.28 + 0.12,
+      drift: Math.random() * 18 + 5,
+      driftSpeed: Math.random() * 0.9 + 0.35,
+      driftPhase: Math.random() * Math.PI * 2,
+    });
 
     const resize = () => {
       width = window.innerWidth;
@@ -281,58 +304,51 @@ const NeonSnowBackground: React.FC = () => {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const count = width < 768 ? 34 : width < 1280 ? 52 : 72;
-      particles = Array.from({ length: count }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        r: Math.random() * 1.7 + 0.7,
-        speed: Math.random() * 0.45 + 0.18,
-        opacity: Math.random() * 0.32 + 0.12,
-        drift: Math.random() * 0.34 + 0.08,
-        phase: Math.random() * Math.PI * 2,
-      }));
+      const count = width < 768 ? 30 : width < 1280 ? 48 : 68;
+      particles = Array.from({ length: count }, () => createParticle());
     };
 
-    const draw = () => {
+    const draw = (time = performance.now()) => {
+      const delta = Math.min((time - lastTime) / 1000, 0.04);
+      lastTime = time;
+
       ctx.clearRect(0, 0, width, height);
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
 
       particles.forEach((particle) => {
-        const driftX = Math.sin(particle.phase + particle.y * 0.012) * particle.drift;
-        const x = particle.x + driftX;
-        const glow = ctx.createRadialGradient(x, particle.y, 0, x, particle.y, particle.r * 5);
+        particle.y += particle.speed * delta;
+        particle.driftPhase += particle.driftSpeed * delta;
+
+        if (particle.y > height + 18) {
+          const reset = createParticle(-18 - Math.random() * 80);
+          Object.assign(particle, reset);
+        }
+
+        const x = particle.baseX + Math.sin(particle.driftPhase) * particle.drift;
+        const glowRadius = particle.radius * 5.5;
+        const glow = ctx.createRadialGradient(x, particle.y, 0, x, particle.y, glowRadius);
         glow.addColorStop(0, `rgba(182,255,0,${particle.opacity})`);
         glow.addColorStop(0.45, `rgba(34,197,94,${particle.opacity * 0.18})`);
         glow.addColorStop(1, "rgba(182,255,0,0)");
 
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(x, particle.y, particle.r * 5, 0, Math.PI * 2);
+        ctx.arc(x, particle.y, glowRadius, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = `rgba(217,255,112,${Math.min(particle.opacity + 0.2, 0.62)})`;
         ctx.beginPath();
-        ctx.arc(x, particle.y, particle.r, 0, Math.PI * 2);
+        ctx.arc(x, particle.y, particle.radius, 0, Math.PI * 2);
         ctx.fill();
-
-        if (!prefersReducedMotion) {
-          particle.y += particle.speed;
-          particle.x += Math.sin(particle.phase) * 0.035;
-          particle.phase += 0.004;
-          if (particle.y > height + 12) {
-            particle.y = -12;
-            particle.x = Math.random() * width;
-          }
-        }
       });
 
       ctx.restore();
-      if (!prefersReducedMotion) frame = requestAnimationFrame(draw);
+      frame = requestAnimationFrame(draw);
     };
 
     resize();
-    draw();
+    frame = requestAnimationFrame(draw);
     window.addEventListener("resize", resize);
 
     return () => {
@@ -743,7 +759,7 @@ const LoginPage: React.FC = () => {
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Recomendação da IA</p>
                 <h3 className="mt-3 text-2xl font-black leading-tight text-white">Ajuste produtos de baixa margem antes de aumentar anúncios.</h3>
                 <p className="mt-4 text-sm leading-7 text-zinc-400">
-                  A proposta é simples: entender números, enxergar perdas e agir com mais segurança.
+                  A proposta é simples: entender os números, encontrar perdas e tomar decisões melhores.
                 </p>
               </div>
             </div>
@@ -752,12 +768,12 @@ const LoginPage: React.FC = () => {
 
         <section id="publico" className="py-16 scroll-mt-20">
           <div className="mb-8 max-w-4xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Para quem é</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">PRA QUEM É</p>
             <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
-              Feita para quem precisa controlar melhor o próprio negócio.
+              Feita para empresários que querem entender melhor o próprio negócio.
             </h2>
             <p className="mt-4 text-sm leading-7 text-zinc-400">
-              Serve para lojas físicas, e-commerces, prestadores de serviço, negócios locais, infoprodutores e empresas em crescimento.
+              Serve para quem vende, atende clientes, controla custos e precisa tomar decisões com mais clareza.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
