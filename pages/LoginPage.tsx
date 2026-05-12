@@ -131,42 +131,42 @@ const FEATURES = [
   {
     icon: ChartIcon,
     title: "Gestão de vendas",
-    desc: "Acompanhe vendas, períodos, desempenho e oportunidades com clareza.",
+    desc: "Entenda o que vende mais, o que dá margem e onde existe oportunidade.",
     color: "from-lime-400/15 to-emerald-400/5",
     border: "border-lime-400/20",
   },
   {
     icon: ShieldIcon,
     title: "Controle de custos",
-    desc: "Veja gastos, perdas e pontos que estão consumindo sua margem.",
+    desc: "Separe faturamento de lucro real com custos, despesas e indicadores claros.",
     color: "from-green-400/15 to-teal-400/5",
     border: "border-green-400/20",
   },
   {
     icon: TrendingUpIcon,
     title: "Produtos e margem",
-    desc: "Entenda quais produtos vendem bem, quais dão lucro e quais precisam de ajuste.",
+    desc: "Acompanhe produtos, preços, custos e margem para saber o que vale vender.",
     color: "from-cyan-400/15 to-blue-400/5",
     border: "border-cyan-400/20",
   },
   {
     icon: WhatsAppIcon,
     title: "Clientes e atendimento",
-    desc: "Organize conversas e oportunidades para não deixar clientes importantes para trás.",
+    desc: "Organize conversas, intenções e oportunidades vindas de WhatsApp e Instagram.",
     color: "from-violet-400/15 to-purple-400/5",
     border: "border-violet-400/20",
   },
   {
     icon: ZapIcon,
     title: "Relatórios automáticos",
-    desc: "Transforme números soltos em relatórios simples para decidir melhor.",
+    desc: "Relatórios mostram vendas, custos, produtos e alertas importantes.",
     color: "from-violet-400/15 to-purple-400/5",
     border: "border-violet-400/20",
   },
   {
     icon: BrainIcon,
     title: "Alertas e recomendações com IA",
-    desc: "Receba sinais sobre problemas, perdas e próximos passos para melhorar resultado.",
+    desc: "A IA analisa sinais do negócio e recomenda próximos passos.",
     color: "from-emerald-400/15 to-cyan-400/5",
     border: "border-emerald-400/20",
   },
@@ -177,6 +177,20 @@ const HOW_IT_WORKS = [
   { title: "A Next Level organiza", text: "A plataforma transforma informações soltas em indicadores úteis." },
   { title: "A IA interpreta sinais", text: "Problemas, riscos e oportunidades aparecem com contexto." },
   { title: "Você decide com clareza", text: "Priorize ações para vender melhor, perder menos e crescer com margem." },
+];
+
+const AI_PRACTICE = [
+  "Analisa vendas, custos e padrões.",
+  "Identifica riscos, desperdícios e oportunidades.",
+  "Ajuda no atendimento e na organização de clientes.",
+  "Gera relatórios e recomendações para decisões melhores.",
+];
+
+const INTELLIGENCE_CARDS = [
+  { label: "Margem baixa detectada", value: "Produto com custo acima do ideal", tone: "text-lime-300" },
+  { label: "Cliente aguardando resposta", value: "Oportunidade ativa no WhatsApp", tone: "text-cyan-200" },
+  { label: "Próxima ação recomendada", value: "Revisar preço antes de escalar anúncio", tone: "text-emerald-200" },
+  { label: "Relatório gerado pela IA", value: "Vendas, custos e pontos de atenção", tone: "text-zinc-100" },
 ];
 
 const FAQS = [
@@ -193,6 +207,7 @@ type FooterInfoKey =
   | "atendimento-com-ia"
   | "relatorios-automaticos"
   | "lucro-real"
+  | "produtos-e-custos"
   | "whatsapp"
   | "instagram"
   | "mercado-livre"
@@ -202,66 +217,84 @@ type FooterInfoKey =
   | "termos"
   | "privacidade";
 
-const FOOTER_DETAILS: Record<FooterInfoKey, { title: string; text: string; how: string }> = {
+const FOOTER_DETAILS: Record<FooterInfoKey, { title: string; text: string; how: string; image: string }> = {
   "gestao-de-vendas": {
     title: "Gestão de vendas",
-    text: "A gestão de vendas organiza faturamento, produtos, períodos e desempenho para o empresário entender o que vende, onde existe oportunidade e onde o resultado pode melhorar.",
-    how: "Dentro da Next Level, vendas viram indicadores claros para cruzar margem, clientes, produtos e ações recomendadas.",
+    text: "Veja o desempenho das vendas, períodos de maior movimento, produtos mais relevantes e oportunidades para aumentar resultado com mais clareza.",
+    how: "Dentro da Next Level, vendas viram indicadores para cruzar margem, clientes, produtos e próximas ações.",
+    image: "/login-features/gestao-vendas.png",
   },
   "atendimento-com-ia": {
     title: "Atendimento com IA",
-    text: "A Next Level usa inteligência artificial para apoiar o atendimento, interpretar intenções de clientes, organizar oportunidades e reduzir mensagens esquecidas.",
-    how: "A IA ajuda a priorizar conversas, identificar intenção de compra e manter o dono do negócio no controle.",
+    text: "A Next Level ajuda a organizar mensagens, identificar intenções dos clientes e apoiar respostas inteligentes em canais como WhatsApp e Instagram.",
+    how: "A IA ajuda a priorizar conversas, identificar intenção de compra e reduzir oportunidades esquecidas.",
+    image: "/login-features/atendimento-ia.png",
   },
   "relatorios-automaticos": {
     title: "Relatórios automáticos",
-    text: "A plataforma transforma dados soltos em relatórios claros sobre vendas, custos, margem, produtos e pontos de atenção.",
+    text: "Transforme dados soltos em relatórios claros sobre vendas, custos, margem, produtos e pontos de atenção.",
     how: "Os relatórios conectam operação e decisão para mostrar o que merece ação agora.",
+    image: "/login-features/relatorios.png",
   },
   "lucro-real": {
     title: "Lucro real",
-    text: "A Next Level ajuda a separar faturamento de lucro, mostrando custos, margem e desperdícios para evitar decisões baseadas apenas em volume de vendas.",
-    how: "Produtos e custos são analisados para revelar onde existe margem, perda ou risco.",
+    text: "Entenda a diferença entre faturamento e lucro, acompanhando custos, margem e desperdícios que afetam o resultado.",
+    how: "A plataforma mostra onde existe margem, perda ou risco antes de o empresário decidir no escuro.",
+    image: "/login-features/lucro-real.png",
+  },
+  "produtos-e-custos": {
+    title: "Produtos e custos",
+    text: "Acompanhe produtos, preços, custos e margem para saber o que realmente vale a pena vender.",
+    how: "A Next Level aproxima estoque, precificação e resultado para revelar oportunidades de ajuste.",
+    image: "/login-features/produtos-custos.png",
   },
   whatsapp: {
     title: "WhatsApp",
-    text: "O WhatsApp pode ser conectado para apoiar atendimento, organização de conversas e acompanhamento de oportunidades comerciais.",
-    how: "A plataforma ajuda a trazer o canal para a operação, sem expor tokens ou complexidade ao usuário final.",
+    text: "Centralize oportunidades e atendimentos vindos do WhatsApp para não perder clientes no meio da operação.",
+    how: "O canal entra na visão operacional sem expor tokens ou complexidade ao usuário final.",
+    image: "/login-features/whatsapp.png",
   },
   instagram: {
     title: "Instagram",
-    text: "A integração com Instagram ajuda negócios que recebem interesse por mensagens, comentários e campanhas sociais.",
+    text: "Organize mensagens, leads e interações vindas do Instagram com apoio da inteligência artificial.",
     how: "A Next Level organiza sinais de atendimento e intenção para reduzir oportunidades esquecidas.",
+    image: "/login-features/instagram.png",
   },
   "mercado-livre": {
     title: "Mercado Livre",
-    text: "A integração com Mercado Livre ajuda operações que vendem em marketplace a acompanhar produtos, pedidos e sinais comerciais.",
+    text: "Conecte dados comerciais do marketplace para acompanhar vendas, produtos e desempenho dentro da Next Level.",
     how: "Os dados do canal entram na visão de gestão para apoiar margem, estoque e decisões estratégicas.",
+    image: "/login-features/mercado-livre.png",
   },
   "alertas-e-recomendacoes": {
     title: "Alertas e recomendações",
-    text: "A IA analisa sinais importantes do negócio e indica problemas, riscos e oportunidades antes que eles passem despercebidos.",
+    text: "A IA pode apontar riscos, oportunidades e próximos passos para o empresário agir antes do problema crescer.",
     how: "Alertas aproximam o empresário do próximo passo: ajustar preço, revisar custo, responder cliente ou investigar queda.",
+    image: "/login-features/alertas-recomendacoes.png",
   },
   sobre: {
     title: "Sobre a Next Level",
     text: "A Next Level AI é um SaaS brasileiro para empresários que precisam transformar operação, atendimento e números em decisões melhores.",
     how: "O produto foi desenhado para esconder complexidade técnica e entregar clareza de gestão no dia a dia.",
+    image: "/login-features/sobre.png",
   },
   contato: {
     title: "Contato",
     text: "Para falar com a Next Level, use os canais oficiais informados pela empresa durante onboarding, suporte ou contratação.",
     how: "No produto, o foco é manter atendimento e gestão no mesmo fluxo para reduzir perda de informação.",
+    image: "/login-features/contato.png",
   },
   termos: {
     title: "Termos",
     text: "Os termos explicam regras de uso da plataforma, responsabilidades, limites do serviço e condições comerciais aplicáveis.",
     how: "A Next Level prioriza segurança, previsibilidade e transparência para negócios que dependem da plataforma.",
+    image: "/login-features/termos.png",
   },
   privacidade: {
     title: "Privacidade",
     text: "A privacidade orienta como dados de usuários, empresas e operações devem ser protegidos e tratados dentro do ecossistema.",
     how: "Dados sensíveis não devem aparecer em interfaces públicas, logs desnecessários ou fluxos sem proteção.",
+    image: "/login-features/privacidade.png",
   },
 };
 
@@ -273,6 +306,7 @@ const FOOTER_COLUMNS: Array<{ title: string; links: Array<{ label: string; key: 
       { label: "Atendimento com IA", key: "atendimento-com-ia" },
       { label: "Relatórios automáticos", key: "relatorios-automaticos" },
       { label: "Lucro real", key: "lucro-real" },
+      { label: "Produtos e custos", key: "produtos-e-custos" },
     ],
   },
   {
@@ -433,6 +467,82 @@ const NeonSnowBackground: React.FC = () => {
   return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 opacity-70" />;
 };
 
+const LandingMotionStyles = () => (
+  <style>{`
+    @keyframes nlRevealUp {
+      from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.99); }
+      to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+    @keyframes nlFloatSoft {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -10px, 0); }
+    }
+    @keyframes nlGlowShift {
+      0%, 100% { opacity: .55; transform: translateX(-8%); }
+      50% { opacity: .9; transform: translateX(8%); }
+    }
+    .nl-reveal { animation: nlRevealUp .75s cubic-bezier(.16,1,.3,1) both; }
+    .nl-delay-1 { animation-delay: .08s; }
+    .nl-delay-2 { animation-delay: .16s; }
+    .nl-delay-3 { animation-delay: .24s; }
+    .nl-delay-4 { animation-delay: .32s; }
+    .nl-float { animation: nlFloatSoft 6s ease-in-out infinite; }
+    .nl-glow-shift { animation: nlGlowShift 9s ease-in-out infinite; }
+    .nl-card-hover { transition: transform .28s ease, border-color .28s ease, background .28s ease, box-shadow .28s ease; }
+    .nl-card-hover:hover { transform: translateY(-5px); border-color: rgba(182,255,0,.28); box-shadow: 0 24px 90px rgba(0,0,0,.28), 0 0 38px rgba(182,255,0,.08); }
+    @supports (animation-timeline: view()) {
+      .nl-scroll-reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        animation: nlRevealUp both cubic-bezier(.16,1,.3,1);
+        animation-timeline: view();
+        animation-range: entry 0% cover 28%;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .nl-reveal, .nl-scroll-reveal, .nl-float, .nl-glow-shift {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .nl-card-hover, .nl-card-hover:hover {
+        transition: none !important;
+        transform: none !important;
+      }
+    }
+  `}</style>
+);
+
+const FeatureScreenshot: React.FC<{ detail: { title: string; image: string } }> = ({ detail }) => {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div className="flex min-h-[260px] items-center justify-center rounded-[24px] border border-dashed border-lime-300/25 bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(255,255,255,0.03))] p-6 text-center">
+        <div>
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-300 text-zinc-950">
+            <ChartIcon />
+          </div>
+          <p className="text-sm font-black text-white">Screenshot em breve</p>
+          <p className="mt-2 text-xs leading-5 text-zinc-500">
+            Adicione a imagem em <span className="font-mono text-lime-300/80">{detail.image}</span>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={detail.image}
+      alt={`Prévia de ${detail.title}`}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="min-h-[260px] w-full rounded-[24px] border border-white/[0.08] bg-white/[0.03] object-cover shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
+    />
+  );
+};
+
 /* Auth panel */
 const authFieldCls = "min-h-[50px] w-full rounded-[18px] border border-white/10 bg-[#070a0f] px-4 py-3.5 text-base text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-lime-400/60 focus:bg-[#0a1020] focus:shadow-[0_0_20px_rgba(182,255,0,0.08),inset_0_0_0_1px_rgba(182,255,0,0.06)]";
 
@@ -457,121 +567,137 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
   showPassword, setShowPassword, error, loading, setError,
   selectedPlanLabel, subscribeIntent, onGoogleLogin,
 }) => (
-  <aside id="auth-panel" className="w-full min-w-0 max-w-[620px] self-start">
+  <aside id="auth-panel" className="w-full min-w-0">
     <div className="relative max-w-full overflow-hidden rounded-[34px] border border-lime-400/[0.16] bg-[linear-gradient(200deg,rgba(16,23,32,0.99),rgba(6,8,12,0.99))] shadow-[0_36px_120px_rgba(0,0,0,0.66),0_0_0_1px_rgba(182,255,0,0.04),inset_0_1px_0_rgba(255,255,255,0.05)]">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(182,255,0,0.18),transparent_60%)]" />
 
-      <div className="relative p-6 sm:p-8 lg:p-9">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center justify-center h-10 w-10 rounded-2xl bg-lime-400 shadow-[0_0_20px_rgba(182,255,0,0.4)]">
-            <span className="text-zinc-950 font-black text-sm tracking-tighter">NL</span>
-          </div>
-          <div>
-            <p className="text-white font-black text-base tracking-tight">NEXT LEVEL</p>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Gestão inteligente</p>
-          </div>
-        </div>
+      <div className="relative grid gap-6 p-5 sm:p-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8 lg:p-8">
+        <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-[linear-gradient(145deg,rgba(182,255,0,0.11),rgba(255,255,255,0.035)_34%,rgba(3,5,8,0.72))] p-6 sm:p-8">
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-24 rounded-full bg-lime-300/15 blur-3xl nl-glow-shift" />
+          <div className="relative">
+            <div className="mb-8 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-400 shadow-[0_0_24px_rgba(182,255,0,0.45)]">
+                <span className="text-zinc-950 font-black text-sm tracking-tighter">NL</span>
+              </div>
+              <div>
+                <p className="text-white font-black text-lg tracking-tight">NEXT LEVEL</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Central inteligente</p>
+              </div>
+            </div>
 
-        <div className="mb-5">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-lime-300/80">
-            {isRegisterView ? "Novo usuário" : "Já sou cliente"}
-          </p>
-          <h2 className="mt-2 text-3xl font-black leading-tight text-white">
-            {isRegisterView ? "Comece agora sua conta Next Level" : "Entrar na minha conta"}
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-zinc-400">
-            {isRegisterView
-              ? "Leva menos de 1 minuto. Depois você escolhe o plano e conecta os dados no seu ritmo."
-              : "Continue acompanhando operação, margem, atendimento e recomendações."}
-          </p>
-        </div>
-
-        {(subscribeIntent || selectedPlanLabel) && (
-          <div className="mb-5 rounded-[18px] border border-lime-400/20 bg-lime-400/10 p-4">
-            <p className="text-sm font-bold text-lime-100">
-              {isRegisterView ? "Crie sua conta para continuar sua assinatura." : "Entre para continuar sua assinatura."}
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-lime-300/80">Acesso ao produto</p>
+            <h2 className="mt-3 max-w-md text-3xl font-black leading-tight text-white sm:text-4xl">
+              Acesse sua central de gestão.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-7 text-zinc-300">
+              Entre para acompanhar vendas, custos, clientes, relatórios e recomendações da IA em uma operação conectada.
             </p>
-            {selectedPlanLabel ? (
-              <p className="mt-1 text-xs font-semibold text-lime-300">
-                Você selecionou: {selectedPlanLabel}
-              </p>
-            ) : null}
+
+            {(subscribeIntent || selectedPlanLabel) && (
+              <div className="mt-6 rounded-[18px] border border-lime-400/20 bg-lime-400/10 p-4">
+                <p className="text-sm font-bold text-lime-100">
+                  {isRegisterView ? "Crie sua conta para continuar sua assinatura." : "Entre para continuar sua assinatura."}
+                </p>
+                {selectedPlanLabel ? (
+                  <p className="mt-1 text-xs font-semibold text-lime-300">
+                    Você selecionou: {selectedPlanLabel}
+                  </p>
+                ) : null}
+              </div>
+            )}
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {[
+                { label: "Dados protegidos", detail: "Acesso seguro" },
+                { label: "Configuração guiada", detail: "Sem complexidade" },
+                { label: "IA para empresas", detail: "Contexto por negócio" },
+              ].map((signal) => (
+                <div key={signal.label} className="rounded-2xl border border-white/[0.07] bg-black/20 p-4 nl-card-hover">
+                  <p className="mb-3 h-1.5 w-1.5 rounded-full bg-lime-300 shadow-[0_0_12px_rgba(182,255,0,0.8)]" />
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-white">{signal.label}</p>
+                  <p className="mt-2 text-xs text-zinc-500">{signal.detail}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-
-        <div className="grid grid-cols-2 rounded-[20px] border border-white/10 bg-white/[0.03] p-1 mb-5">
-          <button type="button" onClick={() => { setIsRegisterView(false); setError(""); }}
-            className={`rounded-[16px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] transition ${!isRegisterView ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-400 hover:text-white"}`}>
-            Já sou cliente
-          </button>
-          <button type="button" onClick={() => { setIsRegisterView(true); setError(""); }}
-            className={`rounded-[16px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] transition ${isRegisterView ? "bg-lime-300 text-zinc-950 shadow-[0_0_18px_rgba(182,255,0,0.3)]" : "text-zinc-400 hover:text-white"}`}>
-            Criar conta
-          </button>
         </div>
 
-        <button type="button"
-          onClick={onGoogleLogin}
-          className="flex min-h-[50px] w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-lime-300/60 mb-4">
-          <GoogleIcon /> Google
-        </button>
+        <div className="rounded-[28px] border border-white/[0.08] bg-[#070a0f]/95 p-5 sm:p-6 lg:p-7">
+          <div className="mb-5">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-lime-300/80">
+              {isRegisterView ? "Novo usuário" : "Já sou cliente"}
+            </p>
+            <h3 className="mt-2 text-2xl font-black leading-tight text-white">
+              {isRegisterView ? "Crie sua conta Next Level" : "Entre no painel"}
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-zinc-500">
+              {isRegisterView
+                ? "Comece agora e continue a escolha do plano em seguida."
+                : "Continue de onde parou na sua operação."}
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px flex-1 bg-white/[0.07]" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">ou email</span>
-          <div className="h-px flex-1 bg-white/[0.07]" />
-        </div>
+          <div className="grid grid-cols-2 rounded-[20px] border border-white/10 bg-white/[0.03] p-1 mb-5">
+            <button type="button" onClick={() => { setIsRegisterView(false); setError(""); }}
+              className={`rounded-[16px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] transition ${!isRegisterView ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-400 hover:text-white"}`}>
+              Já sou cliente
+            </button>
+            <button type="button" onClick={() => { setIsRegisterView(true); setError(""); }}
+              className={`rounded-[16px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] transition ${isRegisterView ? "bg-lime-300 text-zinc-950 shadow-[0_0_18px_rgba(182,255,0,0.3)]" : "text-zinc-400 hover:text-white"}`}>
+              Criar conta
+            </button>
+          </div>
 
-        <form onSubmit={isRegisterView ? onRegister : onLogin} className="space-y-3">
-          {isRegisterView && (
+          <button type="button"
+            onClick={onGoogleLogin}
+            className="flex min-h-[50px] w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-lime-300/60 mb-4">
+            <GoogleIcon /> Google
+          </button>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px flex-1 bg-white/[0.07]" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">ou email</span>
+            <div className="h-px flex-1 bg-white/[0.07]" />
+          </div>
+
+          <form onSubmit={isRegisterView ? onRegister : onLogin} className="space-y-3">
+            {isRegisterView && (
+              <div>
+                <label htmlFor="login-name" className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Nome completo</label>
+                <input id="login-name" value={name} onChange={e => setName(e.target.value)} className={authFieldCls} type="text" placeholder="Seu nome" autoComplete="name" />
+              </div>
+            )}
             <div>
-              <label htmlFor="login-name" className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Nome completo</label>
-              <input id="login-name" value={name} onChange={e => setName(e.target.value)} className={authFieldCls} type="text" placeholder="Seu nome" autoComplete="name" />
+              <label htmlFor="login-email" className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">E-mail</label>
+              <input id="login-email" value={email} onChange={e => setEmail(e.target.value)} className={authFieldCls} type="email" placeholder="nome@empresa.com" autoComplete="email" />
             </div>
-          )}
-          <div>
-            <label htmlFor="login-email" className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">E-mail</label>
-            <input id="login-email" value={email} onChange={e => setEmail(e.target.value)} className={authFieldCls} type="email" placeholder="nome@empresa.com" autoComplete="email" />
-          </div>
-          <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <label htmlFor="login-password" className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Senha</label>
-              {!isRegisterView && <span className="text-[10px] font-semibold text-zinc-600">Acesso seguro</span>}
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label htmlFor="login-password" className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Senha</label>
+                {!isRegisterView && <span className="text-[10px] font-semibold text-zinc-600">Acesso seguro</span>}
+              </div>
+              <div className="relative">
+                <input id="login-password" value={password} onChange={e => setPassword(e.target.value)} className={`${authFieldCls} pr-12`}
+                  type={showPassword ? "text" : "password"} placeholder={isRegisterView ? "Crie uma senha forte" : "Sua senha"} autoComplete={isRegisterView ? "new-password" : "current-password"} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-white/[0.06] hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lime-300/50">
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
             </div>
-            <div className="relative">
-              <input id="login-password" value={password} onChange={e => setPassword(e.target.value)} className={`${authFieldCls} pr-12`}
-                type={showPassword ? "text" : "password"} placeholder={isRegisterView ? "Crie uma senha forte" : "Sua senha"} autoComplete={isRegisterView ? "new-password" : "current-password"} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-white/[0.06] hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lime-300/50">
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
-            </div>
-          </div>
 
-          {error && (
-            <p className="rounded-[14px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-300">{error}</p>
-          )}
+            {error && (
+              <p className="rounded-[14px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-300">{error}</p>
+            )}
 
-          <button type="submit" disabled={loading}
-            className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[18px] bg-lime-300 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/60 disabled:opacity-60 mt-1">
-            {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" /> : null}
-            {isRegisterView ? "Criar minha conta" : "Entrar no painel"}
-            {!loading && <ArrowRight />}
-          </button>
-        </form>
-
-        <div className="mt-5 pt-5 border-t border-white/[0.06] grid grid-cols-3 gap-2 text-center">
-          {[
-            { label: "Dados protegidos" },
-            { label: "Configuração guiada" },
-            { label: "IA por empresa" },
-          ].map(s => (
-            <div key={s.label} className="rounded-xl bg-white/[0.03] py-2.5 px-1">
-              <p className="mx-auto h-1.5 w-1.5 rounded-full bg-lime-300" />
-              <p className="mt-1 text-[9px] font-semibold text-zinc-500 uppercase tracking-[0.15em]">{s.label}</p>
-            </div>
-          ))}
+            <button type="submit" disabled={loading}
+              className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[18px] bg-lime-300 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/60 disabled:opacity-60 mt-1">
+              {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" /> : null}
+              {isRegisterView ? "Criar minha conta" : "Entrar no painel"}
+              {!loading && <ArrowRight />}
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -655,10 +781,6 @@ const LoginPage: React.FC = () => {
     window.location.href = `${base}/auth/google`;
   };
 
-  const scrollToWhatWeDo = () => {
-    document.getElementById("o-que-fazemos")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const openFooterInfo = (key: FooterInfoKey) => {
     setActiveFooterInfo(key);
     window.setTimeout(() => scrollToSection("footer-info"), 30);
@@ -718,6 +840,7 @@ const LoginPage: React.FC = () => {
       onMouseMove={handleMouseMove}
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
+      <LandingMotionStyles />
       <NeonSnowBackground />
 
       {/* Grid bg pattern */}
@@ -752,43 +875,40 @@ const LoginPage: React.FC = () => {
 
       <div className="relative z-10 mx-auto max-w-[1680px] px-4 sm:px-8 lg:px-12 2xl:px-16">
 
-        <section className="grid min-h-[calc(100dvh-88px)] items-center gap-10 py-10 lg:grid-cols-[minmax(0,1.18fr)_minmax(520px,0.82fr)] lg:gap-12 xl:gap-16 2xl:gap-20">
-          <div className="min-w-0">
-            <div className="mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
+        <section className="flex min-h-[72dvh] flex-col items-center justify-center py-12 text-center lg:py-14">
+          <div className="mx-auto flex w-full max-w-[1320px] flex-col items-center">
+            <div className="nl-reveal mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
               <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
               <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Gestão empresarial com IA para empresários</span>
             </div>
 
-            <h1 className="max-w-[980px] text-3xl font-black leading-[1.08] tracking-tight text-white min-[420px]:text-4xl sm:text-6xl lg:text-7xl xl:text-[5.6rem] xl:leading-[0.96]">
-              <span className="block sm:inline">Controle vendas,</span>{" "}
-              <span className="block sm:inline">atendimento e</span>{" "}
-              <span className="block sm:inline">decisões do seu</span>{" "}
-              <span className="block sm:inline">negócio com <span className="text-lime-300">IA.</span></span>
+            <h1 className="nl-reveal nl-delay-1 mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
+              Gestão, atendimento e lucro real em uma única plataforma com <span className="text-lime-300">IA.</span>
             </h1>
 
-            <p className="mt-7 max-w-3xl text-base leading-8 text-zinc-300 sm:text-xl sm:leading-9">
-              A Next Level ajuda empresários a enxergar lucro real, organizar a operação, automatizar atendimento e tomar decisões com dados, não no achismo.
+            <p className="nl-reveal nl-delay-2 mt-7 max-w-3xl text-base leading-8 text-zinc-300 sm:text-xl sm:leading-9">
+              A Next Level ajuda empresários a organizar vendas, custos, clientes e atendimento para tomar decisões com dados, não no achismo.
             </p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <button onClick={() => focusAuth(true)}
-                className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
-                Começar agora <ArrowRight />
-              </button>
-              <button onClick={scrollToWhatWeDo} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
-                Entenda o que fazemos
-              </button>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
-              {["Gestão", "Atendimento", "Relatórios", "IA", "Decisões"].map((item) => (
+            <div className="nl-reveal nl-delay-2 mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+              {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
                 <span key={item} className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2">{item}</span>
               ))}
             </div>
 
-            <div className="mt-10 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="nl-reveal nl-delay-3 mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+              <button onClick={() => focusAuth(true)}
+                className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
+                Começar agora <ArrowRight />
+              </button>
+              <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
+                Ver como funciona
+              </button>
+            </div>
+
+            <div className="nl-reveal nl-delay-4 mt-12 grid w-full grid-cols-1 gap-5 text-left md:grid-cols-3">
               {METRICS.map((m) => (
-                <div key={m.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
+                <div key={m.label} className="nl-card-hover rounded-[24px] border border-white/[0.07] bg-white/[0.025] p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-lime-400/10 text-lime-400">
                       <m.icon />
@@ -802,8 +922,10 @@ const LoginPage: React.FC = () => {
               ))}
             </div>
           </div>
+        </section>
 
-          <div className="mx-auto w-full max-w-[620px] lg:mx-0 lg:justify-self-end">
+        <section className="nl-scroll-reveal pb-16 lg:pb-20">
+          <div className="mx-auto max-w-[1240px]">
             <AuthPanel
               isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
               onLogin={handleLogin} onRegister={handleRegister}
@@ -832,10 +954,14 @@ const LoginPage: React.FC = () => {
                   <span className="rounded-full bg-lime-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-950">IA ativa</span>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {["Lucro real", "Custos", "Vendas"].map((item, index) => (
-                    <div key={item} className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-600">{item}</p>
-                      <p className="mt-2 text-2xl font-black text-white">{index === 0 ? "+18%" : index === 1 ? "-7%" : "+24%"}</p>
+                  {[
+                    { title: "Lucro real", value: "Margem visível" },
+                    { title: "Custos", value: "Risco detectado" },
+                    { title: "Vendas", value: "Oportunidade ativa" },
+                  ].map((item, index) => (
+                    <div key={item.title} className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-600">{item.title}</p>
+                      <p className="mt-2 text-lg font-black text-white">{item.value}</p>
                       <div className="mt-3 h-1.5 rounded-full bg-white/[0.06]">
                         <div className="h-full rounded-full bg-lime-300" style={{ width: `${index === 1 ? 46 : 72}%` }} />
                       </div>
@@ -853,7 +979,37 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="problemas" className="py-14 scroll-mt-20">
+        <section className="nl-scroll-reveal py-16 scroll-mt-20">
+          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+            <div className="rounded-[30px] border border-white/[0.08] bg-white/[0.025] p-8 sm:p-10 nl-card-hover">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Para quem é</p>
+              <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">
+                Para empresários que precisam enxergar a operação com clareza.
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-zinc-400">
+                A Next Level foi criada para negócios que vendem, atendem clientes, lidam com custos e precisam tomar decisões rápidas. A plataforma organiza informações importantes e transforma dados em recomendações práticas.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {INTELLIGENCE_CARDS.map((item, index) => (
+                <div
+                  key={item.label}
+                  className={`nl-card-hover rounded-[26px] border border-white/[0.08] bg-[linear-gradient(145deg,rgba(255,255,255,0.045),rgba(255,255,255,0.018))] p-6 ${index === 0 ? "sm:row-span-2" : ""}`}
+                >
+                  <p className="mb-8 h-1.5 w-10 rounded-full bg-lime-300 shadow-[0_0_18px_rgba(182,255,0,0.55)]" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">{item.label}</p>
+                  <h3 className={`mt-3 text-xl font-black leading-tight ${item.tone}`}>{item.value}</h3>
+                  <p className="mt-4 text-sm leading-6 text-zinc-500">
+                    Um sinal de gestão vira uma ação mais clara para o dono do negócio.
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="problemas" className="nl-scroll-reveal py-16 scroll-mt-20">
           <div className="mb-8 max-w-3xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">O problema</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
@@ -863,9 +1019,9 @@ const LoginPage: React.FC = () => {
               O problema não é falta de esforço. É falta de visibilidade no momento certo.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {PROBLEMS.map((item) => (
-              <div key={item.title} className="rounded-[24px] border border-white/[0.08] bg-white/[0.025] p-5 transition duration-300 hover:border-lime-300/25 hover:bg-white/[0.04]">
+              <div key={item.title} className="nl-card-hover rounded-[26px] border border-white/[0.08] bg-white/[0.025] p-6">
                 <div className="mb-5 flex h-9 w-9 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-300/10 text-lime-300">
                   <ZapIcon />
                 </div>
@@ -876,7 +1032,7 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="o-que-fazemos" className="py-14 scroll-mt-20">
+        <section id="o-que-fazemos" className="nl-scroll-reveal py-16 scroll-mt-20">
           <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.1),rgba(6,8,12,0.96)_42%,rgba(3,5,8,1))] p-8 sm:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.18),transparent_34%)]" />
             <div className="relative">
@@ -889,9 +1045,9 @@ const LoginPage: React.FC = () => {
                   A Next Level centraliza operação, dados e atendimento com inteligência artificial para mostrar lucro, margem, clientes e oportunidades.
                 </p>
               </div>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {SOLUTIONS.map((item) => (
-                  <div key={item.title} className="rounded-[18px] border border-white/[0.08] bg-white/[0.03] p-5">
+                  <div key={item.title} className="nl-card-hover rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-6">
                     <div className="mb-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-lime-300 text-zinc-950">
                       <CheckIcon />
                     </div>
@@ -904,7 +1060,31 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="features" className="py-16 scroll-mt-20">
+        <section className="nl-scroll-reveal py-16">
+          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div className="rounded-[30px] border border-white/[0.08] bg-white/[0.025] p-8 sm:p-10">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">IA aplicada</p>
+              <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">
+                O que a IA faz na prática?
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-zinc-400">
+                Não é uma IA solta. É uma camada de leitura operacional conectada às vendas, custos, atendimento e relatórios do negócio.
+              </p>
+            </div>
+            <div className="grid gap-4">
+              {AI_PRACTICE.map((item, index) => (
+                <div key={item} className="nl-card-hover flex items-center gap-4 rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-lime-300 text-sm font-black text-zinc-950">
+                    {index + 1}
+                  </span>
+                  <p className="text-sm font-bold leading-6 text-zinc-200">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="nl-scroll-reveal py-16 scroll-mt-20">
           <div className="text-center mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
             <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white max-w-2xl mx-auto">
@@ -915,9 +1095,9 @@ const LoginPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
-              <div key={f.title} className={`rounded-[24px] border ${f.border} bg-gradient-to-b ${f.color} p-6 group hover:-translate-y-1 transition duration-300`}>
+              <div key={f.title} className={`nl-card-hover rounded-[28px] border ${f.border} bg-gradient-to-b ${f.color} p-7 group`}>
                 <div className="flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/[0.06] text-lime-300 mb-4 group-hover:bg-lime-400/15 transition">
                   <f.icon />
                 </div>
@@ -929,7 +1109,24 @@ const LoginPage: React.FC = () => {
 
         </section>
 
-        <section id="como-funciona" className="py-16 scroll-mt-20">
+        <section className="nl-scroll-reveal py-16">
+          <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(7,10,15,0.98)_48%,rgba(3,5,8,1))] p-8 sm:p-10">
+            <div className="pointer-events-none absolute -right-20 top-8 h-56 w-56 rounded-full bg-lime-300/10 blur-3xl nl-float" />
+            <div className="relative grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Gestão completa</p>
+                <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">
+                  Não é só financeiro. É a operação inteira conectada.
+                </h2>
+              </div>
+              <p className="text-sm leading-7 text-zinc-300">
+                A Next Level conecta visão financeira, administrativa, comercial e operacional para o empresário entender o negócio como um todo. Da venda ao atendimento, tudo aponta para margem, clareza e próxima ação.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="como-funciona" className="nl-scroll-reveal py-16 scroll-mt-20">
           <div className="mb-10 max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Como funciona</p>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-[0.96]">
@@ -1073,14 +1270,23 @@ const LoginPage: React.FC = () => {
         </section>
 
         {activeFooterInfo ? (
-          <section id="footer-info" className="scroll-mt-20 pb-10">
-            <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.16] bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(7,10,15,0.98)_44%,rgba(3,5,8,1))] p-6 sm:p-8">
+          <section id="footer-info" className="nl-scroll-reveal scroll-mt-20 pb-10">
+            <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.16] bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(7,10,15,0.98)_44%,rgba(3,5,8,1))] p-6 sm:p-8">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.14),transparent_34%)]" />
-              <div className="relative grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+              <div className="relative mb-6 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Detalhe rápido</p>
-                  <h2 className="mt-3 text-3xl font-black leading-tight text-white">{FOOTER_DETAILS[activeFooterInfo].title}</h2>
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Recurso da plataforma</p>
+                  <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-4xl">{FOOTER_DETAILS[activeFooterInfo].title}</h2>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveFooterInfo(null)}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-zinc-300 transition hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white/30"
+                >
+                  Fechar
+                </button>
+              </div>
+              <div className="relative grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
                 <div>
                   <p className="text-sm leading-7 text-zinc-300">{FOOTER_DETAILS[activeFooterInfo].text}</p>
                   <p className="mt-4 rounded-[18px] border border-white/[0.08] bg-black/20 p-4 text-sm leading-7 text-zinc-400">
@@ -1097,6 +1303,7 @@ const LoginPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                <FeatureScreenshot detail={FOOTER_DETAILS[activeFooterInfo]} />
               </div>
             </div>
           </section>
