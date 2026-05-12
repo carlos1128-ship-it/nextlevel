@@ -13,47 +13,33 @@ import {
   savePendingSelectedPlan,
 } from "../src/utils/billingSelection";
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   Helpers
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Helpers */
 function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   Animated Counter
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-const AnimatedCounter: React.FC<{ value: string; duration?: number }> = ({ value, duration = 1800 }) => {
-  const [display, setDisplay] = useState("0");
-  const hasRun = useRef(false);
-  const numMatch = value.match(/([\d,.]+)/);
-  const prefix = value.match(/^[^0-9]*/)?.[0] || "";
-  const suffix = value.match(/[^0-9,.]+$/)?.[0] || "";
-
-  useEffect(() => {
-    if (hasRun.current || !numMatch) return;
-    hasRun.current = true;
-    const target = parseFloat(numMatch[1].replace(",", "."));
-    const isFloat = numMatch[1].includes(",") || numMatch[1].includes(".");
-    const steps = 60;
-    let current = 0;
-    const step = target / steps;
-    const interval = setInterval(() => {
-      current += step;
-      if (current >= target) {
-        current = target;
-        clearInterval(interval);
-      }
-      setDisplay(isFloat ? current.toFixed(1).replace(".", ",") : Math.floor(current).toLocaleString("pt-BR"));
-    }, duration / steps);
-  }, []);
-
-  return <>{prefix}{display}{suffix}</>;
+type AuthUserPayload = {
+  name?: string | null;
+  email?: string | null;
+  admin?: boolean;
+  niche?: null;
 };
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   Icons
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+type ApiErrorLike = {
+  response?: {
+    data?: {
+      message?: string;
+      error?: string;
+    };
+  };
+};
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  const apiError = error as ApiErrorLike;
+  return apiError.response?.data?.message || apiError.response?.data?.error || fallback;
+}
+
+/* Icons */
 const EyeIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -120,27 +106,25 @@ const CreditCardIcon = () => (
   </svg>
 );
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   Static Data
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Static data */
 const METRICS = [
-  { title: "Gestão", label: "Organize vendas, custos, produtos e indicadores.", icon: ChartIcon },
-  { title: "Lucro real", label: "Entenda o que dá margem, o que dá prejuízo e onde existe desperdício.", icon: TrendingUpIcon },
-  { title: "Decisão com IA", label: "Receba análises, alertas e recomendações para agir com mais clareza.", icon: BrainIcon },
+  { title: "Gestão", label: "Vendas, custos, produtos e indicadores em uma visão operacional.", icon: ChartIcon },
+  { title: "Lucro real", label: "Margem, desperdício e oportunidade sem depender de achismo.", icon: TrendingUpIcon },
+  { title: "Decisão com IA", label: "Alertas e próximas ações para o empresário agir antes do problema crescer.", icon: BrainIcon },
 ];
 
 const PROBLEMS = [
-  { title: "Clientes esquecidos", text: "Mensagens chegam pelo WhatsApp ou Instagram, mas se perdem na correria." },
-  { title: "Vendas sem margem", text: "O faturamento aparece, mas o lucro real fica escondido entre custos, taxas e desperdícios." },
-  { title: "Dados espalhados", text: "Planilhas, conversas, pedidos e anúncios ficam desconectados." },
-  { title: "Decisões no achismo", text: "Sem dados claros, o empreendedor decide tarde ou decide errado." },
+  { title: "Venda sem lucro claro", text: "O faturamento sobe, mas custos, taxas e desperdícios escondem a margem real." },
+  { title: "Atendimento perdido", text: "Clientes chegam pelo WhatsApp e Instagram, mas oportunidades se perdem na correria." },
+  { title: "Operação espalhada", text: "Produtos, pedidos, anúncios, custos e relatórios vivem em lugares diferentes." },
+  { title: "Decisão atrasada", text: "O empresário percebe o problema tarde porque os sinais chegam tarde." },
 ];
 
 const SOLUTIONS = [
-  { title: "Organiza sua operação", text: "Reúne vendas, custos, produtos, clientes e atendimento em uma visão mais fácil de acompanhar." },
-  { title: "Mostra o lucro real", text: "Ajuda a entender o que vende bem, o que dá prejuízo e onde existe margem escondida." },
-  { title: "Aponta problemas e oportunidades", text: "Identifica gargalos, desperdícios, produtos fracos, clientes esquecidos e pontos de melhoria." },
-  { title: "Usa IA para recomendar ações", text: "A inteligência artificial lê os dados e sugere próximos passos para melhorar resultados." },
+  { title: "Centralize dados", text: "Vendas, custos, produtos e clientes em um painel feito para decisão." },
+  { title: "Entenda lucro real", text: "Separe volume de venda, margem, desperdício e oportunidade." },
+  { title: "Automatize atendimento", text: "Organize canais e intenções para reduzir mensagens esquecidas." },
+  { title: "Receba recomendações", text: "A IA transforma sinais da operação em próximos passos claros." },
 ];
 
 const FEATURES = [
@@ -189,35 +173,126 @@ const FEATURES = [
 ];
 
 const HOW_IT_WORKS = [
-  { title: "Cadastre ou importe seus dados", text: "Comece com vendas, custos, produtos e informações importantes da operação." },
-  { title: "Acompanhe o que está acontecendo", text: "Veja indicadores claros sobre lucro, margem, desempenho e pontos de atenção." },
-  { title: "Receba análises da IA", text: "A Next Level interpreta os dados e mostra problemas, oportunidades e próximos passos." },
-  { title: "Tome decisões melhores", text: "Use as recomendações para vender melhor, reduzir perdas e crescer com mais controle." },
+  { title: "Conecte ou cadastre os dados", text: "Comece com vendas, custos, produtos e canais importantes." },
+  { title: "A Next Level organiza", text: "A plataforma transforma informações soltas em indicadores úteis." },
+  { title: "A IA interpreta sinais", text: "Problemas, riscos e oportunidades aparecem com contexto." },
+  { title: "Você decide com clareza", text: "Priorize ações para vender melhor, perder menos e crescer com margem." },
 ];
-
-const PRACTICAL_EXAMPLES = [
-  { title: "Produto vendendo muito, mas com pouca margem", text: "A plataforma mostra quando uma venda parece boa, mas quase não gera lucro." },
-  { title: "Custos crescendo sem o empresário perceber", text: "A Next Level ajuda a enxergar desperdícios e gastos que estão comendo a margem." },
-  { title: "Cliente interessado sem acompanhamento", text: "Nos planos com atendimento, a plataforma ajuda a organizar conversas e oportunidades." },
-  { title: "Vendas acontecendo sem clareza", text: "Você entende quais produtos, períodos e canais realmente ajudam o negócio a crescer." },
-];
-
-const AUDIENCES = ["Lojas físicas", "E-commerces", "Prestadores de serviço", "Negócios locais", "Infoprodutores", "Empresas em crescimento"];
 
 const FAQS = [
-  { question: "A Next Level substitui meu sistema de gestão?", answer: "Não necessariamente. A Next Level organiza dados, canais e inteligência para apoiar decisões, atendimento e operação. Ela pode complementar ferramentas que seu negócio já usa." },
+  { question: "A Next Level substitui meu sistema de gestão?", answer: "Não necessariamente. Ela funciona como uma camada de inteligência para centralizar sinais, apoiar decisões e complementar ferramentas que o negócio já usa." },
   { question: "Preciso saber usar IA?", answer: "Não. A plataforma foi pensada para facilitar a rotina do empreendedor com análises, recomendações e automações simples de entender." },
   { question: "Funciona com WhatsApp e Instagram?", answer: "Sim, conforme o plano e as integrações disponíveis." },
   { question: "A plataforma serve para negócio pequeno?", answer: "Sim. Ela é útil principalmente para quem quer mais controle sem precisar montar uma equipe grande." },
-  { question: "Qual plano devo escolher?", answer: "Essencial para começar com organização e indicadores. Premium para canais, automação e IA mais completa. Business para operações mais avançadas e crescimento com controle." },
-  { question: "Consigo cancelar quando quiser?", answer: "As condições de cancelamento devem seguir as regras apresentadas no momento da assinatura." },
+  { question: "Qual plano devo escolher?", answer: "Essencial para organização e indicadores. Premium para IA, relatórios e automação. Business para integrações, escala e análise avançada." },
+  { question: "Escolho o plano antes ou depois da conta?", answer: "Você pode escolher um plano agora. A seleção fica salva e a assinatura continua após criar conta ou entrar." },
 ];
 
-const FOOTER_COLUMNS = [
-  { title: "Produto", links: ["Gestão de vendas", "Atendimento com IA", "Relatórios automáticos", "Produtos e custos", "Alertas e recomendações", "Lucro real"] },
-  { title: "Canais", links: ["WhatsApp", "Instagram", "Mercado Livre"] },
-  { title: "Recursos", links: ["Tutoriais", "Central de ajuda", "Blog", "Perguntas frequentes", "Demonstrações"] },
-  { title: "Empresa", links: ["Sobre a Next Level", "Contato", "Parcerias", "Termos de uso", "Política de privacidade"] },
+type FooterInfoKey =
+  | "gestao-de-vendas"
+  | "atendimento-com-ia"
+  | "relatorios-automaticos"
+  | "lucro-real"
+  | "whatsapp"
+  | "instagram"
+  | "mercado-livre"
+  | "alertas-e-recomendacoes"
+  | "sobre"
+  | "contato"
+  | "termos"
+  | "privacidade";
+
+const FOOTER_DETAILS: Record<FooterInfoKey, { title: string; text: string; how: string }> = {
+  "gestao-de-vendas": {
+    title: "Gestão de vendas",
+    text: "A gestão de vendas organiza faturamento, produtos, períodos e desempenho para o empresário entender o que vende, onde existe oportunidade e onde o resultado pode melhorar.",
+    how: "Dentro da Next Level, vendas viram indicadores claros para cruzar margem, clientes, produtos e ações recomendadas.",
+  },
+  "atendimento-com-ia": {
+    title: "Atendimento com IA",
+    text: "A Next Level usa inteligência artificial para apoiar o atendimento, interpretar intenções de clientes, organizar oportunidades e reduzir mensagens esquecidas.",
+    how: "A IA ajuda a priorizar conversas, identificar intenção de compra e manter o dono do negócio no controle.",
+  },
+  "relatorios-automaticos": {
+    title: "Relatórios automáticos",
+    text: "A plataforma transforma dados soltos em relatórios claros sobre vendas, custos, margem, produtos e pontos de atenção.",
+    how: "Os relatórios conectam operação e decisão para mostrar o que merece ação agora.",
+  },
+  "lucro-real": {
+    title: "Lucro real",
+    text: "A Next Level ajuda a separar faturamento de lucro, mostrando custos, margem e desperdícios para evitar decisões baseadas apenas em volume de vendas.",
+    how: "Produtos e custos são analisados para revelar onde existe margem, perda ou risco.",
+  },
+  whatsapp: {
+    title: "WhatsApp",
+    text: "O WhatsApp pode ser conectado para apoiar atendimento, organização de conversas e acompanhamento de oportunidades comerciais.",
+    how: "A plataforma ajuda a trazer o canal para a operação, sem expor tokens ou complexidade ao usuário final.",
+  },
+  instagram: {
+    title: "Instagram",
+    text: "A integração com Instagram ajuda negócios que recebem interesse por mensagens, comentários e campanhas sociais.",
+    how: "A Next Level organiza sinais de atendimento e intenção para reduzir oportunidades esquecidas.",
+  },
+  "mercado-livre": {
+    title: "Mercado Livre",
+    text: "A integração com Mercado Livre ajuda operações que vendem em marketplace a acompanhar produtos, pedidos e sinais comerciais.",
+    how: "Os dados do canal entram na visão de gestão para apoiar margem, estoque e decisões estratégicas.",
+  },
+  "alertas-e-recomendacoes": {
+    title: "Alertas e recomendações",
+    text: "A IA analisa sinais importantes do negócio e indica problemas, riscos e oportunidades antes que eles passem despercebidos.",
+    how: "Alertas aproximam o empresário do próximo passo: ajustar preço, revisar custo, responder cliente ou investigar queda.",
+  },
+  sobre: {
+    title: "Sobre a Next Level",
+    text: "A Next Level AI é um SaaS brasileiro para empresários que precisam transformar operação, atendimento e números em decisões melhores.",
+    how: "O produto foi desenhado para esconder complexidade técnica e entregar clareza de gestão no dia a dia.",
+  },
+  contato: {
+    title: "Contato",
+    text: "Para falar com a Next Level, use os canais oficiais informados pela empresa durante onboarding, suporte ou contratação.",
+    how: "No produto, o foco é manter atendimento e gestão no mesmo fluxo para reduzir perda de informação.",
+  },
+  termos: {
+    title: "Termos",
+    text: "Os termos explicam regras de uso da plataforma, responsabilidades, limites do serviço e condições comerciais aplicáveis.",
+    how: "A Next Level prioriza segurança, previsibilidade e transparência para negócios que dependem da plataforma.",
+  },
+  privacidade: {
+    title: "Privacidade",
+    text: "A privacidade orienta como dados de usuários, empresas e operações devem ser protegidos e tratados dentro do ecossistema.",
+    how: "Dados sensíveis não devem aparecer em interfaces públicas, logs desnecessários ou fluxos sem proteção.",
+  },
+};
+
+const FOOTER_COLUMNS: Array<{ title: string; links: Array<{ label: string; key: FooterInfoKey }> }> = [
+  {
+    title: "Produto",
+    links: [
+      { label: "Gestão de vendas", key: "gestao-de-vendas" },
+      { label: "Atendimento com IA", key: "atendimento-com-ia" },
+      { label: "Relatórios automáticos", key: "relatorios-automaticos" },
+      { label: "Lucro real", key: "lucro-real" },
+    ],
+  },
+  {
+    title: "Plataforma",
+    links: [
+      { label: "WhatsApp", key: "whatsapp" },
+      { label: "Instagram", key: "instagram" },
+      { label: "Mercado Livre", key: "mercado-livre" },
+      { label: "Alertas e recomendações", key: "alertas-e-recomendacoes" },
+    ],
+  },
+  {
+    title: "Empresa",
+    links: [
+      { label: "Sobre a Next Level", key: "sobre" },
+      { label: "Contato", key: "contato" },
+      { label: "Termos", key: "termos" },
+      { label: "Privacidade", key: "privacidade" },
+    ],
+  },
 ];
 
 const PRICING = [
@@ -225,17 +300,17 @@ const PRICING = [
     key: "COMMON" as BillingPlanKey,
     name: "Essencial",
     monthlyPrice: "R$ 57", annualPrice: "R$ 570",
-    summary: "Para quem quer organizar dados manualmente e entender os indicadores básicos do negócio.",
-    features: ["Dashboard inicial", "Controle básico de dados", "Indicadores principais", "IA básica para análise", "Ideal para começar com mais controle"],
+    summary: "Organização e indicadores para sair do escuro sem complicar a operação.",
+    features: ["Dashboard inicial", "Vendas e custos organizados", "Indicadores principais", "IA básica para análise", "Base para decisões melhores"],
     cta: "Assinar agora", recommended: false,
-    microcopy: "Pagamento seguro via Cakto",
+    microcopy: "Pagamento seguro",
   },
   {
     key: "PREMIUM" as BillingPlanKey,
     name: "Premium",
     monthlyPrice: "R$ 97", annualPrice: "R$ 970",
-    summary: "Para negócios que querem mais IA, automação e canais conectados conforme o plano.",
-    features: ["Tudo do Essencial", "Atendimento com IA", "WhatsApp e Instagram nos planos com integração", "Relatórios mais completos", "Recomendações inteligentes", "Melhor opção para negócios em crescimento"],
+    summary: "IA, relatórios e automação para acompanhar margem, atendimento e oportunidades.",
+    features: ["Tudo do Essencial", "Atendimento com IA", "WhatsApp e Instagram conforme integração", "Relatórios completos", "Recomendações inteligentes", "Mais clareza para crescer"],
     cta: "Ativar Premium", recommended: true,
     microcopy: "Pensado para crescer com margem e controle.",
   },
@@ -243,16 +318,14 @@ const PRICING = [
     key: "PRO_BUSINESS" as BillingPlanKey,
     name: "Business",
     monthlyPrice: "R$ 197", annualPrice: "R$ 1.970",
-    summary: "Para operações em crescimento que precisam de análise avançada, mais escala e inteligência mais profunda.",
-    features: ["Tudo do Premium", "Automação avançada", "Mercado Livre integrado", "Previsões e alertas avançados", "Canais de venda conectados", "Acompanhamento dedicado"],
+    summary: "Integrações, escala e análise avançada para operações que precisam de previsibilidade.",
+    features: ["Tudo do Premium", "Automação avançada", "Mercado Livre integrado", "Previsões e alertas avançados", "Canais de venda conectados", "Visão estratégica da operação"],
     cta: "Assinar Business", recommended: false,
     microcopy: "Pensado para crescer com margem e controle.",
   },
 ];
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   Visual Effects
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Visual effects */
 const UPDATED_PRICING = PRICING;
 
 type NeonParticle = {
@@ -360,10 +433,8 @@ const NeonSnowBackground: React.FC = () => {
   return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 opacity-70" />;
 };
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   Auth Panel
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-const authFieldCls = "w-full rounded-[18px] border border-white/10 bg-[#070a0f] px-4 py-3 text-sm text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-lime-400/60 focus:bg-[#0a1020] focus:shadow-[0_0_20px_rgba(182,255,0,0.08),inset_0_0_0_1px_rgba(182,255,0,0.06)]";
+/* Auth panel */
+const authFieldCls = "min-h-[50px] w-full rounded-[18px] border border-white/10 bg-[#070a0f] px-4 py-3.5 text-base text-zinc-50 outline-none transition placeholder:text-zinc-600 focus:border-lime-400/60 focus:bg-[#0a1020] focus:shadow-[0_0_20px_rgba(182,255,0,0.08),inset_0_0_0_1px_rgba(182,255,0,0.06)]";
 
 interface AuthPanelProps {
   isRegisterView: boolean;
@@ -386,13 +457,11 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
   showPassword, setShowPassword, error, loading, setError,
   selectedPlanLabel, subscribeIntent, onGoogleLogin,
 }) => (
-  <aside id="auth-panel" className="w-full min-w-0 max-w-full self-start">
-    <div className="relative max-w-full overflow-hidden rounded-[32px] border border-lime-400/[0.14] bg-[linear-gradient(200deg,rgba(14,20,28,0.99),rgba(6,8,12,0.99))] shadow-[0_32px_100px_rgba(0,0,0,0.6),0_0_0_1px_rgba(182,255,0,0.03),inset_0_1px_0_rgba(255,255,255,0.04)]">
-      {/* Glow top */}
+  <aside id="auth-panel" className="w-full min-w-0 max-w-[620px] self-start">
+    <div className="relative max-w-full overflow-hidden rounded-[34px] border border-lime-400/[0.16] bg-[linear-gradient(200deg,rgba(16,23,32,0.99),rgba(6,8,12,0.99))] shadow-[0_36px_120px_rgba(0,0,0,0.66),0_0_0_1px_rgba(182,255,0,0.04),inset_0_1px_0_rgba(255,255,255,0.05)]">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(182,255,0,0.18),transparent_60%)]" />
 
-      <div className="relative p-7">
-        {/* Logo mark */}
+      <div className="relative p-6 sm:p-8 lg:p-9">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex items-center justify-center h-10 w-10 rounded-2xl bg-lime-400 shadow-[0_0_20px_rgba(182,255,0,0.4)]">
             <span className="text-zinc-950 font-black text-sm tracking-tighter">NL</span>
@@ -407,13 +476,13 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-lime-300/80">
             {isRegisterView ? "Novo usuário" : "Já sou cliente"}
           </p>
-          <h2 className="mt-2 text-2xl font-black leading-tight text-white">
+          <h2 className="mt-2 text-3xl font-black leading-tight text-white">
             {isRegisterView ? "Comece agora sua conta Next Level" : "Entrar na minha conta"}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-zinc-500">
+          <p className="mt-2 text-sm leading-6 text-zinc-400">
             {isRegisterView
-              ? "Crie seu acesso para organizar dados, custos, lucro e decisões com IA."
-              : "Acesse seu painel para continuar acompanhando vendas, custos e recomendações."}
+              ? "Leva menos de 1 minuto. Depois você escolhe o plano e conecta os dados no seu ritmo."
+              : "Continue acompanhando operação, margem, atendimento e recomendações."}
           </p>
         </div>
 
@@ -430,7 +499,6 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
           </div>
         )}
 
-        {/* Tab selector */}
         <div className="grid grid-cols-2 rounded-[20px] border border-white/10 bg-white/[0.03] p-1 mb-5">
           <button type="button" onClick={() => { setIsRegisterView(false); setError(""); }}
             className={`rounded-[16px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] transition ${!isRegisterView ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-400 hover:text-white"}`}>
@@ -442,10 +510,9 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
           </button>
         </div>
 
-        {/* Google */}
         <button type="button"
           onClick={onGoogleLogin}
-          className="flex w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] mb-4">
+          className="flex min-h-[50px] w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-lime-300/60 mb-4">
           <GoogleIcon /> Google
         </button>
 
@@ -458,24 +525,25 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
         <form onSubmit={isRegisterView ? onRegister : onLogin} className="space-y-3">
           {isRegisterView && (
             <div>
-              <label className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Nome completo</label>
-              <input value={name} onChange={e => setName(e.target.value)} className={authFieldCls} type="text" placeholder="Seu nome" />
+              <label htmlFor="login-name" className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Nome completo</label>
+              <input id="login-name" value={name} onChange={e => setName(e.target.value)} className={authFieldCls} type="text" placeholder="Seu nome" autoComplete="name" />
             </div>
           )}
           <div>
-            <label className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">E-mail</label>
-            <input value={email} onChange={e => setEmail(e.target.value)} className={authFieldCls} type="email" placeholder="nome@empresa.com" />
+            <label htmlFor="login-email" className="mb-1.5 block text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">E-mail</label>
+            <input id="login-email" value={email} onChange={e => setEmail(e.target.value)} className={authFieldCls} type="email" placeholder="nome@empresa.com" autoComplete="email" />
           </div>
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Senha</label>
-              {!isRegisterView && <a href="/forgot-password" className="text-[10px] font-semibold text-zinc-500 hover:text-lime-300 transition">Esqueceu?</a>}
+              <label htmlFor="login-password" className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Senha</label>
+              {!isRegisterView && <span className="text-[10px] font-semibold text-zinc-600">Acesso seguro</span>}
             </div>
             <div className="relative">
-              <input value={password} onChange={e => setPassword(e.target.value)} className={`${authFieldCls} pr-12`}
-                type={showPassword ? "text" : "password"} placeholder={isRegisterView ? "Crie uma senha forte" : "Sua senha"} />
+              <input id="login-password" value={password} onChange={e => setPassword(e.target.value)} className={`${authFieldCls} pr-12`}
+                type={showPassword ? "text" : "password"} placeholder={isRegisterView ? "Crie uma senha forte" : "Sua senha"} autoComplete={isRegisterView ? "new-password" : "current-password"} />
               <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition">
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-white/[0.06] hover:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lime-300/50">
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
@@ -486,14 +554,13 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
           )}
 
           <button type="submit" disabled={loading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-[18px] bg-lime-300 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-60 mt-1">
+            className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[18px] bg-lime-300 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/60 disabled:opacity-60 mt-1">
             {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" /> : null}
             {isRegisterView ? "Criar minha conta" : "Entrar no painel"}
             {!loading && <ArrowRight />}
           </button>
         </form>
 
-        {/* Trust signals */}
         <div className="mt-5 pt-5 border-t border-white/[0.06] grid grid-cols-3 gap-2 text-center">
           {[
             { label: "Dados protegidos" },
@@ -511,9 +578,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
   </aside>
 );
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   MAIN PAGE
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Main page */
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -527,6 +592,7 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [billingAnnual, setBillingAnnual] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PendingPlanSelection | null>(null);
+  const [activeFooterInfo, setActiveFooterInfo] = useState<FooterInfoKey | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: -400, y: -400 });
   const mouseFrameRef = useRef<number | null>(null);
   const mouseTargetRef = useRef({ x: -400, y: -400 });
@@ -564,7 +630,7 @@ const LoginPage: React.FC = () => {
     focusAuth(register);
   };
 
-  const goAfterAuth = async (user: any) => {
+  const goAfterAuth = async (user: AuthUserPayload) => {
     login(user);
     const pendingPlan = readPlanSelectionFromSearch(searchParams) || readPendingSelectedPlan();
     try {
@@ -593,6 +659,11 @@ const LoginPage: React.FC = () => {
     document.getElementById("o-que-fazemos")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const openFooterInfo = (key: FooterInfoKey) => {
+    setActiveFooterInfo(key);
+    window.setTimeout(() => scrollToSection("footer-info"), 30);
+  };
+
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     mouseTargetRef.current = { x: event.clientX, y: event.clientY };
     if (mouseFrameRef.current !== null) return;
@@ -616,8 +687,8 @@ const LoginPage: React.FC = () => {
         await goAfterAuth(res.data?.user || res.data?.data?.user || {});
       }
       else setError("Resposta inesperada do servidor.");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || "Credenciais inválidas.");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Credenciais inválidas."));
     } finally { setLoading(false); }
   };
 
@@ -636,8 +707,8 @@ const LoginPage: React.FC = () => {
         await goAfterAuth(res.data?.user || res.data?.data?.user || {});
       }
       else setError("Erro ao criar conta.");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || "Erro ao criar conta.");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Erro ao criar conta."));
     } finally { setLoading(false); }
   };
 
@@ -662,16 +733,15 @@ const LoginPage: React.FC = () => {
         }}
       />
 
-      {/* NAV */}
-      <nav className="relative z-10 mx-auto flex max-w-[1500px] items-center justify-between px-4 py-5 sm:px-8 lg:px-10">
-        <div className="flex items-center gap-3">
-          <span className="font-black text-xl tracking-tight text-white">NEXT LEVEL</span>
+      <nav className="relative z-10 mx-auto flex max-w-[1680px] items-center justify-between gap-3 px-4 py-5 sm:px-8 lg:px-12 2xl:px-16">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="shrink-0 font-black text-lg tracking-tight text-white sm:text-xl">NEXT LEVEL</span>
           <span className="hidden border-l border-white/10 pl-3 sm:flex sm:flex-col sm:gap-1">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Gestão, atendimento e dados</span>
             <span className="text-[9px] font-black uppercase tracking-[0.18em] text-lime-300/80">IA para vender com margem</span>
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3 max-[480px]:hidden">
           <button onClick={() => scrollToSection("features")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Funcionalidades</button>
           <button onClick={() => scrollToSection("como-funciona")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Como funciona</button>
           <button onClick={() => scrollToSection("pricing")} className="hidden md:block text-xs font-semibold text-zinc-400 hover:text-white transition px-3">Planos</button>
@@ -680,46 +750,43 @@ const LoginPage: React.FC = () => {
         </div>
       </nav>
 
-      <div className="relative z-10 mx-auto max-w-[1500px] px-4 sm:px-8 lg:px-10">
+      <div className="relative z-10 mx-auto max-w-[1680px] px-4 sm:px-8 lg:px-12 2xl:px-16">
 
-        {/* â”€â”€â”€ HERO â”€â”€â”€ */}
-        <section className="flex min-h-[86vh] items-center justify-center py-16 text-center sm:py-24 lg:py-28">
-          <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center">
+        <section className="grid min-h-[calc(100dvh-88px)] items-center gap-10 py-10 lg:grid-cols-[minmax(0,1.18fr)_minmax(520px,0.82fr)] lg:gap-12 xl:gap-16 2xl:gap-20">
+          <div className="min-w-0">
             <div className="mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
               <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Gestão inteligente para negócios</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Gestão empresarial com IA para empresários</span>
             </div>
 
-            <h1 className="mx-auto max-w-[1180px] text-5xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl xl:text-[5.9rem] xl:leading-[0.95]">
-              Veja onde seu negócio ganha, perde e pode <span className="text-lime-300">lucrar mais.</span>
+            <h1 className="max-w-[980px] text-3xl font-black leading-[1.08] tracking-tight text-white min-[420px]:text-4xl sm:text-6xl lg:text-7xl xl:text-[5.6rem] xl:leading-[0.96]">
+              <span className="block sm:inline">Controle vendas,</span>{" "}
+              <span className="block sm:inline">atendimento e</span>{" "}
+              <span className="block sm:inline">decisões do seu</span>{" "}
+              <span className="block sm:inline">negócio com <span className="text-lime-300">IA.</span></span>
             </h1>
 
-            <p className="mt-7 max-w-4xl text-base leading-8 text-zinc-300 sm:text-xl sm:leading-9">
-              A Next Level organiza vendas, custos, produtos, clientes e atendimento para mostrar o que está funcionando, o que está dando prejuízo e quais ações podem aumentar sua margem.
+            <p className="mt-7 max-w-3xl text-base leading-8 text-zinc-300 sm:text-xl sm:leading-9">
+              A Next Level ajuda empresários a enxergar lucro real, organizar a operação, automatizar atendimento e tomar decisões com dados, não no achismo.
             </p>
 
-            <p className="mt-4 text-sm font-semibold text-zinc-500 sm:text-base">
-              Menos achismo. Mais clareza para decidir.
-            </p>
-
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <button onClick={() => focusAuth(true)}
-                className="flex items-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105">
+                className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
                 Começar agora <ArrowRight />
               </button>
-              <button onClick={scrollToWhatWeDo} className="rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white">
+              <button onClick={scrollToWhatWeDo} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
                 Entenda o que fazemos
               </button>
             </div>
-          </div>
-        </section>
 
-        <section className="pb-16">
-          <div className="overflow-hidden rounded-[32px] border border-lime-400/15 bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(255,255,255,0.025),rgba(3,5,8,0.95))] p-5 sm:p-8 lg:p-10">
-            <p className="mx-auto max-w-5xl text-center text-lg font-black leading-8 text-white sm:text-2xl lg:text-3xl lg:leading-10">
-              A Next Level centraliza gestão, atendimento e dados do negócio com inteligência artificial.
-            </p>
-            <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+              {["Gestão", "Atendimento", "Relatórios", "IA", "Decisões"].map((item) => (
+                <span key={item} className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2">{item}</span>
+              ))}
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-3 md:grid-cols-3">
               {METRICS.map((m) => (
                 <div key={m.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -734,7 +801,28 @@ const LoginPage: React.FC = () => {
                 </div>
               ))}
             </div>
-            <div className="mt-6 grid gap-4 rounded-[28px] border border-white/[0.08] bg-black/25 p-4 md:grid-cols-[1.1fr_0.9fr] lg:p-6">
+          </div>
+
+          <div className="mx-auto w-full max-w-[620px] lg:mx-0 lg:justify-self-end">
+            <AuthPanel
+              isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
+              onLogin={handleLogin} onRegister={handleRegister}
+              name={name} setName={setName} email={email} setEmail={setEmail}
+              password={password} setPassword={setPassword}
+              showPassword={showPassword} setShowPassword={setShowPassword}
+              error={error} loading={loading} setError={setError}
+              selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
+              subscribeIntent={searchParams.get("intent") === "subscribe"}
+              onGoogleLogin={handleGoogleLogin}
+            />
+            <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
+              Leva menos de 1 minuto para começar. Escolha um plano após criar sua conta.
+            </p>
+          </div>
+        </section>
+
+        <section className="pb-12 lg:pb-16">
+          <div className="grid gap-4 rounded-[32px] border border-lime-400/15 bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(255,255,255,0.025),rgba(3,5,8,0.95))] p-4 md:grid-cols-[1.1fr_0.9fr] lg:p-6">
               <div className="rounded-[22px] border border-white/[0.07] bg-[#060a0d] p-5">
                 <div className="mb-5 flex items-center justify-between border-b border-white/[0.06] pb-4">
                   <div>
@@ -759,41 +847,20 @@ const LoginPage: React.FC = () => {
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Recomendação da IA</p>
                 <h3 className="mt-3 text-2xl font-black leading-tight text-white">Ajuste produtos de baixa margem antes de aumentar anúncios.</h3>
                 <p className="mt-4 text-sm leading-7 text-zinc-400">
-                  A proposta é simples: entender os números, encontrar perdas e tomar decisões melhores.
+                  A proposta é simples: enxergar lucro real, priorizar ações e reduzir decisões caras tomadas tarde demais.
                 </p>
               </div>
-            </div>
           </div>
         </section>
 
-        <section id="publico" className="py-16 scroll-mt-20">
-          <div className="mb-8 max-w-4xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">PRA QUEM É</p>
-            <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
-              Feita para empresários que querem entender melhor o próprio negócio.
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">
-              Serve para quem vende, atende clientes, controla custos e precisa tomar decisões com mais clareza.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {AUDIENCES.map((audience) => (
-              <div key={audience} className="flex min-h-[92px] items-center gap-3 rounded-[18px] border border-white/[0.08] bg-white/[0.025] p-4 transition hover:border-lime-300/20 hover:bg-white/[0.04]">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-lime-300 text-zinc-950"><CheckIcon /></span>
-                <span className="text-sm font-bold leading-5 text-white">{audience}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="problemas" className="pb-16 scroll-mt-20">
+        <section id="problemas" className="py-14 scroll-mt-20">
           <div className="mb-8 max-w-3xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">O problema</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-              Problemas reais que acontecem no dia a dia
+              Empresários perdem dinheiro quando operação, atendimento e custos ficam espalhados.
             </h2>
             <p className="mt-4 text-sm leading-7 text-zinc-400">
-              Enquanto os dados ficam espalhados, o negócio perde margem, tempo e oportunidades.
+              O problema não é falta de esforço. É falta de visibilidade no momento certo.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -809,7 +876,7 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="o-que-fazemos" className="py-16 scroll-mt-20">
+        <section id="o-que-fazemos" className="py-14 scroll-mt-20">
           <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.1),rgba(6,8,12,0.96)_42%,rgba(3,5,8,1))] p-8 sm:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.18),transparent_34%)]" />
             <div className="relative">
@@ -819,7 +886,7 @@ const LoginPage: React.FC = () => {
                   O que a Next Level faz
                 </h2>
                 <p className="mt-5 max-w-3xl text-sm leading-7 text-zinc-300">
-                  A plataforma organiza os dados do seu negócio e transforma números soltos em decisões mais claras.
+                  A Next Level centraliza operação, dados e atendimento com inteligência artificial para mostrar lucro, margem, clientes e oportunidades.
                 </p>
               </div>
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -837,14 +904,14 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="features" className="py-20 scroll-mt-20">
+        <section id="features" className="py-16 scroll-mt-20">
           <div className="text-center mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
             <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white max-w-2xl mx-auto">
-              Tudo que seu negócio precisa. <span className="text-lime-300">Em um lugar.</span>
+              Ferramentas essenciais para gerir com <span className="text-lime-300">previsibilidade.</span>
             </h2>
             <p className="mt-4 max-w-lg mx-auto text-sm leading-7 text-zinc-400">
-              Veja em segundos as ferramentas que transformam vendas, custos, atendimento e gestão em decisões mais claras.
+              Menos telas soltas, mais leitura estratégica da operação.
             </p>
           </div>
 
@@ -862,13 +929,13 @@ const LoginPage: React.FC = () => {
 
         </section>
 
-        <section id="como-funciona" className="py-20 scroll-mt-20">
+        <section id="como-funciona" className="py-16 scroll-mt-20">
           <div className="mb-10 max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Como funciona</p>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-[0.96]">
-              Como funciona na prática
+              Do dado solto à ação recomendada.
             </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">Da organização dos dados até a decisão com IA.</p>
+            <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar rotina em decisão.</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-4">
             {HOW_IT_WORKS.map((step, index) => (
@@ -883,64 +950,7 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="exemplos" className="py-20 scroll-mt-20">
-          <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(3,5,8,0.96)_48%)] p-8 sm:p-10">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(182,255,0,0.14),transparent_34%)]" />
-            <div className="relative">
-              <div className="mb-8 max-w-3xl">
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Exemplos práticos</p>
-                <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
-                  Veja o que a Next Level identifica por você
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-zinc-400">
-                  Não é só painel bonito. É inteligência aplicada ao dia a dia do negócio.
-                </p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {PRACTICAL_EXAMPLES.map((item) => (
-                  <div key={item.title} className="rounded-[20px] border border-white/[0.08] bg-black/20 p-5">
-                    <h3 className="text-base font-black text-white">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-zinc-400">{item.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="login-section" className="py-20 scroll-mt-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Acesso Next Level</p>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-              Entre ou crie sua conta Next Level.
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
-              Crie seu acesso para começar a organizar seu negócio ou entre para continuar de onde parou.
-            </p>
-            {selectedPlan ? (
-              <div className="mt-6 inline-flex rounded-full border border-lime-400/25 bg-lime-400/10 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-lime-300">
-                Você selecionou: {planSelectionLabel(selectedPlan)}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="mx-auto mt-10 max-w-[560px]">
-            <AuthPanel
-              isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
-              onLogin={handleLogin} onRegister={handleRegister}
-              name={name} setName={setName} email={email} setEmail={setEmail}
-              password={password} setPassword={setPassword}
-              showPassword={showPassword} setShowPassword={setShowPassword}
-              error={error} loading={loading} setError={setError}
-              selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
-              subscribeIntent={searchParams.get("intent") === "subscribe"}
-              onGoogleLogin={handleGoogleLogin}
-            />
-          </div>
-        </section>
-
-        {/* â”€â”€â”€ PRICING â”€â”€â”€ */}
-        <section id="pricing" className="py-20 scroll-mt-20">
+        <section id="pricing" className="py-16 scroll-mt-20">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Planos</p>
@@ -1062,6 +1072,36 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
+        {activeFooterInfo ? (
+          <section id="footer-info" className="scroll-mt-20 pb-10">
+            <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.16] bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(7,10,15,0.98)_44%,rgba(3,5,8,1))] p-6 sm:p-8">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.14),transparent_34%)]" />
+              <div className="relative grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Detalhe rápido</p>
+                  <h2 className="mt-3 text-3xl font-black leading-tight text-white">{FOOTER_DETAILS[activeFooterInfo].title}</h2>
+                </div>
+                <div>
+                  <p className="text-sm leading-7 text-zinc-300">{FOOTER_DETAILS[activeFooterInfo].text}</p>
+                  <p className="mt-4 rounded-[18px] border border-white/[0.08] bg-black/20 p-4 text-sm leading-7 text-zinc-400">
+                    {FOOTER_DETAILS[activeFooterInfo].how}
+                  </p>
+                  <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                    <button type="button" onClick={() => scrollToSection("pricing")}
+                      className="rounded-[18px] bg-lime-300 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-zinc-950 transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70">
+                      Ver planos
+                    </button>
+                    <button type="button" onClick={() => focusAuth(true)}
+                      className="rounded-[18px] border border-white/10 bg-white/[0.04] px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-zinc-200 transition hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white/30">
+                      Criar conta
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <footer className="border-t border-white/[0.08] py-10">
           <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
@@ -1074,20 +1114,29 @@ const LoginPage: React.FC = () => {
               IA - Gestão - Automação - Análise - Resultados
             </p>
           </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {FOOTER_COLUMNS.map((column) => (
               <div key={column.title}>
                 <h3 className="text-xs font-black uppercase tracking-[0.22em] text-lime-300/80">{column.title}</h3>
                 <ul className="mt-4 space-y-2">
                   {column.links.map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-sm text-zinc-500 transition hover:text-zinc-200">{link}</a>
+                    <li key={link.key}>
+                      <button
+                        type="button"
+                        onClick={() => openFooterInfo(link.key)}
+                        className="text-left text-sm text-zinc-500 transition hover:text-zinc-200 focus:outline-none focus:text-lime-300"
+                      >
+                        {link.label}
+                      </button>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
+          <p className="mt-8 text-xs leading-6 text-zinc-700">
+            NEXT LEVEL AI. Gestão, inteligência operacional e atendimento para empresários brasileiros.
+          </p>
         </footer>
       </div>
     </div>
