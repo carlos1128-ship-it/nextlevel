@@ -118,19 +118,23 @@ const Chat = () => {
       ]);
     } catch (error) {
       const message = getErrorMessage(error, "Erro ao consultar IA.");
-      const isUsageLimit = message.toLowerCase().includes("limite de ia");
-      const isGeminiError = message.toLowerCase().includes('gemini') ||
-        message.toLowerCase().includes('overloaded') ||
-        message.toLowerCase().includes('rate limit') ||
-        message.toLowerCase().includes('503') ||
-        message.toLowerCase().includes('529');
+      const normalizedMessage = message.toLowerCase();
+      const isUsageLimit =
+        normalizedMessage.includes("limite de ia") ||
+        normalizedMessage.includes("limite mensal de ia") ||
+        normalizedMessage.includes("plan_limit_reached");
+      const isGeminiError = normalizedMessage.includes('gemini') ||
+        normalizedMessage.includes('overloaded') ||
+        normalizedMessage.includes('rate limit') ||
+        normalizedMessage.includes('503') ||
+        normalizedMessage.includes('529');
 
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
           text: isUsageLimit
-            ? "Você atingiu o limite de IA deste mês. Faça upgrade de plano para continuar."
+            ? "Você atingiu o limite mensal de IA do seu plano. Faça upgrade para continuar usando este recurso."
             : isGeminiError
               ? "A IA está sobrecarregada no momento. Tente novamente em alguns segundos ou minutos."
               : "Não consegui responder agora. Tente novamente em alguns segundos.",
@@ -139,7 +143,7 @@ const Chat = () => {
       ]);
       addToast(
         isUsageLimit
-          ? "Você atingiu o limite de IA deste mês. Veja os planos para continuar."
+          ? "Você atingiu o limite mensal de IA do seu plano. Faça upgrade para continuar usando este recurso."
           : isGeminiError
             ? "Aviso: IA sobrecarregada, tente novamente em alguns segundos"
             : message,

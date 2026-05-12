@@ -75,7 +75,7 @@ const UsageRow = ({ item }: { item: AIUsageFeatureSummary; key?: React.Key }) =>
       ) : null}
       {item.status === "exceeded" ? (
         <p className="mt-3 text-sm font-semibold text-red-700 dark:text-red-200">
-          Limite atingido. Faca upgrade para continuar.
+          Você atingiu o limite mensal de IA do seu plano. Faça upgrade para continuar usando este recurso.
         </p>
       ) : null}
     </section>
@@ -181,7 +181,7 @@ const PlanUsage = () => {
 
       {exceeded ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-5 text-sm font-semibold text-red-100">
-          Você atingiu o limite de IA deste mês. Faça upgrade de plano para continuar.
+          Você atingiu o limite mensal de IA do seu plano. Faça upgrade para continuar usando este recurso.
         </div>
       ) : null}
 

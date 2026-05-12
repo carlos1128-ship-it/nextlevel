@@ -63,6 +63,14 @@ function isCooldownStatus(status?: string | null) {
   return status === "rate_limited" || status === "provider_warming_up" || status === "qr_not_ready";
 }
 
+function sanitizeCustomerConnectionMessage(message?: string | null) {
+  if (!message) return null;
+  return message
+    .replace(/Evolution API/gi, "conexão do WhatsApp")
+    .replace(/Evolution/gi, "conexão")
+    .replace(/(META|INSTAGRAM)_[A-Z_]+/gi, "configuração");
+}
+
 const Integrations = () => {
   const { selectedCompanyId } = useAuth();
   const { currentPlan } = useBilling();
@@ -90,7 +98,7 @@ const Integrations = () => {
     if (connection.status === "disconnect_pending") return "Limpeza pendente";
     if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessário";
     if (connection.status === "rate_limited") return "Limite temporário";
-    if (connection.status === "provider_warming_up") return "Evolution iniciando";
+    if (connection.status === "provider_warming_up") return "Preparando conexão";
     if (connection.status === "qr_not_ready") return "QR ainda não pronto";
     if (connection.status === "repair_ready") return "Reparo pronto";
     if (connection.status === "error") return "Erro";
@@ -98,14 +106,10 @@ const Integrations = () => {
     return "Desconectado";
   }, [connection]);
 
-  const webhookLabel =
-    connection?.webhookStatus === "configured" ? "Webhook configurado" : "Webhook pendente";
+  const connectionHealthLabel =
+    connection?.webhookStatus === "configured" ? "Conexão ativa" : "Sincronizando";
   const automationLabel =
-    connection?.automationStatus === "configured" ? "Automação configurada" : "Automação pendente";
-  const phoneLabel =
-    isConnected(connection?.status) && !connection?.phoneNumber
-      ? "Conectado, sincronizando número"
-      : connection?.phoneNumber || "Aguardando conexão";
+    connection?.automationStatus === "configured" ? "Atendimento pronto" : "Aguardando conexão";
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -176,7 +180,6 @@ const Integrations = () => {
     if (rawQr.startsWith("data:image")) {
       setQrImage(rawQr);
       console.info("whatsapp.qr.frontend.rendered", {
-        instanceName: connection?.instanceName,
         source: "base64",
       });
       return;
@@ -193,12 +196,11 @@ const Integrations = () => {
       .then((image) => {
         setQrImage(image);
         console.info("whatsapp.qr.frontend.rendered", {
-          instanceName: connection?.instanceName,
           source: "code",
         });
       })
       .catch(() => setQrImage(null));
-  }, [connection?.instanceName, connection?.qrCode]);
+  }, [connection?.qrCode]);
 
   const handleConnect = async () => {
     if (!selectedCompanyId) {
@@ -216,18 +218,18 @@ const Integrations = () => {
         addToast("QR Code gerado.", "success");
       } else if (next.status === "provider_warming_up") {
         addToast(
-          next.message || "Preparando conexão com WhatsApp...",
+          sanitizeCustomerConnectionMessage(next.message) || "Preparando conexão com WhatsApp...",
           "info",
         );
       } else if (next.status === "rate_limited") {
         addToast(
-          next.message || "A Evolution limitou as requisições. Aguarde alguns segundos.",
+          sanitizeCustomerConnectionMessage(next.message) || "Muitas tentativas agora. Aguarde alguns segundos.",
           "info",
         );
       } else if (next.status === "qr_not_ready") {
-        addToast(next.message || "QR ainda não está pronto. Tente novamente em alguns segundos.", "info");
+        addToast(sanitizeCustomerConnectionMessage(next.message) || "QR ainda não está pronto. Tente novamente em alguns segundos.", "info");
       } else {
-        addToast(next.message || next.lastError || "Erro ao gerar QR Code.", "error");
+        addToast(sanitizeCustomerConnectionMessage(next.message || next.lastError) || "Erro ao gerar QR Code.", "error");
       }
     } catch (error) {
       addToast(getErrorMessage(error, "Não foi possível iniciar o WhatsApp."), "error");
@@ -248,11 +250,11 @@ const Integrations = () => {
       } else if (next.status === "qr_pending" && hasQrData(next)) {
         addToast("QR Code gerado.", "success");
       } else if (next.status === "provider_warming_up" || next.status === "rate_limited") {
-        addToast(next.message || "Evolution indisponível agora.", "info");
+        addToast(sanitizeCustomerConnectionMessage(next.message) || "Conexão indisponível agora.", "info");
       } else if (next.status === "qr_not_ready" || next.status === "repair_ready") {
-        addToast(next.message || "Clique em Conectar WhatsApp para gerar o QR.", "info");
+        addToast(sanitizeCustomerConnectionMessage(next.message) || "Clique em Conectar WhatsApp para gerar o QR.", "info");
       } else {
-        addToast(next.message || "Conexão ainda precisa de novo QR.", "info");
+        addToast(sanitizeCustomerConnectionMessage(next.message) || "Conexão ainda precisa de novo QR.", "info");
       }
     } catch (error) {
       addToast(getErrorMessage(error, "Não foi possível reparar a conexão."), "error");
@@ -333,27 +335,24 @@ const Integrations = () => {
                 WhatsApp
               </p>
               <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                Atendimento IA via Evolution
+                WhatsApp
               </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+                Conecte o atendimento da sua empresa ao WhatsApp.
+              </p>
             </div>
-            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-3">
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Sessão</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
                 <p className="mt-1 font-bold text-zinc-100">{statusLabel}</p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Webhook</p>
-                <p className="mt-1 font-bold text-zinc-100">{webhookLabel}</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Saúde</p>
+                <p className="mt-1 font-bold text-zinc-100">{connectionHealthLabel}</p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Automação</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Atendimento IA</p>
                 <p className="mt-1 font-bold text-zinc-100">{automationLabel}</p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Número</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {phoneLabel}
-                </p>
               </div>
             </div>
           </div>
@@ -431,10 +430,10 @@ const Integrations = () => {
               ) : null}
               <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                  Instância
+                  Próximo passo
                 </p>
-                <p className="mt-2 break-all text-sm font-semibold text-zinc-200">
-                  {connection?.instanceName || "nextlevel"}
+                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-200">
+                  Leia o QR Code com o WhatsApp da empresa para concluir a conexão.
                 </p>
               </div>
             </div>
@@ -450,7 +449,7 @@ const Integrations = () => {
               ? "border-red-500/30 bg-red-950/30 text-red-200"
               : "border-amber-500/30 bg-amber-500/10 text-amber-100"
           }`}>
-            {connection.message || connection.lastError || "Não foi possível gerar o QR Code agora."}
+            {sanitizeCustomerConnectionMessage(connection.message || connection.lastError) || "Não foi possível gerar o QR Code agora."}
             {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
           </p>
         ) : null}
@@ -466,17 +465,17 @@ const Integrations = () => {
           <div className="min-w-0 space-y-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-                Instagram
+                Integração
               </p>
               <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                DMs com IA via Meta Graph API
+                Instagram
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-                Conecte uma conta profissional vinculada a uma Página do Facebook para responder DMs com memoria isolada por empresa.
+                Organize mensagens e oportunidades vindas do Instagram.
               </p>
             </div>
 
-            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-3">
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
                 <p className="mt-1 font-bold text-zinc-100">
@@ -486,26 +485,20 @@ const Integrations = () => {
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
                 <p className="mt-1 font-bold text-zinc-100">
-                  {instagramStatus?.igUsername ? `@${instagramStatus.igUsername}` : "Aguardando OAuth"}
+                  {instagramStatus?.connected ? "Conta profissional conectada" : "Aguardando conexão"}
                 </p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Página</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Oportunidades</p>
                 <p className="mt-1 font-bold text-zinc-100">
-                  {instagramStatus?.pageName || instagramStatus?.pageId || "Meta Business"}
-                </p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Webhook</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {instagramStatus?.provider_setup_required ? "Configurar ENV" : "Pronto"}
+                  {instagramStatus?.connected ? "Mensagens organizadas" : "Conecte para ativar"}
                 </p>
               </div>
             </div>
 
             {instagramStatus?.provider_setup_required ? (
               <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
-                Configure META_APP_ID, META_APP_SECRET, INSTAGRAM_REDIRECT_URI, INSTAGRAM_OAUTH_SCOPE e INSTAGRAM_WEBHOOK_VERIFY_TOKEN no backend.
+                A conexão com Instagram está temporariamente indisponível. Tente novamente em instantes.
               </p>
             ) : null}
             {isInstagramTokenExpired(instagramStatus) ? (

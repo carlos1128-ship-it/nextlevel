@@ -12,7 +12,7 @@ import {
   readPlanSelectionFromSearch,
   savePendingSelectedPlan,
 } from "../src/utils/billingSelection";
-import { PLAN_DISPLAY } from "../src/utils/planDisplay";
+import { getDisplayPlanPrice, PLAN_DISPLAY } from "../src/utils/planDisplay";
 
 /* Helpers */
 function scrollToSection(id: string) {
@@ -255,19 +255,19 @@ const FOOTER_DETAILS: Record<FooterInfoKey, { title: string; text: string; how: 
     title: "WhatsApp",
     text: "Centralize oportunidades e atendimentos vindos do WhatsApp para não perder clientes no meio da operação.",
     how: "O canal entra na visão operacional sem expor tokens ou complexidade ao usuário final.",
-    image: "/login-features/whatsapp.png",
+    image: "/login-features/atendimento-ia.png",
   },
   instagram: {
     title: "Instagram",
     text: "Organize mensagens, leads e interações vindas do Instagram com apoio da inteligência artificial.",
     how: "A Next Level organiza sinais de atendimento e intenção para reduzir oportunidades esquecidas.",
-    image: "/login-features/instagram.png",
+    image: "/login-features/atendimento-ia.png",
   },
   "mercado-livre": {
     title: "Mercado Livre",
     text: "Conecte dados comerciais do marketplace para acompanhar vendas, produtos e desempenho dentro da Next Level.",
     how: "Os dados do canal entram na visão de gestão para apoiar margem, estoque e decisões estratégicas.",
-    image: "/login-features/mercado-livre.png",
+    image: "/login-features/produtos-custos.png",
   },
   "alertas-e-recomendacoes": {
     title: "Alertas e recomendações",
@@ -335,30 +335,30 @@ const FOOTER_COLUMNS: Array<{ title: string; links: Array<{ label: string; key: 
 const PRICING = [
   {
     key: "COMMON" as BillingPlanKey,
-    name: "Essencial",
-    monthlyPrice: "R$ 57", annualPrice: "R$ 570",
-    summary: "Organização e indicadores para sair do escuro sem complicar a operação.",
-    features: ["Dashboard inicial", "Vendas e custos organizados", "Indicadores principais", PLAN_DISPLAY.COMMON.aiTier, PLAN_DISPLAY.COMMON.aiLimit, "Base para decisões melhores"],
-    cta: "Assinar agora", recommended: false,
-    microcopy: "Pagamento seguro",
+    name: PLAN_DISPLAY.COMMON.publicName,
+    monthlyPrice: getDisplayPlanPrice("COMMON", "MONTHLY"), annualPrice: getDisplayPlanPrice("COMMON", "ANNUAL"),
+    summary: PLAN_DISPLAY.COMMON.summary,
+    features: PLAN_DISPLAY.COMMON.features,
+    cta: PLAN_DISPLAY.COMMON.cta, recommended: PLAN_DISPLAY.COMMON.recommended,
+    microcopy: PLAN_DISPLAY.COMMON.microcopy,
   },
   {
     key: "PREMIUM" as BillingPlanKey,
-    name: "Premium",
-    monthlyPrice: "R$ 97", annualPrice: "R$ 970",
-    summary: "IA, relatórios e automação para acompanhar margem, atendimento e oportunidades.",
-    features: ["Tudo do Essencial", "Atendimento com IA", PLAN_DISPLAY.PREMIUM.aiTier, PLAN_DISPLAY.PREMIUM.aiLimit, "WhatsApp e Instagram conforme integração", "Relatórios completos", "Recomendações inteligentes"],
-    cta: "Ativar Premium", recommended: true,
-    microcopy: "Pensado para crescer com margem e controle.",
+    name: PLAN_DISPLAY.PREMIUM.publicName,
+    monthlyPrice: getDisplayPlanPrice("PREMIUM", "MONTHLY"), annualPrice: getDisplayPlanPrice("PREMIUM", "ANNUAL"),
+    summary: PLAN_DISPLAY.PREMIUM.summary,
+    features: PLAN_DISPLAY.PREMIUM.features,
+    cta: PLAN_DISPLAY.PREMIUM.cta, recommended: PLAN_DISPLAY.PREMIUM.recommended,
+    microcopy: PLAN_DISPLAY.PREMIUM.microcopy,
   },
   {
     key: "PRO_BUSINESS" as BillingPlanKey,
-    name: "Business",
-    monthlyPrice: "R$ 197", annualPrice: "R$ 1.970",
-    summary: "Integrações, escala e análise avançada para operações que precisam de previsibilidade.",
-    features: ["Tudo do Premium", "Automação avançada", PLAN_DISPLAY.PRO_BUSINESS.aiTier, PLAN_DISPLAY.PRO_BUSINESS.aiLimit, "Mercado Livre integrado", "Previsões e alertas avançados", "Canais de venda conectados"],
-    cta: "Assinar Business", recommended: false,
-    microcopy: "Pensado para crescer com margem e controle.",
+    name: PLAN_DISPLAY.PRO_BUSINESS.publicName,
+    monthlyPrice: getDisplayPlanPrice("PRO_BUSINESS", "MONTHLY"), annualPrice: getDisplayPlanPrice("PRO_BUSINESS", "ANNUAL"),
+    summary: PLAN_DISPLAY.PRO_BUSINESS.summary,
+    features: PLAN_DISPLAY.PRO_BUSINESS.features,
+    cta: PLAN_DISPLAY.PRO_BUSINESS.cta, recommended: PLAN_DISPLAY.PRO_BUSINESS.recommended,
+    microcopy: PLAN_DISPLAY.PRO_BUSINESS.microcopy,
   },
 ];
 
@@ -546,12 +546,12 @@ const FeatureScreenshot: React.FC<{ detail: { title: string; image: string } }> 
         <span className="text-[10px] font-black uppercase tracking-[0.22em] text-lime-300/75">Preview da plataforma</span>
       </div>
       <img
-      src={detail.image}
-      alt={`Prévia de ${detail.title}`}
-      loading="lazy"
-      onError={() => setFailed(true)}
-      className="aspect-[16/9] min-h-[260px] w-full bg-white/[0.03] object-cover object-top"
-    />
+        src={detail.image}
+        alt={`Prévia de ${detail.title}`}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="mx-auto h-auto w-full bg-white/[0.03] object-contain"
+      />
     </div>
   );
 };
@@ -1174,7 +1174,13 @@ const LoginPage: React.FC = () => {
                 <p className="mt-3 text-sm leading-6 text-zinc-400 flex-1">{plan.summary}</p>
                 <div className="mt-5 rounded-[18px] border border-lime-300/[0.16] bg-lime-300/[0.055] p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-lime-300">{PLAN_DISPLAY[plan.key].aiTier}</p>
-                  <p className="mt-2 text-sm font-bold leading-6 text-zinc-100">{PLAN_DISPLAY[plan.key].aiLimit}</p>
+                  <ul className="mt-3 space-y-1.5">
+                    {PLAN_DISPLAY[plan.key].aiLimitItems.map((item) => (
+                      <li key={item} className="text-sm font-bold leading-5 text-zinc-100">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                   <p className="mt-1 text-xs leading-5 text-zinc-500">{PLAN_DISPLAY[plan.key].aiDescription}</p>
                 </div>
                 <ul className="mt-5 space-y-2.5">

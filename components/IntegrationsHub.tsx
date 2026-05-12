@@ -205,7 +205,7 @@ const IntegrationsHub = () => {
     } catch (error) {
       setEvolutionOpen(true);
       setQrStatus("warming");
-      addToast(getErrorMessage(error, "Preparando a Evolution. Tente novamente em alguns segundos."), "info");
+      addToast(getErrorMessage(error, "Preparando a conexão. Tente novamente em alguns segundos."), "info");
     } finally {
       setEvolutionLoading(false);
     }
@@ -333,9 +333,9 @@ const IntegrationsHub = () => {
   const evolutionHelperMessage =
     evolutionStatus?.failureReason ||
     (qrStatus === "rate_limited"
-      ? "A Evolution limitou as requisições. Aguarde alguns segundos antes de tentar novamente."
+      ? "Muitas tentativas agora. Aguarde alguns segundos antes de tentar novamente."
       : qrStatus === "warming"
-        ? "A Evolution está iniciando. Vamos tentar buscar o QR automaticamente."
+        ? "A conexão está sendo preparada. Vamos tentar buscar o QR automaticamente."
         : null);
   const instagramNeedsReconnect = isInstagramTokenExpired(instagramConnectionStatus);
 
@@ -343,7 +343,7 @@ const IntegrationsHub = () => {
     {
       key: "INSTAGRAM",
       title: "Instagram",
-      description: "DMs e automações via Meta Graph API.",
+      description: "Organize mensagens e oportunidades vindas do Instagram.",
       status: instagramStatus,
       icon: <RadarIcon className="h-6 w-6" />,
       actionLabel: instagramNeedsReconnect
@@ -407,7 +407,7 @@ const IntegrationsHub = () => {
                 </span>
               </div>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                Conecte por QR Code com Evolution API ou use a Meta API como opcao oficial.
+                Conecte o atendimento da sua empresa ao WhatsApp.
               </p>
               <p className="mt-2 text-xs text-zinc-500">
                 Última sincronização: {formatLastSync(officialStatus?.updatedAt || null)}
@@ -419,9 +419,9 @@ const IntegrationsHub = () => {
             <div className="rounded-[24px] border border-lime-400/20 bg-zinc-900/60 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="text-lg font-black text-zinc-50">Evolution API</h4>
+                  <h4 className="text-lg font-black text-zinc-50">WhatsApp</h4>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Conexão simples por QR Code, sem Chrome no backend.
+                    Conexão simples por QR Code, com status claro para sua equipe.
                   </p>
                 </div>
                 <span
@@ -444,7 +444,7 @@ const IntegrationsHub = () => {
                     Sua conexão está pronta para o atendimento automático.
                   </p>
                   <p className="mt-2 text-xs text-emerald-200">
-                    Webhook: {evolutionStatus?.webhookStatus === "configured" ? "configurado" : "sincronizando"} - Automação: {evolutionStatus?.automationStatus === "configured" ? "configurada" : "pendente"}
+                    Saúde: {evolutionStatus?.webhookStatus === "configured" ? "conexão ativa" : "sincronizando"} - Atendimento: {evolutionStatus?.automationStatus === "configured" ? "pronto" : "pendente"}
                   </p>
                 </div>
               ) : (
@@ -479,9 +479,9 @@ const IntegrationsHub = () => {
             <div className="rounded-[24px] border border-lime-400/20 bg-zinc-900/60 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="text-lg font-black text-zinc-50">Meta API</h4>
+                  <h4 className="text-lg font-black text-zinc-50">Conexão oficial</h4>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">
-                    Opção oficial para integrações da Meta.
+                    Opção oficial para conectar o canal da empresa.
                   </p>
                 </div>
                 <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-lime-300">
@@ -493,13 +493,13 @@ const IntegrationsHub = () => {
                 <div className="mt-4 rounded-2xl border border-lime-400/30 bg-lime-400/10 p-4">
                   <p className="text-sm font-bold text-lime-300">WhatsApp conectado</p>
                   <p className="mt-1 text-sm text-zinc-200">
-                    {officialStatus?.phoneNumber || "Número conectado"}
+                    Canal conectado
                   </p>
                 </div>
               ) : (
                 <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
                   <p className="text-sm text-zinc-300">
-                    Use seu token para ativar a Meta API quando precisar.
+                    Conecte o canal oficial quando precisar.
                   </p>
                 </div>
               )}
@@ -511,7 +511,7 @@ const IntegrationsHub = () => {
                   disabled={!selectedCompanyId}
                   className="flex-1 rounded-2xl bg-[#B6FF00] px-4 py-3 text-sm font-black text-zinc-950 transition hover:brightness-105 disabled:opacity-50"
                 >
-                  Conectar via Meta API
+                  Conectar canal oficial
                 </button>
                 {officialConnected ? (
                   <button
@@ -565,7 +565,7 @@ const IntegrationsHub = () => {
                 <div className="w-full space-y-3">
                   {instagramConnectionStatus?.provider_setup_required ? (
                     <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-200">
-                      Configure META_APP_ID, META_APP_SECRET, INSTAGRAM_REDIRECT_URI, INSTAGRAM_OAUTH_SCOPE e INSTAGRAM_WEBHOOK_VERIFY_TOKEN no backend.
+                      A conexão com Instagram está temporariamente indisponível. Tente novamente em instantes.
                     </div>
                   ) : null}
                   {instagramConnectionStatus?.connected || instagramNeedsReconnect ? (
@@ -579,10 +579,10 @@ const IntegrationsHub = () => {
                       }`}>
                         {instagramNeedsReconnect
                           ? "Token expirado / Reconexão necessária"
-                          : `Instagram conectado${instagramConnectionStatus.igUsername ? ` como @${instagramConnectionStatus.igUsername}` : ""}`}
+                          : "Instagram conectado"}
                       </p>
                       <p className="mt-1 text-xs text-zinc-400">
-                        Página: {instagramConnectionStatus.pageName || instagramConnectionStatus.pageId || "Meta Business"}
+                        Mensagens e oportunidades prontas para organização.
                       </p>
                     </div>
                   ) : null}
@@ -635,7 +635,7 @@ const IntegrationsHub = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-                  Evolution API
+                  WhatsApp
                 </p>
                 <h3 className="mt-2 text-2xl font-black text-zinc-50">Conectar WhatsApp</h3>
               </div>
@@ -664,13 +664,13 @@ const IntegrationsHub = () => {
                   </div>
                 ) : qrStatus === "rate_limited" ? (
                   <div className="space-y-3">
-                    <p>A Evolution limitou as requisições.</p>
+                    <p>Muitas tentativas agora.</p>
                     <p>Aguarde alguns segundos. Vamos tentar de novo automaticamente.</p>
                   </div>
                 ) : qrStatus === "warming" ? (
                   <div className="space-y-3">
                     <p>Preparando conexão...</p>
-                    <p>A Evolution pode estar acordando no Render.</p>
+                    <p>A conexão está sendo preparada.</p>
                   </div>
                 ) : qrCode && qrStatus === "ready" ? (
                   <img
@@ -696,7 +696,7 @@ const IntegrationsHub = () => {
                 {qrStatus === "ready" ? (
                   <p>Escaneie o QR Code com seu WhatsApp Business</p>
                 ) : qrStatus === "rate_limited" ? (
-                  <p>Aguardando cooldown da Evolution.</p>
+                  <p>Aguardando nova tentativa.</p>
                 ) : qrStatus === "warming" ? (
                   <p>Sem ação manual: o painel continua tentando buscar o QR.</p>
                 ) : evolutionStatus?.pairingCode ? (
