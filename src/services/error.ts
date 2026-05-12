@@ -38,7 +38,7 @@ export function getErrorMessage(error: unknown, fallback = "Erro na requisicao."
       ) {
         const message = (payload as { message?: unknown }).message;
         if (typeof message === "string" && message.trim()) return message;
-        return "Este recurso pede upgrade de plano. Veja as opcoes disponiveis.";
+        return "Você atingiu o limite mensal de IA do seu plano. Faça upgrade para continuar usando este recurso.";
       }
       const errorCode = (payload as { error?: unknown }).error;
       if (errorCode === "DependencyUnavailable") {

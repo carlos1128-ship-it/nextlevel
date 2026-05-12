@@ -19,24 +19,15 @@ import {
   readPlanSelectionFromSearch,
   savePendingSelectedPlan,
 } from "../src/utils/billingSelection";
-import { getDisplayPlanAmountInCents, getPublicPlanName, PLAN_DISPLAY } from "../src/utils/planDisplay";
+import { formatCurrencyInCents, getDisplayPlanAmountInCents, getPublicPlanName, PLAN_DISPLAY } from "../src/utils/planDisplay";
 
 const fallbackPlans: BillingPlan[] = [
   {
     key: "COMMON",
     name: "Essencial",
-    description: "Plano inicial para organizar dados, acompanhar indicadores e usar IA basica sem integracoes automaticas.",
+    description: PLAN_DISPLAY.COMMON.summary,
     level: 1,
-    features: [
-      "Dashboard essencial",
-      "Cadastro manual de dados",
-      "Visao basica de vendas e financas",
-      "Relatorios simples",
-      PLAN_DISPLAY.COMMON.aiLimit,
-      "1 importacao inteligente por dia",
-      "Sem integracoes automaticas",
-      "Suporte via e-mail",
-    ],
+    features: PLAN_DISPLAY.COMMON.features,
     prices: {
       MONTHLY: { amountInCents: 5700, currency: "BRL", available: false },
       ANNUAL: { amountInCents: 57000, currency: "BRL", available: false },
@@ -45,20 +36,9 @@ const fallbackPlans: BillingPlan[] = [
   {
     key: "PREMIUM",
     name: "Premium",
-    description: "Plano para usar IA, atendimento automatico e integracoes principais para crescer com mais clareza.",
+    description: PLAN_DISPLAY.PREMIUM.summary,
     level: 2,
-    features: [
-      "Tudo do Essencial",
-      PLAN_DISPLAY.PREMIUM.aiLimit,
-      "Ate 10 empresas vinculadas",
-      "WhatsApp + Instagram integrados",
-      "Atendente IA para WhatsApp e Instagram",
-      "Alertas inteligentes de margem",
-      "Relatorios automaticos semanais",
-      "Recomendacoes taticas da IA",
-      "Suporte prioritario",
-      "Sem Mercado Livre e Utmify",
-    ],
+    features: PLAN_DISPLAY.PREMIUM.features,
     prices: {
       MONTHLY: { amountInCents: 9700, currency: "BRL", available: false },
       ANNUAL: { amountInCents: 97000, currency: "BRL", available: false },
@@ -67,32 +47,15 @@ const fallbackPlans: BillingPlan[] = [
   {
     key: "PRO_BUSINESS",
     name: "Business",
-    description: "Plano completo para automacao, previsibilidade, market intelligence e escala.",
+    description: PLAN_DISPLAY.PRO_BUSINESS.summary,
     level: 3,
-    features: [
-      "Tudo do Premium",
-      PLAN_DISPLAY.PRO_BUSINESS.aiLimit,
-      "Empresas ilimitadas",
-      "Mercado Livre + Utmify + marketplaces",
-      "IA estrategica avancada",
-      "Automacoes inteligentes",
-      "Market intelligence",
-      "Previsoes e alertas avancados",
-      "Importacoes inteligentes ilimitadas",
-      "Prioridade em novas funcionalidades",
-    ],
+    features: PLAN_DISPLAY.PRO_BUSINESS.features,
     prices: {
       MONTHLY: { amountInCents: 19700, currency: "BRL", available: false },
       ANNUAL: { amountInCents: 197000, currency: "BRL", available: false },
     },
   },
 ];
-
-const formatMoney = (amountInCents: number) =>
-  (amountInCents / 100).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
 
 const Plans = () => {
   const navigate = useNavigate();
@@ -189,7 +152,7 @@ const Plans = () => {
     }
 
     setLoadingPlanKey(planKey);
-    setMessage("Criando checkout seguro...");
+    setMessage("Preparando pagamento seguro...");
     try {
       const checkout = await createBillingCheckout({ planKey, billingCycle });
       clearPendingSelectedPlan();
@@ -310,6 +273,7 @@ const Plans = () => {
 
         <section className="mt-8 grid gap-5 lg:grid-cols-3">
           {orderedPlans.map((plan) => {
+            const display = PLAN_DISPLAY[plan.key];
             const price = plan.prices[billingCycle];
             const displayAmountInCents = getDisplayPlanAmountInCents(
               plan.key,
@@ -317,13 +281,15 @@ const Plans = () => {
               price?.amountInCents || 0,
             );
             const displayName = getPublicPlanName(plan.key, plan.name);
+            const displayDescription = display?.summary || plan.description;
+            const displayFeatures = display?.features || plan.features;
             const available = !isInitialBillingLoading && Boolean(price?.available) && checkoutEnabled === true;
             const planUnavailable = !isInitialBillingLoading && checkoutEnabled === true && Boolean(price) && !price.available;
             const providerUnavailable = !isInitialBillingLoading && checkoutEnabled === false;
             const loading = loadingPlanKey === plan.key;
             const isSelected = selectedPlan?.planKey === plan.key;
             const buttonLabel = loading
-              ? "Preparando checkout..."
+              ? "Preparando pagamento..."
               : isInitialBillingLoading
               ? "Carregando..."
               : available
@@ -334,7 +300,7 @@ const Plans = () => {
               ? "Plano indisponivel"
               : "Plano indisponivel";
             const helperCopy = isInitialBillingLoading
-              ? "Preparando pagamento..."
+              ? "Preparando pagamento seguro..."
               : available
               ? "Pagamento seguro via Cakto"
               : providerUnavailable
@@ -367,22 +333,28 @@ const Plans = () => {
                   </span>
                 ) : null}
                 <h2 className="text-2xl font-black">{displayName}</h2>
-                <p className="mt-3 min-h-16 text-sm leading-6 text-zinc-400">{plan.description}</p>
+                <p className="mt-3 min-h-16 text-sm leading-6 text-zinc-400">{displayDescription}</p>
                 <div className="mt-5">
                   <span className="text-4xl font-black">
-                    {price ? formatMoney(displayAmountInCents) : "Indisponível"}
+                    {price ? formatCurrencyInCents(displayAmountInCents) : "Indisponível"}
                   </span>
                   <span className="ml-2 text-sm text-zinc-500">
                     {billingCycle === "MONTHLY" ? "/mês" : "/ano"}
                   </span>
                 </div>
                 <div className="mt-5 rounded-[18px] border border-lime-300/[0.16] bg-lime-300/[0.055] p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-300">{PLAN_DISPLAY[plan.key].aiTier}</p>
-                  <p className="mt-2 text-sm font-bold leading-6 text-zinc-100">{PLAN_DISPLAY[plan.key].aiLimit}</p>
-                  <p className="mt-1 text-xs leading-5 text-zinc-500">{PLAN_DISPLAY[plan.key].aiDescription}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-300">{display.aiTier}</p>
+                  <ul className="mt-3 space-y-1.5">
+                    {display.aiLimitItems.map((item) => (
+                      <li key={item} className="text-sm font-bold leading-5 text-zinc-100">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-xs leading-5 text-zinc-500">{display.aiDescription}</p>
                 </div>
                 <ul className="mt-6 flex-1 space-y-3">
-                  {plan.features.map((feature) => (
+                  {displayFeatures.map((feature) => (
                     <li key={feature} className="flex items-start gap-3 text-sm text-zinc-300">
                       <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-lime-300" />
                       {feature}
