@@ -9,11 +9,11 @@ import type { AIUsageCurrentResponse, AIUsageFeatureSummary } from "../src/types
 const planLabels: Record<string, string> = {
   free: "Teste",
   test: "Teste",
-  common: "Comum",
-  basic: "Comum",
+  common: "Essencial",
+  basic: "Essencial",
   premium: "Premium",
-  pro_business: "Pro Business",
-  business: "Pro Business",
+  pro_business: "Business",
+  business: "Business",
 };
 
 const statusLabel: Record<AIUsageFeatureSummary["status"], string> = {

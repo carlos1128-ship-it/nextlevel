@@ -19,11 +19,12 @@ import {
   readPlanSelectionFromSearch,
   savePendingSelectedPlan,
 } from "../src/utils/billingSelection";
+import { getDisplayPlanAmountInCents, getPublicPlanName, PLAN_DISPLAY } from "../src/utils/planDisplay";
 
 const fallbackPlans: BillingPlan[] = [
   {
     key: "COMMON",
-    name: "Comum",
+    name: "Essencial",
     description: "Plano inicial para organizar dados, acompanhar indicadores e usar IA basica sem integracoes automaticas.",
     level: 1,
     features: [
@@ -31,7 +32,7 @@ const fallbackPlans: BillingPlan[] = [
       "Cadastro manual de dados",
       "Visao basica de vendas e financas",
       "Relatorios simples",
-      "Chat IA basico: 400 mensagens/mes",
+      PLAN_DISPLAY.COMMON.aiLimit,
       "1 importacao inteligente por dia",
       "Sem integracoes automaticas",
       "Suporte via e-mail",
@@ -47,7 +48,8 @@ const fallbackPlans: BillingPlan[] = [
     description: "Plano para usar IA, atendimento automatico e integracoes principais para crescer com mais clareza.",
     level: 2,
     features: [
-      "Tudo do Comum",
+      "Tudo do Essencial",
+      PLAN_DISPLAY.PREMIUM.aiLimit,
       "Ate 10 empresas vinculadas",
       "WhatsApp + Instagram integrados",
       "Atendente IA para WhatsApp e Instagram",
@@ -64,11 +66,12 @@ const fallbackPlans: BillingPlan[] = [
   },
   {
     key: "PRO_BUSINESS",
-    name: "Pro Business",
+    name: "Business",
     description: "Plano completo para automacao, previsibilidade, market intelligence e escala.",
     level: 3,
     features: [
       "Tudo do Premium",
+      PLAN_DISPLAY.PRO_BUSINESS.aiLimit,
       "Empresas ilimitadas",
       "Mercado Livre + Utmify + marketplaces",
       "IA estrategica avancada",
@@ -308,6 +311,12 @@ const Plans = () => {
         <section className="mt-8 grid gap-5 lg:grid-cols-3">
           {orderedPlans.map((plan) => {
             const price = plan.prices[billingCycle];
+            const displayAmountInCents = getDisplayPlanAmountInCents(
+              plan.key,
+              billingCycle,
+              price?.amountInCents || 0,
+            );
+            const displayName = getPublicPlanName(plan.key, plan.name);
             const available = !isInitialBillingLoading && Boolean(price?.available) && checkoutEnabled === true;
             const planUnavailable = !isInitialBillingLoading && checkoutEnabled === true && Boolean(price) && !price.available;
             const providerUnavailable = !isInitialBillingLoading && checkoutEnabled === false;
@@ -357,15 +366,20 @@ const Plans = () => {
                     Mais completo
                   </span>
                 ) : null}
-                <h2 className="text-2xl font-black">{plan.name}</h2>
+                <h2 className="text-2xl font-black">{displayName}</h2>
                 <p className="mt-3 min-h-16 text-sm leading-6 text-zinc-400">{plan.description}</p>
                 <div className="mt-5">
                   <span className="text-4xl font-black">
-                    {price ? formatMoney(price.amountInCents) : "Indisponível"}
+                    {price ? formatMoney(displayAmountInCents) : "Indisponível"}
                   </span>
                   <span className="ml-2 text-sm text-zinc-500">
                     {billingCycle === "MONTHLY" ? "/mês" : "/ano"}
                   </span>
+                </div>
+                <div className="mt-5 rounded-[18px] border border-lime-300/[0.16] bg-lime-300/[0.055] p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-300">{PLAN_DISPLAY[plan.key].aiTier}</p>
+                  <p className="mt-2 text-sm font-bold leading-6 text-zinc-100">{PLAN_DISPLAY[plan.key].aiLimit}</p>
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">{PLAN_DISPLAY[plan.key].aiDescription}</p>
                 </div>
                 <ul className="mt-6 flex-1 space-y-3">
                   {plan.features.map((feature) => (

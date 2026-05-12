@@ -12,6 +12,7 @@ import {
   readPlanSelectionFromSearch,
   savePendingSelectedPlan,
 } from "../src/utils/billingSelection";
+import { PLAN_DISPLAY } from "../src/utils/planDisplay";
 
 /* Helpers */
 function scrollToSection(id: string) {
@@ -113,18 +114,27 @@ const METRICS = [
   { title: "Decisão com IA", label: "Alertas e próximas ações para o empresário agir antes do problema crescer.", icon: BrainIcon },
 ];
 
+const TARGET_SEGMENTS = [
+  { title: "Lojas e comércios locais", text: "Acompanhe vendas, custos, clientes e operação em uma visão simples." },
+  { title: "Prestadores de serviço", text: "Organize atendimento, solicitações, oportunidades e relatórios." },
+  { title: "E-commerces e marketplaces", text: "Entenda produtos, margem, pedidos e canais de venda." },
+  { title: "Empresas em crescimento", text: "Transforme dados soltos em decisões mais claras." },
+];
+
 const PROBLEMS = [
-  { title: "Venda sem lucro claro", text: "O faturamento sobe, mas custos, taxas e desperdícios escondem a margem real." },
-  { title: "Atendimento perdido", text: "Clientes chegam pelo WhatsApp e Instagram, mas oportunidades se perdem na correria." },
-  { title: "Operação espalhada", text: "Produtos, pedidos, anúncios, custos e relatórios vivem em lugares diferentes." },
-  { title: "Decisão atrasada", text: "O empresário percebe o problema tarde porque os sinais chegam tarde." },
+  { title: "Vendas sem margem clara", text: "Faturamento sobe, mas o lucro real continua difícil de enxergar." },
+  { title: "Atendimento perdido", text: "Mensagens e oportunidades se perdem entre WhatsApp, Instagram e outros canais." },
+  { title: "Custos espalhados", text: "Despesas, produtos e operação ficam desconectados da decisão." },
+  { title: "Decisões no achismo", text: "Sem dados organizados, o empresário percebe o problema tarde demais." },
 ];
 
 const SOLUTIONS = [
-  { title: "Centralize dados", text: "Vendas, custos, produtos e clientes em um painel feito para decisão." },
-  { title: "Entenda lucro real", text: "Separe volume de venda, margem, desperdício e oportunidade." },
-  { title: "Automatize atendimento", text: "Organize canais e intenções para reduzir mensagens esquecidas." },
-  { title: "Receba recomendações", text: "A IA transforma sinais da operação em próximos passos claros." },
+  { title: "Centraliza a operação", text: "Reúne vendas, clientes, custos, produtos e canais em uma visão mais clara." },
+  { title: "Mostra o lucro real", text: "Ajuda a separar faturamento, margem, custos e desperdícios." },
+  { title: "Apoia o atendimento", text: "Organiza conversas, intenções e oportunidades vindas dos canais digitais." },
+  { title: "Gera recomendações", text: "A IA interpreta sinais do negócio e sugere ações práticas." },
+  { title: "Cria relatórios", text: "Transforma dados em análises simples para o empresário agir." },
+  { title: "Conecta crescimento", text: "Une visão financeira, comercial e administrativa em um só lugar." },
 ];
 
 const FEATURES = [
@@ -173,17 +183,10 @@ const FEATURES = [
 ];
 
 const HOW_IT_WORKS = [
-  { title: "Conecte ou cadastre os dados", text: "Comece com vendas, custos, produtos e canais importantes." },
-  { title: "A Next Level organiza", text: "A plataforma transforma informações soltas em indicadores úteis." },
-  { title: "A IA interpreta sinais", text: "Problemas, riscos e oportunidades aparecem com contexto." },
-  { title: "Você decide com clareza", text: "Priorize ações para vender melhor, perder menos e crescer com margem." },
-];
-
-const AI_PRACTICE = [
-  "Analisa vendas, custos e padrões.",
-  "Identifica riscos, desperdícios e oportunidades.",
-  "Ajuda no atendimento e na organização de clientes.",
-  "Gera relatórios e recomendações para decisões melhores.",
+  { title: "Conecte ou cadastre seus dados", text: "Adicione informações de vendas, custos, clientes, produtos ou canais." },
+  { title: "A Next Level organiza", text: "A plataforma estrutura os dados em indicadores claros." },
+  { title: "A IA interpreta sinais", text: "Riscos, oportunidades e padrões importantes são identificados." },
+  { title: "Você decide com clareza", text: "O empresário age com base em dados, não no achismo." },
 ];
 
 const INTELLIGENCE_CARDS = [
@@ -335,7 +338,7 @@ const PRICING = [
     name: "Essencial",
     monthlyPrice: "R$ 57", annualPrice: "R$ 570",
     summary: "Organização e indicadores para sair do escuro sem complicar a operação.",
-    features: ["Dashboard inicial", "Vendas e custos organizados", "Indicadores principais", "IA básica para análise", "Base para decisões melhores"],
+    features: ["Dashboard inicial", "Vendas e custos organizados", "Indicadores principais", PLAN_DISPLAY.COMMON.aiTier, PLAN_DISPLAY.COMMON.aiLimit, "Base para decisões melhores"],
     cta: "Assinar agora", recommended: false,
     microcopy: "Pagamento seguro",
   },
@@ -344,7 +347,7 @@ const PRICING = [
     name: "Premium",
     monthlyPrice: "R$ 97", annualPrice: "R$ 970",
     summary: "IA, relatórios e automação para acompanhar margem, atendimento e oportunidades.",
-    features: ["Tudo do Essencial", "Atendimento com IA", "WhatsApp e Instagram conforme integração", "Relatórios completos", "Recomendações inteligentes", "Mais clareza para crescer"],
+    features: ["Tudo do Essencial", "Atendimento com IA", PLAN_DISPLAY.PREMIUM.aiTier, PLAN_DISPLAY.PREMIUM.aiLimit, "WhatsApp e Instagram conforme integração", "Relatórios completos", "Recomendações inteligentes"],
     cta: "Ativar Premium", recommended: true,
     microcopy: "Pensado para crescer com margem e controle.",
   },
@@ -353,7 +356,7 @@ const PRICING = [
     name: "Business",
     monthlyPrice: "R$ 197", annualPrice: "R$ 1.970",
     summary: "Integrações, escala e análise avançada para operações que precisam de previsibilidade.",
-    features: ["Tudo do Premium", "Automação avançada", "Mercado Livre integrado", "Previsões e alertas avançados", "Canais de venda conectados", "Visão estratégica da operação"],
+    features: ["Tudo do Premium", "Automação avançada", PLAN_DISPLAY.PRO_BUSINESS.aiTier, PLAN_DISPLAY.PRO_BUSINESS.aiLimit, "Mercado Livre integrado", "Previsões e alertas avançados", "Canais de venda conectados"],
     cta: "Assinar Business", recommended: false,
     microcopy: "Pensado para crescer com margem e controle.",
   },
@@ -518,14 +521,14 @@ const FeatureScreenshot: React.FC<{ detail: { title: string; image: string } }> 
 
   if (failed) {
     return (
-      <div className="flex min-h-[260px] items-center justify-center rounded-[24px] border border-dashed border-lime-300/25 bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(255,255,255,0.03))] p-6 text-center">
+      <div className="flex min-h-[320px] items-center justify-center rounded-[24px] border border-dashed border-lime-300/25 bg-[linear-gradient(135deg,rgba(182,255,0,0.1),rgba(255,255,255,0.025))] p-6 text-center">
         <div>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-300 text-zinc-950">
             <ChartIcon />
           </div>
-          <p className="text-sm font-black text-white">Screenshot em breve</p>
+          <p className="text-sm font-black text-white">Preview visual em preparação</p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            Adicione a imagem em <span className="font-mono text-lime-300/80">{detail.image}</span>.
+            Assim que o screenshot específico de {detail.title} for adicionado, ele aparece aqui automaticamente.
           </p>
         </div>
       </div>
@@ -533,13 +536,23 @@ const FeatureScreenshot: React.FC<{ detail: { title: string; image: string } }> 
   }
 
   return (
-    <img
+    <div className="overflow-hidden rounded-[28px] border border-white/[0.1] bg-[#05070a] shadow-[0_28px_90px_rgba(0,0,0,0.38),0_0_0_1px_rgba(182,255,0,0.06)]">
+      <div className="flex items-center justify-between border-b border-white/[0.08] bg-white/[0.035] px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-lime-300" />
+        </div>
+        <span className="text-[10px] font-black uppercase tracking-[0.22em] text-lime-300/75">Preview da plataforma</span>
+      </div>
+      <img
       src={detail.image}
       alt={`Prévia de ${detail.title}`}
       loading="lazy"
       onError={() => setFailed(true)}
-      className="min-h-[260px] w-full rounded-[24px] border border-white/[0.08] bg-white/[0.03] object-cover shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
+      className="aspect-[16/9] min-h-[260px] w-full bg-white/[0.03] object-cover object-top"
     />
+    </div>
   );
 };
 
@@ -731,7 +744,7 @@ const LoginPage: React.FC = () => {
 
   const focusAuth = (register = false) => {
     setIsRegisterView(register);
-    document.getElementById("auth-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("login")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   useEffect(() => {
@@ -924,25 +937,6 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="nl-scroll-reveal pb-16 lg:pb-20">
-          <div className="mx-auto max-w-[1240px]">
-            <AuthPanel
-              isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
-              onLogin={handleLogin} onRegister={handleRegister}
-              name={name} setName={setName} email={email} setEmail={setEmail}
-              password={password} setPassword={setPassword}
-              showPassword={showPassword} setShowPassword={setShowPassword}
-              error={error} loading={loading} setError={setError}
-              selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
-              subscribeIntent={searchParams.get("intent") === "subscribe"}
-              onGoogleLogin={handleGoogleLogin}
-            />
-            <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
-              Leva menos de 1 minuto para começar. Escolha um plano após criar sua conta.
-            </p>
-          </div>
-        </section>
-
         <section className="pb-12 lg:pb-16">
           <div className="grid gap-4 rounded-[32px] border border-lime-400/15 bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(255,255,255,0.025),rgba(3,5,8,0.95))] p-4 md:grid-cols-[1.1fr_0.9fr] lg:p-6">
               <div className="rounded-[22px] border border-white/[0.07] bg-[#060a0d] p-5">
@@ -980,32 +974,33 @@ const LoginPage: React.FC = () => {
         </section>
 
         <section className="nl-scroll-reveal py-16 scroll-mt-20">
-          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
-            <div className="rounded-[30px] border border-white/[0.08] bg-white/[0.025] p-8 sm:p-10 nl-card-hover">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Para quem é</p>
-              <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">
-                Para empresários que precisam enxergar a operação com clareza.
-              </h2>
-              <p className="mt-5 text-sm leading-7 text-zinc-400">
-                A Next Level foi criada para negócios que vendem, atendem clientes, lidam com custos e precisam tomar decisões rápidas. A plataforma organiza informações importantes e transforma dados em recomendações práticas.
-              </p>
-            </div>
+          <div className="mb-9 max-w-4xl">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Para quem é?</p>
+            <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
+              Para empresários que precisam enxergar a operação com clareza.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-zinc-400">
+              A Next Level foi criada para negócios que vendem, atendem clientes, lidam com custos e precisam tomar decisões rápidas sem depender de planilhas espalhadas ou achismo.
+            </p>
+          </div>
 
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <div className="grid gap-4 sm:grid-cols-2">
-              {INTELLIGENCE_CARDS.map((item, index) => (
-                <div
-                  key={item.label}
-                  className={`nl-card-hover rounded-[26px] border border-white/[0.08] bg-[linear-gradient(145deg,rgba(255,255,255,0.045),rgba(255,255,255,0.018))] p-6 ${index === 0 ? "sm:row-span-2" : ""}`}
-                >
-                  <p className="mb-8 h-1.5 w-10 rounded-full bg-lime-300 shadow-[0_0_18px_rgba(182,255,0,0.55)]" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">{item.label}</p>
-                  <h3 className={`mt-3 text-xl font-black leading-tight ${item.tone}`}>{item.value}</h3>
-                  <p className="mt-4 text-sm leading-6 text-zinc-500">
-                    Um sinal de gestão vira uma ação mais clara para o dono do negócio.
-                  </p>
+              {TARGET_SEGMENTS.map((item) => (
+                <div key={item.title} className="nl-card-hover rounded-[24px] border border-white/[0.08] bg-white/[0.025] p-5">
+                  <div className="mb-4 h-1.5 w-10 rounded-full bg-lime-300 shadow-[0_0_18px_rgba(182,255,0,0.45)]" />
+                  <h3 className="text-base font-black text-white">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-zinc-400">{item.text}</p>
+                </div>
+              ))}
+              {INTELLIGENCE_CARDS.slice(1).map((item) => (
+                <div key={item.label} className="nl-card-hover rounded-[24px] border border-lime-300/[0.12] bg-lime-300/[0.035] p-5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">{item.label}</p>
+                  <h3 className={`mt-3 text-lg font-black leading-tight ${item.tone}`}>{item.value}</h3>
                 </div>
               ))}
             </div>
+            <FeatureScreenshot detail={{ title: "Visão geral da operação", image: "/login-features/gestao-vendas.png" }} />
           </div>
         </section>
 
@@ -1013,10 +1008,10 @@ const LoginPage: React.FC = () => {
           <div className="mb-8 max-w-3xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">O problema</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-              Empresários perdem dinheiro quando operação, atendimento e custos ficam espalhados.
+              O problema não é falta de esforço. É falta de visibilidade.
             </h2>
             <p className="mt-4 text-sm leading-7 text-zinc-400">
-              O problema não é falta de esforço. É falta de visibilidade no momento certo.
+              Quando vendas, atendimento, custos e clientes ficam espalhados, o empresário trabalha muito, mas decide com pouca clareza.
             </p>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -1037,15 +1032,15 @@ const LoginPage: React.FC = () => {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.18),transparent_34%)]" />
             <div className="relative">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">A solução</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">O que a Next Level faz</p>
                 <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
-                  O que a Next Level faz
+                  Transforma dados soltos em gestão, atendimento e decisões inteligentes.
                 </h2>
                 <p className="mt-5 max-w-3xl text-sm leading-7 text-zinc-300">
-                  A Next Level centraliza operação, dados e atendimento com inteligência artificial para mostrar lucro, margem, clientes e oportunidades.
+                  A plataforma centraliza informações importantes do negócio, organiza vendas, custos, clientes e atendimento, e usa IA para apontar riscos, oportunidades e próximos passos.
                 </p>
               </div>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {SOLUTIONS.map((item) => (
                   <div key={item.title} className="nl-card-hover rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-6">
                     <div className="mb-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-lime-300 text-zinc-950">
@@ -1056,30 +1051,6 @@ const LoginPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="nl-scroll-reveal py-16">
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-            <div className="rounded-[30px] border border-white/[0.08] bg-white/[0.025] p-8 sm:p-10">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">IA aplicada</p>
-              <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">
-                O que a IA faz na prática?
-              </h2>
-              <p className="mt-5 text-sm leading-7 text-zinc-400">
-                Não é uma IA solta. É uma camada de leitura operacional conectada às vendas, custos, atendimento e relatórios do negócio.
-              </p>
-            </div>
-            <div className="grid gap-4">
-              {AI_PRACTICE.map((item, index) => (
-                <div key={item} className="nl-card-hover flex items-center gap-4 rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-lime-300 text-sm font-black text-zinc-950">
-                    {index + 1}
-                  </span>
-                  <p className="text-sm font-bold leading-6 text-zinc-200">{item}</p>
-                </div>
-              ))}
             </div>
           </div>
         </section>
@@ -1120,7 +1091,7 @@ const LoginPage: React.FC = () => {
                 </h2>
               </div>
               <p className="text-sm leading-7 text-zinc-300">
-                A Next Level conecta visão financeira, administrativa, comercial e operacional para o empresário entender o negócio como um todo. Da venda ao atendimento, tudo aponta para margem, clareza e próxima ação.
+                A Next Level conecta visão financeira, administrativa, comercial e operacional para o empresário entender o negócio como um todo.
               </p>
             </div>
           </div>
@@ -1132,7 +1103,7 @@ const LoginPage: React.FC = () => {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-[0.96]">
               Do dado solto à ação recomendada.
             </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar rotina em decisão.</p>
+            <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar informação espalhada em ação prática.</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-4">
             {HOW_IT_WORKS.map((step, index) => (
@@ -1171,7 +1142,7 @@ const LoginPage: React.FC = () => {
                 {billingAnnual && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-lime-300">
                     <span className="h-1.5 w-1.5 rounded-full bg-lime-400 animate-pulse"></span>
-                    1 mês grátis
+                    Economia no anual
                   </span>
                 )}
               </div>
@@ -1198,9 +1169,14 @@ const LoginPage: React.FC = () => {
                   <span className="text-sm text-zinc-500">{billingAnnual ? "/ano" : "/mês"}</span>
                 </div>
                 {billingAnnual && (
-                  <p className="mt-1 text-[11px] text-lime-300/80">Equivale a {plan.monthlyPrice}/mês x 11</p>
+                  <p className="mt-1 text-[11px] text-lime-300/80">Equivale a {plan.monthlyPrice}/mês x 10</p>
                 )}
                 <p className="mt-3 text-sm leading-6 text-zinc-400 flex-1">{plan.summary}</p>
+                <div className="mt-5 rounded-[18px] border border-lime-300/[0.16] bg-lime-300/[0.055] p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-lime-300">{PLAN_DISPLAY[plan.key].aiTier}</p>
+                  <p className="mt-2 text-sm font-bold leading-6 text-zinc-100">{PLAN_DISPLAY[plan.key].aiLimit}</p>
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">{PLAN_DISPLAY[plan.key].aiDescription}</p>
+                </div>
                 <ul className="mt-5 space-y-2.5">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2.5">
@@ -1224,6 +1200,34 @@ const LoginPage: React.FC = () => {
                 </p>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section id="login" className="nl-scroll-reveal py-16 scroll-mt-20 lg:py-20">
+          <div className="mx-auto max-w-[1240px]">
+            <div className="mb-8 text-center">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Acesso à plataforma</p>
+              <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
+                Entre para transformar clareza em ação.
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
+                Crie sua conta ou acesse sua central para acompanhar vendas, custos, clientes, relatórios e recomendações da IA.
+              </p>
+            </div>
+            <AuthPanel
+              isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
+              onLogin={handleLogin} onRegister={handleRegister}
+              name={name} setName={setName} email={email} setEmail={setEmail}
+              password={password} setPassword={setPassword}
+              showPassword={showPassword} setShowPassword={setShowPassword}
+              error={error} loading={loading} setError={setError}
+              selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
+              subscribeIntent={searchParams.get("intent") === "subscribe"}
+              onGoogleLogin={handleGoogleLogin}
+            />
+            <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
+              Leva menos de 1 minuto para começar. Escolha um plano após criar sua conta.
+            </p>
           </div>
         </section>
 
