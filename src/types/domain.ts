@@ -284,6 +284,9 @@ export interface Product {
   category?: string | null;
   price: number;
   cost?: number | null;
+  mlItemId?: string | null;
+  marketplaceStatus?: string | null;
+  availableQuantity?: number | null;
   tax?: number | null;
   shipping?: number | null;
   financials?: {

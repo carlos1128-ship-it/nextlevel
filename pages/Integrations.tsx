@@ -3,21 +3,28 @@ import QRCode from "qrcode";
 import { useAuth, useBilling } from "../App";
 import { useToast } from "../components/Toast";
 import {
+  disconnectMercadoLivre,
   disconnectWhatsapp,
   disconnectInstagram,
+  getMercadoLivreConnectUrl,
+  getMercadoLivreDashboard,
+  getMercadoLivreStatus,
   getInstagramConnectUrl,
   getInstagramStatus,
   getWhatsappConnectionStatus,
   restartWhatsappConnection,
   startWhatsappConnection,
+  syncMercadoLivre,
   type InstagramConnectionStatus,
+  type MercadoLivreDashboard,
+  type MercadoLivreStatus,
 } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
 import type { WhatsappConnection } from "../src/types/domain";
 
 const channels = [
   {
-    title: "Mercado Livre",
+    title: "Utmify",
     description: "Configuração do provedor necessária: aguardando OAuth/API oficial.",
   },
 ];
@@ -80,6 +87,10 @@ const Integrations = () => {
   const [loading, setLoading] = useState(false);
   const [instagramLoading, setInstagramLoading] = useState(false);
   const [instagramStatus, setInstagramStatus] = useState<InstagramConnectionStatus | null>(null);
+  const [mercadoLivreStatus, setMercadoLivreStatus] = useState<MercadoLivreStatus | null>(null);
+  const [mercadoLivreDashboard, setMercadoLivreDashboard] = useState<MercadoLivreDashboard | null>(null);
+  const [mercadoLivreLoading, setMercadoLivreLoading] = useState(false);
+  const [mercadoLivreSyncing, setMercadoLivreSyncing] = useState(false);
   const [retryRemaining, setRetryRemaining] = useState(0);
   const normalizedPlan = String(currentPlan || "").toUpperCase();
   const canUseMainIntegrations = normalizedPlan === "PREMIUM" || normalizedPlan === "PRO_BUSINESS";
@@ -119,11 +130,18 @@ const Integrations = () => {
     getInstagramStatus(selectedCompanyId)
       .then(setInstagramStatus)
       .catch(() => undefined);
+    getMercadoLivreStatus(selectedCompanyId)
+      .then(setMercadoLivreStatus)
+      .catch(() => undefined);
+    getMercadoLivreDashboard(selectedCompanyId)
+      .then(setMercadoLivreDashboard)
+      .catch(() => undefined);
   }, [selectedCompanyId]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("integration_provider") !== "instagram") return;
+    const provider = params.get("integration_provider");
+    if (provider !== "instagram" && provider !== "mercadolivre") return;
 
     const status = params.get("integration_status");
     const message = params.get("integration_message");
@@ -132,7 +150,11 @@ const Integrations = () => {
       status === "connected" ? "success" : "error",
     );
     window.history.replaceState({}, "", window.location.pathname);
-  }, [addToast]);
+    if (provider === "mercadolivre" && selectedCompanyId) {
+      getMercadoLivreStatus(selectedCompanyId).then(setMercadoLivreStatus).catch(() => undefined);
+      getMercadoLivreDashboard(selectedCompanyId).then(setMercadoLivreDashboard).catch(() => undefined);
+    }
+  }, [addToast, selectedCompanyId]);
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -313,6 +335,61 @@ const Integrations = () => {
       addToast(getErrorMessage(error, "Não foi possível desconectar o Instagram."), "error");
     } finally {
       setInstagramLoading(false);
+    }
+  };
+
+  const refreshMercadoLivre = async () => {
+    if (!selectedCompanyId) return;
+    const [status, dashboard] = await Promise.all([
+      getMercadoLivreStatus(selectedCompanyId),
+      getMercadoLivreDashboard(selectedCompanyId),
+    ]);
+    setMercadoLivreStatus(status);
+    setMercadoLivreDashboard(dashboard);
+  };
+
+  const handleMercadoLivreConnect = async () => {
+    if (!selectedCompanyId) {
+      addToast("Selecione uma empresa antes de conectar.", "error");
+      return;
+    }
+
+    try {
+      setMercadoLivreLoading(true);
+      const returnTo = `${window.location.pathname}${window.location.search}`;
+      const session = await getMercadoLivreConnectUrl(selectedCompanyId, returnTo);
+      window.location.assign(session.authUrl);
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel iniciar o Mercado Livre."), "error");
+      setMercadoLivreLoading(false);
+    }
+  };
+
+  const handleMercadoLivreSync = async () => {
+    if (!selectedCompanyId) return;
+    try {
+      setMercadoLivreSyncing(true);
+      await syncMercadoLivre(selectedCompanyId);
+      await refreshMercadoLivre();
+      addToast("Mercado Livre sincronizado.", "success");
+    } catch (error) {
+      addToast(getErrorMessage(error, "Falha ao sincronizar Mercado Livre."), "error");
+    } finally {
+      setMercadoLivreSyncing(false);
+    }
+  };
+
+  const handleMercadoLivreDisconnect = async () => {
+    if (!selectedCompanyId) return;
+    try {
+      setMercadoLivreLoading(true);
+      await disconnectMercadoLivre(selectedCompanyId);
+      await refreshMercadoLivre();
+      addToast("Mercado Livre desconectado.", "success");
+    } catch (error) {
+      addToast(getErrorMessage(error, "Nao foi possivel desconectar Mercado Livre."), "error");
+    } finally {
+      setMercadoLivreLoading(false);
     }
   };
 
@@ -532,6 +609,95 @@ const Integrations = () => {
                   : isInstagramTokenExpired(instagramStatus)
                     ? "Reconectar Instagram"
                     : "Conectar Instagram"}
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 space-y-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
+                Mercado Livre
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-zinc-50">
+                Dados de marketplace para dashboard, IA e financeiro
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+                OAuth oficial, produtos, pedidos, estoque, perguntas, avaliacoes e webhooks em tempo real.
+              </p>
+            </div>
+
+            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {mercadoLivreStatus?.connected ? "Conectado" : "Desconectado"}
+                </p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {mercadoLivreStatus?.nickname || mercadoLivreStatus?.mlUserId || "Aguardando OAuth"}
+                </p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Receita ML</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {Number(mercadoLivreDashboard?.revenue || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Pedidos</p>
+                <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.orders || 0}</p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Perguntas</p>
+                <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.pendingQuestions || 0} pendentes</p>
+              </div>
+            </div>
+
+            {mercadoLivreStatus?.webhook ? (
+              <p className="rounded-md border border-lime-400/20 bg-lime-400/10 p-3 text-sm font-semibold text-lime-100">
+                Prova de conexao: ultimo webhook {mercadoLivreStatus.webhook.status.toLowerCase()} em {new Date(mercadoLivreStatus.webhook.lastEventAt).toLocaleString("pt-BR")}.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="flex shrink-0 flex-wrap gap-3">
+            {mercadoLivreStatus?.connected ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleMercadoLivreSync}
+                  disabled={mercadoLivreSyncing || !canUseMarketplaces}
+                  className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:opacity-50"
+                >
+                  {mercadoLivreSyncing ? "Sincronizando..." : "Sincronizar agora"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMercadoLivreDisconnect}
+                  disabled={mercadoLivreLoading}
+                  className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
+                >
+                  Desconectar
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={handleMercadoLivreConnect}
+                disabled={mercadoLivreLoading || !canUseMarketplaces}
+                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:opacity-50"
+              >
+                {mercadoLivreLoading
+                  ? "Abrindo Mercado Livre..."
+                  : !canUseMarketplaces
+                    ? "Disponivel no Pro Business"
+                    : "Conectar Mercado Livre"}
               </button>
             )}
           </div>

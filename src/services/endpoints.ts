@@ -76,6 +76,12 @@ function normalizeProduct(product: any): Product {
     category: product?.category ?? null,
     price: Number(product?.price ?? 0),
     cost: product?.cost === undefined || product?.cost === null ? null : Number(product.cost),
+    mlItemId: product?.mlItemId ?? null,
+    marketplaceStatus: product?.marketplaceStatus ?? null,
+    availableQuantity:
+      product?.availableQuantity === undefined || product?.availableQuantity === null
+        ? null
+        : Number(product.availableQuantity),
     tax: product?.tax === undefined || product?.tax === null ? null : Number(product.tax),
     shipping:
       product?.shipping === undefined || product?.shipping === null
@@ -1514,6 +1520,141 @@ export async function getMetaWhatsappStatus(companyId: string) {
   }>(
     "/meta/status",
     { params: { companyId } }
+  );
+  return data;
+}
+
+export type MercadoLivreStatus = {
+  connected: boolean;
+  mlUserId: string | null;
+  nickname: string | null;
+  status: string;
+  expiresAt: string | null;
+  lastSyncAt: string | null;
+  updatedAt: string | null;
+  webhook: null | {
+    status: string;
+    lastEventAt: string;
+  };
+};
+
+export type MercadoLivreDashboard = {
+  revenue: number;
+  orders: number;
+  products: number;
+  pendingQuestions: number;
+  averageRating: number;
+};
+
+export type MercadoLivreProduct = {
+  id: string;
+  mlItemId: string | null;
+  title: string;
+  price: number;
+  status: string | null;
+  stock: number;
+  soldQuantity: number;
+  permalink: string | null;
+  updatedAt: string;
+};
+
+export type MercadoLivreOrder = {
+  id: string;
+  mlOrderId: string;
+  status: string;
+  totalAmount: number;
+  paidAmount: number | null;
+  currencyId: string | null;
+  dateCreated: string;
+  items: Array<{ title: string; quantity: number; unitPrice: number }>;
+  shipment: null | { status: string | null; trackingCode: string | null };
+};
+
+export type MercadoLivreQuestion = {
+  id: string;
+  mlQuestionId: string;
+  mlItemId: string | null;
+  status: string | null;
+  question: string;
+  answer: string | null;
+  dateCreated: string | null;
+};
+
+export async function getMercadoLivreConnectUrl(companyId: string, returnTo: string) {
+  const { data } = await api.get<{ authUrl: string; callbackUrl: string }>("/auth/ml", {
+    params: { companyId, returnTo },
+  });
+  return data;
+}
+
+export async function getMercadoLivreStatus(companyId: string) {
+  const { data } = await api.get<MercadoLivreStatus>("/integrations/mercadolivre/status", {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function getMercadoLivreDashboard(companyId: string) {
+  const { data } = await api.get<MercadoLivreDashboard>("/integrations/mercadolivre/dashboard", {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function syncMercadoLivre(companyId: string) {
+  const { data } = await api.post("/integrations/mercadolivre/sync", null, {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function syncMercadoLivreProducts(companyId: string) {
+  const { data } = await api.post("/integrations/mercadolivre/sync/products", null, {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function syncMercadoLivreOrders(companyId: string) {
+  const { data } = await api.post("/integrations/mercadolivre/sync/orders", null, {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function disconnectMercadoLivre(companyId: string) {
+  const { data } = await api.post("/integrations/mercadolivre/disconnect", null, {
+    params: { companyId },
+  });
+  return data;
+}
+
+export async function getMercadoLivreProducts(companyId: string) {
+  const { data } = await api.get<MercadoLivreProduct[]>("/integrations/mercadolivre/products", {
+    params: { companyId },
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getMercadoLivreOrders(companyId: string) {
+  const { data } = await api.get<MercadoLivreOrder[]>("/integrations/mercadolivre/orders", {
+    params: { companyId },
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getMercadoLivreQuestions(companyId: string) {
+  const { data } = await api.get<MercadoLivreQuestion[]>("/integrations/mercadolivre/questions", {
+    params: { companyId },
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function answerMercadoLivreQuestion(companyId: string, questionId: string, text: string) {
+  const { data } = await api.post(
+    "/integrations/mercadolivre/questions/answer",
+    { questionId, text },
+    { params: { companyId } },
   );
   return data;
 }

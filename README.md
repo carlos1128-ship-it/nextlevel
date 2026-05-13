@@ -18,3 +18,11 @@ Frontend React/Vite da Next Level Platform.
    `NEXT_PUBLIC_API_URL=https://next-level-backend.onrender.com`
 3. Run the app:
    `npm run dev`
+
+## Mercado Livre
+
+A tela `/integrations` conecta OAuth do Mercado Livre. As rotas `/products`, `/orders` e `/questions` exibem dados sincronizados para dashboard, IA e financeiro.
+
+Scripts:
+- `npm test`
+- `npm run build`

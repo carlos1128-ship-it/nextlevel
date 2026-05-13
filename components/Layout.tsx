@@ -40,6 +40,8 @@ const navItems: SidebarNavItem[] = [
   { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
   { id: "add-data", path: "/add-data", name: "Adicionar dados", icon: PlusIcon },
   { id: "products", path: "/products", name: "Produtos", icon: PackageIcon },
+  { id: "orders", path: "/orders", name: "Pedidos", icon: ReceiptIcon },
+  { id: "questions", path: "/questions", name: "Perguntas", icon: MessageSquareIcon },
   { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
   { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
   { id: "plans", path: "/plans", name: "Planos", icon: CreditCardIcon },
@@ -67,6 +69,8 @@ const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   projects: "automations",
   "add-data": "data_imports",
   products: "products",
+  orders: "orders",
+  questions: "questions",
   customers: "customers",
   costs: "costs",
   plans: "plans",
@@ -115,7 +119,7 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
   }
 
   if (niche === "ECOMMERCE") {
-    items = moveItemsToFront(items, ["products", "market", "financial-flow"]);
+    items = moveItemsToFront(items, ["products", "orders", "questions", "market", "financial-flow"]);
   }
 
   return isAdmin ? [...items, adminNavItem] : items;
