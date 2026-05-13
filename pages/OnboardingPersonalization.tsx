@@ -111,7 +111,7 @@ const MODULE_LABELS: Record<string, string> = {
   reports: "Relatórios",
   attendant: "Atendente IA",
   integrations: "Integrações",
-  market_intelligence: "Mercado",
+  market_intelligence: "Marketing",
   automations: "Automações",
   costs: "Custos",
   insights: "Insights",

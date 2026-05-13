@@ -7,7 +7,6 @@ import {
   createProduct,
   deleteProduct,
   getProducts,
-  syncMercadoLivreProducts,
   updateProduct,
 } from "../src/services/endpoints";
 import type { Pagination, Product } from "../src/types/domain";
@@ -46,7 +45,6 @@ const Products = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
-  const [syncingMl, setSyncingMl] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -185,20 +183,6 @@ const Products = () => {
     }
   };
 
-  const handleMercadoLivreSync = async () => {
-    if (!selectedCompanyId) return;
-    try {
-      setSyncingMl(true);
-      await syncMercadoLivreProducts(selectedCompanyId);
-      await loadProducts();
-      addToast("Produtos do Mercado Livre sincronizados.", "success");
-    } catch (err) {
-      addToast(getErrorMessage(err, "Falha ao sincronizar Mercado Livre."), "error");
-    } finally {
-      setSyncingMl(false);
-    }
-  };
-
   const changePage = (next: number) => {
     setPage(Math.max(1, Math.min(next, pagination.totalPages || 1)));
   };
@@ -208,7 +192,7 @@ const Products = () => {
       <section className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Fase A · Dados completos</p>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Produtos</h1>
+          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Produtos e Serviços</h1>
         </div>
         <div className="flex gap-2">
           <button
@@ -227,14 +211,6 @@ const Products = () => {
             className="rounded-xl bg-lime-400 px-4 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
           >
             Atualizar
-          </button>
-          <button
-            type="button"
-            onClick={handleMercadoLivreSync}
-            disabled={syncingMl || !selectedCompanyId}
-            className="rounded-xl border border-lime-400/40 px-4 py-2 text-sm font-black text-lime-300 transition hover:border-lime-300 disabled:opacity-50"
-          >
-            {syncingMl ? "Sincronizando..." : "Sync Mercado Livre"}
           </button>
         </div>
       </section>

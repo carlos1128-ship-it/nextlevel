@@ -55,6 +55,10 @@ const Profile = () => {
       addToast("Preencha senha atual e nova senha.", "info");
       return;
     }
+    if (newPassword.length < 8 || !/[A-Za-z]/.test(newPassword) || !/\d/.test(newPassword)) {
+      addToast("A nova senha precisa ter pelo menos 8 caracteres, com letras e numeros.", "info");
+      return;
+    }
     try {
       setSavingPassword(true);
       await changePassword({ currentPassword, newPassword });

@@ -35,7 +35,6 @@ const BillingCancel = lazy(() => import('./pages/BillingCancel'));
 const PlanUsage = lazy(() => import('./pages/PlanUsage'));
 const Products = lazy(() => import('./pages/Products'));
 const Orders = lazy(() => import('./pages/Orders'));
-const Questions = lazy(() => import('./pages/Questions'));
 const Customers = lazy(() => import('./pages/Customers'));
 const Costs = lazy(() => import('./pages/Costs'));
 const AddData = lazy(() => import('./pages/AddData'));
@@ -828,7 +827,7 @@ const AppContent = () => {
           <Route path="/finance" element={personalizedShell(<FinancialFlow />)} />
           <Route path="/products" element={personalizedShell(<Products />)} />
           <Route path="/orders" element={personalizedShell(<Orders />)} />
-          <Route path="/questions" element={personalizedShell(<Questions />)} />
+          <Route path="/questions" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
           <Route path="/customers" element={personalizedShell(<Customers />)} />
           <Route path="/costs" element={personalizedShell(<Costs />)} />
           <Route path="/add-data" element={personalizedShell(<AddData />)} />

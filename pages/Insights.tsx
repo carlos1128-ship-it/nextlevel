@@ -1,13 +1,4 @@
 import React from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
 import { useToast } from "../components/Toast";
 import { LoadingState } from "../components/AsyncState";
 import { useAuth } from "../App";
@@ -29,36 +20,20 @@ const InsightCard: React.FC<StrategicInsightCard> = ({ title, description, categ
   };
 
   return (
-    <div className={`rounded-2xl border p-4 ${colorClasses[color]}`}>
+    <div className={`rounded-2xl border p-5 md:p-6 ${colorClasses[color]}`}>
       <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${textColors[color]}`}>
         {category}
       </span>
-      <h3 className="mt-1 text-base font-black tracking-tight text-zinc-100 md:text-lg">{title}</h3>
-      <ul className="mt-2 space-y-1 text-sm leading-5 text-zinc-300">
-        <li className="ml-4 list-disc">{description}</li>
-      </ul>
+      <h3 className="mt-2 text-lg font-black tracking-tight text-zinc-100 md:text-xl">{title}</h3>
+      <p className="mt-3 text-sm leading-6 text-zinc-300">{description}</p>
     </div>
   );
 };
 
-const benchmarkData = [
-  { name: "E-commerce", total: 18 },
-  { name: "Industria", total: 7 },
-  { name: "Serviços", total: 12 },
-  { name: "Tecnologia", total: 25 },
-];
-
 const Insights = () => {
   const { addToast } = useToast();
   const { selectedCompanyId, detailLevel } = useAuth();
-  const {
-    cards,
-    loading,
-    refreshing,
-    error,
-    source,
-    reload,
-  } = useStrategicInsights({
+  const { cards, loading, refreshing, error, source, reload } = useStrategicInsights({
     companyId: selectedCompanyId,
     detailLevel,
     enabled: Boolean(selectedCompanyId),
@@ -79,7 +54,7 @@ const Insights = () => {
       return;
     }
 
-    addToast("Insights atualizados com dados analiticos. A IA segue protegida por cache/retry.", "info");
+    addToast("Insights atualizados com dados analiticos.", "info");
   };
 
   return (
@@ -87,7 +62,9 @@ const Insights = () => {
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Insights</h1>
-          <p className="mt-2 text-sm text-zinc-400 md:text-base">Analise orientada por dados e monitoramento competitivo.</p>
+          <p className="mt-2 text-sm text-zinc-400 md:text-base">
+            Analises praticas geradas a partir dos dados reais da empresa.
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <span
@@ -107,7 +84,7 @@ const Insights = () => {
             disabled={refreshing || loading}
             className="rounded-2xl bg-lime-400 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {refreshing ? "Gerando..." : "Gerar Insights"}
+            {refreshing ? "Gerando..." : "Gerar insights"}
           </button>
         </div>
       </header>
@@ -116,7 +93,8 @@ const Insights = () => {
 
       {error ? (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
-          <span className="font-bold">Erro da IA: </span>{error}
+          <span className="font-bold">IA em modo seguro: </span>
+          {error}
           {source === "cache" ? " (exibindo cache recente)" : ""}
         </div>
       ) : null}
@@ -129,32 +107,9 @@ const Insights = () => {
         </div>
       ) : !loading ? (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-sm text-zinc-400">
-          Nenhum insight dinamico foi retornado no momento. Gere novamente apos revisar a conectividade da IA e os dados financeiros da empresa.
+          Nenhum insight dinamico foi retornado ainda. Conecte dados, importe vendas ou gere novamente depois de atualizar o financeiro.
         </div>
       ) : null}
-
-      <div className="rounded-3xl border border-zinc-900 bg-zinc-950 p-8">
-        <div className="mb-8 flex items-center justify-between">
-          <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Benchmark por Setor (30 dias)</h3>
-          <span className="rounded-xl bg-lime-400/15 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-lime-400">
-            Analise Global
-          </span>
-        </div>
-        <div className="h-[360px] w-full min-w-0">
-          <ResponsiveContainer width="100%" height="100%" minWidth={280} minHeight={260}>
-            <BarChart layout="vertical" data={benchmarkData} margin={{ left: 20, right: 25 }}>
-              <CartesianGrid strokeDasharray="4 4" stroke="#1f2937" horizontal={true} vertical={false} />
-              <XAxis type="number" stroke="#52525b" />
-              <YAxis type="category" dataKey="name" stroke="#a1a1aa" width={110} />
-              <Tooltip />
-              <Bar dataKey="total" fill="#B6FF00" radius={[6, 6, 6, 6]} barSize={16} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-600">
-          Os dados acima sao baseados em tendencias agregadas do ecossistema Next Level.
-        </p>
-      </div>
     </div>
   );
 };

@@ -36,12 +36,11 @@ const navItems: SidebarNavItem[] = [
   { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "insights", path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
-  { id: "market", path: "/market-intel", name: "Mercado", icon: RadarIcon, isPrimary: true },
+  { id: "market", path: "/market-intel", name: "Marketing", icon: RadarIcon, isPrimary: true },
   { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
   { id: "add-data", path: "/add-data", name: "Adicionar dados", icon: PlusIcon },
-  { id: "products", path: "/products", name: "Produtos", icon: PackageIcon },
+  { id: "products", path: "/products", name: "Produtos e Serviços", icon: PackageIcon },
   { id: "orders", path: "/orders", name: "Pedidos", icon: ReceiptIcon },
-  { id: "questions", path: "/questions", name: "Perguntas", icon: MessageSquareIcon },
   { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
   { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
   { id: "plans", path: "/plans", name: "Planos", icon: CreditCardIcon },
@@ -70,7 +69,6 @@ const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   "add-data": "data_imports",
   products: "products",
   orders: "orders",
-  questions: "questions",
   customers: "customers",
   costs: "costs",
   plans: "plans",
@@ -105,9 +103,7 @@ function moveItemsToFront(items: SidebarNavItem[], ids: string[]) {
 
 function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavItem[] {
   let items = navItems.map((item) =>
-    item.id === "products" && niche === "MEDICINA"
-      ? { ...item, name: "Serviços/Consultas" }
-      : item.id === "projects" && niche === "SERVICOS"
+    item.id === "projects" && niche === "SERVICOS"
         ? { ...item, name: "Projetos/Metragem" }
         : item.id === "costs" && niche === "SERVICOS"
           ? { ...item, name: "Custos/Metragem" }
@@ -119,7 +115,7 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
   }
 
   if (niche === "ECOMMERCE") {
-    items = moveItemsToFront(items, ["products", "orders", "questions", "market", "financial-flow"]);
+    items = moveItemsToFront(items, ["products", "orders", "market", "financial-flow"]);
   }
 
   return isAdmin ? [...items, adminNavItem] : items;

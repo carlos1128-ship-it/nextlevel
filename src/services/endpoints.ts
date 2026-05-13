@@ -731,6 +731,37 @@ export async function getTransactions(companyId?: string) {
   return Array.isArray(data) ? data.map((item) => normalizeTransaction(item)) : [];
 }
 
+export type SaleOrderItem = {
+  id: string;
+  externalId: string | null;
+  channel: string;
+  amount: number;
+  productName: string | null;
+  category: string | null;
+  occurredAt: string;
+};
+
+export async function getSalesOrders(params?: { companyId?: string | null; start?: string; end?: string }) {
+  const { data } = await api.get<any[]>("/sales", {
+    params: {
+      companyId: params?.companyId || undefined,
+      start: params?.start || undefined,
+      end: params?.end || undefined,
+    },
+  });
+  return Array.isArray(data)
+    ? data.map((item) => ({
+        id: item?.id || "",
+        externalId: item?.externalId || null,
+        channel: item?.channel || "manual",
+        amount: Number(item?.amount || 0),
+        productName: item?.productName || null,
+        category: item?.category || null,
+        occurredAt: item?.occurredAt || item?.createdAt || new Date().toISOString(),
+      }))
+    : [];
+}
+
 export async function createTransaction(payload: {
   companyId: string;
   type: "income" | "expense";
