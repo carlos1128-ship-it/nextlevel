@@ -60,7 +60,7 @@ const fallbackPlans: BillingPlan[] = [
 const Plans = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, selectedCompanyId } = useAuth();
   const saved = readPlanSelectionFromSearch(params) || readPendingSelectedPlan();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     saved?.billingCycle || "MONTHLY",
@@ -115,7 +115,7 @@ const Plans = () => {
 
   useEffect(() => {
     if (!isLoggedIn) return;
-    getBillingMe()
+    getBillingMe({ companyId: selectedCompanyId })
       .then((billing) => {
         setHasActiveSubscription(Boolean(billing.hasActiveSubscription));
         setCurrentPlan(billing.subscription?.planKey || null);
@@ -124,7 +124,7 @@ const Plans = () => {
       .catch(() => {
         setHasActiveSubscription(false);
       });
-  }, [isLoggedIn]);
+  }, [isLoggedIn, selectedCompanyId]);
 
   const orderedPlans = useMemo(
     () => [...plans].sort((a, b) => a.level - b.level),
@@ -154,7 +154,7 @@ const Plans = () => {
     setLoadingPlanKey(planKey);
     setMessage("Preparando pagamento seguro...");
     try {
-      const checkout = await createBillingCheckout({ planKey, billingCycle });
+      const checkout = await createBillingCheckout({ planKey, billingCycle, companyId: selectedCompanyId });
       clearPendingSelectedPlan();
       window.location.href = checkout.checkoutUrl;
     } catch (error: any) {

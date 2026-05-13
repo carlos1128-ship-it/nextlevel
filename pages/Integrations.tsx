@@ -94,7 +94,7 @@ const Integrations = () => {
   const [retryRemaining, setRetryRemaining] = useState(0);
   const normalizedPlan = String(currentPlan || "").toUpperCase();
   const canUseMainIntegrations = normalizedPlan === "PREMIUM" || normalizedPlan === "PRO_BUSINESS";
-  const canUseMarketplaces = normalizedPlan === "PRO_BUSINESS";
+  const canUseMarketplaces = normalizedPlan === "PREMIUM" || normalizedPlan === "PRO_BUSINESS";
 
   const statusLabel = useMemo(() => {
     if (!connection) return "Desconectado";
@@ -130,13 +130,18 @@ const Integrations = () => {
     getInstagramStatus(selectedCompanyId)
       .then(setInstagramStatus)
       .catch(() => undefined);
-    getMercadoLivreStatus(selectedCompanyId)
-      .then(setMercadoLivreStatus)
-      .catch(() => undefined);
-    getMercadoLivreDashboard(selectedCompanyId)
-      .then(setMercadoLivreDashboard)
-      .catch(() => undefined);
-  }, [selectedCompanyId]);
+    if (canUseMarketplaces) {
+      getMercadoLivreStatus(selectedCompanyId)
+        .then(setMercadoLivreStatus)
+        .catch(() => undefined);
+      getMercadoLivreDashboard(selectedCompanyId)
+        .then(setMercadoLivreDashboard)
+        .catch(() => undefined);
+    } else {
+      setMercadoLivreStatus(null);
+      setMercadoLivreDashboard(null);
+    }
+  }, [canUseMarketplaces, selectedCompanyId]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -145,16 +150,17 @@ const Integrations = () => {
 
     const status = params.get("integration_status");
     const message = params.get("integration_message");
+    const providerLabel = provider === "mercadolivre" ? "Mercado Livre" : "Instagram";
     addToast(
-      message || (status === "connected" ? "Instagram conectado." : "Não foi possível conectar o Instagram."),
+      message || (status === "connected" ? `${providerLabel} conectado.` : `Nao foi possivel conectar o ${providerLabel}.`),
       status === "connected" ? "success" : "error",
     );
     window.history.replaceState({}, "", window.location.pathname);
-    if (provider === "mercadolivre" && selectedCompanyId) {
+    if (provider === "mercadolivre" && selectedCompanyId && canUseMarketplaces) {
       getMercadoLivreStatus(selectedCompanyId).then(setMercadoLivreStatus).catch(() => undefined);
       getMercadoLivreDashboard(selectedCompanyId).then(setMercadoLivreDashboard).catch(() => undefined);
     }
-  }, [addToast, selectedCompanyId]);
+  }, [addToast, canUseMarketplaces, selectedCompanyId]);
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -339,7 +345,7 @@ const Integrations = () => {
   };
 
   const refreshMercadoLivre = async () => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !canUseMarketplaces) return;
     const [status, dashboard] = await Promise.all([
       getMercadoLivreStatus(selectedCompanyId),
       getMercadoLivreDashboard(selectedCompanyId),
@@ -351,6 +357,10 @@ const Integrations = () => {
   const handleMercadoLivreConnect = async () => {
     if (!selectedCompanyId) {
       addToast("Selecione uma empresa antes de conectar.", "error");
+      return;
+    }
+    if (!canUseMarketplaces) {
+      addToast("Mercado Livre esta disponivel a partir do plano Premium.", "error");
       return;
     }
 
@@ -366,7 +376,7 @@ const Integrations = () => {
   };
 
   const handleMercadoLivreSync = async () => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !canUseMarketplaces) return;
     try {
       setMercadoLivreSyncing(true);
       await syncMercadoLivre(selectedCompanyId);
@@ -380,7 +390,7 @@ const Integrations = () => {
   };
 
   const handleMercadoLivreDisconnect = async () => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !canUseMarketplaces) return;
     try {
       setMercadoLivreLoading(true);
       await disconnectMercadoLivre(selectedCompanyId);
@@ -696,7 +706,7 @@ const Integrations = () => {
                 {mercadoLivreLoading
                   ? "Abrindo Mercado Livre..."
                   : !canUseMarketplaces
-                    ? "Disponivel no Pro Business"
+                    ? "Disponivel no Premium"
                     : "Conectar Mercado Livre"}
               </button>
             )}
@@ -719,7 +729,7 @@ const Integrations = () => {
         ))}
         {!canUseMarketplaces ? (
           <p className="rounded-lg border border-lime-400/20 bg-lime-400/10 p-4 text-sm font-semibold text-lime-100 md:col-span-3">
-            Mercado Livre, Utmify e marketplaces estao disponiveis no plano Pro Business.
+            Mercado Livre esta disponivel a partir do Premium. Utmify e automacoes avancadas seguem no Business.
           </p>
         ) : null}
       </section>

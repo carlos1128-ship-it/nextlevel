@@ -1885,14 +1885,17 @@ export async function getBillingConfig() {
   return data;
 }
 
-export async function getBillingMe() {
-  const { data } = await api.get<BillingMeResponse>("/billing/me");
+export async function getBillingMe(params?: { companyId?: string | null }) {
+  const { data } = await api.get<BillingMeResponse>("/billing/me", {
+    params: params?.companyId ? { companyId: params.companyId } : undefined,
+  });
   return data;
 }
 
 export async function createBillingCheckout(payload: {
   planKey: BillingPlanKey;
   billingCycle: BillingCycle;
+  companyId?: string | null;
 }) {
   const { data } = await api.post<{
     checkoutUrl: string;
