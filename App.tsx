@@ -31,6 +31,7 @@ const Insights = lazy(() => import('./pages/Insights'));
 const FinancialFlow = lazy(() => import('./pages/FinancialFlow'));
 const Plans = lazy(() => import('./pages/Plans'));
 const BillingSuccess = lazy(() => import('./pages/BillingSuccess'));
+const BillingCancel = lazy(() => import('./pages/BillingCancel'));
 const PlanUsage = lazy(() => import('./pages/PlanUsage'));
 const Products = lazy(() => import('./pages/Products'));
 const Orders = lazy(() => import('./pages/Orders'));
@@ -149,10 +150,11 @@ function tokenFingerprint() {
   return `${token.length}:${token.slice(0, 16)}:${token.slice(-8)}`;
 }
 
-function billingUserKey(email: string | null, authSessionKey: string | null) {
+function billingUserKey(email: string | null, authSessionKey: string | null, companyId?: string | null) {
   const normalizedEmail = email?.trim().toLowerCase();
-  if (normalizedEmail) return `email:${normalizedEmail}:${authSessionKey || 'no-token'}`;
-  if (authSessionKey) return `token:${authSessionKey}`;
+  const companySegment = companyId || 'default-company';
+  if (normalizedEmail) return `email:${normalizedEmail}:company:${companySegment}:${authSessionKey || 'no-token'}`;
+  if (authSessionKey) return `token:${authSessionKey}:company:${companySegment}`;
   return null;
 }
 
@@ -393,8 +395,8 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
 };
 
 const BillingProvider = ({ children }: { children?: ReactNode }) => {
-  const { isLoggedIn, isProfileReady, email, authSessionKey } = useAuth();
-  const userKey = billingUserKey(email, authSessionKey);
+  const { isLoggedIn, isProfileReady, email, authSessionKey, selectedCompanyId } = useAuth();
+  const userKey = billingUserKey(email, authSessionKey, selectedCompanyId);
   const cached = readBillingCache(userKey);
   const [billingStatus, setBillingStatus] = useState<BillingStatus>(cached?.status || "UNKNOWN");
   const [hasActiveSubscription, setHasActiveSubscription] = useState(Boolean(cached?.hasActiveSubscription));
@@ -445,7 +447,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
     setIsBillingValidating(true);
     try {
       const billing = await Promise.race([
-        getBillingMe(),
+        getBillingMe({ companyId: selectedCompanyId }),
         new Promise<never>((_, reject) => {
           window.setTimeout(() => reject(new Error("billing_validation_timeout")), BILLING_VALIDATION_TIMEOUT_MS);
         }),
@@ -802,6 +804,7 @@ const AppContent = () => {
           <Route path="/login" element={isLoggedIn ? <LoggedInLoginRedirect /> : <LoginPage />} />
           <Route path="/planos" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
           <Route path="/billing/success" element={<ProtectedRoute><BillingSuccess /></ProtectedRoute>} />
+          <Route path="/billing/cancel" element={<ProtectedRoute><BillingCancel /></ProtectedRoute>} />
           <Route path="/onboarding/personalization" element={<ProtectedRoute><OnboardingPersonalization /></ProtectedRoute>} />
           <Route path="/" element={isLoggedIn ? <Navigate to={DASHBOARD_ROUTE} replace /> : <LoginPage />} />
           <Route path="/inicio" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
