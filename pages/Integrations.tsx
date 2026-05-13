@@ -22,13 +22,6 @@ import {
 import { getErrorMessage } from "../src/services/error";
 import type { WhatsappConnection } from "../src/types/domain";
 
-const channels = [
-  {
-    title: "Utmify",
-    description: "Configuração do provedor necessária: aguardando OAuth/API oficial.",
-  },
-];
-
 function isConnected(status?: string | null) {
   return status === "connected";
 }
@@ -381,7 +374,7 @@ const Integrations = () => {
       setMercadoLivreSyncing(true);
       await syncMercadoLivre(selectedCompanyId);
       await refreshMercadoLivre();
-      addToast("Mercado Livre sincronizado.", "success");
+      addToast("Integração Mercado Livre reprocessada.", "success");
     } catch (error) {
       addToast(getErrorMessage(error, "Falha ao sincronizar Mercado Livre."), "error");
     } finally {
@@ -633,10 +626,10 @@ const Integrations = () => {
                 Mercado Livre
               </p>
               <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                Dados de marketplace para dashboard, IA e financeiro
+                Mercado Livre
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-                OAuth oficial, produtos, pedidos, estoque, perguntas, avaliacoes e webhooks em tempo real.
+                Conecte sua conta vendedora para importar produtos, pedidos, vendas e dados operacionais automaticamente.
               </p>
             </div>
 
@@ -695,7 +688,7 @@ const Integrations = () => {
                   disabled={mercadoLivreSyncing || !canUseMarketplaces}
                   className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:opacity-50"
                 >
-                  {mercadoLivreSyncing ? "Sincronizando..." : "Sincronizar agora"}
+                  {mercadoLivreSyncing ? "Reprocessando..." : "Reprocessar integração"}
                 </button>
                 <button
                   type="button"
@@ -724,25 +717,11 @@ const Integrations = () => {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {channels.map((channel) => (
-          <article
-            key={channel.title}
-            className="rounded-lg border border-zinc-800 bg-zinc-950/70 p-5"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-              Em preparação
-            </p>
-            <h2 className="mt-3 text-xl font-black text-zinc-50">{channel.title}</h2>
-            <p className="mt-3 text-sm leading-6 text-zinc-400">{channel.description}</p>
-          </article>
-        ))}
-        {!canUseMarketplaces ? (
-          <p className="rounded-lg border border-lime-400/20 bg-lime-400/10 p-4 text-sm font-semibold text-lime-100 md:col-span-3">
-            Mercado Livre esta disponivel a partir do Premium. Utmify e automacoes avancadas seguem no Business.
-          </p>
-        ) : null}
-      </section>
+      {!canUseMarketplaces ? (
+        <p className="rounded-lg border border-lime-400/20 bg-lime-400/10 p-4 text-sm font-semibold text-lime-100">
+          Mercado Livre esta disponivel a partir do Premium.
+        </p>
+      ) : null}
 
     </main>
   );

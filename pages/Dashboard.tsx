@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LineChart,
@@ -27,7 +27,6 @@ import { useToast } from "../components/Toast";
 import AiDashboardPanel from "../components/AiDashboardPanel";
 import { getErrorMessage } from "../src/services/error";
 import {
-  exportFinancialCsv,
   getAiDashboardInsights,
   getDashboardMetrics,
   getDashboardPreferences,
@@ -63,8 +62,8 @@ const PERIODS: Array<{ label: string; value: DashboardPeriod }> = [
   { label: "Hoje", value: "today" },
   { label: "Ontem", value: "yesterday" },
   { label: "7 dias", value: "7d" },
-  { label: "30 dias", value: "30d" },
   { label: "Mes", value: "month" },
+  { label: "Ano", value: "year" },
 ];
 const FORECAST_HORIZONS: Array<7 | 15 | 30> = [7, 15, 30];
 const DEFAULT_VISIBLE_METRICS = new Set([
@@ -359,8 +358,10 @@ const RealMetricCard: React.FC<{
 const Dashboard = () => {
   const { username, detailLevel, selectedCompanyId, isCompanyReady } = useAuth();
   const { addToast } = useToast();
+  const dashboardExportRef = useRef<HTMLDivElement>(null);
   const [metricsData, setMetricsData] = useState<DashboardMetricsResponse | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [layout, setLayout] = useState<DashboardResolvedLayoutItem[]>([]);
   const [isLayoutLoading, setIsLayoutLoading] = useState(true);
   const [activePeriod, setActivePeriod] = useState<DashboardPeriod>("today");
@@ -631,17 +632,48 @@ const Dashboard = () => {
   }, [selectedCompanyId, isLayoutLoading, enabledMetricKeys.join(",")]);
 
   const handleExport = async () => {
+    if (!dashboardExportRef.current) {
+      addToast("Relatorio ainda nao esta pronto para exportar.", "info");
+      return;
+    }
+
     try {
-      const blob = await exportFinancialCsv({ companyId: selectedCompanyId });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "financial-export.csv";
-      a.click();
-      window.URL.revokeObjectURL(url);
-      addToast("CSV exportado com sucesso.", "success");
+      setIsExporting(true);
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
+      const canvas = await html2canvas(dashboardExportRef.current, {
+        backgroundColor: "#040507",
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgH = (canvas.height * pageW) / canvas.width;
+      let position = 0;
+      let remaining = imgH;
+
+      while (remaining > 0) {
+        pdf.setFillColor(4, 5, 7);
+        pdf.rect(0, 0, pageW, pageH, "F");
+        pdf.addImage(imgData, "PNG", 0, position, pageW, imgH);
+        remaining -= pageH;
+        if (remaining > 0) {
+          pdf.addPage();
+          position -= pageH;
+        }
+      }
+
+      const label = PERIODS.find((item) => item.value === activePeriod)?.label || activePeriod;
+      const date = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
+      pdf.save(`dashboard-next-level-${label.toLowerCase()}-${date}.pdf`);
+      addToast("Relatorio visual exportado com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Falha ao exportar CSV."), "error");
+      addToast(getErrorMessage(error, "Falha ao exportar relatorio."), "error");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -689,7 +721,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-7 overflow-x-hidden">
+    <div ref={dashboardExportRef} className="space-y-7 overflow-x-hidden bg-[#040507]">
       <header className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
         <div>
           <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visão Geral</h1>
@@ -706,9 +738,10 @@ const Dashboard = () => {
           </Link>
           <button
             onClick={handleExport}
-            className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-7 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-100 transition hover:bg-zinc-900 md:flex-none"
+            disabled={isExporting}
+            className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-7 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-100 transition hover:bg-zinc-900 disabled:opacity-50 md:flex-none"
           >
-            Exportar dados
+            {isExporting ? "Gerando PDF..." : "Exportar relatorio"}
           </button>
           <button
             onClick={() => void loadMetrics()}

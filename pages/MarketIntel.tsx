@@ -92,12 +92,11 @@ const MarketIntel = () => {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="mb-2 text-xs uppercase tracking-[0.24em] text-zinc-400">
-              Fase H — Inteligência de Mercado
+              Marketing e inteligência de mercado
             </p>
-            <h1 className="text-3xl font-black tracking-tight text-lime-300">NEXT LEVEL MARKET</h1>
+            <h1 className="text-3xl font-black tracking-tight text-lime-300">Marketing</h1>
             <p className="mt-2 max-w-2xl text-sm text-zinc-300">
-              Monitore preços de concorrentes, enxergue tendências do setor e gere ações táticas
-              automaticamente.
+              Monitore preços, encontre oportunidades e entenda quando seus produtos precisam de mais dados de mercado.
             </p>
             {lastRun ? (
               <p className="mt-2 text-xs text-zinc-500">
@@ -113,7 +112,7 @@ const MarketIntel = () => {
               disabled={refreshing}
             >
               <RadarIcon className="h-5 w-5" />
-              {refreshing ? "Rastreando..." : "Rastrear Agora"}
+              {refreshing ? "Analisando..." : "Analisar produtos"}
             </button>
             <button
               type="button"
@@ -122,7 +121,7 @@ const MarketIntel = () => {
               disabled={refreshing}
             >
               <LightbulbIcon className="h-5 w-5" />
-              Atualizar Tendências
+              Atualizar sinais
             </button>
           </div>
         </div>
@@ -161,7 +160,7 @@ const MarketIntel = () => {
       <section className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-zinc-100">Comparação de Preços</h2>
+            <h2 className="text-lg font-semibold text-zinc-100">Comparação de preços</h2>
             <span className="text-xs uppercase tracking-[0.2em] text-zinc-500">
               Empresa vs Mercado
             </span>
@@ -174,7 +173,7 @@ const MarketIntel = () => {
             ) : null}
             {!loading && !comparisons.length ? (
               <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-300">
-                Nenhum produto encontrado para está empresa.
+                Dados de mercado ainda não disponíveis. Cadastre produtos, conecte canais ou importe dados para iniciar a análise.
               </div>
             ) : null}
 
@@ -232,12 +231,12 @@ const MarketIntel = () => {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-zinc-100">Trend Cloud</h2>
+            <h2 className="text-lg font-semibold text-zinc-100">Sinais de mercado</h2>
             <span className="text-xs text-zinc-500">Última semana</span>
           </div>
           <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-[#0b1b26] via-[#0a0f18] to-[#090b12] p-5 shadow-lg">
             {trends.length === 0 ? (
-              <p className="text-sm text-zinc-400">Sem tendências registradas ainda.</p>
+              <p className="text-sm text-zinc-400">Funcionalidade em preparação para MVP privado. Nenhum sinal externo confirmado ainda.</p>
             ) : (
               <div className="flex flex-wrap gap-3">
                 {trends.map((trend) => {

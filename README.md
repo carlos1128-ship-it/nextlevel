@@ -28,7 +28,7 @@ Frontend React/Vite da Next Level Platform.
 
 ## Mercado Livre
 
-A tela `/integrations` conecta OAuth do Mercado Livre. As rotas `/products`, `/orders` e `/questions` exibem dados sincronizados para dashboard, IA e financeiro.
+A tela `/integrations` conecta OAuth do Mercado Livre. As rotas `/products` e `/orders` exibem dados sincronizados; perguntas continuam sendo ingeridas no backend para IA/contexto, sem pagina standalone no MVP.
 
 Scripts:
 - `npm test`

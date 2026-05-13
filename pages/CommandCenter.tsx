@@ -64,7 +64,7 @@ const CommandCenter = () => {
             Planos de Ação da IA
           </h1>
           <p className="text-sm text-zinc-500">
-            Aprove ou rejeite ações sugeridas pela IA antes de disparar mensagens para clientes.
+            Projetos sugeridos pela IA a partir de conversas, insights, vendas, custos, clientes e integrações conectadas.
           </p>
         </div>
         <button
@@ -81,7 +81,7 @@ const CommandCenter = () => {
         </div>
       ) : actions.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-zinc-400">
-          Nenhuma ação sugerida no momento. Assim que a IA detectar risco ou oportunidade, os planos aparecerão aqui.
+          Nenhum projeto sugerido no momento. Assim que a IA detectar risco ou oportunidade com dados reais, os planos aparecerão aqui para aprovação.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -111,7 +111,7 @@ const CommandCenter = () => {
                   <>Executando...</>
                 ) : (
                   <>
-                    Aprovar e Executar <ArrowUpRightIcon className="h-4 w-4" />
+                    Aprovar projeto <ArrowUpRightIcon className="h-4 w-4" />
                   </>
                 )}
               </button>
