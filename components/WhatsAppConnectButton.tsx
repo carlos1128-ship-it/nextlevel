@@ -17,7 +17,7 @@ export const WhatsAppConnectButton: React.FC<WhatsAppConnectButtonProps> = ({ co
       window.location.href = url;
     } catch (error) {
       console.error('Failed to get Meta OAuth URL', error);
-      alert('Erro ao iniciar conexão com a Meta. Verifique se o backend está online.');
+      alert('Erro ao iniciar conexão com a Meta. Verifique se o serviço está online.');
     } finally {
       setLoading(false);
     }

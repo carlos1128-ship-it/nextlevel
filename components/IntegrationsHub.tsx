@@ -788,7 +788,7 @@ const IntegrationsHub = () => {
                 >
                   {officialLoading ? "Conectando..." : "Conectar"}
                 </button>
-                <p className="mt-3 text-xs text-zinc-400">Seu token fica protegido no backend.</p>
+                <p className="mt-3 text-xs text-zinc-400">Seu token fica protegido em ambiente seguro.</p>
               </div>
             </div>
           </div>

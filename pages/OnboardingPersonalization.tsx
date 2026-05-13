@@ -398,7 +398,7 @@ const OnboardingPersonalization = () => {
               <h2 className="mt-2 text-3xl font-black tracking-tighter">Seu painel vai nascer com foco em {selectedBusiness.label}</h2>
               <p className="mt-2 text-sm text-zinc-500">O dashboard inicial fica limpo; as métricas abaixo entram como sugestões para você ativar quando fizer sentido.</p>
               {previewLoading ? (
-                <div className="mt-8 rounded-3xl border border-dashed border-zinc-800 p-8 text-center text-zinc-500">Gerando recomendação real no backend...</div>
+                <div className="mt-8 rounded-3xl border border-dashed border-zinc-800 p-8 text-center text-zinc-500">Gerando recomendação personalizada...</div>
               ) : preview ? (
                 <div className="mt-8 grid gap-4 lg:grid-cols-3">
                   {form.businessType === "other" ? (

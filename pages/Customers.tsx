@@ -179,7 +179,7 @@ const Customers = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Fase A · Base de clientes</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Base de clientes</p>
           <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Clientes</h1>
         </div>
         <div className="flex gap-2">
