@@ -468,7 +468,7 @@ const AddData = () => {
             </button>
             {activeMode?.beta ? (
               <p className="text-xs text-zinc-500">
-                Prints e PDFs dependem da capacidade multimodal ativa no backend.
+                Prints e PDFs dependem do processamento multimodal ativo.
               </p>
             ) : null}
           </div>
@@ -723,7 +723,7 @@ const AddData = () => {
                   <ul className="space-y-2 text-sm text-zinc-400">
                     <li>• Nada entra no dashboard sem confirmação.</li>
                     <li>• CSV e texto estão prontos para revisão e confirmação.</li>
-                    <li>• Print/PDF dependem da capacidade multimodal ativa no backend.</li>
+                    <li>• Print/PDF dependem do processamento multimodal ativo.</li>
                   </ul>
                 </div>
               </div>

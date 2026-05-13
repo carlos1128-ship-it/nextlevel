@@ -33,9 +33,9 @@ function MiniCard({
           </span>
         ) : null}
       </div>
-      <h3 className="text-lg font-black tracking-tight text-zinc-100">{card?.title || "Aguardando dados"}</h3>
+      <h3 className="text-lg font-black tracking-tight text-zinc-100">{card?.title || "Aguardando dados suficientes"}</h3>
       <p className="mt-2 text-sm leading-6 text-zinc-400">
-        {card?.summary || "Cadastre dados reais para liberar este sinal inteligente."}
+        {card?.summary || "Conecte uma integração ou adicione dados para liberar esta análise."}
       </p>
       {card?.recommendation ? (
         <p className="mt-3 text-sm font-semibold leading-6 text-lime-200">{card.recommendation}</p>
@@ -69,7 +69,7 @@ export default function AiDashboardPanel({
           </h2>
         </div>
         <span className="rounded-full border border-zinc-800 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
-          Dados reais do backend
+          Em análise contínua
         </span>
       </div>
 

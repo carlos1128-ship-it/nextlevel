@@ -24,6 +24,7 @@ const TypingIndicator = () => (
 
 const normalizeText = (value: string) =>
   value
+    .replace(/\*/g, "")
     .split("\n")
     .map((line) => line.trimEnd())
     .join("\n")

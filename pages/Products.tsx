@@ -191,7 +191,7 @@ const Products = () => {
     <main className="space-y-6">
       <section className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Fase A · Dados completos</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Catálogo operacional</p>
           <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Produtos e Serviços</h1>
         </div>
         <div className="flex gap-2">

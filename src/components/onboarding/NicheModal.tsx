@@ -220,7 +220,7 @@ const NicheModal = ({
 
         <div className="flex flex-col gap-3 border-t border-white/10 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-            Nicho vai para o backend agora. O nivel fica salvo localmente por enquanto.
+            Nicho salvo para personalizar sua experiencia. O nivel fica salvo localmente por enquanto.
           </p>
           <button
             type="button"
