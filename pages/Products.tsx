@@ -7,6 +7,7 @@ import {
   createProduct,
   deleteProduct,
   getProducts,
+  syncMercadoLivreProducts,
   updateProduct,
 } from "../src/services/endpoints";
 import type { Pagination, Product } from "../src/types/domain";
@@ -45,6 +46,7 @@ const Products = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [syncingMl, setSyncingMl] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -183,6 +185,20 @@ const Products = () => {
     }
   };
 
+  const handleMercadoLivreSync = async () => {
+    if (!selectedCompanyId) return;
+    try {
+      setSyncingMl(true);
+      await syncMercadoLivreProducts(selectedCompanyId);
+      await loadProducts();
+      addToast("Produtos do Mercado Livre sincronizados.", "success");
+    } catch (err) {
+      addToast(getErrorMessage(err, "Falha ao sincronizar Mercado Livre."), "error");
+    } finally {
+      setSyncingMl(false);
+    }
+  };
+
   const changePage = (next: number) => {
     setPage(Math.max(1, Math.min(next, pagination.totalPages || 1)));
   };
@@ -211,6 +227,14 @@ const Products = () => {
             className="rounded-xl bg-lime-400 px-4 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
           >
             Atualizar
+          </button>
+          <button
+            type="button"
+            onClick={handleMercadoLivreSync}
+            disabled={syncingMl || !selectedCompanyId}
+            className="rounded-xl border border-lime-400/40 px-4 py-2 text-sm font-black text-lime-300 transition hover:border-lime-300 disabled:opacity-50"
+          >
+            {syncingMl ? "Sincronizando..." : "Sync Mercado Livre"}
           </button>
         </div>
       </section>
@@ -371,6 +395,8 @@ const Products = () => {
                   <th className="px-3 py-2 text-left">Produto</th>
                   <th className="px-3 py-2 text-left">Categoria</th>
                   <th className="px-3 py-2 text-left">SKU</th>
+                  <th className="px-3 py-2 text-left">Status ML</th>
+                  <th className="px-3 py-2 text-right">Estoque</th>
                   <th className="px-3 py-2 text-right">Preço</th>
                   <th className="px-3 py-2 text-right">Custo</th>
                   <th className="px-3 py-2 text-right">Margem</th>
@@ -404,6 +430,8 @@ const Products = () => {
                       </td>
                       <td className="px-3 py-2">{product.category || "—"}</td>
                       <td className="px-3 py-2">{product.sku || "—"}</td>
+                      <td className="px-3 py-2">{product.marketplaceStatus || "—"}</td>
+                      <td className="px-3 py-2 text-right">{product.availableQuantity ?? "—"}</td>
                       <td className="px-3 py-2 text-right font-semibold">{asCurrency(product.price)}</td>
                       <td className="px-3 py-2 text-right text-zinc-200">
                         {product.cost !== null && product.cost !== undefined ? asCurrency(product.cost) : "—"}
