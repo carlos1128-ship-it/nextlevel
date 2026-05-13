@@ -8,10 +8,13 @@ const COMPANY_ACCESS_INVALID_EVENT = 'nextlevel:company-access-invalid';
 const AUTH_CHANGED_EVENT = 'nextlevel:auth-changed';
 const BILLING_ACCESS_INVALID_EVENT = 'nextlevel:billing-access-invalid';
 const BILLING_CACHE_PREFIX = 'nextlevel:billing:';
+const DEFAULT_PRODUCTION_API_URL = 'https://next-level-backend.onrender.com';
 
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
-const rawBaseUrl = String(rawEnvBaseUrl).trim().replace(/\/+$/, '');
+const rawBaseUrl = String(
+  rawEnvBaseUrl || (import.meta.env.PROD ? DEFAULT_PRODUCTION_API_URL : ''),
+).trim().replace(/\/+$/, '');
 const baseURL = /\/api$/i.test(rawBaseUrl) ? rawBaseUrl : `${rawBaseUrl}/api`;
 
 let refreshPromise: Promise<string | null> | null = null;

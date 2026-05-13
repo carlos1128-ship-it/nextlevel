@@ -526,9 +526,9 @@ const FeatureScreenshot: React.FC<{ detail: { title: string; image: string } }> 
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-300 text-zinc-950">
             <ChartIcon />
           </div>
-          <p className="text-sm font-black text-white">Preview visual em preparação</p>
+          <p className="text-sm font-black text-white">Visão de gestão pronta para dados reais</p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            Assim que o screenshot específico de {detail.title} for adicionado, ele aparece aqui automaticamente.
+            Conecte dados ou importe uma planilha para ver indicadores, alertas e recomendações da IA em {detail.title}.
           </p>
         </div>
       </div>
