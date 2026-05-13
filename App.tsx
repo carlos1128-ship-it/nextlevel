@@ -716,14 +716,17 @@ const GoogleAuthCallback = () => {
   const { login } = useAuth();
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const refreshToken = searchParams.get('refresh_token');
-    const name = searchParams.get('name');
-    const email = searchParams.get('email');
-    const admin = searchParams.get('admin') === 'true';
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const readParam = (key: string) => hashParams.get(key) || searchParams.get(key);
+    const token = readParam('token');
+    const refreshToken = readParam('refresh_token');
+    const name = readParam('name');
+    const email = readParam('email');
+    const admin = readParam('admin') === 'true';
     const selectedPlan = readPendingSelectedPlan();
 
     if (token) {
+      window.history.replaceState({}, document.title, window.location.pathname);
       localStorage.setItem('access_token', token);
       if (refreshToken) {
         localStorage.setItem('refresh_token', refreshToken);

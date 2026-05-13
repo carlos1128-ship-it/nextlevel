@@ -640,7 +640,7 @@ const Integrations = () => {
               </p>
             </div>
 
-            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
                 <p className="mt-1 font-bold text-zinc-100">
@@ -660,12 +660,22 @@ const Integrations = () => {
                 </p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Produtos</p>
+                <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.products || 0}</p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Pedidos</p>
                 <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.orders || 0}</p>
               </div>
               <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Perguntas</p>
                 <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.pendingQuestions || 0} pendentes</p>
+              </div>
+              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Última sync</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {mercadoLivreStatus?.lastSyncAt ? new Date(mercadoLivreStatus.lastSyncAt).toLocaleString("pt-BR") : "Ainda não sincronizado"}
+                </p>
               </div>
             </div>
 

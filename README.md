@@ -19,6 +19,13 @@ Frontend React/Vite da Next Level Platform.
 3. Run the app:
    `npm run dev`
 
+## Deploy Vercel
+
+- Root Directory: `next-level-front`
+- Build Command: `npm run build`
+- Output Directory: `dist`
+- Env obrigatoria: `VITE_API_URL=https://next-level-backend.onrender.com`
+
 ## Mercado Livre
 
 A tela `/integrations` conecta OAuth do Mercado Livre. As rotas `/products`, `/orders` e `/questions` exibem dados sincronizados para dashboard, IA e financeiro.
