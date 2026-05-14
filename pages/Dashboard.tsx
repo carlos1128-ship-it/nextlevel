@@ -722,31 +722,31 @@ const Dashboard = () => {
 
   return (
     <div ref={dashboardExportRef} className="space-y-7 overflow-x-hidden bg-[#040507]">
-      <header className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+      <header className="grid max-w-full gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,auto)] xl:items-end">
         <div className="min-w-0">
           <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visão Geral</h1>
           <p className="mt-2 text-base font-medium text-zinc-400 md:text-lg">
             Olá, {username || "Usuário"}. Aqui está o panorama estratégico do período selecionado.
           </p>
         </div>
-        <div className="flex w-full min-w-0 flex-wrap gap-3 xl:w-auto xl:max-w-[620px] xl:justify-end">
+        <div className="flex w-full max-w-full min-w-0 flex-wrap gap-3 xl:w-auto xl:justify-end">
           <Link
             to="/settings#dashboard"
-            className="min-w-[138px] flex-1 rounded-2xl border border-lime-400/30 bg-lime-400/10 px-4 py-3 text-center text-[11px] font-black uppercase tracking-[0.14em] text-lime-300 transition hover:border-lime-400/60 sm:flex-none"
+            className="min-w-0 flex-[1_1_140px] rounded-2xl border border-lime-400/30 bg-lime-400/10 px-4 py-3 text-center text-[11px] font-black uppercase tracking-[0.14em] text-lime-300 transition hover:border-lime-400/60 sm:flex-none"
           >
             Personalizar
           </Link>
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="min-w-[160px] flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-100 transition hover:bg-zinc-900 disabled:opacity-50 sm:flex-none"
+            className="min-w-0 flex-[1_1_170px] rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-100 transition hover:bg-zinc-900 disabled:opacity-50 sm:flex-none"
           >
             {isExporting ? "Gerando PDF..." : "Exportar relatorio"}
           </button>
           <button
             onClick={() => void loadMetrics()}
             disabled={isUpdating}
-            className={`min-w-[132px] flex-1 rounded-2xl bg-lime-400 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-900 transition ${
+            className={`min-w-0 flex-[1_1_132px] rounded-2xl bg-lime-400 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-900 transition ${
               isUpdating ? "opacity-50" : "hover:opacity-90"
             } sm:flex-none`}
           >

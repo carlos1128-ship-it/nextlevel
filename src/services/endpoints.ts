@@ -1922,6 +1922,14 @@ export type CheckoutSessionStatusResponse = {
   billing?: BillingMeResponse;
 };
 
+export type ChangePlanResponse = {
+  status: "changed" | "pending_confirmation" | "checkout_required" | "portal_required" | string;
+  checkoutUrl?: string;
+  portalUrl?: string;
+  message?: string;
+  billing?: BillingMeResponse;
+};
+
 export type BillingConfigResponse = {
   paymentProvider: "STRIPE" | string;
   checkoutEnabled: boolean;
@@ -1968,6 +1976,17 @@ export async function createBillingCheckout(payload: {
   const { data } = await api.post<{
     checkoutUrl: string;
   }>("/billing/checkout", payload);
+  return data;
+}
+
+export async function changeBillingPlan(payload: {
+  planKey?: BillingPlanKey;
+  targetPlanKey: BillingPlanKey;
+  billingCycle: BillingCycle;
+  billingInterval?: "monthly" | "yearly";
+  companyId?: string | null;
+}) {
+  const { data } = await api.post<ChangePlanResponse>("/billing/change-plan", payload);
   return data;
 }
 

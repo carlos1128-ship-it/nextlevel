@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../App";
+import NextLevelLoader from "../components/NextLevelLoader";
 import { useToast } from "../components/Toast";
 import { DASHBOARD_ROUTE, normalizeDashboardRoute } from "../src/app/routes";
 import {
@@ -230,6 +231,10 @@ const OnboardingPersonalization = () => {
     return <Navigate to="/companies" replace />;
   }
 
+  if (saving) {
+    return <NextLevelLoader />;
+  }
+
   const updateField = <K extends keyof OnboardingForm>(key: K, value: OnboardingForm[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
@@ -293,10 +298,10 @@ const OnboardingPersonalization = () => {
       <section className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-8 md:px-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.32em] text-lime-300">NEXT LEVEL SETUP</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-6xl">Personalize sua experiencia na NEXT LEVEL</h1>
+            <p className="text-[10px] font-black uppercase tracking-[0.32em] text-lime-300">NEXT LEVEL</p>
+            <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-6xl">Conte para a Next sobre seu negocio</h1>
             <p className="mt-4 max-w-3xl text-sm font-medium text-zinc-400 md:text-base">
-              Responda algumas perguntas rápidas para montarmos um painel, ferramentas e IA alinhados ao seu tipo de negócio.
+              Assim a plataforma organiza o painel e gera recomendacoes mais uteis para sua operacao.
             </p>
           </div>
           <div className="hidden rounded-3xl border border-lime-400/20 bg-lime-400/10 px-5 py-4 text-right md:block">
@@ -309,7 +314,7 @@ const OnboardingPersonalization = () => {
           <div className="h-full rounded-full bg-lime-400 transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} />
         </div>
 
-        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950/78 p-5 shadow-2xl shadow-black/30 backdrop-blur md:p-8">
+        <div className="rounded-[1.5rem] bg-zinc-950/70 p-5 shadow-2xl shadow-black/25 backdrop-blur md:p-8">
           {step === 0 ? (
             <section>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Tipo de negócio</p>
@@ -323,7 +328,7 @@ const OnboardingPersonalization = () => {
                       key={option.key}
                       type="button"
                       onClick={() => updateField("businessType", option.key)}
-                      className={`rounded-3xl border p-5 text-left transition ${
+                      className={`rounded-2xl border p-5 text-left transition ${
                         active
                           ? "border-lime-400 bg-lime-400 text-zinc-950 shadow-lg shadow-lime-400/20"
                           : "border-zinc-800 bg-zinc-950 text-zinc-200 hover:border-lime-400/40"
@@ -336,7 +341,7 @@ const OnboardingPersonalization = () => {
                 })}
               </div>
               {form.businessType === "other" ? (
-                <label className="mt-5 block rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
+                <label className="mt-5 block rounded-2xl border border-zinc-800/80 bg-[#070a0d] p-5">
                   <span className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">
                     Descrição livre
                   </span>
@@ -464,7 +469,7 @@ const OnboardingPersonalization = () => {
               <h2 className="mt-2 text-3xl font-black tracking-tighter">Seu painel vai nascer com foco em {selectedBusiness.label}</h2>
               <p className="mt-2 text-sm text-zinc-500">O dashboard inicial fica limpo; as métricas abaixo entram como sugestões para você ativar quando fizer sentido.</p>
               {previewLoading ? (
-                <div className="mt-8 rounded-3xl border border-dashed border-zinc-800 p-8 text-center text-zinc-500">Gerando recomendação personalizada...</div>
+                <NextLevelLoader fullscreen={false} />
               ) : preview ? (
                 <div className="mt-8 grid gap-4 lg:grid-cols-3">
                   {form.businessType === "other" ? (

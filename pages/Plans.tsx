@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "../App";
+import { useAuth, useBilling } from "../App";
+import NextLevelLoader from "../components/NextLevelLoader";
 import {
   BillingCycle,
   BillingPlan,
   BillingPlanKey,
+  changeBillingPlan,
   createBillingCheckout,
   createBillingPortal,
   getBillingConfig,
@@ -67,6 +69,7 @@ const Plans = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { isLoggedIn, logout, selectedCompanyId } = useAuth();
+  const { refreshBilling } = useBilling();
   const saved = readPlanSelectionFromSearch(params) || readPendingSelectedPlan();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(saved?.billingCycle || "MONTHLY");
   const [selectedPlan, setSelectedPlan] = useState<PendingPlanSelection | null>(saved);
@@ -74,15 +77,14 @@ const Plans = () => {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [currentBillingCycle, setCurrentBillingCycle] = useState<BillingCycle | null>(null);
-  const [currentSource, setCurrentSource] = useState<string | null>(null);
   const [loadingPlanKey, setLoadingPlanKey] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [checkoutEnabled, setCheckoutEnabled] = useState<boolean | null>(null);
-  const [paymentProvider, setPaymentProvider] = useState<string>("STRIPE");
   const [billingConfigMessage, setBillingConfigMessage] = useState<string | null>(null);
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
   const [isLoadingBilling, setIsLoadingBilling] = useState(false);
+  const [billingLoadError, setBillingLoadError] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -102,7 +104,6 @@ const Plans = () => {
         }
         if (configResult.status === "fulfilled") {
           setCheckoutEnabled(Boolean(configResult.value.checkoutEnabled));
-          setPaymentProvider(configResult.value.paymentProvider);
           setBillingConfigMessage(configResult.value.message);
         } else {
           setCheckoutEnabled(false);
@@ -123,14 +124,17 @@ const Plans = () => {
   useEffect(() => {
     if (!isLoggedIn) return;
     setIsLoadingBilling(true);
+    setBillingLoadError(false);
     getBillingMe({ companyId: selectedCompanyId })
       .then((billing) => {
         setHasActiveSubscription(Boolean(billing.hasActiveSubscription));
         setCurrentPlan(billing.subscription?.planKey || billing.activePlan || null);
         setCurrentBillingCycle(billing.subscription?.billingCycle || null);
-        setCurrentSource(billing.subscription?.source || null);
       })
-      .catch(() => setHasActiveSubscription(false))
+      .catch(() => {
+        setBillingLoadError(true);
+        setMessage("Nao foi possivel carregar sua assinatura agora. Tente novamente em instantes.");
+      })
       .finally(() => setIsLoadingBilling(false));
   }, [isLoggedIn, selectedCompanyId]);
 
@@ -147,6 +151,15 @@ const Plans = () => {
     savePendingSelectedPlan(nextSelection);
   };
 
+  const syncBillingState = async () => {
+    const billing = await getBillingMe({ companyId: selectedCompanyId });
+    setHasActiveSubscription(Boolean(billing.hasActiveSubscription));
+    setCurrentPlan(billing.subscription?.planKey || billing.activePlan || null);
+    setCurrentBillingCycle(billing.subscription?.billingCycle || null);
+    await refreshBilling(true);
+    return billing;
+  };
+
   const subscribe = async (planKey: BillingPlanKey) => {
     const nextSelection = { planKey, billingCycle };
     setSelectedPlan(nextSelection);
@@ -157,15 +170,46 @@ const Plans = () => {
       return;
     }
 
-    if (hasActiveSubscription) {
-      setMessage("Para alterar ou cancelar sua assinatura, acesse o portal seguro da Stripe.");
-      await openPortal();
+    if (billingLoadError) {
+      setMessage("Nao foi possivel validar sua assinatura agora. Tente novamente em instantes.");
       return;
     }
 
     setLoadingPlanKey(planKey);
-    setMessage("Preparando checkout seguro no Stripe...");
+    setMessage(hasActiveSubscription ? "Atualizando sua assinatura..." : "Abrindo ambiente seguro de pagamento...");
     try {
+      if (hasActiveSubscription) {
+        if (currentPlan === planKey && currentBillingCycle === billingCycle) {
+          await openPortal();
+          return;
+        }
+
+        const result = await changeBillingPlan({
+          targetPlanKey: planKey,
+          planKey,
+          billingCycle,
+          billingInterval: billingCycle === "ANNUAL" ? "yearly" : "monthly",
+          companyId: selectedCompanyId,
+        });
+
+        if (result.status === "checkout_required" && result.checkoutUrl) {
+          clearPendingSelectedPlan();
+          window.location.href = result.checkoutUrl;
+          return;
+        }
+
+        if (result.status === "portal_required") {
+          setMessage(result.message || "Abra o ambiente seguro de assinatura para concluir esta alteracao.");
+          await openPortal();
+          return;
+        }
+
+        await syncBillingState();
+        clearPendingSelectedPlan();
+        setMessage(result.message || "Plano atualizado com sucesso.");
+        return;
+      }
+
       const checkout = await createBillingCheckout({
         planKey,
         billingCycle,
@@ -189,6 +233,7 @@ const Plans = () => {
   const openPortal = async () => {
     try {
       setPortalLoading(true);
+      setMessage("Abrindo ambiente seguro de assinatura...");
       const session = await createBillingPortal({ companyId: selectedCompanyId });
       window.location.href = session.portalUrl;
     } catch {
@@ -197,24 +242,30 @@ const Plans = () => {
       setPortalLoading(false);
     }
   };
+  const showGlobalPlanLoading = Boolean(loadingPlanKey || portalLoading);
 
   return (
     <div className="min-h-screen bg-[#030508] px-5 py-8 text-white">
+      {showGlobalPlanLoading ? (
+        <div className="fixed inset-0 z-[80]">
+          <NextLevelLoader />
+        </div>
+      ) : null}
       <div className="mx-auto max-w-7xl">
         <header className="flex flex-col gap-5 border-b border-white/10 pb-7 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">NEXT LEVEL</p>
             <h1 className="mt-3 text-4xl font-black tracking-tight md:text-6xl">Escolha seu nivel</h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
-              Selecione um plano e finalize sua assinatura pelo Stripe. O acesso e liberado pelo webhook de pagamento, nao pela tela de sucesso.
+              Selecione um plano e finalize sua assinatura em um ambiente seguro. O acesso e liberado assim que o pagamento for confirmado.
             </p>
             <p className="mt-2 text-xs font-semibold text-zinc-500">
               {isInitialBillingLoading
                 ? "Preparando pagamento..."
                 : isLoadingBilling
                   ? "Validando plano atual..."
-                : paymentProvider === "STRIPE" && checkoutEnabled
-                  ? "Pagamento seguro via Stripe"
+                : checkoutEnabled
+                  ? "Pagamento seguro disponivel"
                   : "Pagamento temporariamente indisponivel."}
             </p>
             {params.get("upgrade") ? (
@@ -225,10 +276,9 @@ const Plans = () => {
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-lime-300">Plano atual</p>
                 <p className="mt-2 text-lg font-black text-white">
                   {planLabel(currentPlan)} {currentBillingCycle === "ANNUAL" ? "anual" : "mensal"}
-                  {currentSource ? ` (${currentSource})` : ""}
                 </p>
                 <p className="mt-2 text-xs leading-5 text-lime-100/80">
-                  Para alterar ou cancelar sua assinatura, acesse o portal seguro da Stripe.
+                  Para cancelar, trocar forma de pagamento ou ver cobrancas, abra o gerenciamento da assinatura.
                 </p>
               </div>
             ) : null}
@@ -311,20 +361,22 @@ const Plans = () => {
             const loading = loadingPlanKey === plan.key;
             const isSelected = selectedPlan?.planKey === plan.key;
             const isCurrentPlan = hasActiveSubscription && currentPlan === plan.key;
+            const isExactCurrentPlan = isCurrentPlan && currentBillingCycle === billingCycle;
             const isUpgrade = hasActiveSubscription && plan.level > currentPlanLevel;
-            const actionAvailable = hasActiveSubscription || available;
+            const isDowngrade = hasActiveSubscription && plan.level < currentPlanLevel;
+            const actionAvailable = !isLoadingBilling && !billingLoadError && (hasActiveSubscription || available);
             const buttonLabel = loading
               ? "Preparando..."
               : portalLoading && hasActiveSubscription
-                ? "Abrindo portal..."
+                ? "Abrindo..."
               : isInitialBillingLoading
                 ? "Carregando..."
-                : isCurrentPlan
-                  ? "Plano atual"
+                : isExactCurrentPlan
+                  ? "Gerenciar assinatura"
                   : hasActiveSubscription
-                    ? (isUpgrade ? "Fazer upgrade" : "Alterar para este plano")
+                    ? (isUpgrade ? "Fazer upgrade" : isDowngrade ? "Fazer downgrade" : "Alterar cobranca")
                     : available
-                      ? "Continuar para Stripe"
+                      ? "Assinar agora"
                       : "Plano indisponivel";
 
             return (
@@ -391,9 +443,11 @@ const Plans = () => {
                 </button>
                 <p className={`mt-3 min-h-10 text-xs font-semibold leading-5 ${actionAvailable ? "text-lime-200" : "text-zinc-500"}`}>
                   {hasActiveSubscription
-                    ? "Troca, downgrade, cancelamento e ciclo de cobranca pelo portal Stripe."
+                    ? isExactCurrentPlan
+                      ? "Cancele, veja cobrancas ou atualize a forma de pagamento no ambiente seguro."
+                      : "A alteracao deste plano sera aplicada de forma segura na sua assinatura."
                     : available
-                      ? "Checkout seguro via Stripe."
+                      ? "Pagamento em ambiente seguro."
                       : "Este plano ainda nao esta pronto para pagamento."}
                 </p>
               </article>
