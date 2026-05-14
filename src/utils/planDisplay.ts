@@ -79,9 +79,9 @@ export const PLAN_DISPLAY: Record<
     displayPricesInCents: { MONTHLY: 9700, ANNUAL: 97000 },
   },
   PRO_BUSINESS: {
-    publicName: "Business",
+    publicName: "Pro Business",
     summary: "Integrações, escala e análise avançada para operações que precisam de previsibilidade.",
-    aiTier: "Limites de IA do Business",
+    aiTier: "Limites de IA do Pro Business",
     aiLimitItems: [
       "Chat IA: 5.000 mensagens/mês",
       "Análises de dados: ilimitadas",
@@ -106,7 +106,7 @@ export const PLAN_DISPLAY: Record<
       "Importações inteligentes ilimitadas",
       "Prioridade em novas funcionalidades",
     ],
-    cta: "Assinar Business",
+    cta: "Assinar Pro Business",
     recommended: false,
     microcopy: "Pensado para operações com mais canais, dados e escala.",
     displayPricesInCents: { MONTHLY: 19700, ANNUAL: 197000 },
