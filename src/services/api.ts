@@ -142,16 +142,29 @@ function dispatchFriendlyApiError(error: AxiosError) {
   }
 
   const payload = error.response?.data as { code?: string } | undefined;
-  if (
-    error.response?.status === 402 ||
-    payload?.code === 'SUBSCRIPTION_REQUIRED' ||
-    payload?.code === 'PLAN_UPGRADE_REQUIRED'
-  ) {
+  if (error.response?.status === 402 || payload?.code === 'SUBSCRIPTION_REQUIRED') {
     clearBillingStorage();
     window.dispatchEvent(new CustomEvent(BILLING_ACCESS_INVALID_EVENT));
-    if (!window.location.pathname.startsWith('/planos')) {
-      window.location.assign(payload?.code === 'PLAN_UPGRADE_REQUIRED' ? '/planos?upgrade=true' : '/planos');
-    }
+    window.dispatchEvent(
+      new CustomEvent(GLOBAL_FEEDBACK_EVENT, {
+        detail: {
+          message: getErrorMessage(error, 'Este recurso exige outro plano.'),
+          type: 'error',
+        },
+      }),
+    );
+    return;
+  }
+
+  if (payload?.code === 'PLAN_UPGRADE_REQUIRED' || payload?.code === 'FEATURE_NOT_INCLUDED' || payload?.code === 'INTEGRATION_NOT_INCLUDED') {
+    window.dispatchEvent(
+      new CustomEvent(GLOBAL_FEEDBACK_EVENT, {
+        detail: {
+          message: getErrorMessage(error, 'Este recurso exige outro plano.'),
+          type: 'error',
+        },
+      }),
+    );
     return;
   }
 

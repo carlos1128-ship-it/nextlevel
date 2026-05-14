@@ -80,6 +80,33 @@ const getCompanyId = (company: Partial<Company> | null | undefined) => company?.
 
 type BillingStatus = "UNKNOWN" | "ACTIVE" | "INACTIVE";
 
+type BillingPlanKey = "COMMON" | "PREMIUM" | "PRO_BUSINESS";
+
+const PLAN_LEVELS: Record<BillingPlanKey, number> = {
+  COMMON: 1,
+  PREMIUM: 2,
+  PRO_BUSINESS: 3,
+};
+
+const PLAN_LABELS: Record<BillingPlanKey, string> = {
+  COMMON: "Essencial",
+  PREMIUM: "Premium",
+  PRO_BUSINESS: "Pro Business",
+};
+
+function normalizePlanKey(plan: string | null | undefined): BillingPlanKey | null {
+  const normalized = String(plan || "").trim().toUpperCase();
+  if (normalized === "COMUM" || normalized === "ESSENTIAL" || normalized === "ESSENCIAL") return "COMMON";
+  if (normalized === "PRO" || normalized === "PREMIUM") return "PREMIUM";
+  if (normalized === "BUSINESS" || normalized === "PROBUSINESS" || normalized === "ENTERPRISE") return "PRO_BUSINESS";
+  return normalized === "COMMON" || normalized === "PRO_BUSINESS" ? (normalized as BillingPlanKey) : null;
+}
+
+function hasPlanLevel(currentPlan: string | null, requiredPlan: BillingPlanKey) {
+  const normalized = normalizePlanKey(currentPlan);
+  return Boolean(normalized && PLAN_LEVELS[normalized] >= PLAN_LEVELS[requiredPlan]);
+}
+
 type BillingCacheEntry = {
   userKey: string;
   status: BillingStatus;
@@ -502,6 +529,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
     const handleBillingInvalid = () => {
       clearAllBillingCache();
       clearBilling();
+      void refreshBilling(true);
     };
     const handleAuthChanged = () => {
       clearBilling();
@@ -512,7 +540,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
       window.removeEventListener(BILLING_ACCESS_INVALID_EVENT, handleBillingInvalid);
       window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
     };
-  }, []);
+  }, [refreshBilling]);
 
   return (
     <BillingContext.Provider
@@ -654,6 +682,7 @@ const OnboardingGate = ({ children }: { children?: ReactNode }) => {
 };
 
 const BillingGate = ({ children }: { children?: ReactNode }) => {
+  const location = useLocation();
   const { isLoggedIn, isProfileReady, logout } = useAuth();
   const {
     hasActiveSubscription,
@@ -675,11 +704,64 @@ const BillingGate = ({ children }: { children?: ReactNode }) => {
   if (isLoggedIn && isProfileReady && billingError && !isBillingLoaded) {
     return <BillingValidationError onRetry={() => void refreshBilling(true)} onLogout={logout} />;
   }
-  if (isLoggedIn && isProfileReady && isBillingLoaded && !hasActiveSubscription) {
+  if (isLoggedIn && isProfileReady && isBillingLoaded && !hasActiveSubscription && location.pathname !== "/planos") {
     return <Navigate to="/planos" replace />;
   }
   if (isLoggedIn && isProfileReady && !isBillingLoaded) {
     return <FullscreenLoading label="Validando assinatura" />;
+  }
+  return <>{children}</>;
+};
+
+const LockedFeature = ({
+  requiredPlan,
+  title = "Recurso bloqueado neste plano",
+}: {
+  requiredPlan: BillingPlanKey;
+  title?: string;
+}) => {
+  const navigate = useNavigate();
+  return (
+    <div className="rounded-3xl border border-lime-400/20 bg-zinc-950 p-7 text-zinc-100">
+      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Upgrade disponivel</p>
+      <h1 className="mt-3 text-3xl font-black tracking-tighter">{title}</h1>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
+        Este recurso esta disponivel a partir do plano {PLAN_LABELS[requiredPlan]}. Seu acesso ao restante do dashboard continua normal.
+      </p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => navigate(`/planos?upgrade=true&required=${requiredPlan}`)}
+          className="rounded-2xl bg-lime-400 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-zinc-950"
+        >
+          Ver planos
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(DASHBOARD_ROUTE)}
+          className="rounded-2xl border border-zinc-800 px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-zinc-300"
+        >
+          Voltar ao dashboard
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const PlanFeatureGate = ({
+  children,
+  requiredPlan,
+  title,
+}: {
+  children?: ReactNode;
+  requiredPlan: BillingPlanKey;
+  title?: string;
+}) => {
+  const { currentPlan, hasActiveSubscription, isBillingLoaded } = useBilling();
+  if (!isBillingLoaded) return <FullscreenLoading label="Validando plano" />;
+  if (!hasActiveSubscription) return <LockedFeature requiredPlan="COMMON" title="Escolha um plano para continuar" />;
+  if (!hasPlanLevel(currentPlan, requiredPlan)) {
+    return <LockedFeature requiredPlan={requiredPlan} title={title} />;
   }
   return <>{children}</>;
 };
@@ -786,6 +868,19 @@ const AppContent = () => {
       </BillingGate>
     </ProtectedRoute>
   );
+  const featureShell = (page: ReactNode, requiredPlan: BillingPlanKey, title: string) => (
+    <ProtectedRoute>
+      <BillingGate>
+        <OnboardingGate>
+          <Layout>
+            <PlanFeatureGate requiredPlan={requiredPlan} title={title}>
+              {page}
+            </PlanFeatureGate>
+          </Layout>
+        </OnboardingGate>
+      </BillingGate>
+    </ProtectedRoute>
+  );
   const dashboardShell = personalizedShell(<Dashboard />);
 
   return (
@@ -820,7 +915,7 @@ const AppContent = () => {
           <Route path="/chat" element={personalizedShell(<Chat />)} />
           <Route path="/settings" element={plainShell(<Settings />)} />
           <Route path="/profile" element={plainShell(<Profile />)} />
-          <Route path="/integrations" element={personalizedShell(<Integrations />)} />
+          <Route path="/integrations" element={featureShell(<Integrations />, "PREMIUM", "Integracoes automaticas exigem Premium")} />
           <Route path="/companies" element={plainShell(<Companies />)} />
           <Route path="/insights" element={personalizedShell(<Insights />)} />
           <Route path="/financial-flow" element={personalizedShell(<FinancialFlow />)} />
@@ -831,10 +926,10 @@ const AppContent = () => {
           <Route path="/customers" element={personalizedShell(<Customers />)} />
           <Route path="/costs" element={personalizedShell(<Costs />)} />
           <Route path="/add-data" element={personalizedShell(<AddData />)} />
-          <Route path="/market-intel" element={personalizedShell(<MarketIntel />)} />
-          <Route path="/attendant" element={personalizedShell(<Attendant />)} />
+          <Route path="/market-intel" element={featureShell(<MarketIntel />, "PRO_BUSINESS", "Market intelligence exige Pro Business")} />
+          <Route path="/attendant" element={featureShell(<Attendant />, "PREMIUM", "Atendente IA exige Premium")} />
           <Route path="/admin/system-health" element={<AdminRoute><Layout><SystemHealth /></Layout></AdminRoute>} />
-          <Route path="/command-center" element={personalizedShell(<CommandCenter />)} />
+          <Route path="/command-center" element={featureShell(<CommandCenter />, "PRO_BUSINESS", "Automacoes avancadas exigem Pro Business")} />
           <Route path="/plans" element={<Navigate to="/planos" replace />} />
           <Route path="/usage" element={personalizedShell(<PlanUsage />)} />
           <Route path="/plan-usage" element={<Navigate to="/usage" replace />} />

@@ -148,6 +148,11 @@ export interface CompanyProfile {
   monthlyRevenueRange?: string | null;
   dataMaturity?: string | null;
   originalBusinessDescription?: string | null;
+  customBusinessDescription?: string | null;
+  mainGoals?: string[] | null;
+  priorityModules?: string[] | null;
+  nonPriorityModules?: string[] | null;
+  preferredDashboardFocus?: string | null;
   detectedBusinessType?: BusinessType | null;
   classificationConfidence?: number | null;
   usesPaidTraffic: boolean;

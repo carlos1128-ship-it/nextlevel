@@ -722,33 +722,33 @@ const Dashboard = () => {
 
   return (
     <div ref={dashboardExportRef} className="space-y-7 overflow-x-hidden bg-[#040507]">
-      <header className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-        <div>
+      <header className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+        <div className="min-w-0">
           <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visão Geral</h1>
           <p className="mt-2 text-base font-medium text-zinc-400 md:text-lg">
             Olá, {username || "Usuário"}. Aqui está o panorama estratégico do período selecionado.
           </p>
         </div>
-        <div className="flex w-full gap-3 md:w-auto">
+        <div className="flex w-full min-w-0 flex-wrap gap-3 xl:w-auto xl:max-w-[620px] xl:justify-end">
           <Link
             to="/settings#dashboard"
-            className="flex-1 rounded-2xl border border-lime-400/30 bg-lime-400/10 px-7 py-3 text-center text-[11px] font-black uppercase tracking-[0.2em] text-lime-300 transition hover:border-lime-400/60 md:flex-none"
+            className="min-w-[138px] flex-1 rounded-2xl border border-lime-400/30 bg-lime-400/10 px-4 py-3 text-center text-[11px] font-black uppercase tracking-[0.14em] text-lime-300 transition hover:border-lime-400/60 sm:flex-none"
           >
             Personalizar
           </Link>
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-7 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-100 transition hover:bg-zinc-900 disabled:opacity-50 md:flex-none"
+            className="min-w-[160px] flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-100 transition hover:bg-zinc-900 disabled:opacity-50 sm:flex-none"
           >
             {isExporting ? "Gerando PDF..." : "Exportar relatorio"}
           </button>
           <button
             onClick={() => void loadMetrics()}
             disabled={isUpdating}
-            className={`flex-1 rounded-2xl bg-lime-400 px-7 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-900 transition ${
+            className={`min-w-[132px] flex-1 rounded-2xl bg-lime-400 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-900 transition ${
               isUpdating ? "opacity-50" : "hover:opacity-90"
-            } md:flex-none`}
+            } sm:flex-none`}
           >
             {isUpdating ? "Atualizando..." : "Atualizar"}
           </button>

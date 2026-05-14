@@ -17,7 +17,7 @@ import {
 } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
 import type { IntegrationStatus } from "../src/types/domain";
-import { MessageSquareIcon, PackageIcon, PuzzleIcon, RadarIcon } from "./icons";
+import { MessageSquareIcon, PuzzleIcon, RadarIcon } from "./icons";
 
 type OfficialStatus = {
   connected: boolean;
@@ -312,7 +312,6 @@ const IntegrationsHub = () => {
 
   const instagramStatus = findStatus("INSTAGRAM");
   const mercadoLivreStatus = findStatus("MERCADOLIVRE");
-  const shopeeStatus = findStatus("SHOPEE");
   const evolutionConnected = Boolean(evolutionStatus?.connected);
   const officialConnected = Boolean(officialStatus?.connected && officialStatus?.method === "meta");
   const whatsappConnected = evolutionConnected || officialConnected;
@@ -360,15 +359,6 @@ const IntegrationsHub = () => {
       status: mercadoLivreStatus,
       icon: <PuzzleIcon className="h-6 w-6" />,
       actionLabel: mercadoLivreStatus?.connected ? "Conectado" : "Configurar",
-      actionType: "config" as const,
-    },
-    {
-      key: "SHOPEE",
-      title: "Shopee",
-      description: "Canal preservado na interface com status atual.",
-      status: shopeeStatus,
-      icon: <PackageIcon className="h-6 w-6" />,
-      actionLabel: shopeeStatus?.connected ? "Conectado" : "Configurar",
       actionType: "config" as const,
     },
   ];
