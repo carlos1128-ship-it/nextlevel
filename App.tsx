@@ -8,6 +8,7 @@ import Integrations from './pages/Integrations';
 import Companies from './pages/Companies';
 import LoginPage from './pages/LoginPage';
 import { ToastProvider } from './components/Toast';
+import NextLevelLoader from './components/NextLevelLoader';
 import AppErrorBoundary from './src/components/AppErrorBoundary';
 import { DASHBOARD_ROUTE } from './src/app/routes';
 import { useDetailLevel } from './src/hooks/useDetailLevel';
@@ -177,8 +178,9 @@ function tokenFingerprint() {
 }
 
 function billingUserKey(email: string | null, authSessionKey: string | null, companyId?: string | null) {
+  if (!companyId) return null;
   const normalizedEmail = email?.trim().toLowerCase();
-  const companySegment = companyId || 'default-company';
+  const companySegment = companyId;
   if (normalizedEmail) return `email:${normalizedEmail}:company:${companySegment}:${authSessionKey || 'no-token'}`;
   if (authSessionKey) return `token:${authSessionKey}:company:${companySegment}`;
   return null;
@@ -421,7 +423,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
 };
 
 const BillingProvider = ({ children }: { children?: ReactNode }) => {
-  const { isLoggedIn, isProfileReady, email, authSessionKey, selectedCompanyId } = useAuth();
+  const { isLoggedIn, isProfileReady, isCompanyReady, email, authSessionKey, selectedCompanyId } = useAuth();
   const userKey = billingUserKey(email, authSessionKey, selectedCompanyId);
   const cached = readBillingCache(userKey);
   const [billingStatus, setBillingStatus] = useState<BillingStatus>(cached?.status || "UNKNOWN");
@@ -456,7 +458,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const refreshBilling = async (force = false) => {
-    if (!isLoggedIn || !isProfileReady || !userKey) {
+    if (!isLoggedIn || !isProfileReady || !isCompanyReady || !userKey) {
       clearBilling();
       return null;
     }
@@ -511,7 +513,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   useEffect(() => {
-    if (!isLoggedIn || !isProfileReady || !userKey) {
+    if (!isLoggedIn || !isProfileReady || !isCompanyReady || !userKey) {
       clearBilling();
       return;
     }
@@ -523,7 +525,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
     }
 
     void refreshBilling(false);
-  }, [isLoggedIn, isProfileReady, userKey]);
+  }, [isLoggedIn, isProfileReady, isCompanyReady, userKey]);
 
   useEffect(() => {
     const handleBillingInvalid = () => {
@@ -577,13 +579,8 @@ const AdminRoute = ({ children }: { children?: ReactNode }) => {
   return isAdmin ? <>{children}</> : <Navigate to={DASHBOARD_ROUTE} replace />;
 };
 
-const FullscreenLoading = ({ label = "Preparando experiência" }: { label?: string }) => (
-  <div className="flex min-h-screen items-center justify-center bg-[#040507] text-zinc-100">
-    <div className="text-center">
-      <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
-      <p className="mt-3 text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">{label}</p>
-    </div>
-  </div>
+const FullscreenLoading = (_props?: { label?: string }) => (
+  <NextLevelLoader />
 );
 
 const BillingValidationError = ({
@@ -683,7 +680,7 @@ const OnboardingGate = ({ children }: { children?: ReactNode }) => {
 
 const BillingGate = ({ children }: { children?: ReactNode }) => {
   const location = useLocation();
-  const { isLoggedIn, isProfileReady, logout } = useAuth();
+  const { isLoggedIn, isProfileReady, isCompanyReady, selectedCompanyId, logout } = useAuth();
   const {
     hasActiveSubscription,
     isBillingLoaded,
@@ -696,10 +693,16 @@ const BillingGate = ({ children }: { children?: ReactNode }) => {
   const shouldShowFullScreenValidation =
     isLoggedIn &&
     isProfileReady &&
+    isCompanyReady &&
     !isBillingLoaded &&
     !hasCachedBillingStatus &&
     isBillingValidating;
 
+  if (isLoggedIn && isProfileReady && !isCompanyReady) return <FullscreenLoading />;
+  if (isLoggedIn && isProfileReady && isCompanyReady && !selectedCompanyId) {
+    if (location.pathname === "/companies") return <>{children}</>;
+    return <Navigate to="/companies" replace />;
+  }
   if (shouldShowFullScreenValidation) return <FullscreenLoading label="Validando assinatura" />;
   if (isLoggedIn && isProfileReady && billingError && !isBillingLoaded) {
     return <BillingValidationError onRetry={() => void refreshBilling(true)} onLogout={logout} />;
@@ -794,9 +797,15 @@ const MetadataSync = () => {
 const GoogleAuthCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, setSelectedCompanyId } = useAuth();
+  const handledAttemptRef = useRef<number | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
+  const [callbackError, setCallbackError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (handledAttemptRef.current === retryKey) return;
+    handledAttemptRef.current = retryKey;
+    let cancelled = false;
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
     const readParam = (key: string) => hashParams.get(key) || searchParams.get(key);
     const token = readParam('token');
@@ -806,43 +815,110 @@ const GoogleAuthCallback = () => {
     const admin = readParam('admin') === 'true';
     const selectedPlan = readPendingSelectedPlan();
 
-    if (token) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      localStorage.setItem('access_token', token);
-      if (refreshToken) {
-        localStorage.setItem('refresh_token', refreshToken);
+    const completeAuthFlow = async () => {
+      if (!token) {
+        navigate('/login?error=google_auth_failed', { replace: true });
+        return;
       }
-      login({ name, email, admin, niche: null });
-      getBillingMe()
-        .then((billing) => {
-          if (billing.hasActiveSubscription) {
-            clearPendingSelectedPlan();
-            navigate(DASHBOARD_ROUTE, { replace: true });
-            return;
-          }
-          navigate(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos', { replace: true });
-        })
-        .catch(() => navigate(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos', { replace: true }));
-    } else {
-      navigate('/login?error=google_auth_failed', { replace: true });
-    }
-  }, [searchParams, navigate, login]);
 
-  return (
-    <div className="bg-zinc-950 text-zinc-100 min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-[#B6FF00] tracking-widest animate-pulse">
-          NEXT LEVEL
-        </h1>
-        <p className="mt-2 text-zinc-400 text-xs tracking-widest uppercase">Autenticando com Google...</p>
+      try {
+        setCallbackError(null);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        localStorage.setItem('access_token', token);
+        if (refreshToken) {
+          localStorage.setItem('refresh_token', refreshToken);
+        }
+        login({ name, email, admin, niche: null });
+
+        const companies = await getCompanies();
+        if (cancelled) return;
+        const list = Array.isArray(companies) ? companies : [];
+        if (!list.length) {
+          navigate('/companies', { replace: true });
+          return;
+        }
+
+        const storedCompanyId = localStorage.getItem(COMPANY_ID_STORAGE_KEY);
+        const selectedCompany =
+          list.find((company) => getCompanyId(company) === storedCompanyId) || list[0];
+        const companyId = getCompanyId(selectedCompany);
+        if (!companyId) {
+          navigate('/companies', { replace: true });
+          return;
+        }
+
+        setSelectedCompanyId(companyId);
+        const billing = await getBillingMe({ companyId });
+        if (cancelled) return;
+        if (billing.hasActiveSubscription) {
+          clearPendingSelectedPlan();
+          navigate(DASHBOARD_ROUTE, { replace: true });
+          return;
+        }
+        navigate(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos', { replace: true });
+      } catch {
+        if (!cancelled) {
+          setCallbackError("Nao foi possivel concluir esta etapa agora.");
+        }
+      }
+    };
+
+    void completeAuthFlow();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, navigate, login, setSelectedCompanyId, retryKey]);
+
+  if (callbackError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#040507] px-5 text-zinc-100">
+        <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-white/[0.04] p-7 text-center shadow-[0_0_70px_rgba(182,255,0,0.08)]">
+          <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
+          <p className="mt-4 text-sm font-bold text-zinc-200">{callbackError}</p>
+          <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessao esta protegida. Tente novamente para validar seu acesso.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setCallbackError(null);
+              handledAttemptRef.current = null;
+              setRetryKey((current) => current + 1);
+            }}
+            className="mt-6 rounded-[16px] bg-lime-300 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-zinc-950"
+          >
+            Tentar novamente
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return <FullscreenLoading />;
 };
 
 const LoggedInLoginRedirect = () => {
   const [searchParams] = useSearchParams();
+  const { isProfileReady, isCompanyReady, selectedCompanyId, logout } = useAuth();
+  const {
+    hasActiveSubscription,
+    isBillingLoaded,
+    isBillingValidating,
+    billingError,
+    refreshBilling,
+  } = useBilling();
   const selectedPlan = readPlanSelectionFromSearch(searchParams) || readPendingSelectedPlan();
+
+  if (!isProfileReady || !isCompanyReady) return <FullscreenLoading />;
+  if (!selectedCompanyId) return <Navigate to="/companies" replace />;
+  if (isBillingValidating || !isBillingLoaded) {
+    if (billingError && !isBillingLoaded) {
+      return <BillingValidationError onRetry={() => void refreshBilling(true)} onLogout={logout} />;
+    }
+    return <FullscreenLoading />;
+  }
+  if (hasActiveSubscription) {
+    clearPendingSelectedPlan();
+    return <Navigate to={DASHBOARD_ROUTE} replace />;
+  }
   return <Navigate to={selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : "/planos"} replace />;
 };
 
@@ -886,16 +962,7 @@ const AppContent = () => {
   return (
     <BrowserRouter>
       <MetadataSync />
-      <Suspense fallback={
-        <div className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-[#B6FF00] text-neon tracking-widest animate-pulse">
-              NEXT LEVEL
-            </h1>
-            <p className="mt-2 text-zinc-500 dark:text-zinc-400 text-xs tracking-widest uppercase">Pronto para avançar</p>
-          </div>
-        </div>
-      }>
+      <Suspense fallback={<FullscreenLoading />}>
         <Routes>
           <Route path="/auth/callback" element={<GoogleAuthCallback />} />
           <Route path="/login" element={isLoggedIn ? <LoggedInLoginRedirect /> : <LoginPage />} />
@@ -916,7 +983,7 @@ const AppContent = () => {
           <Route path="/settings" element={plainShell(<Settings />)} />
           <Route path="/profile" element={plainShell(<Profile />)} />
           <Route path="/integrations" element={featureShell(<Integrations />, "PREMIUM", "Integracoes automaticas exigem Premium")} />
-          <Route path="/companies" element={plainShell(<Companies />)} />
+          <Route path="/companies" element={<ProtectedRoute><Layout><Companies /></Layout></ProtectedRoute>} />
           <Route path="/insights" element={personalizedShell(<Insights />)} />
           <Route path="/financial-flow" element={personalizedShell(<FinancialFlow />)} />
           <Route path="/finance" element={personalizedShell(<FinancialFlow />)} />

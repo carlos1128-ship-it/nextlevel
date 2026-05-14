@@ -170,7 +170,7 @@ function dispatchFriendlyApiError(error: AxiosError) {
 
   const message = getErrorMessage(
     error,
-    'Algo saiu do fluxo esperado, mas sua operação continua protegida.',
+    'Nao foi possivel concluir esta etapa agora.',
   );
 
   window.dispatchEvent(

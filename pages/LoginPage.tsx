@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../App";
 import { api } from "../services/api";
-import { BillingCycle, BillingPlanKey, getBillingMe } from "../src/services/endpoints";
+import { BillingCycle, BillingPlanKey, getBillingMe, getCompanies } from "../src/services/endpoints";
 import {
   buildPlanosSubscribeUrl,
   clearPendingSelectedPlan,
@@ -721,7 +721,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login } = useAuth();
+  const { login, setSelectedCompanyId } = useAuth();
   const [isRegisterView, setIsRegisterView] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -773,7 +773,24 @@ const LoginPage: React.FC = () => {
     login(user);
     const pendingPlan = readPlanSelectionFromSearch(searchParams) || readPendingSelectedPlan();
     try {
-      const billing = await getBillingMe();
+      const companies = await getCompanies();
+      const storedCompanyId = localStorage.getItem("selectedCompanyId");
+      const selectedCompany = companies.find((company) => {
+        const id = (company as { id?: string; _id?: string }).id || (company as { id?: string; _id?: string })._id;
+        return id === storedCompanyId;
+      }) || companies[0];
+      const companyId =
+        (selectedCompany as { id?: string; _id?: string } | undefined)?.id ||
+        (selectedCompany as { id?: string; _id?: string } | undefined)?._id ||
+        null;
+
+      if (!companyId) {
+        navigate("/companies", { replace: true });
+        return;
+      }
+
+      setSelectedCompanyId(companyId);
+      const billing = await getBillingMe({ companyId });
       if (billing.hasActiveSubscription) {
         clearPendingSelectedPlan();
         navigate("/dashboard", { replace: true });
@@ -781,7 +798,7 @@ const LoginPage: React.FC = () => {
       }
       navigate(pendingPlan ? buildPlanosSubscribeUrl(pendingPlan) : "/planos", { replace: true });
     } catch {
-      navigate(pendingPlan ? buildPlanosSubscribeUrl(pendingPlan) : "/planos", { replace: true });
+      setError("Nao foi possivel validar seu acesso agora. Tente novamente em instantes.");
     }
   };
 

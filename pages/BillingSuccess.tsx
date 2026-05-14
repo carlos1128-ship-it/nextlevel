@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth, useBilling } from "../App";
+import NextLevelLoader from "../components/NextLevelLoader";
 import { getCheckoutSessionStatus } from "../src/services/endpoints";
 
 type SuccessState = "confirming" | "success" | "waiting" | "failed";
@@ -17,12 +18,12 @@ const BillingSuccess = () => {
   const [state, setState] = useState<SuccessState>("confirming");
   const [attempts, setAttempts] = useState(0);
   const [checking, setChecking] = useState(false);
-  const [message, setMessage] = useState("Confirmando pagamento...");
+  const [message, setMessage] = useState("Estamos liberando seu acesso.");
   const redirectTimerRef = useRef<number | null>(null);
 
   const title = useMemo(() => {
-    if (state === "success") return "Plano ativado com sucesso";
-    if (state === "waiting") return "Estamos aguardando a confirmacao da Stripe";
+    if (state === "success") return "Pagamento confirmado.";
+    if (state === "waiting") return "Estamos liberando seu acesso.";
     if (state === "failed") return "Nao foi possivel confirmar automaticamente";
     return "Confirmando pagamento...";
   }, [state]);
@@ -31,7 +32,7 @@ const BillingSuccess = () => {
     if (checking) return;
     setChecking(true);
     setState("confirming");
-    setMessage(manual ? "Verificando novamente..." : "Confirmando pagamento...");
+    setMessage("Estamos liberando seu acesso.");
 
     try {
       const result = sessionId
@@ -43,7 +44,7 @@ const BillingSuccess = () => {
       if (active) {
         await refreshBilling(true);
         setState("success");
-        setMessage("Seu plano foi ativado. Redirecionando com seguranca...");
+        setMessage("Plano ativado. Voce sera levado ao dashboard.");
         if (redirectTimerRef.current) window.clearTimeout(redirectTimerRef.current);
         redirectTimerRef.current = window.setTimeout(() => {
           navigate("/dashboard", { replace: true });
@@ -55,12 +56,12 @@ const BillingSuccess = () => {
       setAttempts(nextAttempts);
       if (nextAttempts >= MAX_ATTEMPTS) {
         setState("failed");
-        setMessage("A Stripe ainda nao confirmou a assinatura para esta empresa.");
+        setMessage("Nao conseguimos confirmar automaticamente agora. Tente novamente ou veja seus planos.");
         return;
       }
 
       setState("waiting");
-      setMessage(result?.message || "Webhook ou assinatura ainda em processamento.");
+      setMessage(result?.message || "Estamos liberando seu acesso.");
     } catch {
       const nextAttempts = manual ? 0 : attempts + 1;
       setAttempts(nextAttempts);
@@ -68,7 +69,7 @@ const BillingSuccess = () => {
       setMessage(
         nextAttempts >= MAX_ATTEMPTS
           ? "Nao conseguimos confirmar automaticamente agora."
-          : "Estamos aguardando a confirmacao segura da Stripe.",
+          : "Estamos liberando seu acesso.",
       );
     } finally {
       setChecking(false);
@@ -88,11 +89,15 @@ const BillingSuccess = () => {
     return () => window.clearTimeout(timer);
   }, [state, attempts, sessionId, selectedCompanyId]);
 
+  if (state === "confirming" || state === "waiting") {
+    return <NextLevelLoader />;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#030508] px-6 text-white">
       <div className="w-full max-w-xl rounded-lg border border-lime-400/20 bg-white/[0.04] p-8 text-center shadow-[0_0_60px_rgba(182,255,0,0.08)]">
         <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">
-          Checkout Stripe
+          NEXT LEVEL
         </p>
         <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{title}</h1>
         <p className="mt-4 text-sm leading-7 text-zinc-400">{message}</p>
