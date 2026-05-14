@@ -36,7 +36,7 @@ const navItems: SidebarNavItem[] = [
   { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },
   { id: "insights", path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
-  { id: "market", path: "/market-intel", name: "Marketing", icon: RadarIcon, isPrimary: true },
+  { id: "market", path: "/market-intel", name: "Marketing", icon: RadarIcon },
   { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
   { id: "add-data", path: "/add-data", name: "Adicionar dados", icon: PlusIcon },
   { id: "products", path: "/products", name: "Produtos e Serviços", icon: PackageIcon },
@@ -83,7 +83,19 @@ const COMPANY_STAGE_STORAGE_KEY = "nextlevel:onboarding-company-stage";
 const NICHE_MODAL_DONE_PREFIX = "nextlevel:niche-modal-done:";
 const SIDEBAR_PREF_CACHE_PREFIX = "nextlevel:sidebar-module-preferences:";
 const DEFAULT_COMPANY_STAGE: CompanyStage = "ESCALANDO";
-const DEFAULT_VISIBLE_NAV_IDS = new Set(["home", "reports", "chat", "attendant", "insights", "settings", "profile", "plans", "companies"]);
+const DEFAULT_VISIBLE_NAV_IDS = new Set([
+  "home",
+  "reports",
+  "chat",
+  "attendant",
+  "insights",
+  "add-data",
+  "integrations",
+  "usage",
+  "settings",
+  "profile",
+  "plans",
+]);
 
 function readStoredCompanyStage(): CompanyStage {
   const raw = localStorage.getItem(COMPANY_STAGE_STORAGE_KEY);
@@ -136,17 +148,19 @@ function splitNavItemsByModulePreferences(
   const withPreference = items.map((item, index) => {
     const moduleKey = MODULE_KEY_BY_NAV_ID[item.id] || item.id;
     const preference = preferenceByModule.get(moduleKey);
+    const alwaysVisible = DEFAULT_VISIBLE_NAV_IDS.has(item.id);
     return {
       item,
-      enabled: preference?.enabled ?? true,
+      enabled: alwaysVisible || (preference?.enabled ?? false),
       order: preference?.order ?? index,
+      alwaysVisible,
     };
   });
 
   return {
     primaryItems: withPreference
       .filter((entry) => entry.enabled)
-      .sort((a, b) => a.order - b.order)
+      .sort((a, b) => Number(b.alwaysVisible) - Number(a.alwaysVisible) || a.order - b.order)
       .map((entry) => entry.item),
     moreItems: withPreference
       .filter((entry) => !entry.enabled)

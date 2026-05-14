@@ -29,7 +29,7 @@ const BUSINESS_OPTIONS: Array<{ key: BusinessType; label: string; description: s
   { key: "retail_store", label: "Loja fisica / varejo", description: "Produtos, horarios de pico e ticket médio." },
   { key: "restaurant", label: "Restaurante / delivery", description: "Cardapio, pedidos, pico e custos de entrega." },
   { key: "marketplace_seller", label: "Marketplace seller", description: "Taxas, frete, margem e produtos campeoes." },
-  { key: "other", label: "Outro", description: "Configuração balanceada para comecar rápido." },
+  { key: "other", label: "Outros", description: "Configuração balanceada para comecar rápido." },
 ];
 
 const BUSINESS_LABELS = Object.fromEntries(BUSINESS_OPTIONS.map((item) => [item.key, item.label])) as Record<BusinessType, string>;
@@ -117,15 +117,31 @@ const MODULE_LABELS: Record<string, string> = {
   insights: "Insights",
 };
 
+const MODULE_PRIORITY_OPTIONS = [
+  { key: "products", label: "Produtos/servicos" },
+  { key: "attendant", label: "Atendente IA" },
+  { key: "integrations", label: "Integracoes" },
+  { key: "market_intelligence", label: "Market intel" },
+  { key: "automations", label: "Projetos/automacoes" },
+  { key: "customers", label: "Clientes" },
+  { key: "costs", label: "Custos" },
+  { key: "financial", label: "Financeiro" },
+];
+
 const DEFAULT_FORM: OnboardingForm = {
   businessType: "ecommerce_physical",
   businessModel: "",
   mainGoal: "",
+  mainGoals: [],
+  priorityModules: ["attendant", "products"],
+  nonPriorityModules: [],
+  preferredDashboardFocus: "roi",
   salesChannel: "",
   companySize: "",
   monthlyRevenueRange: "",
   dataMaturity: "",
   originalBusinessDescription: "",
+  customBusinessDescription: "",
   detectedBusinessType: null,
   classificationConfidence: null,
   usesPaidTraffic: false,
@@ -203,9 +219,9 @@ const OnboardingPersonalization = () => {
   const canGoNext = useMemo(() => {
     if (step === 0) {
       if (form.businessType !== "other") return Boolean(form.businessType);
-      return Boolean(form.originalBusinessDescription?.trim());
+      return Boolean((form.customBusinessDescription || form.originalBusinessDescription)?.trim());
     }
-    if (step === 2) return Boolean(form.mainGoal);
+    if (step === 2) return Boolean(form.mainGoal || form.mainGoals?.length);
     if (step === 3) return Boolean(form.companySize && form.monthlyRevenueRange && form.dataMaturity);
     return true;
   }, [form, step]);
@@ -218,6 +234,23 @@ const OnboardingPersonalization = () => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
+  const toggleListValue = (key: "mainGoals" | "priorityModules" | "nonPriorityModules", value: string) => {
+    setForm((current) => {
+      const currentValues = Array.isArray(current[key]) ? [...(current[key] as string[])] : [];
+      const nextValues = currentValues.includes(value)
+        ? currentValues.filter((item) => item !== value)
+        : [...currentValues, value];
+      const patch: Partial<OnboardingForm> = { [key]: nextValues } as Partial<OnboardingForm>;
+      if (key === "priorityModules") {
+        patch.nonPriorityModules = (current.nonPriorityModules || []).filter((item) => item !== value);
+      }
+      if (key === "nonPriorityModules") {
+        patch.priorityModules = (current.priorityModules || []).filter((item) => item !== value);
+      }
+      return { ...current, ...patch };
+    });
+  };
+
   const goNext = () => {
     if (!canGoNext) {
       setError("Preencha esta etapa para montarmos uma recomendação precisa.");
@@ -227,14 +260,15 @@ const OnboardingPersonalization = () => {
     setStep((current) => Math.min(4, current + 1));
   };
 
-  const submit = async (applyRecommendedSetup: boolean) => {
+  const submit = async (applyRecommendedSetup: boolean, onboardingSkipped = false) => {
     try {
       setSaving(true);
       setError(null);
       const result = await saveCompanyOnboarding(
         {
           ...form,
-          applyRecommendedSetup,
+          applyRecommendedSetup: onboardingSkipped ? false : applyRecommendedSetup,
+          onboardingSkipped,
         },
         { companyId: selectedCompanyId },
       );
@@ -244,7 +278,7 @@ const OnboardingPersonalization = () => {
       window.dispatchEvent(new CustomEvent("dashboard:preferences-updated", { detail: { companyId: selectedCompanyId } }));
       window.dispatchEvent(new CustomEvent("company:personalization-updated", { detail: { companyId: selectedCompanyId } }));
       addToast("Experiencia personalizada com sucesso.", "success");
-      navigate(applyRecommendedSetup ? safeReturnTo : "/settings#dashboard", { replace: true });
+      navigate(onboardingSkipped ? DASHBOARD_ROUTE : applyRecommendedSetup ? safeReturnTo : "/settings#dashboard", { replace: true });
     } catch (err) {
       setError(getErrorMessage(err, "Não foi possível salvar a personalização."));
       addToast(getErrorMessage(err, "Não foi possível salvar a personalização."), "error");
@@ -307,11 +341,14 @@ const OnboardingPersonalization = () => {
                     Descrição livre
                   </span>
                   <span className="mt-2 block text-sm font-bold text-zinc-200">
-                    Descreva com o que sua empresa trabalha
+                    Descreva seu negocio
                   </span>
                   <textarea
-                    value={form.originalBusinessDescription || ""}
-                    onChange={(event) => updateField("originalBusinessDescription", event.target.value)}
+                    value={form.customBusinessDescription || form.originalBusinessDescription || ""}
+                    onChange={(event) => {
+                      updateField("customBusinessDescription", event.target.value);
+                      updateField("originalBusinessDescription", event.target.value);
+                    }}
                     rows={4}
                     className="mt-4 w-full resize-none rounded-2xl border border-zinc-800 bg-[#05070a] px-4 py-3 text-sm font-medium text-zinc-100 outline-none transition focus:border-lime-400"
                     placeholder="Ex: consultoria para restaurantes, curso online, clinica odontologica, loja de pecas..."
@@ -362,15 +399,44 @@ const OnboardingPersonalization = () => {
                   <button
                     key={goal}
                     type="button"
-                    onClick={() => updateField("mainGoal", goal)}
+                    onClick={() => {
+                      toggleListValue("mainGoals", goal);
+                      updateField("mainGoal", goal);
+                    }}
                     className={`rounded-2xl border px-5 py-4 text-left text-sm font-black transition ${
-                      form.mainGoal === goal ? "border-lime-400 bg-lime-400 text-zinc-950" : "border-zinc-800 bg-zinc-950 text-zinc-300"
+                      form.mainGoals?.includes(goal) ? "border-lime-400 bg-lime-400 text-zinc-950" : "border-zinc-800 bg-zinc-950 text-zinc-300"
                     }`}
                   >
                     {goal}
                   </button>
                 ))}
               </div>
+              <div className="mt-8 grid gap-5 lg:grid-cols-2">
+                <ModulePicker
+                  title="Prioridade na sidebar"
+                  values={form.priorityModules || []}
+                  onToggle={(value) => toggleListValue("priorityModules", value)}
+                />
+                <ModulePicker
+                  title="Nao e prioridade agora"
+                  values={form.nonPriorityModules || []}
+                  onToggle={(value) => toggleListValue("nonPriorityModules", value)}
+                />
+              </div>
+              <label className="mt-5 block rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
+                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Foco do dashboard</span>
+                <select
+                  value={form.preferredDashboardFocus || ""}
+                  onChange={(event) => updateField("preferredDashboardFocus", event.target.value)}
+                  className="mt-3 w-full rounded-2xl border border-zinc-800 bg-[#05070a] px-4 py-3 text-sm font-bold text-zinc-100 outline-none transition focus:border-lime-400"
+                >
+                  <option value="roi">ROI e lucro</option>
+                  <option value="sales">Vendas</option>
+                  <option value="customers">Clientes</option>
+                  <option value="operations">Operacao</option>
+                  <option value="automation">Automacao</option>
+                </select>
+              </label>
             </section>
           ) : null}
 
@@ -430,13 +496,23 @@ const OnboardingPersonalization = () => {
           ) : null}
 
           <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-            <button
-              type="button"
-              onClick={() => (step === 0 ? navigate("/plans") : setStep((current) => Math.max(0, current - 1)))}
-              className="rounded-2xl border border-zinc-800 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 transition hover:text-zinc-100"
-            >
-              {step === 0 ? "Ver plano" : "Voltar"}
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => (step === 0 ? navigate("/plans") : setStep((current) => Math.max(0, current - 1)))}
+                className="rounded-2xl border border-zinc-800 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 transition hover:text-zinc-100"
+              >
+                {step === 0 ? "Ver plano" : "Voltar"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void submit(false, true)}
+                disabled={saving}
+                className="rounded-2xl border border-zinc-800 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-500 transition hover:text-zinc-100 disabled:opacity-50"
+              >
+                Pular por enquanto
+              </button>
+            </div>
             {step < 4 ? (
               <button
                 type="button"
@@ -506,6 +582,39 @@ const SelectCard = ({
       ))}
     </select>
   </label>
+);
+
+const ModulePicker = ({
+  title,
+  values,
+  onToggle,
+}: {
+  title: string;
+  values: string[];
+  onToggle: (value: string) => void;
+}) => (
+  <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5">
+    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">{title}</p>
+    <div className="mt-4 flex flex-wrap gap-2">
+      {MODULE_PRIORITY_OPTIONS.map((option) => {
+        const active = values.includes(option.key);
+        return (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => onToggle(option.key)}
+            className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] transition ${
+              active
+                ? "border-lime-400 bg-lime-400 text-zinc-950"
+                : "border-zinc-800 bg-[#05070a] text-zinc-400 hover:border-lime-400/40 hover:text-zinc-100"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  </div>
 );
 
 const PreviewCard = ({ title, items }: { title: string; items: string[] }) => (

@@ -73,6 +73,7 @@ const Plans = () => {
   const [plans, setPlans] = useState<BillingPlan[]>(fallbackPlans);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [currentBillingCycle, setCurrentBillingCycle] = useState<BillingCycle | null>(null);
   const [currentSource, setCurrentSource] = useState<string | null>(null);
   const [loadingPlanKey, setLoadingPlanKey] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -81,6 +82,7 @@ const Plans = () => {
   const [billingConfigMessage, setBillingConfigMessage] = useState<string | null>(null);
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+  const [isLoadingBilling, setIsLoadingBilling] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -120,18 +122,22 @@ const Plans = () => {
 
   useEffect(() => {
     if (!isLoggedIn) return;
+    setIsLoadingBilling(true);
     getBillingMe({ companyId: selectedCompanyId })
       .then((billing) => {
         setHasActiveSubscription(Boolean(billing.hasActiveSubscription));
         setCurrentPlan(billing.subscription?.planKey || billing.activePlan || null);
+        setCurrentBillingCycle(billing.subscription?.billingCycle || null);
         setCurrentSource(billing.subscription?.source || null);
       })
-      .catch(() => setHasActiveSubscription(false));
+      .catch(() => setHasActiveSubscription(false))
+      .finally(() => setIsLoadingBilling(false));
   }, [isLoggedIn, selectedCompanyId]);
 
   const orderedPlans = useMemo(() => [...plans].sort((a, b) => a.level - b.level), [plans]);
   const isInitialBillingLoading = isLoadingPlans || isLoadingConfig;
   const isActuallyUnavailable = !isInitialBillingLoading && checkoutEnabled === false;
+  const currentPlanLevel = orderedPlans.find((plan) => plan.key === currentPlan)?.level || 0;
 
   const updateBillingCycle = (cycle: BillingCycle) => {
     setBillingCycle(cycle);
@@ -148,6 +154,12 @@ const Plans = () => {
 
     if (!isLoggedIn) {
       navigate(`/login?intent=subscribe&plan=${planKey}&cycle=${billingCycle}`);
+      return;
+    }
+
+    if (hasActiveSubscription) {
+      setMessage("Para alterar ou cancelar sua assinatura, acesse o portal seguro da Stripe.");
+      await openPortal();
       return;
     }
 
@@ -186,38 +198,6 @@ const Plans = () => {
     }
   };
 
-  if (isLoggedIn && hasActiveSubscription) {
-    return (
-      <div className="min-h-screen bg-[#030508] px-6 py-12 text-white">
-        <div className="mx-auto max-w-3xl rounded-lg border border-lime-400/20 bg-white/[0.04] p-8 text-center shadow-[0_0_60px_rgba(182,255,0,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Assinatura ativa</p>
-          <h1 className="mt-4 text-4xl font-black tracking-tight">Seu acesso esta liberado</h1>
-          <p className="mt-4 text-zinc-400">
-            Plano atual: {planLabel(currentPlan)}{currentSource ? ` (${currentSource})` : ""}.
-          </p>
-          {message ? <p className="mt-4 text-sm font-semibold text-amber-200">{message}</p> : null}
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={openPortal}
-              disabled={portalLoading}
-              className="rounded-lg border border-lime-300/40 px-7 py-3 text-sm font-black uppercase tracking-[0.14em] text-lime-200 disabled:opacity-60"
-            >
-              {portalLoading ? "Abrindo..." : "Gerenciar plano"}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="rounded-lg bg-lime-300 px-7 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-950"
-            >
-              Ir para o dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#030508] px-5 py-8 text-white">
       <div className="mx-auto max-w-7xl">
@@ -231,12 +211,26 @@ const Plans = () => {
             <p className="mt-2 text-xs font-semibold text-zinc-500">
               {isInitialBillingLoading
                 ? "Preparando pagamento..."
+                : isLoadingBilling
+                  ? "Validando plano atual..."
                 : paymentProvider === "STRIPE" && checkoutEnabled
                   ? "Pagamento seguro via Stripe"
                   : "Pagamento temporariamente indisponivel."}
             </p>
             {params.get("upgrade") ? (
               <p className="mt-3 text-sm font-bold text-lime-300">Seu plano atual nao da acesso a esse recurso.</p>
+            ) : null}
+            {isLoggedIn && hasActiveSubscription ? (
+              <div className="mt-5 rounded-lg border border-lime-400/20 bg-lime-400/10 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-lime-300">Plano atual</p>
+                <p className="mt-2 text-lg font-black text-white">
+                  {planLabel(currentPlan)} {currentBillingCycle === "ANNUAL" ? "anual" : "mensal"}
+                  {currentSource ? ` (${currentSource})` : ""}
+                </p>
+                <p className="mt-2 text-xs leading-5 text-lime-100/80">
+                  Para alterar ou cancelar sua assinatura, acesse o portal seguro da Stripe.
+                </p>
+              </div>
             ) : null}
             {selectedPlan ? (
               <p className="mt-3 text-sm font-bold text-lime-300">
@@ -262,6 +256,24 @@ const Plans = () => {
               </button>
             </div>
             {isLoggedIn ? (
+              <>
+              {hasActiveSubscription ? (
+                <button
+                  type="button"
+                  onClick={openPortal}
+                  disabled={portalLoading}
+                  className="rounded-lg border border-lime-300/40 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-lime-200 disabled:opacity-60"
+                >
+                  {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => navigate("/dashboard")}
+                className="rounded-lg border border-white/10 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/[0.06]"
+              >
+                Dashboard
+              </button>
               <button
                 type="button"
                 onClick={logout}
@@ -269,6 +281,7 @@ const Plans = () => {
               >
                 Sair
               </button>
+              </>
             ) : null}
           </div>
         </header>
@@ -297,13 +310,22 @@ const Plans = () => {
             const available = !isInitialBillingLoading && Boolean(price?.available) && checkoutEnabled === true;
             const loading = loadingPlanKey === plan.key;
             const isSelected = selectedPlan?.planKey === plan.key;
+            const isCurrentPlan = hasActiveSubscription && currentPlan === plan.key;
+            const isUpgrade = hasActiveSubscription && plan.level > currentPlanLevel;
+            const actionAvailable = hasActiveSubscription || available;
             const buttonLabel = loading
               ? "Preparando..."
+              : portalLoading && hasActiveSubscription
+                ? "Abrindo portal..."
               : isInitialBillingLoading
                 ? "Carregando..."
-                : available
-                  ? "Continuar para Stripe"
-                  : "Plano indisponivel";
+                : isCurrentPlan
+                  ? "Plano atual"
+                  : hasActiveSubscription
+                    ? (isUpgrade ? "Fazer upgrade" : "Alterar para este plano")
+                    : available
+                      ? "Continuar para Stripe"
+                      : "Plano indisponivel";
 
             return (
               <article
@@ -316,9 +338,14 @@ const Plans = () => {
                       : "border-white/[0.08] bg-white/[0.035]"
                 }`}
               >
-                {isSelected ? (
+                {isSelected && !isCurrentPlan ? (
                   <span className="absolute left-5 top-5 rounded-full border border-lime-300/40 bg-lime-300/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-lime-200">
                     Selecionado
+                  </span>
+                ) : null}
+                {isCurrentPlan ? (
+                  <span className="absolute left-5 top-5 rounded-full border border-lime-300/40 bg-lime-300/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-lime-200">
+                    Plano atual
                   </span>
                 ) : null}
                 {plan.key === "PREMIUM" ? (
@@ -352,18 +379,22 @@ const Plans = () => {
                 </ul>
                 <button
                   type="button"
-                  disabled={!available || loading || isInitialBillingLoading}
+                  disabled={!actionAvailable || loading || isInitialBillingLoading || (hasActiveSubscription && portalLoading)}
                   onClick={() => subscribe(plan.key)}
                   className={`mt-7 rounded-lg px-5 py-4 text-sm font-black uppercase tracking-[0.14em] transition ${
-                    available
+                    actionAvailable
                       ? "bg-lime-300 text-zinc-950 hover:brightness-105"
                       : "cursor-not-allowed border border-amber-400/25 bg-amber-400/10 text-amber-200"
                   }`}
                 >
                   {buttonLabel}
                 </button>
-                <p className={`mt-3 min-h-10 text-xs font-semibold leading-5 ${available ? "text-lime-200" : "text-zinc-500"}`}>
-                  {available ? "Checkout seguro via Stripe." : "Este plano ainda nao esta pronto para pagamento."}
+                <p className={`mt-3 min-h-10 text-xs font-semibold leading-5 ${actionAvailable ? "text-lime-200" : "text-zinc-500"}`}>
+                  {hasActiveSubscription
+                    ? "Troca, downgrade, cancelamento e ciclo de cobranca pelo portal Stripe."
+                    : available
+                      ? "Checkout seguro via Stripe."
+                      : "Este plano ainda nao esta pronto para pagamento."}
                 </p>
               </article>
             );

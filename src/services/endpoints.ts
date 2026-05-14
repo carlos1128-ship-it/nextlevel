@@ -1910,6 +1910,18 @@ export type BillingMeResponse = {
   aiUsage?: unknown;
 };
 
+export type CheckoutSessionStatusResponse = {
+  status: "ACTIVE" | "AWAITING_STRIPE_WEBHOOK" | "PENDING_PAYMENT" | string;
+  hasActiveSubscription: boolean;
+  message?: string;
+  checkoutSession?: {
+    id: string;
+    stripeStatus: string | null;
+    paymentStatus: string | null;
+  };
+  billing?: BillingMeResponse;
+};
+
 export type BillingConfigResponse = {
   paymentProvider: "STRIPE" | string;
   checkoutEnabled: boolean;
@@ -1931,6 +1943,19 @@ export async function getBillingMe(params?: { companyId?: string | null }) {
   const { data } = await api.get<BillingMeResponse>("/billing/me", {
     params: params?.companyId ? { companyId: params.companyId } : undefined,
   });
+  return data;
+}
+
+export async function getCheckoutSessionStatus(
+  sessionId: string,
+  params?: { companyId?: string | null },
+) {
+  const { data } = await api.get<CheckoutSessionStatusResponse>(
+    `/billing/checkout-session/${encodeURIComponent(sessionId)}/status`,
+    {
+      params: params?.companyId ? { companyId: params.companyId } : undefined,
+    },
+  );
   return data;
 }
 
