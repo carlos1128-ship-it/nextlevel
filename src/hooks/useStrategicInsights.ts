@@ -34,7 +34,7 @@ type CachedStrategicInsightsResult = StrategicInsightsResult & {
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const RETRY_DELAY_MS = 2000;
 const STORAGE_PREFIX = "strategic_insights_cache_v1";
-const MAX_INSIGHT_CHARS = 120;
+const MAX_INSIGHT_CHARS = 420;
 
 const memoryCache = new Map<string, CachedStrategicInsightsResult>();
 const inFlightRequests = new Map<string, Promise<StrategicInsightsResult>>();
@@ -49,17 +49,18 @@ function buildStorageKey(companyId: string, detailLevel: DetailLevel) {
 
 function inferCategory(content: string): string {
   const text = content.toLowerCase();
-  if (text.includes("risco") || text.includes("ameaca")) return "Risco";
+  if (text.includes("risco")) return "Risco";
   if (text.includes("oportunidade")) return "Oportunidade";
-  if (text.includes("recomend")) return "Recomendação";
-  if (text.includes("padrao") || text.includes("tendencia")) return "Padrão";
-  return "Sugestão da IA";
+  if (text.includes("crescimento")) return "Crescimento";
+  if (text.includes("acao") || text.includes("recomend")) return "Acao recomendada";
+  if (text.includes("atencao")) return "Atencao";
+  return "Insight";
 }
 
 function inferColor(category: string): StrategicInsightCard["color"] {
   if (category === "Risco") return "red";
-  if (category === "Oportunidade") return "green";
-  if (category === "Recomendacao") return "purple";
+  if (category === "Oportunidade" || category === "Crescimento") return "green";
+  if (category === "Acao recomendada") return "purple";
   return "blue";
 }
 
@@ -71,13 +72,10 @@ function compactText(value: string) {
 
 function sanitizeInsight(value: string) {
   let text = value || "";
-  text = text.replace(/\*\*/g, "");
+  text = text.replace(/\*/g, "");
   const dadosIdx = text.toLowerCase().indexOf("dados:");
-  if (dadosIdx >= 0) {
-    text = text.slice(0, dadosIdx).trim();
-  }
-  text = text.replace(/\n{2,}/g, "\n");
-  return text.trim();
+  if (dadosIdx >= 0) text = text.slice(0, dadosIdx).trim();
+  return text.replace(/\n{2,}/g, "\n").trim();
 }
 
 function stripInsightLead(value: string) {
@@ -96,12 +94,12 @@ function stripInsightLead(value: string) {
 
 function normalizeInsightLine(value: string) {
   const compact = sanitizeInsight(value)
-    .replace(/^(padroes|padrões|riscos|oportunidades|recomendacoes|recomendações)\s*:\s*/i, "")
-    .replace(/^[-*•]\s*/, "")
+    .replace(/^(padroes|riscos|oportunidades|recomendacoes)\s*:\s*/i, "")
+    .replace(/^[-*]\s*/, "")
     .split(/[.!?](?:\s|$)/)
     .map((sentence) => sentence.trim())
     .filter(Boolean)
-    .slice(0, 2)
+    .slice(0, 4)
     .join(". ");
 
   return compactText(stripInsightLead(compact).replace(/\s+/g, " ").trim());
@@ -112,7 +110,7 @@ function parseInsightLines(value: string) {
     .split(/\n+/)
     .map((item) => normalizeInsightLine(item))
     .filter(Boolean)
-    .slice(0, 4);
+    .slice(0, 6);
 }
 
 function cardsToRawText(cards: StrategicInsightCard[]) {
@@ -122,9 +120,7 @@ function cardsToRawText(cards: StrategicInsightCard[]) {
 function readCachedResult(companyId: string, detailLevel: DetailLevel) {
   const key = buildCacheKey(companyId, detailLevel);
   const inMemory = memoryCache.get(key);
-  if (inMemory && Date.now() - inMemory.updatedAt < CACHE_TTL_MS) {
-    return inMemory;
-  }
+  if (inMemory && Date.now() - inMemory.updatedAt < CACHE_TTL_MS) return inMemory;
 
   const raw = localStorage.getItem(buildStorageKey(companyId, detailLevel));
   if (!raw) return null;
@@ -146,10 +142,7 @@ function readCachedResult(companyId: string, detailLevel: DetailLevel) {
 function writeCachedResult(result: CachedStrategicInsightsResult) {
   const key = buildCacheKey(result.companyId, result.detailLevel);
   memoryCache.set(key, result);
-  localStorage.setItem(
-    buildStorageKey(result.companyId, result.detailLevel),
-    JSON.stringify(result)
-  );
+  localStorage.setItem(buildStorageKey(result.companyId, result.detailLevel), JSON.stringify(result));
 }
 
 function getAiErrorDetails(error: unknown) {
@@ -160,10 +153,7 @@ function getAiErrorDetails(error: unknown) {
       typeof payload === "string"
         ? payload
         : payload?.message || payload?.error || payload?.detail || error.message;
-    return {
-      status,
-      message: status ? `[${status}] ${message}` : message,
-    };
+    return { status, message: status ? `[${status}] ${message}` : message };
   }
 
   return {
@@ -185,7 +175,7 @@ function sleep(ms: number) {
 async function requestAiAnalysis(
   companyId: string,
   detailLevel: DetailLevel,
-  summaryOverride?: DashboardSummary | null
+  summaryOverride?: DashboardSummary | null,
 ) {
   const [summary, financialReport] = await Promise.all([
     summaryOverride ? Promise.resolve(summaryOverride) : getDashboardSummary({ companyId }),
@@ -203,7 +193,7 @@ async function requestAiAnalysis(
       },
       goals: [],
     },
-    detailLevel
+    detailLevel,
   );
 
   const text =
@@ -229,49 +219,34 @@ async function requestAiAnalysis(
 }
 
 async function requestAnalyticsFallback(companyId: string) {
-  const { data } = await api.get("/insights", {
-    params: { companyId },
-  });
+  const { data } = await api.get("/insights", { params: { companyId } });
 
   const cards = Array.isArray(data)
     ? data
         .map((item: any) => {
-          const baseDescription = normalizeInsightLine(String(item?.description ?? ""));
+          const metadata = item?.metadata || {};
+          const parts = [
+            item?.description,
+            metadata?.whyItMatters ? `Por que importa: ${metadata.whyItMatters}` : null,
+            metadata?.recommendedAction ? `Acao: ${metadata.recommendedAction}` : null,
+            metadata?.expectedImpact ? `Impacto esperado: ${metadata.expectedImpact}` : null,
+          ].filter(Boolean);
+
+          const baseDescription = compactText(sanitizeInsight(String(parts.join(" "))));
           if (!baseDescription) return null;
           const description =
-            item?.value != null ? compactText(`${baseDescription} • ${item.value}`) : baseDescription;
-          const category =
-            item?.type === "metric"
-              ? "Metrica"
-              : item?.type === "peak"
-                ? "Pico"
-                : item?.type === "product"
-                  ? "Produto"
-                  : item?.type === "growth"
-                    ? "Crescimento"
-                    : item?.type === "alert"
-                      ? "Alerta"
-                      : item?.type === "info"
-                        ? "Info"
-                        : inferCategory(baseDescription);
-
-          const colorMap: Record<string, StrategicInsightCard["color"]> = {
-            Metrica: "blue",
-            Pico: "purple",
-            Produto: "green",
-            Crescimento: "green",
-            Alerta: "red",
-            Info: "blue",
-          };
+            item?.value != null ? compactText(`${baseDescription} Valor: ${item.value}`) : baseDescription;
+          const category = String(metadata?.priority || inferCategory(baseDescription));
 
           return {
             title: item?.title ?? "Insight",
             description,
             category,
-            color: colorMap[category] || inferColor(category),
+            color: inferColor(category),
           } as StrategicInsightCard;
         })
         .filter(Boolean)
+        .slice(0, 6)
     : [];
 
   return {
@@ -283,18 +258,14 @@ async function requestAnalyticsFallback(companyId: string) {
 async function fetchStrategicInsights(
   companyId: string,
   detailLevel: DetailLevel,
-  options?: { forceFresh?: boolean; summary?: DashboardSummary | null }
+  options?: { forceFresh?: boolean; summary?: DashboardSummary | null },
 ): Promise<StrategicInsightsResult> {
   const cached = readCachedResult(companyId, detailLevel);
-  if (cached && !options?.forceFresh) {
-    return { ...cached, source: "cache" };
-  }
+  if (cached && !options?.forceFresh) return { ...cached, source: "cache" };
 
   const cacheKey = buildCacheKey(companyId, detailLevel);
   const existing = inFlightRequests.get(cacheKey);
-  if (existing) {
-    return existing;
-  }
+  if (existing) return existing;
 
   const request: Promise<StrategicInsightsResult> = (async () => {
     try {
@@ -303,9 +274,7 @@ async function fetchStrategicInsights(
       try {
         aiResult = await requestAiAnalysis(companyId, detailLevel, options?.summary);
       } catch (error) {
-        if (!isRateLimitError(error)) {
-          throw error;
-        }
+        if (!isRateLimitError(error)) throw error;
         await sleep(RETRY_DELAY_MS);
         aiResult = await requestAiAnalysis(companyId, detailLevel, options?.summary);
       }
@@ -331,15 +300,11 @@ async function fetchStrategicInsights(
         source: "analytics",
         updatedAt: Date.now(),
         error: null,
-      } as StrategicInsightsResult;
+      };
     } catch (error) {
       const fallbackCache = readCachedResult(companyId, detailLevel);
       if (fallbackCache) {
-        return {
-          ...fallbackCache,
-          source: "cache" as const,
-          error: getAiErrorDetails(error).message,
-        };
+        return { ...fallbackCache, source: "cache", error: getAiErrorDetails(error).message };
       }
 
       const fallback = await requestAnalyticsFallback(companyId);
@@ -349,7 +314,7 @@ async function fetchStrategicInsights(
         source: "analytics",
         updatedAt: Date.now(),
         error: getAiErrorDetails(error).message,
-      } as StrategicInsightsResult;
+      };
     } finally {
       inFlightRequests.delete(cacheKey);
     }
@@ -376,7 +341,7 @@ export function useStrategicInsights({
 
   const cacheKey = useMemo(
     () => (companyId ? buildCacheKey(companyId, detailLevel) : null),
-    [companyId, detailLevel]
+    [companyId, detailLevel],
   );
 
   const load = useCallback(
@@ -392,12 +357,8 @@ export function useStrategicInsights({
 
       const requestId = requestIdRef.current + 1;
       requestIdRef.current = requestId;
-
-      if (options?.forceFresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (options?.forceFresh) setRefreshing(true);
+      else setLoading(true);
 
       try {
         const result = await fetchStrategicInsights(companyId, detailLevel, {
@@ -418,7 +379,7 @@ export function useStrategicInsights({
         }
       }
     },
-    [companyId, detailLevel, enabled, summary]
+    [companyId, detailLevel, enabled, summary],
   );
 
   useEffect(() => {

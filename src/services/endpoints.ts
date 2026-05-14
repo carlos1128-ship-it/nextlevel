@@ -1887,6 +1887,7 @@ export type BillingPlan = {
 
 export type BillingMeResponse = {
   hasActiveSubscription: boolean;
+  activePlan: BillingPlanKey | null;
   subscription: null | {
     id: string;
     planKey: BillingPlanKey;
@@ -1895,12 +1896,22 @@ export type BillingMeResponse = {
     provider?: string | null;
     source?: string | null;
     currentPeriodEnd: string | null;
+    cancelAtPeriodEnd?: boolean;
     expiresAt: string | null;
   };
+  limits?: Record<string, unknown>;
+  features?: {
+    integrations?: boolean;
+    aiChat?: boolean;
+    basicDashboard?: boolean;
+    advancedInsights?: boolean;
+    reports?: boolean;
+  };
+  aiUsage?: unknown;
 };
 
 export type BillingConfigResponse = {
-  paymentProvider: "MANUAL" | "ABACATEPAY" | "CAKTO" | "ASAAS" | "MERCADO_PAGO" | string;
+  paymentProvider: "STRIPE" | string;
   checkoutEnabled: boolean;
   message: string | null;
   webhookUrl?: string | null;
@@ -1926,13 +1937,16 @@ export async function getBillingMe(params?: { companyId?: string | null }) {
 export async function createBillingCheckout(payload: {
   planKey: BillingPlanKey;
   billingCycle: BillingCycle;
+  billingInterval?: "monthly" | "yearly";
   companyId?: string | null;
 }) {
   const { data } = await api.post<{
     checkoutUrl: string;
-    subscriptionId: string;
-    provider: string;
-    status: string;
   }>("/billing/checkout", payload);
+  return data;
+}
+
+export async function createBillingPortal(payload?: { companyId?: string | null }) {
+  const { data } = await api.post<{ portalUrl: string }>("/billing/portal", payload || {});
   return data;
 }

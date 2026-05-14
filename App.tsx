@@ -456,7 +456,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
         userKey,
         status: billing.hasActiveSubscription ? "ACTIVE" : "INACTIVE",
         hasActiveSubscription: Boolean(billing.hasActiveSubscription),
-        currentPlan: billing.subscription?.planKey || null,
+        currentPlan: billing.subscription?.planKey || billing.activePlan || null,
         checkedAt: Date.now(),
       };
       writeBillingCache(entry);

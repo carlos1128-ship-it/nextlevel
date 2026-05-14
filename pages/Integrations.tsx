@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
+import { useNavigate } from "react-router-dom";
 import { useAuth, useBilling } from "../App";
+import { LockIcon } from "../components/icons";
 import { useToast } from "../components/Toast";
 import {
   disconnectMercadoLivre,
@@ -72,6 +74,7 @@ function sanitizeCustomerConnectionMessage(message?: string | null) {
 }
 
 const Integrations = () => {
+  const navigate = useNavigate();
   const { selectedCompanyId } = useAuth();
   const { currentPlan } = useBilling();
   const { addToast } = useToast();
@@ -116,7 +119,13 @@ const Integrations = () => {
     connection?.automationStatus === "configured" ? "Atendimento pronto" : "Aguardando conexão";
 
   useEffect(() => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !canUseMainIntegrations) {
+      setConnection(null);
+      setInstagramStatus(null);
+      setMercadoLivreStatus(null);
+      setMercadoLivreDashboard(null);
+      return;
+    }
     getWhatsappConnectionStatus(selectedCompanyId)
       .then(setConnection)
       .catch(() => undefined);
@@ -134,7 +143,7 @@ const Integrations = () => {
       setMercadoLivreStatus(null);
       setMercadoLivreDashboard(null);
     }
-  }, [canUseMarketplaces, selectedCompanyId]);
+  }, [canUseMainIntegrations, canUseMarketplaces, selectedCompanyId]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -156,7 +165,7 @@ const Integrations = () => {
   }, [addToast, canUseMarketplaces, selectedCompanyId]);
 
   useEffect(() => {
-    if (!selectedCompanyId) return;
+    if (!selectedCompanyId || !canUseMainIntegrations) return;
     const shouldPoll =
       connection?.status === "creating" ||
       connection?.status === "creating_instance" ||
@@ -172,7 +181,7 @@ const Integrations = () => {
     }, 3000);
 
     return () => window.clearInterval(timer);
-  }, [connection?.status, selectedCompanyId]);
+  }, [canUseMainIntegrations, connection?.status, selectedCompanyId]);
 
   useEffect(() => {
     if (!isCooldownStatus(connection?.status)) {
@@ -395,6 +404,49 @@ const Integrations = () => {
       setMercadoLivreLoading(false);
     }
   };
+
+  if (!canUseMainIntegrations) {
+    return (
+      <main className="space-y-7">
+        <section className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
+            Integrações
+          </p>
+          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
+            Canais conectados ao lucro
+          </h1>
+        </section>
+
+        <section className="rounded-lg border border-red-500/30 bg-[linear-gradient(155deg,rgba(127,29,29,0.35),rgba(9,9,11,0.96)_58%)] p-7 shadow-2xl shadow-red-950/20">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/15 text-red-300">
+                <LockIcon className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-red-300">
+                  Disponível no Premium
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-zinc-50">
+                  Assine Premium para ter integrações e mais.
+                </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-300">
+                  As integrações automáticas liberam conexão com canais de venda, atendimento e dados em tempo real para sua empresa.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/planos?upgrade=integrations")}
+              className="rounded-lg bg-lime-300 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 transition hover:brightness-105"
+            >
+              Ver planos
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="space-y-7">
