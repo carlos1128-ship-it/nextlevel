@@ -1,73 +1,117 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
+type RevealDirection = "up" | "down" | "left" | "right" | "none";
+type RevealTag = "div" | "section" | "article" | "aside" | "ul";
 
 type RevealOnScrollProps = {
   children: React.ReactNode;
+  as?: RevealTag;
+  id?: string;
   className?: string;
   delay?: number;
   duration?: number;
+  direction?: RevealDirection;
   once?: boolean;
-  yOffset?: number;
-  as?: React.ElementType;
-  id?: string;
+  stagger?: number;
+  style?: React.CSSProperties;
 };
+
+function getOffset(direction: RevealDirection) {
+  switch (direction) {
+    case "down":
+      return { x: 0, y: -24 };
+    case "left":
+      return { x: -24, y: 0 };
+    case "right":
+      return { x: 24, y: 0 };
+    case "none":
+      return { x: 0, y: 0 };
+    case "up":
+    default:
+      return { x: 0, y: 24 };
+  }
+}
+
+function reducedMotionEnabled() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
   children,
+  as = "div",
+  id,
   className = "",
   delay = 0,
-  duration = 0.6,
+  duration = 650,
+  direction = "up",
   once = true,
-  yOffset = 24,
-  as: Component = "div",
-  id,
+  stagger = 0,
+  style,
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const Tag = as;
+  const ref = useRef<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(() => reducedMotionEnabled());
+  const offset = getOffset(direction as RevealDirection);
 
   useEffect(() => {
+    const element = ref.current;
+    if (!element || reducedMotionEnabled()) {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
-          if (once && ref.current) {
-            observer.unobserve(ref.current);
-          }
+          setVisible(true);
+          if (once) observer.unobserve(entry.target);
         } else if (!once) {
-          setIsVisible(false);
+          setVisible(false);
         }
       },
-      {
-        root: null,
-        rootMargin: "0px 0px -10% 0px",
-        threshold: 0.1,
-      }
+      { root: null, rootMargin: "0px 0px -8% 0px", threshold: 0.16 },
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
+    observer.observe(element);
 
-    return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
-    };
+    return () => observer.disconnect();
   }, [once]);
 
+  const revealStyle = {
+    ...style,
+    "--nl-reveal-delay": `${delay}ms`,
+    "--nl-reveal-duration": `${duration}ms`,
+    "--nl-reveal-x": `${offset.x}px`,
+    "--nl-reveal-y": `${offset.y}px`,
+    "--nl-stagger": `${stagger}ms`,
+  } as React.CSSProperties;
+
+  const preparedChildren = useMemo(() => {
+    if (!stagger) return children;
+
+    return React.Children.map(children, (child, index) => {
+      if (!React.isValidElement(child)) return child;
+
+      const childProps = child.props as React.HTMLAttributes<HTMLElement>;
+      const childStyle = {
+        ...childProps.style,
+        "--nl-reveal-index": index,
+      } as React.CSSProperties;
+
+      return React.cloneElement(child, { style: childStyle });
+    });
+  }, [children, stagger]);
+
   return (
-    <Component
+    <Tag
+      id={id}
       ref={ref}
-      className={className}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : `translateY(${yOffset}px)`,
-        filter: isVisible ? "blur(0px)" : "blur(4px)",
-        transition: `opacity ${duration}s ease-out ${delay}s, transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, filter ${duration}s ease-out ${delay}s`,
-      }}
-      {...(Component === "section" && id ? { id } : {})}
+      style={revealStyle}
+      className={`nl-reveal-scroll ${stagger ? "nl-reveal-stagger" : ""} ${visible ? "is-visible" : ""} ${className}`}
     >
-      {children}
-    </Component>
+      {preparedChildren}
+    </Tag>
   );
 };
 
