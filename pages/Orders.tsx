@@ -85,7 +85,7 @@ const Orders = () => {
       </section>
 
       {loading ? (
-        <LoadingState label="Carregando pedidos..." />
+        <LoadingState />
       ) : error ? (
         <ErrorState title="Erro nos pedidos" description={error} actionLabel="Tentar novamente" onAction={loadOrders} />
       ) : orders.length === 0 ? (

@@ -189,7 +189,7 @@ const KpiCard: React.FC<
 > = ({ title, value, change, changeType, icon: Icon, color, iconAccent, status = "ok", reason, sourceLabel }) => {
   const isMuted = status !== "ok";
   return (
-    <div className={`flex min-w-[260px] flex-col rounded-3xl border bg-zinc-950 p-6 transition-all duration-300 hover:border-lime-400/40 ${isMuted ? "border-amber-500/25" : "border-zinc-800/90"}`}>
+    <div className={`nl-card nl-card-interactive flex min-w-[260px] flex-col p-6 ${isMuted ? "border-amber-500/25" : ""}`}>
       <div className="mb-4 flex items-start justify-between">
         <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">
           {title}
@@ -282,7 +282,7 @@ const GrowthMetricCard: React.FC<{
   legacyText: string;
   accentColor: string;
 }> = ({ title, description, legacyText, accentColor }) => (
-  <div className="flex flex-col rounded-3xl border border-zinc-800/90 bg-zinc-950 p-5 transition-all duration-300 hover:border-lime-400/25">
+  <div className="nl-card nl-card-interactive flex flex-col p-5">
     <div className="flex items-start justify-between gap-2">
       <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
       <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
@@ -339,7 +339,7 @@ const RealMetricCard: React.FC<{
   accentColor: string;
   metric?: DashboardMetricResult;
 }> = ({ title, description, accentColor, metric }) => (
-  <div className="flex flex-col rounded-3xl border border-zinc-800/90 bg-zinc-950 p-5 transition-all duration-300 hover:border-lime-400/25">
+  <div className="nl-card nl-card-interactive flex flex-col p-5">
     <div className="flex items-start justify-between gap-2">
       <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
       <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
@@ -347,7 +347,7 @@ const RealMetricCard: React.FC<{
       </span>
     </div>
     <p className={`mt-4 text-2xl font-black tracking-tight ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
-      {metric?.formatted || "Carregando"}
+      {metric?.formatted || "NEXT LEVEL"}
     </p>
     <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
     {metric?.reason ? <p className="mt-2 text-[11px] leading-5 text-zinc-600">{translateMetricReason(metric.reason)}</p> : null}
@@ -460,7 +460,7 @@ const Dashboard = () => {
   const hasForecast = forecast?.status === "ok" && forecastChartData.length > 0;
 
   const forecastStatusMessage = useMemo(() => {
-    if (!forecast) return "Carregando projeção...";
+    if (!forecast) return "NEXT LEVEL";
     if (forecast.status === "insufficient_data" || forecast.status === "not_enough_data") {
       return forecast.message || "Histórico insuficiente para prever receita";
     }
@@ -772,7 +772,7 @@ const Dashboard = () => {
       </div>
 
       {isCompanyReady && !selectedCompanyId ? (
-        <div className="rounded-3xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-center">
+        <div className="nl-card nl-card-empty border-dashed p-8">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Selecione uma empresa</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
             O dashboard carrega quando uma empresa ativa estiver definida para esta sessão.
@@ -787,7 +787,7 @@ const Dashboard = () => {
       ) : null}
 
       {!isLayoutLoading && !!selectedCompanyId && !hasSelectedMetrics ? (
-        <div className="rounded-3xl border border-dashed border-lime-400/30 bg-lime-400/10 p-8 text-center">
+        <div className="nl-card nl-card-empty border-dashed border-lime-400/30 bg-lime-400/10 p-8">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Dashboard sem widgets ativos</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
             Escolha os indicadores que fazem sentido para esta empresa e salve uma visão mais limpa.
@@ -806,7 +806,7 @@ const Dashboard = () => {
           {isMetricEnabled("revenue") ? (
             <KpiCard
               title="Faturamento"
-              value={metric("revenue")?.formatted || "Carregando"}
+              value={metric("revenue")?.formatted || "NEXT LEVEL"}
               change={metricChange(metric("revenue")).text}
               changeType={metricChange(metric("revenue")).type}
               icon={DollarSignIcon}
@@ -819,7 +819,7 @@ const Dashboard = () => {
           {isMetricEnabled("losses") ? (
             <KpiCard
               title="Perdas"
-              value={metric("losses")?.formatted || "Carregando"}
+              value={metric("losses")?.formatted || "NEXT LEVEL"}
               change={metricChange(metric("losses")).text}
               changeType={metricChange(metric("losses")).type}
               icon={DollarSignIcon}
@@ -832,7 +832,7 @@ const Dashboard = () => {
           {isMetricEnabled("profit") || isMetricEnabled("net_profit") ? (
             <KpiCard
               title={isMetricEnabled("net_profit") ? "Lucro líquido" : "Lucro"}
-              value={(metric("net_profit") || metric("profit"))?.formatted || "Carregando"}
+              value={(metric("net_profit") || metric("profit"))?.formatted || "NEXT LEVEL"}
               change={metricChange(metric("net_profit") || metric("profit")).text}
               changeType={metricChange(metric("net_profit") || metric("profit")).type || marginDirection}
               icon={BarChartIcon}
@@ -845,7 +845,7 @@ const Dashboard = () => {
           {isMetricEnabled("cash_flow") ? (
             <KpiCard
               title="Fluxo de caixa"
-              value={metric("cash_flow")?.formatted || "Carregando"}
+              value={metric("cash_flow")?.formatted || "NEXT LEVEL"}
               change={metricChange(metric("cash_flow")).text}
               changeType={metricChange(metric("cash_flow")).type}
               icon={BarChartIcon}
@@ -858,7 +858,7 @@ const Dashboard = () => {
           {isMetricEnabled("company_count") ? (
             <KpiCard
               title="Empresas"
-              value={metric("company_count")?.formatted || "Carregando"}
+              value={metric("company_count")?.formatted || "NEXT LEVEL"}
               change="Base vinculada"
               changeType="flat"
               icon={BuildingIcon}
@@ -886,7 +886,7 @@ const Dashboard = () => {
       ) : null}
 
       {isMetricEnabled("alerts_insights") ? (
-        <div className="flex flex-col items-start gap-6 rounded-3xl border border-zinc-900 bg-zinc-950 p-7 md:flex-row md:items-center">
+        <div className="nl-card flex flex-col items-start gap-6 p-7 md:flex-row md:items-center">
           <div className="min-w-0 flex-1">
             <div className="mb-3 flex flex-wrap items-center gap-3">
               <div className="rounded-lg bg-lime-400/15 p-2 text-lime-400">
@@ -945,13 +945,13 @@ const Dashboard = () => {
       ) : null}
 
       {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && !hasChartData ? (
-        <div className="grid place-items-center rounded-3xl border border-zinc-900 bg-zinc-950 p-10 text-zinc-500">
+        <div className="nl-card nl-card-empty grid place-items-center p-10 text-zinc-500">
           Nenhum dado disponível ainda para este período.
         </div>
       ) : (isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) ? (
         <div className="grid min-h-0 grid-cols-1 gap-5 xl:grid-cols-3">
           {isMetricEnabled("cash_flow_summary") ? (
-          <div className="relative min-h-0 overflow-hidden rounded-3xl border border-zinc-900 bg-zinc-950 p-7 xl:col-span-2">
+          <div className="nl-card relative min-h-0 overflow-hidden p-7 xl:col-span-2">
             <div className="relative z-10 mb-8 flex items-center justify-between">
               <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Fluxo por Faixa</h3>
               <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">
@@ -1001,7 +1001,7 @@ const Dashboard = () => {
           ) : null}
 
           {isMetricEnabled("category_mix") ? (
-          <div className="flex flex-col items-center rounded-3xl border border-zinc-900 bg-zinc-950 p-7">
+          <div className="nl-card flex flex-col items-center p-7">
             <h3 className="mb-8 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Mix do Período</h3>
             <div className="w-full min-w-0">
               <ResponsiveContainer width="100%" minWidth={240} minHeight={220} height={260}>
@@ -1041,7 +1041,7 @@ const Dashboard = () => {
       ) : null}
 
       {isMetricEnabled("revenue_forecast") ? (
-      <div className="rounded-3xl border border-zinc-900 bg-zinc-950 p-7">
+      <div className="nl-card p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Modo futuro</p>
@@ -1071,8 +1071,8 @@ const Dashboard = () => {
 
         <div className="mt-6">
           {isForecastLoading ? (
-            <div className="grid place-items-center rounded-2xl border border-dashed border-zinc-800 px-6 py-12 text-zinc-500">
-              Calculando projeção...
+            <div className="grid place-items-center rounded-2xl border border-dashed border-zinc-800 px-6 py-12">
+              <span className="text-2xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</span>
             </div>
           ) : forecast?.status === "insufficient_data" || forecast?.status === "not_enough_data" ? (
             <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 text-sm text-amber-200">

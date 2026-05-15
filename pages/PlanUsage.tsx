@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ActivityIcon, CreditCardIcon } from "../components/icons";
+import NextLevelLoader from "../components/NextLevelLoader";
 import { useAuth } from "../App";
 import { getCurrentAIUsage } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
@@ -126,16 +127,7 @@ const PlanUsage = () => {
   );
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-28 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
-        <div className="grid gap-4">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="h-36 animate-pulse rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
-          ))}
-        </div>
-      </div>
-    );
+    return <NextLevelLoader fullscreen={false} />;
   }
 
   if (error) {

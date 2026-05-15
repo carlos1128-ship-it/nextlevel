@@ -716,7 +716,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
             onClick={onGoogleLogin}
             disabled={loading || googleLoading}
             className="flex min-h-[50px] w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-lime-300/60 disabled:cursor-not-allowed disabled:opacity-60 mb-4">
-            {googleLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-lime-300/25 border-t-lime-300" /> : <GoogleIcon />}
+            <GoogleIcon />
             {googleLoading ? "Conectando..." : "Google"}
           </button>
 
@@ -759,7 +759,6 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
 
             <button type="submit" disabled={loading}
               className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[18px] bg-lime-300 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_30px_rgba(182,255,0,0.2)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/60 disabled:opacity-60 mt-1">
-              {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950/30 border-t-zinc-950" /> : null}
               {isRegisterView ? "Criar minha conta" : "Entrar no painel"}
               {!loading && <ArrowRight />}
             </button>

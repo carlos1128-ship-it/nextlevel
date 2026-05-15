@@ -208,7 +208,7 @@ const FinancialFlow = () => {
       <MarginCalculator freeUsesLeft={7} />
 
       {loadingPage ? (
-        <LoadingState label="Carregando transações..." />
+        <LoadingState />
       ) : loadError ? (
         <ErrorState
           title="Erro ao carregar transações"

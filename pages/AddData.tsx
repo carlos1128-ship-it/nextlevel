@@ -489,8 +489,8 @@ const AddData = () => {
 
           <div className="mt-5 max-h-[620px] space-y-3 overflow-y-auto overflow-x-hidden pr-1">
             {isLoadingHistory ? (
-              <div className="rounded-2xl border border-dashed border-zinc-800 p-6 text-sm text-zinc-500">
-                Carregando importacoes...
+              <div className="grid min-h-[160px] place-items-center rounded-2xl border border-dashed border-zinc-800 p-6">
+                <span className="text-2xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</span>
               </div>
             ) : historyError ? (
               <div className="space-y-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-5 text-sm text-amber-100">

@@ -4,6 +4,7 @@ import { useToast } from "../components/Toast";
 import { executeStrategicAction, getStrategicActions } from "../src/services/endpoints";
 import type { StrategicAction } from "../src/types/domain";
 import { ArrowUpRightIcon } from "../components/icons";
+import { AppCard, ActionCard } from "../components/ui/Card";
 
 const ImpactBadge = ({ score }: { score: number }) => {
   const color =
@@ -76,17 +77,17 @@ const CommandCenter = () => {
       </div>
 
       {loading ? (
-        <div className="grid place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 p-10 text-zinc-500">
-          Carregando planos...
-        </div>
+        <AppCard className="grid min-h-[180px] place-items-center p-10">
+          <p className="text-2xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</p>
+        </AppCard>
       ) : actions.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-zinc-400">
+        <AppCard className="border-dashed p-8 text-zinc-400">
           Nenhum projeto sugerido no momento. Assim que a IA detectar risco ou oportunidade com dados reais, os planos aparecerão aqui para aprovação.
-        </div>
+        </AppCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {actions.map((action) => (
-            <div key={action.id} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5 flex flex-col gap-3">
+            <ActionCard key={action.id} className="flex flex-col gap-3 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">{action.type}</p>
@@ -115,7 +116,7 @@ const CommandCenter = () => {
                   </>
                 )}
               </button>
-            </div>
+            </ActionCard>
           ))}
         </div>
       )}

@@ -4,6 +4,7 @@ import {
   resetCompanyRecommendations,
   updateCompanyPersonalizationProfile,
 } from "../../services/endpoints";
+import NextLevelLoader from "../../../components/NextLevelLoader";
 import { getErrorMessage } from "../../services/error";
 import type { BusinessType, CompanyOnboardingPayload, CompanyPersonalizationResponse } from "../../types/domain";
 
@@ -140,9 +141,7 @@ export default function CompanyPersonalizationPanel({
           Selecione uma empresa para editar a personalização.
         </div>
       ) : loading ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-zinc-300 p-5 text-sm text-zinc-500 dark:border-zinc-800">
-          Carregando perfil...
-        </div>
+        <NextLevelLoader fullscreen={false} className="mt-5" />
       ) : (
         <>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
