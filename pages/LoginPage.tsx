@@ -13,6 +13,7 @@ import {
   savePendingSelectedPlan,
 } from "../src/utils/billingSelection";
 import { getDisplayPlanPrice, PLAN_DISPLAY } from "../src/utils/planDisplay";
+import AnimatedHeroBackground from "../components/AnimatedHeroBackground";
 
 /* Helpers */
 function scrollToSection(id: string) {
@@ -109,39 +110,47 @@ const CreditCardIcon = () => (
 
 /* Static data */
 const METRICS = [
-  { title: "Gestão", label: "Vendas, custos, produtos e indicadores em uma visão operacional.", icon: ChartIcon },
-  { title: "Lucro real", label: "Margem, desperdício e oportunidade sem depender de achismo.", icon: TrendingUpIcon },
-  { title: "Decisão com IA", label: "Alertas e próximas ações para o empresário agir antes do problema crescer.", icon: BrainIcon },
+  { title: "Gestão", label: "Vendas, custos, clientes e produtos organizados em uma visão executiva.", icon: ChartIcon },
+  { title: "Lucro real", label: "Margem, desperdício e oportunidade separados do faturamento bruto.", icon: TrendingUpIcon },
+  { title: "Decisão com IA", label: "Alertas práticos para agir antes que o problema vire prejuízo.", icon: BrainIcon },
+];
+
+const HERO_GROWTH_FRAMES = [
+  "/hero-growth/chart-frame-01.webp",
+  "/hero-growth/chart-frame-02.webp",
+  "/hero-growth/chart-frame-03.webp",
+  "/hero-growth/chart-frame-04.webp",
+  "/hero-growth/chart-frame-05.webp",
 ];
 
 const TARGET_SEGMENTS = [
-  { title: "Lojas e comércios locais", text: "Acompanhe vendas, custos, clientes e operação em uma visão simples." },
-  { title: "Prestadores de serviço", text: "Organize atendimento, solicitações, oportunidades e relatórios." },
-  { title: "E-commerces e marketplaces", text: "Entenda produtos, margem, pedidos e canais de venda." },
-  { title: "Empresas em crescimento", text: "Transforme dados soltos em decisões mais claras." },
+  { title: "Comércios que vendem todos os dias", text: "Veja vendas, custos, clientes e margem sem depender de planilhas soltas." },
+  { title: "Prestadores com atendimento intenso", text: "Organize solicitações, retornos e oportunidades antes que bons clientes esfriem." },
+  { title: "E-commerces e marketplaces", text: "Entenda pedidos, produtos, canais e margem para vender mais sem queimar lucro." },
+  { title: "Empresas saindo do improviso", text: "Transforme dados espalhados em uma rotina de decisão mais previsível." },
 ];
 
 const PROBLEMS = [
-  { title: "Vendas sem margem clara", text: "Faturamento sobe, mas o lucro real continua difícil de enxergar." },
-  { title: "Atendimento perdido", text: "Mensagens e oportunidades se perdem entre WhatsApp, Instagram e outros canais." },
-  { title: "Custos espalhados", text: "Despesas, produtos e operação ficam desconectados da decisão." },
-  { title: "Decisões no achismo", text: "Sem dados organizados, o empresário percebe o problema tarde demais." },
+  { title: "Faturamento sem lucro visível", text: "A venda entra, mas margem, custo e desperdício continuam difíceis de provar." },
+  { title: "Oportunidades esquecidas", text: "Mensagens se espalham entre WhatsApp, Instagram e rotina da equipe." },
+  { title: "Custos fora da decisão", text: "Despesas, produtos e operação não conversam com preço, estoque e campanha." },
+  { title: "Ação tarde demais", text: "Sem sinal claro, o empresário só percebe o problema quando ele já custou caro." },
 ];
 
 const SOLUTIONS = [
-  { title: "Centraliza a operação", text: "Reúne vendas, clientes, custos, produtos e canais em uma visão mais clara." },
-  { title: "Mostra o lucro real", text: "Ajuda a separar faturamento, margem, custos e desperdícios." },
-  { title: "Apoia o atendimento", text: "Organiza conversas, intenções e oportunidades vindas dos canais digitais." },
-  { title: "Gera recomendações", text: "A IA interpreta sinais do negócio e sugere ações práticas." },
-  { title: "Cria relatórios", text: "Transforma dados em análises simples para o empresário agir." },
-  { title: "Conecta crescimento", text: "Une visão financeira, comercial e administrativa em um só lugar." },
+  { title: "Centraliza sinais críticos", text: "Reúne vendas, clientes, custos, produtos e canais em uma leitura acionável." },
+  { title: "Mostra onde o lucro escapa", text: "Separa faturamento, margem, custos e desperdícios para revelar o resultado real." },
+  { title: "Prioriza o atendimento", text: "Organiza conversas, intenção de compra e oportunidades vindas dos canais digitais." },
+  { title: "Recomenda o próximo passo", text: "A IA interpreta sinais do negócio e sugere ações que protegem caixa e crescimento." },
+  { title: "Gera relatórios úteis", text: "Transforma dados em análises simples, prontas para decisão." },
+  { title: "Conecta operação e ROI", text: "Une visão financeira, comercial e administrativa em um só painel." },
 ];
 
 const FEATURES = [
   {
     icon: ChartIcon,
     title: "Gestão de vendas",
-    desc: "Entenda o que vende mais, o que dá margem e onde existe oportunidade.",
+    desc: "Entenda o que vende, o que dá margem e quais produtos merecem atenção.",
     color: "from-lime-400/15 to-emerald-400/5",
     border: "border-lime-400/20",
   },
@@ -155,52 +164,52 @@ const FEATURES = [
   {
     icon: TrendingUpIcon,
     title: "Produtos e margem",
-    desc: "Acompanhe produtos, preços, custos e margem para saber o que vale vender.",
+    desc: "Acompanhe preço, custo e margem para decidir o que vender, ajustar ou pausar.",
     color: "from-cyan-400/15 to-blue-400/5",
     border: "border-cyan-400/20",
   },
   {
     icon: WhatsAppIcon,
     title: "Clientes e atendimento",
-    desc: "Organize conversas, intenções e oportunidades vindas de WhatsApp e Instagram.",
+    desc: "Organize conversas, intenção de compra e oportunidades vindas de WhatsApp e Instagram.",
     color: "from-violet-400/15 to-purple-400/5",
     border: "border-violet-400/20",
   },
   {
     icon: ZapIcon,
     title: "Relatórios automáticos",
-    desc: "Relatórios mostram vendas, custos, produtos e alertas importantes.",
+    desc: "Receba leituras simples sobre vendas, custos, produtos e pontos de atenção.",
     color: "from-violet-400/15 to-purple-400/5",
     border: "border-violet-400/20",
   },
   {
     icon: BrainIcon,
     title: "Alertas e recomendações com IA",
-    desc: "A IA analisa sinais do negócio e recomenda próximos passos.",
+    desc: "A IA analisa sinais do negócio e recomenda próximos passos com foco em resultado.",
     color: "from-emerald-400/15 to-cyan-400/5",
     border: "border-emerald-400/20",
   },
 ];
 
 const HOW_IT_WORKS = [
-  { title: "Conecte ou cadastre seus dados", text: "Adicione informações de vendas, custos, clientes, produtos ou canais." },
-  { title: "A Next Level organiza", text: "A plataforma estrutura os dados em indicadores claros." },
-  { title: "A IA interpreta sinais", text: "Riscos, oportunidades e padrões importantes são identificados." },
-  { title: "Você decide com clareza", text: "O empresário age com base em dados, não no achismo." },
+  { title: "Conecte ou cadastre seus dados", text: "Adicione vendas, custos, clientes, produtos ou canais sem expor complexidade." },
+  { title: "A Next Level organiza", text: "A plataforma transforma dados brutos em indicadores que o dono entende." },
+  { title: "A IA interpreta sinais", text: "Riscos, oportunidades e padrões importantes aparecem antes da urgência." },
+  { title: "Você age com clareza", text: "O empresário decide com base em dados, impacto e próximo passo." },
 ];
 
 const INTELLIGENCE_CARDS = [
-  { label: "Margem baixa detectada", value: "Produto com custo acima do ideal", tone: "text-lime-300" },
-  { label: "Cliente aguardando resposta", value: "Oportunidade ativa no WhatsApp", tone: "text-cyan-200" },
+  { label: "Margem baixa detectada", value: "Produto vendendo bem, mas com lucro frágil", tone: "text-lime-300" },
+  { label: "Cliente aguardando resposta", value: "Oportunidade quente no WhatsApp", tone: "text-cyan-200" },
   { label: "Próxima ação recomendada", value: "Revisar preço antes de escalar anúncio", tone: "text-emerald-200" },
   { label: "Relatório gerado pela IA", value: "Vendas, custos e pontos de atenção", tone: "text-zinc-100" },
 ];
 
 const FAQS = [
   { question: "A Next Level substitui meu sistema de gestão?", answer: "Não necessariamente. Ela funciona como uma camada de inteligência para centralizar sinais, apoiar decisões e complementar ferramentas que o negócio já usa." },
-  { question: "Preciso saber usar IA?", answer: "Não. A plataforma foi pensada para facilitar a rotina do empreendedor com análises, recomendações e automações simples de entender." },
-  { question: "Funciona com WhatsApp e Instagram?", answer: "Sim, conforme o plano e as integrações disponíveis." },
-  { question: "A plataforma serve para negócio pequeno?", answer: "Sim. Ela é útil principalmente para quem quer mais controle sem precisar montar uma equipe grande." },
+  { question: "Preciso saber usar IA?", answer: "Não. A plataforma entrega análises, recomendações e automações em linguagem simples, sem exigir conhecimento técnico." },
+  { question: "Funciona com WhatsApp e Instagram?", answer: "Sim, conforme o plano e as integrações disponíveis. A ideia é aproximar atendimento, cliente e oportunidade da visão de gestão." },
+  { question: "A plataforma serve para negócio pequeno?", answer: "Sim. Ela foi pensada para quem precisa de mais controle sem montar uma equipe grande de análise, tecnologia ou atendimento." },
   { question: "Qual plano devo escolher?", answer: "Essencial para organização e indicadores. Premium para IA, relatórios e automação. Business para integrações, escala e análise avançada." },
   { question: "Escolho o plano antes ou depois da conta?", answer: "Você pode escolher um plano agora. A seleção fica salva e a assinatura continua após criar conta ou entrar." },
 ];
@@ -223,14 +232,14 @@ type FooterInfoKey =
 const FOOTER_DETAILS: Record<FooterInfoKey, { title: string; text: string; how: string; image: string }> = {
   "gestao-de-vendas": {
     title: "Gestão de vendas",
-    text: "Veja o desempenho das vendas, períodos de maior movimento, produtos mais relevantes e oportunidades para aumentar resultado com mais clareza.",
-    how: "Dentro da Next Level, vendas viram indicadores para cruzar margem, clientes, produtos e próximas ações.",
+    text: "Veja desempenho, períodos de maior movimento, produtos relevantes e oportunidades de resultado em uma única leitura.",
+    how: "Dentro da Next Level, vendas viram indicadores para cruzar margem, clientes, produtos e ações prioritárias.",
     image: "/login-features/gestao-vendas.png",
   },
   "atendimento-com-ia": {
     title: "Atendimento com IA",
-    text: "A Next Level ajuda a organizar mensagens, identificar intenções dos clientes e apoiar respostas inteligentes em canais como WhatsApp e Instagram.",
-    how: "A IA ajuda a priorizar conversas, identificar intenção de compra e reduzir oportunidades esquecidas.",
+    text: "Organize mensagens, identifique intenção de compra e apoie respostas em canais como WhatsApp e Instagram.",
+    how: "A IA prioriza conversas relevantes para reduzir tempo de resposta e oportunidades esquecidas.",
     image: "/login-features/atendimento-ia.png",
   },
   "relatorios-automaticos": {
@@ -241,19 +250,19 @@ const FOOTER_DETAILS: Record<FooterInfoKey, { title: string; text: string; how: 
   },
   "lucro-real": {
     title: "Lucro real",
-    text: "Entenda a diferença entre faturamento e lucro, acompanhando custos, margem e desperdícios que afetam o resultado.",
+    text: "Entenda a diferença entre faturamento e lucro acompanhando custos, margem e desperdícios que afetam o caixa.",
     how: "A plataforma mostra onde existe margem, perda ou risco antes de o empresário decidir no escuro.",
     image: "/login-features/lucro-real.png",
   },
   "produtos-e-custos": {
     title: "Produtos e custos",
-    text: "Acompanhe produtos, preços, custos e margem para saber o que realmente vale a pena vender.",
+    text: "Acompanhe produtos, preços, custos e margem para saber o que vale vender, ajustar ou pausar.",
     how: "A Next Level aproxima estoque, precificação e resultado para revelar oportunidades de ajuste.",
     image: "/login-features/produtos-custos.png",
   },
   whatsapp: {
     title: "WhatsApp",
-    text: "Centralize oportunidades e atendimentos vindos do WhatsApp para não perder clientes no meio da operação.",
+    text: "Centralize oportunidades e atendimentos vindos do WhatsApp para não perder clientes no meio da rotina.",
     how: "O canal entra na visão operacional sem expor tokens ou complexidade ao usuário final.",
     image: "/login-features/atendimento-ia.png",
   },
@@ -271,8 +280,8 @@ const FOOTER_DETAILS: Record<FooterInfoKey, { title: string; text: string; how: 
   },
   "alertas-e-recomendacoes": {
     title: "Alertas e recomendações",
-    text: "A IA pode apontar riscos, oportunidades e próximos passos para o empresário agir antes do problema crescer.",
-    how: "Alertas aproximam o empresário do próximo passo: ajustar preço, revisar custo, responder cliente ou investigar queda.",
+    text: "A IA aponta riscos, oportunidades e próximos passos para o empresário agir antes do problema crescer.",
+    how: "Alertas aproximam o empresário da ação concreta: ajustar preço, revisar custo, responder cliente ou investigar queda.",
     image: "/login-features/alertas-recomendacoes.png",
   },
   sobre: {
@@ -918,19 +927,26 @@ const LoginPage: React.FC = () => {
 
       <div className="relative z-10 mx-auto max-w-[1680px] px-4 sm:px-8 lg:px-12 2xl:px-16">
 
-        <section className="flex min-h-[72dvh] flex-col items-center justify-center py-12 text-center lg:py-14">
-          <div className="mx-auto flex w-full max-w-[1320px] flex-col items-center">
+        <section className="relative left-1/2 flex min-h-[calc(100dvh-88px)] w-screen -translate-x-1/2 flex-col items-center justify-center overflow-hidden px-4 py-16 text-center sm:px-8 lg:px-12 lg:py-20">
+          <AnimatedHeroBackground
+            images={HERO_GROWTH_FRAMES}
+            className="z-0 opacity-40 sm:opacity-50 lg:opacity-65"
+          />
+          <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(3,5,8,0.76)_0%,rgba(3,5,8,0.48)_38%,rgba(3,5,8,0.9)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(180deg,rgba(3,5,8,0.82)_0%,rgba(3,5,8,0.44)_46%,rgba(3,5,8,0.96)_100%)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-1/3 bg-[linear-gradient(180deg,transparent,rgba(3,5,8,0.98))]" />
+          <div className="relative z-[3] mx-auto flex w-full max-w-[1320px] flex-col items-center">
             <div className="nl-reveal mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
               <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
               <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Gestão empresarial com IA para empresários</span>
             </div>
 
             <h1 className="nl-reveal nl-delay-1 mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
-              Gestão, atendimento e lucro real em uma única plataforma com <span className="text-lime-300">IA.</span>
+              Gestão, atendimento e lucro real em uma plataforma com <span className="text-lime-300">IA.</span>
             </h1>
 
             <p className="nl-reveal nl-delay-2 mt-7 max-w-3xl text-base leading-8 text-zinc-300 sm:text-xl sm:leading-9">
-              A Next Level ajuda empresários a organizar vendas, custos, clientes e atendimento para tomar decisões com dados, não no achismo.
+              A Next Level transforma vendas, custos, clientes e atendimento em decisões claras para proteger margem e acelerar crescimento.
             </p>
 
             <div className="nl-reveal nl-delay-2 mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
@@ -942,7 +958,7 @@ const LoginPage: React.FC = () => {
             <div className="nl-reveal nl-delay-3 mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
               <button onClick={() => focusAuth(true)}
                 className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
-                Começar agora <ArrowRight />
+                Criar minha conta <ArrowRight />
               </button>
               <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
                 Ver como funciona
@@ -997,7 +1013,7 @@ const LoginPage: React.FC = () => {
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Recomendação da IA</p>
                 <h3 className="mt-3 text-2xl font-black leading-tight text-white">Ajuste produtos de baixa margem antes de aumentar anúncios.</h3>
                 <p className="mt-4 text-sm leading-7 text-zinc-400">
-                  A proposta é simples: enxergar lucro real, priorizar ações e reduzir decisões caras tomadas tarde demais.
+                  A proposta é simples: mostrar onde existe lucro, onde existe vazamento e qual ação merece prioridade.
                 </p>
               </div>
           </div>
@@ -1007,7 +1023,7 @@ const LoginPage: React.FC = () => {
           <div className="mb-9 max-w-4xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Para quem é?</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-              Para empresários que precisam enxergar a operação com clareza.
+              Para empresários que precisam decidir com clareza, sem virar analistas de dados.
             </h2>
             <p className="mt-4 text-sm leading-7 text-zinc-400">
               A Next Level foi criada para negócios que vendem, atendem clientes, lidam com custos e precisam tomar decisões rápidas sem depender de planilhas espalhadas ou achismo.
@@ -1038,7 +1054,7 @@ const LoginPage: React.FC = () => {
           <div className="mb-8 max-w-3xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">O problema</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-              O problema não é falta de esforço. É falta de visibilidade.
+              O problema não é falta de esforço. É falta de sinal confiável.
             </h2>
             <p className="mt-4 text-sm leading-7 text-zinc-400">
               Quando vendas, atendimento, custos e clientes ficam espalhados, o empresário trabalha muito, mas decide com pouca clareza.
@@ -1064,7 +1080,7 @@ const LoginPage: React.FC = () => {
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">O que a Next Level faz</p>
                 <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
-                  Transforma dados soltos em gestão, atendimento e decisões inteligentes.
+                  Transforma dados soltos em gestão, atendimento e próximos passos.
                 </h2>
                 <p className="mt-5 max-w-3xl text-sm leading-7 text-zinc-300">
                   A plataforma centraliza informações importantes do negócio, organiza vendas, custos, clientes e atendimento, e usa IA para apontar riscos, oportunidades e próximos passos.
@@ -1089,7 +1105,7 @@ const LoginPage: React.FC = () => {
           <div className="text-center mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
             <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white max-w-2xl mx-auto">
-              Ferramentas essenciais para gerir com <span className="text-lime-300">previsibilidade.</span>
+              Ferramentas essenciais para gerir com <span className="text-lime-300">margem e previsibilidade.</span>
             </h2>
             <p className="mt-4 max-w-lg mx-auto text-sm leading-7 text-zinc-400">
               Menos telas soltas, mais leitura estratégica da operação.
@@ -1117,11 +1133,11 @@ const LoginPage: React.FC = () => {
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Gestão completa</p>
                 <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">
-                  Não é só financeiro. É a operação inteira conectada.
+                  Não é só financeiro. É a operação inteira falando a mesma língua.
                 </h2>
               </div>
               <p className="text-sm leading-7 text-zinc-300">
-                A Next Level conecta visão financeira, administrativa, comercial e operacional para o empresário entender o negócio como um todo.
+                A Next Level conecta visão financeira, administrativa, comercial e operacional para o empresário entender causa, impacto e próxima ação.
               </p>
             </div>
           </div>
@@ -1131,9 +1147,9 @@ const LoginPage: React.FC = () => {
           <div className="mb-10 max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Como funciona</p>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-[0.96]">
-              Do dado solto à ação recomendada.
+              Do dado solto ao próximo passo.
             </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar informação espalhada em ação prática.</p>
+            <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar informação espalhada em decisão prática.</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-4">
             {HOW_IT_WORKS.map((step, index) => (
@@ -1153,11 +1169,11 @@ const LoginPage: React.FC = () => {
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Planos</p>
               <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white max-w-xl leading-[0.94]">
-                Escolha seu plano.
+                Escolha o nível de inteligência da sua operação.
               </h2>
             </div>
             <div className="flex flex-col gap-3">
-              <p className="text-sm text-zinc-400 max-w-sm">Comece com organização básica ou avance para automação, atendimento e canais conectados.</p>
+              <p className="text-sm text-zinc-400 max-w-sm">Comece organizando a operação ou avance para IA, automação e canais conectados.</p>
               <div className="flex items-center gap-3">
                 <div className="flex rounded-2xl border border-white/10 bg-white/[0.03] p-1">
                   <button type="button" onClick={() => setBillingAnnual(false)}
@@ -1244,7 +1260,7 @@ const LoginPage: React.FC = () => {
             <div className="mb-8 text-center">
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Acesso à plataforma</p>
               <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-                Entre para transformar clareza em ação.
+                Entre para transformar clareza em resultado.
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
                 Crie sua conta ou acesse sua central para acompanhar vendas, custos, clientes, relatórios e recomendações da IA.
@@ -1263,7 +1279,7 @@ const LoginPage: React.FC = () => {
               onGoogleLogin={handleGoogleLogin}
             />
             <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
-              Leva menos de 1 minuto para começar. Escolha um plano após criar sua conta.
+              Leva menos de 1 minuto para começar. A escolha do plano continua depois do acesso.
             </p>
           </div>
         </section>
@@ -1290,7 +1306,7 @@ const LoginPage: React.FC = () => {
               <div className="max-w-2xl">
                 <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">Comece com clareza</p>
                 <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-tight text-white">
-                  Pare de operar no escuro. Comece a decidir com IA.
+                  Pare de operar no escuro. Comece a agir com IA.
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-zinc-300/80">
                   Organize seus dados e veja onde seu negócio pode vender melhor, perder menos e crescer com margem.
