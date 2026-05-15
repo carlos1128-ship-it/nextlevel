@@ -1,5 +1,6 @@
 import React from "react";
 import NextLevelLoader from "./NextLevelLoader";
+import { EmptyStateCard } from "./ui/Card";
 
 interface StateCardProps {
   title: string;
@@ -18,21 +19,21 @@ export const EmptyState: React.FC<StateCardProps> = ({
   actionLabel,
   onAction,
 }) => (
-  <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{title}</h3>
+  <EmptyStateCard className="nl-enter">
+    <h3 className="text-lg font-black tracking-tight text-zinc-100">{title}</h3>
     {description ? (
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-zinc-400">{description}</p>
     ) : null}
     {actionLabel && onAction ? (
       <button
         type="button"
         onClick={onAction}
-        className="mt-4 rounded-lg bg-lime-300 px-4 py-2 text-sm font-semibold text-zinc-900 transition hover:opacity-90"
+        className="nl-button-primary mt-5"
       >
         {actionLabel}
       </button>
     ) : null}
-  </div>
+  </EmptyStateCard>
 );
 
 export const ErrorState: React.FC<StateCardProps> = ({
@@ -41,16 +42,16 @@ export const ErrorState: React.FC<StateCardProps> = ({
   actionLabel,
   onAction,
 }) => (
-  <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-500/30 dark:bg-red-500/10">
-    <h3 className="text-lg font-semibold text-red-700 dark:text-red-300">{title}</h3>
+  <div className="nl-card nl-card-empty nl-enter border-red-400/30 bg-red-500/10">
+    <h3 className="text-lg font-black tracking-tight text-red-200">{title}</h3>
     {description ? (
-      <p className="mt-2 text-sm text-red-600 dark:text-red-200">{description}</p>
+      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-red-200/80">{description}</p>
     ) : null}
     {actionLabel && onAction ? (
       <button
         type="button"
         onClick={onAction}
-        className="mt-4 rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-300/40 dark:text-red-200 dark:hover:bg-red-500/20"
+        className="nl-button-danger mt-5"
       >
         {actionLabel}
       </button>

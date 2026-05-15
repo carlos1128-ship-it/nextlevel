@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import NextLevelLoader from "../../../components/NextLevelLoader";
 import { getDashboardPreferences, resetDashboardPreferences, saveDashboardPreferences } from "../../services/endpoints";
 import { getErrorMessage } from "../../services/error";
 import type {
@@ -230,9 +231,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
           Selecione uma empresa para personalizar o dashboard.
         </div>
       ) : loading ? (
-        <div className="rounded-2xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800">
-          Carregando métricas...
-        </div>
+        <NextLevelLoader fullscreen={false} />
       ) : error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
           {error}

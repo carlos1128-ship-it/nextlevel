@@ -370,7 +370,7 @@ const Plans = () => {
               : portalLoading && hasActiveSubscription
                 ? "Abrindo..."
               : isInitialBillingLoading
-                ? "Carregando..."
+                ? "Aguarde"
                 : isExactCurrentPlan
                   ? "Gerenciar assinatura"
                   : hasActiveSubscription

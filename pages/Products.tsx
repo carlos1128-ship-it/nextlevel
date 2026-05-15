@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useToast } from "../components/Toast";
 import { EmptyState, ErrorState, LoadingState } from "../components/AsyncState";
+import { FilterCard, FormCard, TableCard } from "../components/ui/Card";
 import { useAuth } from "../App";
 import { getErrorMessage } from "../src/services/error";
 import {
@@ -216,53 +217,53 @@ const Products = () => {
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <article className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 lg:col-span-3">
+        <FormCard className="lg:col-span-3">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-12">
             <input
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="Nome do produto"
-              className="md:col-span-3 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input md:col-span-3"
             />
             <input
               value={form.sku}
               onChange={(e) => setForm((prev) => ({ ...prev, sku: e.target.value }))}
               placeholder="SKU"
-              className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input md:col-span-2"
             />
             <input
               value={form.category}
               onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
               placeholder="Categoria"
-              className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input md:col-span-2"
             />
             <input
               value={form.price}
               onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
               placeholder="Preço venda (BRL)"
-              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input md:col-span-1"
             />
             <input
               value={form.cost}
               onChange={(e) => setForm((prev) => ({ ...prev, cost: e.target.value }))}
               placeholder="Custo"
-              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input md:col-span-1"
             />
             <input
               value={form.tax}
               onChange={(e) => setForm((prev) => ({ ...prev, tax: e.target.value }))}
               placeholder="Impostos"
-              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input md:col-span-1"
             />
             <input
               value={form.shipping}
               onChange={(e) => setForm((prev) => ({ ...prev, shipping: e.target.value }))}
               placeholder="Frete"
-              className="md:col-span-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input md:col-span-1"
             />
             <button
               type="submit"
-              className="md:col-span-1 rounded-xl bg-lime-400 px-3 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
+              className="nl-button-primary md:col-span-1"
             >
               {editingId ? "Salvar" : "Add"}
             </button>
@@ -290,39 +291,39 @@ const Products = () => {
               </div>
             </div>
           </div>
-        </article>
+        </FormCard>
 
-        <aside className="space-y-2 rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
+        <FilterCard className="space-y-3">
           <p className="text-sm font-semibold text-zinc-300">Filtros</p>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome, SKU ou categoria"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            className="nl-input"
           />
           <input
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             placeholder="Categoria exata (opcional)"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            className="nl-input"
           />
           <div className="flex items-center justify-between gap-2">
             <label className="text-xs text-zinc-500">Itens por página</label>
             <select
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value) || 10)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs text-zinc-100 focus:outline-none"
+              className="nl-input min-h-0 py-2 text-xs"
             >
               {[5, 10, 20, 50].map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}
             </select>
           </div>
-        </aside>
+        </FilterCard>
       </section>
 
       {loading ? (
-        <LoadingState label="Carregando produtos..." />
+        <LoadingState />
       ) : error ? (
         <ErrorState
           title="Erro ao carregar produtos"
@@ -336,7 +337,7 @@ const Products = () => {
           description="Cadastre produtos para destravar margens, precificacao e LTV."
         />
       ) : (
-        <section className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 shadow-sm">
+        <TableCard>
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
             <div>
               <p className="text-sm font-semibold text-zinc-200">
@@ -365,8 +366,8 @@ const Products = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-zinc-800 text-sm">
-              <thead className="text-xs uppercase tracking-tight text-zinc-500">
+            <table className="nl-table">
+              <thead>
                 <tr>
                   <th className="px-3 py-2 text-left">Produto</th>
                   <th className="px-3 py-2 text-left">Categoria</th>
@@ -379,7 +380,7 @@ const Products = () => {
                   <th className="px-3 py-2 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900 text-zinc-100">
+              <tbody className="text-zinc-100">
                 {items.map((product) => {
                   const financials =
                     product.financials ??
@@ -397,7 +398,7 @@ const Products = () => {
                         : "border border-lime-400/25 bg-lime-400/10 text-lime-200";
 
                   return (
-                    <tr key={product.id} className="hover:bg-zinc-900/60">
+                    <tr key={product.id} className="border-t border-zinc-800/80">
                       <td className="px-3 py-2">
                         <div className="font-semibold">{product.name}</div>
                         <p className="text-xs text-zinc-500">
@@ -422,14 +423,14 @@ const Products = () => {
                       <td className="space-x-2 px-3 py-2 text-right">
                         <button
                           type="button"
-                          className="rounded-lg border border-zinc-800 px-2 py-1 text-xs text-zinc-200 hover:border-lime-400"
+                          className="nl-button-secondary min-h-0 px-3 py-2 text-xs"
                           onClick={() => handleEdit(product)}
                         >
                           Editar
                         </button>
                         <button
                           type="button"
-                          className="rounded-lg border border-red-500/60 px-2 py-1 text-xs text-red-400 hover:border-red-400"
+                          className="nl-button-danger min-h-0 px-3 py-2 text-xs"
                           onClick={() => handleDelete(product.id)}
                         >
                           Excluir
@@ -441,7 +442,7 @@ const Products = () => {
               </tbody>
             </table>
           </div>
-        </section>
+        </TableCard>
       )}
     </main>
   );

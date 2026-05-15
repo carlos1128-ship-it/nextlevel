@@ -167,8 +167,8 @@ const MarketIntel = () => {
           </div>
           <div className="grid gap-3">
             {loading && !comparisons.length ? (
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-400">
-                Carregando preços...
+              <div className="grid min-h-[160px] place-items-center rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
+                <span className="text-2xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</span>
               </div>
             ) : null}
             {!loading && !comparisons.length ? (

@@ -265,7 +265,7 @@ const Companies = () => {
       ) : null}
 
       {loadingPage ? (
-        <LoadingState label="Carregando empresas..." />
+        <LoadingState />
       ) : loadError ? (
         <ErrorState
           title="Erro ao carregar empresas"

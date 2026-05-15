@@ -383,7 +383,7 @@ const Reports = () => {
 
       {/* States */}
       {loading ? (
-        <LoadingState label="Carregando relatório..." />
+        <LoadingState />
       ) : loadError ? (
         <ErrorState
           title="Erro ao carregar relatório"

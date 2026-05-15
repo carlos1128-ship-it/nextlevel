@@ -89,7 +89,7 @@ const Insights = () => {
         </div>
       </header>
 
-      {loading ? <LoadingState label="Carregando insights..." /> : null}
+      {loading ? <LoadingState /> : null}
 
       {error ? (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
