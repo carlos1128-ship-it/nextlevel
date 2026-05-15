@@ -322,14 +322,14 @@ const Plans = () => {
                 onClick={() => navigate("/dashboard")}
                 className="rounded-lg border border-white/10 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/[0.06]"
               >
-                Dashboard
+                Voltar ao dashboard
               </button>
               <button
                 type="button"
                 onClick={logout}
                 className="rounded-lg border border-white/10 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/[0.06]"
               >
-                Sair
+                Encerrar sessao
               </button>
               </>
             ) : null}

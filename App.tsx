@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext, useContext, ReactNode, lazy, Suspense, useRef } from 'react';
+import React, { useCallback, useEffect, useState, createContext, useContext, ReactNode, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import Chat from './pages/Chat';
@@ -77,9 +77,12 @@ const BILLING_ACCESS_INVALID_EVENT = "nextlevel:billing-access-invalid";
 const BILLING_CACHE_PREFIX = "nextlevel:billing:";
 const BILLING_CACHE_TTL_MS = 5 * 60 * 1000;
 const BILLING_VALIDATION_TIMEOUT_MS = 15000;
+const AUTH_CALLBACK_TIMEOUT_MS = 15000;
+const AUTH_CALLBACK_START_DELAY_MS = 0;
 const getCompanyId = (company: Partial<Company> | null | undefined) => company?.id || company?._id || null;
 
 type BillingStatus = "UNKNOWN" | "ACTIVE" | "INACTIVE";
+type AuthCallbackState = "callbackLoading" | "authResolved" | "companyResolved" | "billingResolved" | "success" | "error";
 
 type BillingPlanKey = "COMMON" | "PREMIUM" | "PRO_BUSINESS";
 
@@ -214,6 +217,17 @@ function clearAllBillingCache() {
     .forEach((key) => sessionStorage.removeItem(key));
 }
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, code: string): Promise<T> {
+  let timeoutId: number | null = null;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(code)), timeoutMs);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timeoutId !== null) window.clearTimeout(timeoutId);
+  });
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -256,16 +270,16 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     setIsProfileReady(true);
   }, []);
 
-  const setSelectedCompanyId = (value: string | null) => {
+  const setSelectedCompanyId = useCallback((value: string | null) => {
     setSelectedCompanyIdState(value);
     if (value) {
       localStorage.setItem(COMPANY_ID_STORAGE_KEY, value);
       return;
     }
     localStorage.removeItem(COMPANY_ID_STORAGE_KEY);
-  };
+  }, []);
 
-  const setNiche = (value: UserNiche | null) => {
+  const setNiche = useCallback((value: UserNiche | null) => {
     setNicheState(value);
     writeStoredUser({
       name: username,
@@ -273,9 +287,9 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
       admin: isAdmin,
       niche: value,
     });
-  };
+  }, [email, isAdmin, username]);
 
-  const login = (user: { name?: string | null; email?: string | null; admin?: boolean; niche?: UserNiche | null }) => {
+  const login = useCallback((user: { name?: string | null; email?: string | null; admin?: boolean; niche?: UserNiche | null }) => {
     clearAllBillingCache();
     const nextSessionKey = tokenFingerprint();
     setIsLoggedIn(true);
@@ -294,9 +308,9 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
       niche: user.niche || null,
     });
     window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
-  };
+  }, [setSelectedCompanyId]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
       void api.post('/auth/logout', { refresh_token: refreshToken }).catch(() => {
@@ -318,7 +332,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem(AUTH_USER_STORAGE_KEY);
     window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
-  };
+  }, [setSelectedCompanyId]);
 
   useEffect(() => {
     const handleAuthChanged = () => {
@@ -608,7 +622,7 @@ const BillingValidationError = ({
           onClick={onLogout}
           className="flex-1 rounded-[16px] border border-white/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-zinc-300"
         >
-          Sair
+          Encerrar sessao
         </button>
       </div>
     </div>
@@ -795,98 +809,150 @@ const MetadataSync = () => {
 };
 
 const GoogleAuthCallback = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login, setSelectedCompanyId } = useAuth();
-  const handledAttemptRef = useRef<number | null>(null);
+  const { login, logout, setSelectedCompanyId } = useAuth();
+  const activeRunRef = useRef(0);
   const [retryKey, setRetryKey] = useState(0);
+  const [callbackState, setCallbackState] = useState<AuthCallbackState>("callbackLoading");
   const [callbackError, setCallbackError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (handledAttemptRef.current === retryKey) return;
-    handledAttemptRef.current = retryKey;
+    const runId = activeRunRef.current + 1;
+    activeRunRef.current = runId;
     let cancelled = false;
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    const readParam = (key: string) => hashParams.get(key) || searchParams.get(key);
-    const token = readParam('token');
-    const refreshToken = readParam('refresh_token');
-    const name = readParam('name');
-    const email = readParam('email');
-    const admin = readParam('admin') === 'true';
-    const selectedPlan = readPendingSelectedPlan();
+
+    const isCurrentRun = () => !cancelled && activeRunRef.current === runId;
+    const fail = () => {
+      if (!isCurrentRun()) return;
+      setCallbackError("Não foi possível concluir seu login agora.");
+      setCallbackState("error");
+    };
 
     const completeAuthFlow = async () => {
-      if (!token) {
-        navigate('/login?error=google_auth_failed', { replace: true });
-        return;
-      }
-
       try {
+        setCallbackState("callbackLoading");
         setCallbackError(null);
-        window.history.replaceState({}, document.title, window.location.pathname);
-        localStorage.setItem('access_token', token);
-        if (refreshToken) {
-          localStorage.setItem('refresh_token', refreshToken);
-        }
-        login({ name, email, admin, niche: null });
 
-        const companies = await getCompanies();
-        if (cancelled) return;
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const searchParams = new URLSearchParams(window.location.search);
+        const readParam = (key: string) => hashParams.get(key) || searchParams.get(key);
+        const token = readParam("token") || readParam("access_token");
+        const refreshToken = readParam("refresh_token") || readParam("refreshToken");
+        const name = readParam("name");
+        const email = readParam("email");
+        const admin = readParam("admin") === "true";
+        const selectedPlan = readPendingSelectedPlan();
+        const preferredCompanyId = localStorage.getItem(COMPANY_ID_STORAGE_KEY);
+
+        if (token) {
+          localStorage.setItem("access_token", token);
+          if (refreshToken) {
+            localStorage.setItem("refresh_token", refreshToken);
+          }
+          window.history.replaceState({}, document.title, window.location.pathname);
+          login({ name, email, admin, niche: null });
+        } else {
+          const storedToken = localStorage.getItem("access_token");
+          if (!storedToken) {
+            navigate("/login", { replace: true });
+            return;
+          }
+
+          const profile = await withTimeout(getUserProfile(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
+          if (!isCurrentRun()) return;
+          login({
+            name: profile?.name || null,
+            email: profile?.email || null,
+            admin: Boolean(profile?.admin),
+            niche: profile?.niche || null,
+          });
+        }
+
+        if (!isCurrentRun()) return;
+        setCallbackState("authResolved");
+
+        const companies = await withTimeout(getCompanies(), AUTH_CALLBACK_TIMEOUT_MS, "company_resolution_timeout");
+        if (!isCurrentRun()) return;
         const list = Array.isArray(companies) ? companies : [];
         if (!list.length) {
+          setCallbackState("companyResolved");
           navigate('/companies', { replace: true });
           return;
         }
 
-        const storedCompanyId = localStorage.getItem(COMPANY_ID_STORAGE_KEY);
         const selectedCompany =
-          list.find((company) => getCompanyId(company) === storedCompanyId) || list[0];
+          list.find((company) => getCompanyId(company) === preferredCompanyId) || list[0];
         const companyId = getCompanyId(selectedCompany);
         if (!companyId) {
+          setCallbackState("companyResolved");
           navigate('/companies', { replace: true });
           return;
         }
 
         setSelectedCompanyId(companyId);
-        const billing = await getBillingMe({ companyId });
-        if (cancelled) return;
+        setCallbackState("companyResolved");
+
+        const billing = await withTimeout(
+          getBillingMe({ companyId }),
+          AUTH_CALLBACK_TIMEOUT_MS,
+          "billing_resolution_timeout",
+        );
+        if (!isCurrentRun()) return;
+        setCallbackState("billingResolved");
+
         if (billing.hasActiveSubscription) {
           clearPendingSelectedPlan();
+          setCallbackState("success");
           navigate(DASHBOARD_ROUTE, { replace: true });
           return;
         }
+        setCallbackState("success");
         navigate(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos', { replace: true });
       } catch {
-        if (!cancelled) {
-          setCallbackError("Nao foi possivel concluir esta etapa agora.");
-        }
+        fail();
       }
     };
 
-    void completeAuthFlow();
+    const startTimer = window.setTimeout(() => {
+      void completeAuthFlow();
+    }, AUTH_CALLBACK_START_DELAY_MS);
+
     return () => {
       cancelled = true;
+      window.clearTimeout(startTimer);
     };
-  }, [searchParams, navigate, login, setSelectedCompanyId, retryKey]);
+  }, [login, navigate, retryKey, setSelectedCompanyId]);
 
-  if (callbackError) {
+  if (callbackState === "error") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#040507] px-5 text-zinc-100">
         <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-white/[0.04] p-7 text-center shadow-[0_0_70px_rgba(182,255,0,0.08)]">
           <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
-          <p className="mt-4 text-sm font-bold text-zinc-200">{callbackError}</p>
-          <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessao esta protegida. Tente novamente para validar seu acesso.</p>
-          <button
-            type="button"
-            onClick={() => {
-              setCallbackError(null);
-              handledAttemptRef.current = null;
-              setRetryKey((current) => current + 1);
-            }}
-            className="mt-6 rounded-[16px] bg-lime-300 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-zinc-950"
-          >
-            Tentar novamente
-          </button>
+          <p className="mt-4 text-sm font-bold text-zinc-200">{callbackError || "Não foi possível concluir seu login agora."}</p>
+          <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessao nao ficou presa. Tente novamente ou volte para iniciar um novo login.</p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => {
+                setCallbackError(null);
+                setCallbackState("callbackLoading");
+                setRetryKey((current) => current + 1);
+              }}
+              className="flex-1 rounded-[16px] bg-lime-300 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-zinc-950"
+            >
+              Tentar novamente
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                navigate("/login", { replace: true });
+              }}
+              className="flex-1 rounded-[16px] border border-white/10 px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-zinc-300"
+            >
+              Voltar para login
+            </button>
+          </div>
         </div>
       </div>
     );

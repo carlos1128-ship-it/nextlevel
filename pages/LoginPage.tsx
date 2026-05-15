@@ -569,6 +569,7 @@ interface AuthPanelProps {
   password: string; setPassword: (v: string) => void;
   showPassword: boolean; setShowPassword: (v: boolean) => void;
   error: string; loading: boolean; setError: (v: string) => void;
+  googleLoading: boolean;
   selectedPlanLabel?: string | null;
   subscribeIntent?: boolean;
   onGoogleLogin: () => void;
@@ -578,7 +579,7 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
   isRegisterView, setIsRegisterView, onLogin, onRegister,
   name, setName, email, setEmail, password, setPassword,
   showPassword, setShowPassword, error, loading, setError,
-  selectedPlanLabel, subscribeIntent, onGoogleLogin,
+  googleLoading, selectedPlanLabel, subscribeIntent, onGoogleLogin,
 }) => (
   <aside id="auth-panel" className="w-full min-w-0">
     <div className="relative max-w-full overflow-hidden rounded-[34px] border border-lime-400/[0.16] bg-[linear-gradient(200deg,rgba(16,23,32,0.99),rgba(6,8,12,0.99))] shadow-[0_36px_120px_rgba(0,0,0,0.66),0_0_0_1px_rgba(182,255,0,0.04),inset_0_1px_0_rgba(255,255,255,0.05)]">
@@ -663,8 +664,10 @@ const AuthPanel: React.FC<AuthPanelProps> = ({
 
           <button type="button"
             onClick={onGoogleLogin}
-            className="flex min-h-[50px] w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-lime-300/60 mb-4">
-            <GoogleIcon /> Google
+            disabled={loading || googleLoading}
+            className="flex min-h-[50px] w-full items-center justify-center gap-3 rounded-[18px] border border-white/[0.1] bg-white/[0.04] py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-lime-300/60 disabled:cursor-not-allowed disabled:opacity-60 mb-4">
+            {googleLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-lime-300/25 border-t-lime-300" /> : <GoogleIcon />}
+            {googleLoading ? "Conectando..." : "Google"}
           </button>
 
           <div className="flex items-center gap-3 mb-4">
@@ -729,6 +732,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [billingAnnual, setBillingAnnual] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PendingPlanSelection | null>(null);
   const [activeFooterInfo, setActiveFooterInfo] = useState<FooterInfoKey | null>(null);
@@ -758,6 +762,13 @@ const LoginPage: React.FC = () => {
     if (searchParams.get("intent") === "subscribe") {
       window.setTimeout(() => focusAuth(false), 120);
     }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (searchParams.get("error") !== "google_auth_failed") return;
+    setGoogleLoading(false);
+    setError("Não foi possível concluir seu login agora.");
+    window.setTimeout(() => focusAuth(false), 120);
   }, [searchParams]);
 
   const selectPlanAndLogin = (planKey: BillingPlanKey, register = true) => {
@@ -805,6 +816,8 @@ const LoginPage: React.FC = () => {
   const handleGoogleLogin = () => {
     const pendingPlan = readPlanSelectionFromSearch(searchParams) || selectedPlan || readPendingSelectedPlan();
     if (pendingPlan) savePendingSelectedPlan(pendingPlan);
+    setError("");
+    setGoogleLoading(true);
 
     const raw = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
     const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
@@ -1244,6 +1257,7 @@ const LoginPage: React.FC = () => {
               password={password} setPassword={setPassword}
               showPassword={showPassword} setShowPassword={setShowPassword}
               error={error} loading={loading} setError={setError}
+              googleLoading={googleLoading}
               selectedPlanLabel={selectedPlan ? planSelectionLabel(selectedPlan) : null}
               subscribeIntent={searchParams.get("intent") === "subscribe"}
               onGoogleLogin={handleGoogleLogin}
