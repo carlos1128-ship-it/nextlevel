@@ -927,58 +927,70 @@ const LoginPage: React.FC = () => {
 
       <div className="relative z-10 mx-auto max-w-[1680px] px-4 sm:px-8 lg:px-12 2xl:px-16">
 
-        <section className="relative left-1/2 flex min-h-[calc(100dvh-88px)] w-screen -translate-x-1/2 flex-col items-center justify-center overflow-hidden px-4 py-16 text-center sm:px-8 lg:px-12 lg:py-20">
-          <AnimatedHeroBackground
-            images={HERO_GROWTH_FRAMES}
-            className="z-0 opacity-40 sm:opacity-50 lg:opacity-65"
-          />
-          <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(3,5,8,0.76)_0%,rgba(3,5,8,0.48)_38%,rgba(3,5,8,0.9)_100%)]" />
-          <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(180deg,rgba(3,5,8,0.82)_0%,rgba(3,5,8,0.44)_46%,rgba(3,5,8,0.96)_100%)]" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-1/3 bg-[linear-gradient(180deg,transparent,rgba(3,5,8,0.98))]" />
-          <div className="relative z-[3] mx-auto flex w-full max-w-[1320px] flex-col items-center">
-            <div className="nl-reveal mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
-              <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Gestão empresarial com IA para empresários</span>
-            </div>
+        {/* Hero wrapper — tall to give scroll space for frame animation */}
+        <section
+          data-hero-wrapper
+          className="relative left-1/2 w-screen -translate-x-1/2"
+          style={{ height: "160vh" }}
+        >
+          <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden text-center">
+            {/* Layer 1: Animated hero background frames (scroll-controlled) */}
+            <AnimatedHeroBackground
+              images={HERO_GROWTH_FRAMES}
+              className="z-0"
+            />
 
-            <h1 className="nl-reveal nl-delay-1 mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
-              Gestão, atendimento e lucro real em uma plataforma com <span className="text-lime-300">IA.</span>
-            </h1>
+            {/* Layer 2: Subtle dark overlay for text readability */}
+            <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(3,5,8,0.45)_0%,rgba(3,5,8,0.25)_40%,rgba(3,5,8,0.65)_100%)]" />
+            <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(180deg,rgba(3,5,8,0.55)_0%,rgba(3,5,8,0.18)_42%,rgba(3,5,8,0.75)_100%)]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-1/4 bg-[linear-gradient(180deg,transparent,rgba(3,5,8,0.92))]" />
 
-            <p className="nl-reveal nl-delay-2 mt-7 max-w-3xl text-base leading-8 text-zinc-300 sm:text-xl sm:leading-9">
-              A Next Level transforma vendas, custos, clientes e atendimento em decisões claras para proteger margem e acelerar crescimento.
-            </p>
+            {/* Layer 3: Hero content — title, subtitle, tags, CTAs */}
+            <div className="relative z-[3] mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-8 lg:px-12">
+              <div className="nl-reveal mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
+                <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Gestão empresarial com IA para empresários</span>
+              </div>
 
-            <div className="nl-reveal nl-delay-2 mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
-              {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
-                <span key={item} className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2">{item}</span>
-              ))}
-            </div>
+              <h1 className="nl-reveal nl-delay-1 mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
+                Gestão, atendimento e lucro real em uma plataforma com <span className="text-lime-300">IA.</span>
+              </h1>
 
-            <div className="nl-reveal nl-delay-3 mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
-              <button onClick={() => focusAuth(true)}
-                className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
-                Criar minha conta <ArrowRight />
-              </button>
-              <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
-                Ver como funciona
-              </button>
-            </div>
+              <p className="nl-reveal nl-delay-2 mt-7 max-w-3xl text-base leading-8 text-zinc-300 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-xl sm:leading-9">
+                A Next Level transforma vendas, custos, clientes e atendimento em decisões claras para proteger margem e acelerar crescimento.
+              </p>
 
-            <div className="nl-reveal nl-delay-4 mt-12 grid w-full grid-cols-1 gap-5 text-left md:grid-cols-3">
-              {METRICS.map((m) => (
-                <div key={m.label} className="nl-card-hover rounded-[24px] border border-white/[0.07] bg-white/[0.025] p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-lime-400/10 text-lime-400">
-                      <m.icon />
+              <div className="nl-reveal nl-delay-2 mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+                {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
+                  <span key={item} className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-2 backdrop-blur-sm">{item}</span>
+                ))}
+              </div>
+
+              <div className="nl-reveal nl-delay-3 mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+                <button onClick={() => focusAuth(true)}
+                  className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
+                  Criar minha conta <ArrowRight />
+                </button>
+                <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
+                  Ver como funciona
+                </button>
+              </div>
+
+              <div className="nl-reveal nl-delay-4 mt-12 grid w-full grid-cols-1 gap-5 text-left md:grid-cols-3">
+                {METRICS.map((m) => (
+                  <div key={m.label} className="nl-card-hover rounded-[24px] border border-white/[0.07] bg-black/30 backdrop-blur-sm p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-lime-400/10 text-lime-400">
+                        <m.icon />
+                      </div>
                     </div>
+                    <p className="text-base font-black tracking-tight text-white">
+                      {m.title}
+                    </p>
+                    <p className="mt-2 text-xs leading-5 text-zinc-400">{m.label}</p>
                   </div>
-                  <p className="text-base font-black tracking-tight text-white">
-                    {m.title}
-                  </p>
-                  <p className="mt-2 text-xs leading-5 text-zinc-400">{m.label}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
