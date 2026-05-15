@@ -171,6 +171,10 @@ export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
     <div
       ref={containerRef}
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
+      style={{
+        maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)"
+      }}
       aria-hidden="true"
     >
       {images.map((src, index) => (
@@ -185,9 +189,9 @@ export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
           }}
           style={{
             opacity: frameOpacities[index] ?? 0,
-            transition: "opacity 0.15s ease-out",
+            transition: "opacity 0.2s ease-in-out",
           }}
-          className="absolute inset-0 h-full w-full object-cover object-[center_70%] motion-reduce:transition-none"
+          className="absolute inset-0 h-full w-full object-cover object-bottom motion-reduce:transition-none"
           draggable={false}
         />
       ))}
