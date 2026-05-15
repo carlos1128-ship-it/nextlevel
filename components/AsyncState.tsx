@@ -1,4 +1,5 @@
 import React from "react";
+import NextLevelLoader from "./NextLevelLoader";
 
 interface StateCardProps {
   title: string;
@@ -7,12 +8,8 @@ interface StateCardProps {
   onAction?: () => void;
 }
 
-export const LoadingState: React.FC<{ label?: string }> = ({
-  label = "Carregando dados...",
-}) => (
-  <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
-    {label}
-  </div>
+export const LoadingState: React.FC<{ label?: string }> = () => (
+  <NextLevelLoader fullscreen={false} />
 );
 
 export const EmptyState: React.FC<StateCardProps> = ({
