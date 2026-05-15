@@ -14,6 +14,7 @@ import {
 } from "../src/utils/billingSelection";
 import { getDisplayPlanPrice, PLAN_DISPLAY } from "../src/utils/planDisplay";
 import AnimatedHeroBackground from "../components/AnimatedHeroBackground";
+import RevealOnScroll from "../components/RevealOnScroll";
 
 /* Helpers */
 function scrollToSection(id: string) {
@@ -888,7 +889,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen overflow-x-hidden bg-[#030508] text-white"
+      className="min-h-screen max-w-[100vw] overflow-x-clip bg-[#030508] text-white"
       onMouseMove={handleMouseMove}
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
@@ -947,34 +948,44 @@ const LoginPage: React.FC = () => {
 
             {/* Layer 3: Hero content — title, subtitle, tags, CTAs */}
             <div className="relative z-[3] mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-8 lg:px-12">
-              <div className="nl-reveal mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
-                <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Gestão empresarial com IA para empresários</span>
-              </div>
+              <RevealOnScroll delay={0.1}>
+                <div className="mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
+                  <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Cérebro digital para PMEs</span>
+                </div>
+              </RevealOnScroll>
 
-              <h1 className="nl-reveal nl-delay-1 mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
-                Gestão, atendimento e lucro real em uma plataforma com <span className="text-lime-300">IA.</span>
-              </h1>
+              <RevealOnScroll delay={0.2}>
+                <h1 className="mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
+                  A inteligência tática que a sua operação <span className="text-lime-300">precisava.</span>
+                </h1>
+              </RevealOnScroll>
 
-              <p className="nl-reveal nl-delay-2 mt-7 max-w-3xl text-base leading-8 text-zinc-300 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-xl sm:leading-9">
-                A Next Level transforma vendas, custos, clientes e atendimento em decisões claras para proteger margem e acelerar crescimento.
-              </p>
+              <RevealOnScroll delay={0.3}>
+                <p className="mt-7 max-w-3xl text-sm leading-7 text-zinc-300 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-lg sm:leading-9">
+                  Saia do escuro. A Next Level capta dados de vendas, atendimento e custos para mostrar a margem verdadeira e as prioridades do seu negócio com alertas da IA.
+                </p>
+              </RevealOnScroll>
 
-              <div className="nl-reveal nl-delay-2 mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
-                {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
-                  <span key={item} className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-2 backdrop-blur-sm">{item}</span>
-                ))}
-              </div>
+              <RevealOnScroll delay={0.4}>
+                <div className="mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+                  {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
+                    <span key={item} className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-2 backdrop-blur-sm">{item}</span>
+                  ))}
+                </div>
+              </RevealOnScroll>
 
-              <div className="nl-reveal nl-delay-3 mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
-                <button onClick={() => focusAuth(true)}
-                  className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
-                  Criar minha conta <ArrowRight />
-                </button>
-                <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
-                  Ver como funciona
-                </button>
-              </div>
+              <RevealOnScroll delay={0.5}>
+                <div className="mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+                  <button onClick={() => focusAuth(true)}
+                    className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
+                    Acessar plataforma <ArrowRight />
+                  </button>
+                  <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
+                    Ver como funciona
+                  </button>
+                </div>
+              </RevealOnScroll>
 
               <div className="nl-reveal nl-delay-4 mt-12 grid w-full grid-cols-1 gap-5 text-left md:grid-cols-3">
                 {METRICS.map((m) => (
@@ -1031,7 +1042,7 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="nl-scroll-reveal py-16 scroll-mt-20">
+        <RevealOnScroll as="section" className="py-16 scroll-mt-20">
           <div className="mb-9 max-w-4xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Para quem é?</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
@@ -1060,9 +1071,9 @@ const LoginPage: React.FC = () => {
             </div>
             <FeatureScreenshot detail={{ title: "Visão geral da operação", image: "/login-features/gestao-vendas.png" }} />
           </div>
-        </section>
+        </RevealOnScroll>
 
-        <section id="problemas" className="nl-scroll-reveal py-16 scroll-mt-20">
+        <RevealOnScroll as="section" id="problemas" className="py-16 scroll-mt-20">
           <div className="mb-8 max-w-3xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">O problema</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
@@ -1083,9 +1094,9 @@ const LoginPage: React.FC = () => {
               </div>
             ))}
           </div>
-        </section>
+        </RevealOnScroll>
 
-        <section id="o-que-fazemos" className="nl-scroll-reveal py-16 scroll-mt-20">
+        <RevealOnScroll as="section" id="o-que-fazemos" className="py-16 scroll-mt-20">
           <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.1),rgba(6,8,12,0.96)_42%,rgba(3,5,8,1))] p-8 sm:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.18),transparent_34%)]" />
             <div className="relative">
@@ -1111,9 +1122,9 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
+        </RevealOnScroll>
 
-        <section id="features" className="nl-scroll-reveal py-16 scroll-mt-20">
+        <RevealOnScroll as="section" id="features" className="py-16 scroll-mt-20">
           <div className="text-center mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
             <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white max-w-2xl mx-auto">
@@ -1136,9 +1147,9 @@ const LoginPage: React.FC = () => {
             ))}
           </div>
 
-        </section>
+        </RevealOnScroll>
 
-        <section className="nl-scroll-reveal py-16">
+        <RevealOnScroll as="section" className="py-16">
           <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(7,10,15,0.98)_48%,rgba(3,5,8,1))] p-8 sm:p-10">
             <div className="pointer-events-none absolute -right-20 top-8 h-56 w-56 rounded-full bg-lime-300/10 blur-3xl nl-float" />
             <div className="relative grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
@@ -1153,9 +1164,9 @@ const LoginPage: React.FC = () => {
               </p>
             </div>
           </div>
-        </section>
+        </RevealOnScroll>
 
-        <section id="como-funciona" className="nl-scroll-reveal py-16 scroll-mt-20">
+        <RevealOnScroll as="section" id="como-funciona" className="py-16 scroll-mt-20">
           <div className="mb-10 max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Como funciona</p>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-[0.96]">
@@ -1174,7 +1185,7 @@ const LoginPage: React.FC = () => {
               </div>
             ))}
           </div>
-        </section>
+        </RevealOnScroll>
 
         <section id="pricing" className="py-16 scroll-mt-20">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10">
@@ -1267,7 +1278,7 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="login" className="nl-scroll-reveal py-16 scroll-mt-20 lg:py-20">
+        <RevealOnScroll as="section" id="login" className="py-16 scroll-mt-20 lg:py-20">
           <div className="mx-auto max-w-[1240px]">
             <div className="mb-8 text-center">
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Acesso à plataforma</p>
@@ -1294,7 +1305,7 @@ const LoginPage: React.FC = () => {
               Leva menos de 1 minuto para começar. A escolha do plano continua depois do acesso.
             </p>
           </div>
-        </section>
+        </RevealOnScroll>
 
         <section id="faq" className="py-20 scroll-mt-20">
           <div className="mb-10 text-center">
@@ -1339,7 +1350,7 @@ const LoginPage: React.FC = () => {
         </section>
 
         {activeFooterInfo ? (
-          <section id="footer-info" className="nl-scroll-reveal scroll-mt-20 pb-10">
+          <RevealOnScroll as="section" id="footer-info" className="scroll-mt-20 pb-10">
             <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.16] bg-[linear-gradient(135deg,rgba(182,255,0,0.09),rgba(7,10,15,0.98)_44%,rgba(3,5,8,1))] p-6 sm:p-8">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.14),transparent_34%)]" />
               <div className="relative mb-6 flex items-start justify-between gap-4">
@@ -1375,7 +1386,7 @@ const LoginPage: React.FC = () => {
                 <FeatureScreenshot detail={FOOTER_DETAILS[activeFooterInfo]} />
               </div>
             </div>
-          </section>
+          </RevealOnScroll>
         ) : null}
 
         <footer className="border-t border-white/[0.08] py-10">
