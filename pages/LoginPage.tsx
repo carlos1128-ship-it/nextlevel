@@ -510,6 +510,11 @@ const LandingMotionStyles = () => (
     .nl-delay-2 { animation-delay: .16s; }
     .nl-delay-3 { animation-delay: .24s; }
     .nl-delay-4 { animation-delay: .32s; }
+    .nl-hero-stagger > * {
+      opacity: 0;
+      animation: nlRevealUp .68s cubic-bezier(.16,1,.3,1) both;
+      animation-delay: var(--nl-hero-delay, .2s);
+    }
     .nl-float { animation: nlFloatSoft 6s ease-in-out infinite; }
     .nl-glow-shift { animation: nlGlowShift 9s ease-in-out infinite; }
     .nl-card-hover { transition: transform .28s ease, border-color .28s ease, background .28s ease, box-shadow .28s ease; }
@@ -517,7 +522,7 @@ const LandingMotionStyles = () => (
     .nl-reveal-scroll {
       opacity: 0;
       transform: translate3d(var(--nl-reveal-x, 0), var(--nl-reveal-y, 24px), 0);
-      filter: blur(4px);
+      filter: blur(var(--nl-reveal-blur, 4px));
       transition:
         opacity var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
         transform var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
@@ -539,12 +544,12 @@ const LandingMotionStyles = () => (
     .nl-reveal-stagger > * {
       opacity: 0;
       transform: translate3d(0, 18px, 0);
-      filter: blur(4px);
+      filter: blur(var(--nl-reveal-blur, 4px));
       transition:
         opacity var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
         transform var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
         filter var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1);
-      transition-delay: calc(var(--nl-reveal-delay, 0ms) + (var(--nl-reveal-index, 0) * var(--nl-stagger, 70ms)));
+      transition-delay: var(--nl-reveal-child-delay, var(--nl-reveal-delay, 0ms));
       will-change: opacity, transform, filter;
     }
     .nl-reveal-stagger.is-visible > * {
@@ -553,7 +558,7 @@ const LandingMotionStyles = () => (
       filter: blur(0);
     }
     @media (prefers-reduced-motion: reduce) {
-      .nl-reveal, .nl-reveal-scroll, .nl-reveal-stagger > *, .nl-float, .nl-glow-shift {
+      .nl-reveal, .nl-hero-stagger > *, .nl-reveal-scroll, .nl-reveal-stagger > *, .nl-float, .nl-glow-shift {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
@@ -1014,9 +1019,15 @@ const LoginPage: React.FC = () => {
                 A Next Level reúne vendas, custos, clientes e atendimento para mostrar onde a margem escapa e qual ação tomar antes que o problema vire prejuízo.
               </p>
 
-              <div className="nl-reveal nl-delay-2 mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
-                {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
-                  <span key={item} className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-2 backdrop-blur-sm">{item}</span>
+              <div className="mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500 nl-hero-stagger">
+                {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item, index) => (
+                  <span
+                    key={item}
+                    style={{ "--nl-hero-delay": `${220 + index * 56}ms` } as React.CSSProperties}
+                    className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-2 backdrop-blur-sm"
+                  >
+                    {item}
+                  </span>
                 ))}
               </div>
 
@@ -1030,9 +1041,13 @@ const LoginPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="nl-reveal nl-delay-4 mt-12 grid w-full grid-cols-1 gap-5 text-left md:grid-cols-3">
-                {METRICS.map((m) => (
-                  <div key={m.label} className="nl-card-hover rounded-[24px] border border-white/[0.07] bg-black/30 backdrop-blur-sm p-5">
+              <div className="mt-12 grid w-full grid-cols-1 gap-5 text-left md:grid-cols-3 nl-hero-stagger">
+                {METRICS.map((m, index) => (
+                  <div
+                    key={m.label}
+                    style={{ "--nl-hero-delay": `${360 + index * 82}ms` } as React.CSSProperties}
+                    className="nl-card-hover rounded-[24px] border border-white/[0.07] bg-black/30 backdrop-blur-sm p-5"
+                  >
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-lime-400/10 text-lime-400">
                         <m.icon />
@@ -1086,7 +1101,7 @@ const LoginPage: React.FC = () => {
         </RevealOnScroll>
 
         <RevealOnScroll as="section" className="py-16 scroll-mt-20">
-          <div className="mb-9 max-w-4xl">
+          <RevealOnScroll className="mb-9 max-w-4xl" stagger={85} duration={680}>
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Para quem é?</p>
               <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
                 Para donos que precisam enxergar lucro, atendimento e operação sem virar analista.
@@ -1094,7 +1109,7 @@ const LoginPage: React.FC = () => {
               <p className="mt-4 text-sm leading-7 text-zinc-400">
                 A Next Level foi criada para empresas que vendem, atendem clientes e precisam decidir rápido com base em margem, não em achismo.
               </p>
-          </div>
+          </RevealOnScroll>
 
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <RevealOnScroll className="grid gap-4 sm:grid-cols-2" stagger={70} duration={620}>
@@ -1112,12 +1127,14 @@ const LoginPage: React.FC = () => {
                 </div>
               ))}
             </RevealOnScroll>
-            <FeatureScreenshot detail={{ title: "Visão geral da operação", image: "/login-features/gestao-vendas.png" }} />
+            <RevealOnScroll direction="right" delay={120} duration={760}>
+              <FeatureScreenshot detail={{ title: "Visão geral da operação", image: "/login-features/gestao-vendas.png" }} />
+            </RevealOnScroll>
           </div>
         </RevealOnScroll>
 
         <RevealOnScroll as="section" id="problemas" className="py-16 scroll-mt-20">
-          <div className="mb-8 max-w-3xl">
+          <RevealOnScroll className="mb-8 max-w-3xl" stagger={85} duration={680}>
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">O problema</p>
               <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
                 O problema não é falta de esforço. É falta de sinal confiável.
@@ -1125,7 +1142,7 @@ const LoginPage: React.FC = () => {
               <p className="mt-4 text-sm leading-7 text-zinc-400">
                 Quando vendas, atendimento, custos e clientes ficam espalhados, o empresário trabalha muito, mas decide tarde.
               </p>
-          </div>
+          </RevealOnScroll>
           <RevealOnScroll className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" stagger={75} duration={620}>
             {PROBLEMS.map((item) => (
               <div key={item.title} className="nl-card-hover rounded-[26px] border border-white/[0.08] bg-white/[0.025] p-6">
@@ -1140,7 +1157,7 @@ const LoginPage: React.FC = () => {
           <div className="relative overflow-hidden rounded-[28px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.1),rgba(6,8,12,0.96)_42%,rgba(3,5,8,1))] p-8 sm:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(182,255,0,0.18),transparent_34%)]" />
             <div className="relative">
-              <div>
+              <RevealOnScroll stagger={80} duration={680}>
                 <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">O que a Next Level faz</p>
                 <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
                   Transforma dados soltos em decisões que protegem caixa e aumentam margem.
@@ -1148,7 +1165,7 @@ const LoginPage: React.FC = () => {
                 <p className="mt-5 max-w-3xl text-sm leading-7 text-zinc-300">
                   A plataforma centraliza vendas, custos, clientes e canais digitais. Depois usa IA para apontar risco, oportunidade e próxima ação em linguagem de dono.
                 </p>
-              </div>
+              </RevealOnScroll>
               <RevealOnScroll className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" stagger={70} duration={620}>
                 {SOLUTIONS.map((item) => (
                   <div key={item.title} className="nl-card-hover rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-6">
@@ -1162,7 +1179,7 @@ const LoginPage: React.FC = () => {
         </RevealOnScroll>
 
         <RevealOnScroll as="section" id="features" className="py-16 scroll-mt-20">
-          <div className="text-center mb-12">
+          <RevealOnScroll className="text-center mb-12" stagger={85} duration={680}>
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
             <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white max-w-2xl mx-auto">
               O que muda na rotina do dono.
@@ -1170,7 +1187,7 @@ const LoginPage: React.FC = () => {
             <p className="mt-4 max-w-lg mx-auto text-sm leading-7 text-zinc-400">
               Cada recurso responde uma pergunta simples: onde ganhar, onde parar perda e qual ação vem agora.
             </p>
-          </div>
+          </RevealOnScroll>
 
           <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={80} duration={650}>
             {FEATURES.map((f) => (
@@ -1187,27 +1204,29 @@ const LoginPage: React.FC = () => {
           <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.14] bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(7,10,15,0.98)_48%,rgba(3,5,8,1))] p-8 sm:p-10">
             <div className="pointer-events-none absolute -right-20 top-8 h-56 w-56 rounded-full bg-lime-300/10 blur-3xl nl-float" />
             <div className="relative grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-              <div>
+              <RevealOnScroll stagger={80} duration={680}>
                 <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Gestão completa</p>
                 <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">
                   Não é só financeiro. É a operação inteira falando a mesma língua.
                 </h2>
-              </div>
-              <p className="text-sm leading-7 text-zinc-300">
-                A Next Level conecta visão financeira, comercial e operacional para o empresário entender causa, impacto e próxima ação sem depender de cinco ferramentas abertas.
-              </p>
+              </RevealOnScroll>
+              <RevealOnScroll direction="left" delay={120} duration={720}>
+                <p className="text-sm leading-7 text-zinc-300">
+                  A Next Level conecta visão financeira, comercial e operacional para o empresário entender causa, impacto e próxima ação sem depender de cinco ferramentas abertas.
+                </p>
+              </RevealOnScroll>
             </div>
           </div>
         </RevealOnScroll>
 
         <RevealOnScroll as="section" id="como-funciona" className="py-16 scroll-mt-20">
-          <div className="mb-10 max-w-3xl">
+          <RevealOnScroll className="mb-10 max-w-3xl" stagger={85} duration={680}>
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Como funciona</p>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-[0.96]">
               Do dado solto ao próximo passo.
             </h2>
             <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar informação espalhada em decisão prática, sem sobrecarregar a equipe.</p>
-          </div>
+          </RevealOnScroll>
           <RevealOnScroll className="grid gap-4 lg:grid-cols-4" stagger={85} duration={650}>
             {HOW_IT_WORKS.map((step) => (
               <div key={step.title} className="relative border-t border-white/[0.1] pt-5">
@@ -1219,7 +1238,7 @@ const LoginPage: React.FC = () => {
         </RevealOnScroll>
 
         <RevealOnScroll as="section" id="pricing" className="py-16 scroll-mt-20">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10">
+          <RevealOnScroll className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10" stagger={90} duration={700}>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Planos</p>
               <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white max-w-xl leading-[0.94]">
@@ -1247,7 +1266,7 @@ const LoginPage: React.FC = () => {
                 )}
               </div>
             </div>
-          </div>
+          </RevealOnScroll>
 
           <RevealOnScroll className="grid gap-4 lg:grid-cols-3" stagger={90} duration={680}>
             {UPDATED_PRICING.map((plan) => (
@@ -1311,7 +1330,7 @@ const LoginPage: React.FC = () => {
 
         <RevealOnScroll as="section" id="login" className="py-16 scroll-mt-20 lg:py-20">
           <div className="mx-auto max-w-[1240px]">
-            <div className="mb-8 text-center">
+            <RevealOnScroll className="mb-8 text-center" stagger={80} duration={680}>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Acesso à plataforma</p>
               <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
                 Entre para transformar clareza em resultado.
@@ -1319,7 +1338,7 @@ const LoginPage: React.FC = () => {
               <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
                 Crie sua conta ou acesse sua central para acompanhar vendas, custos, clientes, relatórios e recomendações da IA em um só lugar.
               </p>
-            </div>
+            </RevealOnScroll>
             <AuthPanel
               isRegisterView={isRegisterView} setIsRegisterView={setIsRegisterView}
               onLogin={handleLogin} onRegister={handleRegister}
@@ -1339,10 +1358,10 @@ const LoginPage: React.FC = () => {
         </RevealOnScroll>
 
         <RevealOnScroll as="section" id="faq" className="py-20 scroll-mt-20">
-          <div className="mb-10 text-center">
+          <RevealOnScroll className="mb-10 text-center" stagger={80} duration={680}>
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Dúvidas comuns</p>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white">Perguntas frequentes</h2>
-          </div>
+          </RevealOnScroll>
           <RevealOnScroll className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2" stagger={70} duration={620}>
             {FAQS.map((faq) => (
               <div key={faq.question} className="rounded-[22px] border border-white/[0.08] bg-white/[0.025] p-5">
