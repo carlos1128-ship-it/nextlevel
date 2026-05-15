@@ -11,8 +11,11 @@ type RevealOnScrollProps = {
   delay?: number;
   duration?: number;
   direction?: RevealDirection;
+  blur?: boolean;
   once?: boolean;
+  rootMargin?: string;
   stagger?: number;
+  threshold?: number;
   style?: React.CSSProperties;
 };
 
@@ -45,8 +48,11 @@ export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
   delay = 0,
   duration = 650,
   direction = "up",
+  blur = true,
   once = true,
+  rootMargin = "0px 0px -10% 0px",
   stagger = 0,
+  threshold = 0.14,
   style,
 }) => {
   const Tag = as;
@@ -70,13 +76,13 @@ export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
           setVisible(false);
         }
       },
-      { root: null, rootMargin: "0px 0px -8% 0px", threshold: 0.16 },
+      { root: null, rootMargin, threshold },
     );
 
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, [once]);
+  }, [once, rootMargin, threshold]);
 
   const revealStyle = {
     ...style,
@@ -84,6 +90,7 @@ export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
     "--nl-reveal-duration": `${duration}ms`,
     "--nl-reveal-x": `${offset.x}px`,
     "--nl-reveal-y": `${offset.y}px`,
+    "--nl-reveal-blur": blur ? "4px" : "0px",
     "--nl-stagger": `${stagger}ms`,
   } as React.CSSProperties;
 
@@ -96,12 +103,12 @@ export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
       const childProps = child.props as React.HTMLAttributes<HTMLElement>;
       const childStyle = {
         ...childProps.style,
-        "--nl-reveal-index": index,
+        "--nl-reveal-child-delay": `${delay + index * stagger}ms`,
       } as React.CSSProperties;
 
       return React.cloneElement(child, { style: childStyle });
     });
-  }, [children, stagger]);
+  }, [children, delay, stagger]);
 
   return (
     <Tag

@@ -25,9 +25,8 @@ function smoothStep(value: number) {
  * Scroll-controlled hero background.
  *
  * The parent must provide the scroll range with `data-hero-wrapper`.
- * Frame ranges:
- * 0.00-0.20 frame 1, 0.20-0.40 frame 2, 0.40-0.60 frame 3,
- * 0.60-0.80 frame 4, 0.80-1.00 frame 5.
+ * Each scroll range keeps one dominant frame and crossfades only into the
+ * immediate next frame. Non-adjacent frames are always forced to opacity 0.
  */
 export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
   images,
@@ -49,43 +48,25 @@ export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
     if (frameCount === 0) return [];
     if (frameCount === 1) return [1];
 
-    const segmentSize = 1 / frameCount;
-    const crossfadeZone = Math.min(segmentSize * 0.44, 0.09);
+    const rawFrameProgress = clamp(progress) * frameCount;
+    const activeIndex = Math.min(Math.floor(rawFrameProgress), finalFrame);
 
-    return images.map((_, index) => {
-      const segmentStart = index * segmentSize;
-      const segmentEnd = (index + 1) * segmentSize;
+    if (activeIndex === finalFrame) {
+      return Array.from({ length: frameCount }, (_, index) => (index === finalFrame ? 1 : 0));
+    }
 
-      if (index === 0) {
-        if (progress <= segmentEnd - crossfadeZone) return 1;
-        if (progress <= segmentEnd + crossfadeZone) {
-          return 1 - smoothStep((progress - (segmentEnd - crossfadeZone)) / (crossfadeZone * 2));
-        }
-        return 0;
-      }
+    const nextIndex = activeIndex + 1;
+    const segmentProgress = clamp(rawFrameProgress - activeIndex);
+    const blendStart = 0.62;
+    const blendEnd = 0.94;
+    const blendProgress = smoothStep((segmentProgress - blendStart) / (blendEnd - blendStart));
 
-      if (index === finalFrame) {
-        if (progress < segmentStart - crossfadeZone) return 0;
-        if (progress < segmentStart + crossfadeZone) {
-          return smoothStep((progress - (segmentStart - crossfadeZone)) / (crossfadeZone * 2));
-        }
-        return 1;
-      }
-
-      if (progress < segmentStart - crossfadeZone) return 0;
-      if (progress > segmentEnd + crossfadeZone) return 0;
-
-      if (progress < segmentStart + crossfadeZone) {
-        return smoothStep((progress - (segmentStart - crossfadeZone)) / (crossfadeZone * 2));
-      }
-
-      if (progress > segmentEnd - crossfadeZone) {
-        return 1 - smoothStep((progress - (segmentEnd - crossfadeZone)) / (crossfadeZone * 2));
-      }
-
-      return 1;
+    return Array.from({ length: frameCount }, (_, index) => {
+      if (index === activeIndex) return 1 - blendProgress;
+      if (index === nextIndex) return blendProgress;
+      return 0;
     });
-  }, [finalFrame, frameCount, images]);
+  }, [finalFrame, frameCount]);
 
   const readScrollProgress = useCallback(() => {
     const container = containerRef.current;
@@ -104,7 +85,7 @@ export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
     const target = targetProgressRef.current;
     const current = visualProgressRef.current;
     const distance = target - current;
-    const nextProgress = Math.abs(distance) < 0.001 ? target : current + distance * (isReducedMotion ? 0.22 : 0.14);
+    const nextProgress = isReducedMotion || Math.abs(distance) < 0.001 ? target : current + distance * 0.16;
 
     visualProgressRef.current = nextProgress;
     setFrameOpacities(buildFrameOpacities(nextProgress));
@@ -191,7 +172,11 @@ export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
           }}
           style={{
             opacity: (frameOpacities[index] ?? 0) * imageOpacity,
-            transition: `opacity ${isReducedMotion ? 220 : 320}ms cubic-bezier(.16,1,.3,1)`,
+            visibility: (frameOpacities[index] ?? 0) > 0.001 ? "visible" : "hidden",
+            zIndex: (frameOpacities[index] ?? 0) > 0.001 ? index + 1 : 0,
+            mixBlendMode: "normal",
+            transition: "none",
+            willChange: "opacity",
           }}
           className={`absolute inset-0 h-full w-full scale-[1.015] object-cover object-[center_72%] brightness-[1.05] contrast-[1.04] saturate-[1.06] ${imageClassName}`}
           draggable={false}
