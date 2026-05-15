@@ -13,7 +13,7 @@ import {
   savePendingSelectedPlan,
 } from "../src/utils/billingSelection";
 import { getDisplayPlanPrice, PLAN_DISPLAY } from "../src/utils/planDisplay";
-import AnimatedHeroBackground from "../components/AnimatedHeroBackground";
+
 import RevealOnScroll from "../components/RevealOnScroll";
 
 /* Helpers */
@@ -116,13 +116,6 @@ const METRICS = [
   { title: "Próximo passo", label: "Alertas práticos para agir antes que a perda apareça no caixa.", icon: BrainIcon },
 ];
 
-const HERO_GROWTH_FRAMES = [
-  "/hero-growth/chart-frame-01.webp",
-  "/hero-growth/chart-frame-02.webp",
-  "/hero-growth/chart-frame-03.webp",
-  "/hero-growth/chart-frame-04.webp",
-  "/hero-growth/chart-frame-05.webp",
-];
 
 const TARGET_SEGMENTS = [
   { title: "Comércios com venda diária", text: "Veja o que vende, o que dá margem e onde o dinheiro fica parado." },
@@ -975,26 +968,28 @@ const LoginPage: React.FC = () => {
 
       <div className="relative z-10 mx-auto max-w-[1680px] px-4 sm:px-8 lg:px-12 2xl:px-16">
 
-        {/* Hero wrapper - tall to give scroll space for frame animation */}
+        {/* Hero — static single-frame background */}
         <section
-          data-hero-wrapper
           className="relative left-1/2 w-screen -translate-x-1/2 bg-[#030508]"
-          style={{ height: "160vh" }}
         >
-          <div className="sticky top-0 flex h-[100dvh] flex-col items-center justify-center overflow-hidden bg-[#030508] text-center">
-            {/* Layer 1: particles integrated into the hero stack */}
+          <div className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden bg-[#030508] text-center">
+            {/* Layer 1: particles */}
             <NeonSnowBackground
               fixed={false}
               intensity={0.92}
               className="z-[1] opacity-75 [mask-image:linear-gradient(180deg,transparent_0%,black_14%,black_84%,transparent_100%)]"
             />
 
-            {/* Layer 2: Animated hero background frames (scroll-controlled) */}
-            <AnimatedHeroBackground
-              images={HERO_GROWTH_FRAMES}
-              className="z-[2]"
-              imageOpacity={0.88}
-              imageClassName="object-[center_74%] md:object-[center_68%]"
+            {/* Layer 2: static hero image — final growth frame */}
+            <img
+              src="/hero-growth/chart-frame-05.webp"
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              decoding="async"
+              loading="eager"
+              className="pointer-events-none absolute inset-0 z-[2] h-full w-full object-cover object-[center_74%] md:object-[center_68%] brightness-[1.05] contrast-[1.04] saturate-[1.06]"
+              style={{ opacity: 0.88 }}
             />
 
             {/* Layer 3: dark blend overlays for readability and seamless edges */}
