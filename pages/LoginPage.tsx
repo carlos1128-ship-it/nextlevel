@@ -988,16 +988,13 @@ const LoginPage: React.FC = () => {
               draggable={false}
               decoding="async"
               loading="eager"
-              className="pointer-events-none absolute inset-0 z-[2] h-full w-full object-cover object-[center_74%] md:object-[center_68%] brightness-[1.05] contrast-[1.04] saturate-[1.06]"
+              className="pointer-events-none absolute inset-0 z-[2] h-full w-full object-cover object-top brightness-[1.05] contrast-[1.04] saturate-[1.06]"
               style={{ opacity: 0.88 }}
             />
 
             {/* Layer 3: dark blend overlays for readability and seamless edges */}
-            <div className="pointer-events-none absolute inset-0 z-[3] bg-[radial-gradient(ellipse_at_50%_38%,rgba(3,5,8,0.34)_0%,rgba(3,5,8,0.24)_34%,rgba(3,5,8,0.64)_78%,rgba(3,5,8,0.9)_100%)]" />
-            <div className="pointer-events-none absolute inset-0 z-[4] bg-[linear-gradient(180deg,rgba(3,5,8,0.84)_0%,rgba(3,5,8,0.28)_24%,rgba(3,5,8,0.22)_56%,rgba(3,5,8,0.88)_100%)]" />
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-[4] w-1/4 bg-[linear-gradient(90deg,rgba(3,5,8,0.9),transparent)]" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-[4] w-1/4 bg-[linear-gradient(270deg,rgba(3,5,8,0.9),transparent)]" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-1/3 bg-[linear-gradient(180deg,transparent,rgba(3,5,8,0.98))]" />
+            <div className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-b from-[#030508]/30 via-transparent to-[#030508]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-1/3 bg-gradient-to-t from-[#030508] to-transparent" />
 
             {/* Layer 4: Hero content */}
             <div className="relative z-[5] mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-8 lg:px-12">
