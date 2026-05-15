@@ -1,8 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 type AnimatedHeroBackgroundProps = {
   images: string[];
   className?: string;
+  imageClassName?: string;
+  imageOpacity?: number;
 };
 
 function prefersReducedMotion() {
@@ -10,160 +12,163 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function clamp(value: number, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function smoothStep(value: number) {
+  const t = clamp(value);
+  return t * t * (3 - 2 * t);
+}
+
 /**
- * Scroll-controlled hero background that crossfades through growth-chart frames
- * based on scroll progress through the parent wrapper section.
+ * Scroll-controlled hero background.
  *
- * Expects the parent to be a tall wrapper (e.g. h-[160vh]) with this component
- * inside a sticky inner container (h-screen, sticky top-0).
- *
- * Frame mapping (with crossfade):
- *   progress 0.00–0.20 → frame 1
- *   progress 0.20–0.40 → frame 2
- *   progress 0.40–0.60 → frame 3
- *   progress 0.60–0.80 → frame 4
- *   progress 0.80–1.00 → frame 5
+ * The parent must provide the scroll range with `data-hero-wrapper`.
+ * Frame ranges:
+ * 0.00-0.20 frame 1, 0.20-0.40 frame 2, 0.40-0.60 frame 3,
+ * 0.60-0.80 frame 4, 0.80-1.00 frame 5.
  */
 export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
   images,
   className = "",
+  imageClassName = "",
+  imageOpacity = 0.88,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const targetProgressRef = useRef(0);
+  const visualProgressRef = useRef(0);
   const frameCount = images.length;
   const finalFrame = Math.max(frameCount - 1, 0);
 
-  // Each frame's opacity (0–1)
-  const [frameOpacities, setFrameOpacities] = useState<number[]>(() => {
-    if (prefersReducedMotion()) {
-      return images.map((_, i) => (i === finalFrame ? 1 : 0));
-    }
-    return images.map((_, i) => (i === 0 ? 1 : 0));
-  });
+  const [isReducedMotion, setIsReducedMotion] = useState(() => prefersReducedMotion());
+  const [frameOpacities, setFrameOpacities] = useState<number[]>(() => images.map((_, i) => (i === 0 ? 1 : 0)));
 
-  const rafRef = useRef<number | null>(null);
+  const buildFrameOpacities = useCallback((progress: number) => {
+    if (frameCount === 0) return [];
+    if (frameCount === 1) return [1];
 
-  const computeOpacities = useCallback(() => {
-    const container = containerRef.current;
-    if (!container || !frameCount) return;
-
-    // Find the hero wrapper (parent with h-[160vh])
-    const wrapper = container.closest("[data-hero-wrapper]") as HTMLElement | null;
-    if (!wrapper) return;
-
-    const rect = wrapper.getBoundingClientRect();
-    const wrapperHeight = wrapper.offsetHeight;
-    const viewportH = window.innerHeight;
-
-    // scrolled = how far past the top of the wrapper we've scrolled
-    // range = wrapperHeight - viewportH (the scroll distance through the wrapper)
-    const scrollableDistance = wrapperHeight - viewportH;
-    if (scrollableDistance <= 0) return;
-
-    // progress: 0 = top of wrapper at top of viewport, 1 = bottom of wrapper at bottom of viewport
-    const scrolled = -rect.top;
-    const progress = Math.max(0, Math.min(1, scrolled / scrollableDistance));
-
-    // Calculate per-frame opacity with crossfade
     const segmentSize = 1 / frameCount;
-    const newOpacities = images.map((_, i) => {
-      const segmentStart = i * segmentSize;
-      const segmentEnd = (i + 1) * segmentSize;
+    const crossfadeZone = Math.min(segmentSize * 0.44, 0.09);
 
-      if (progress <= segmentStart) {
-        // Before this segment — only first frame should show if progress is 0
-        return i === 0 && progress === 0 ? 1 : 0;
+    return images.map((_, index) => {
+      const segmentStart = index * segmentSize;
+      const segmentEnd = (index + 1) * segmentSize;
+
+      if (index === 0) {
+        if (progress <= segmentEnd - crossfadeZone) return 1;
+        if (progress <= segmentEnd + crossfadeZone) {
+          return 1 - smoothStep((progress - (segmentEnd - crossfadeZone)) / (crossfadeZone * 2));
+        }
+        return 0;
       }
 
-      if (progress >= segmentEnd) {
-        // Past this segment — only last frame should stay visible at end
-        return i === frameCount - 1 && progress >= 1 ? 1 : 0;
+      if (index === finalFrame) {
+        if (progress < segmentStart - crossfadeZone) return 0;
+        if (progress < segmentStart + crossfadeZone) {
+          return smoothStep((progress - (segmentStart - crossfadeZone)) / (crossfadeZone * 2));
+        }
+        return 1;
       }
-
-      // Within this segment — fully visible
-      return 1;
-    });
-
-    // Crossfade: blend between neighboring frames at transition zones.
-    // We want smooth transitions, not hard cuts.
-    const crossfadeZone = segmentSize * 0.35; // 35% of a segment for crossfade
-
-    const blendedOpacities = images.map((_, i) => {
-      const segmentStart = i * segmentSize;
-      const segmentEnd = (i + 1) * segmentSize;
 
       if (progress < segmentStart - crossfadeZone) return 0;
       if (progress > segmentEnd + crossfadeZone) return 0;
 
-      // Fade in at the start of this frame's segment
-      if (progress < segmentStart) {
-        return 0; // Not yet
+      if (progress < segmentStart + crossfadeZone) {
+        return smoothStep((progress - (segmentStart - crossfadeZone)) / (crossfadeZone * 2));
       }
 
-      // Fade in zone
-      if (progress < segmentStart + crossfadeZone && i > 0) {
-        const fadeProgress = (progress - segmentStart) / crossfadeZone;
-        return Math.max(0, Math.min(1, fadeProgress));
-      }
-
-      // Full visibility zone (middle of segment)
-      if (progress >= segmentStart + crossfadeZone && progress <= segmentEnd - crossfadeZone) {
-        return 1;
-      }
-
-      // Fade out zone (only if not the last frame)
-      if (progress > segmentEnd - crossfadeZone && i < frameCount - 1) {
-        const fadeProgress = (segmentEnd - progress) / crossfadeZone;
-        return Math.max(0, Math.min(1, fadeProgress));
-      }
-
-      // Last frame stays at 1 once fully visible
-      if (i === frameCount - 1 && progress >= segmentStart) {
-        return 1;
+      if (progress > segmentEnd - crossfadeZone) {
+        return 1 - smoothStep((progress - (segmentEnd - crossfadeZone)) / (crossfadeZone * 2));
       }
 
       return 1;
     });
+  }, [finalFrame, frameCount, images]);
 
-    setFrameOpacities(blendedOpacities);
-  }, [frameCount, images]);
+  const readScrollProgress = useCallback(() => {
+    const container = containerRef.current;
+    if (!container || frameCount === 0) return null;
+
+    const wrapper = container.closest("[data-hero-wrapper]") as HTMLElement | null;
+    if (!wrapper) return null;
+
+    const scrollableDistance = wrapper.offsetHeight - window.innerHeight;
+    if (scrollableDistance <= 0) return null;
+
+    return clamp(-wrapper.getBoundingClientRect().top / scrollableDistance);
+  }, [frameCount]);
+
+  const renderProgress = useCallback(() => {
+    const target = targetProgressRef.current;
+    const current = visualProgressRef.current;
+    const distance = target - current;
+    const nextProgress = Math.abs(distance) < 0.001 ? target : current + distance * (isReducedMotion ? 0.22 : 0.14);
+
+    visualProgressRef.current = nextProgress;
+    setFrameOpacities(buildFrameOpacities(nextProgress));
+
+    if (nextProgress === target) {
+      rafRef.current = null;
+      return;
+    }
+
+    rafRef.current = requestAnimationFrame(renderProgress);
+  }, [buildFrameOpacities, isReducedMotion]);
+
+  const updateTargetProgress = useCallback((instant = false) => {
+    const progress = readScrollProgress();
+    if (progress === null) return;
+
+    targetProgressRef.current = progress;
+
+    if (instant) {
+      visualProgressRef.current = progress;
+      setFrameOpacities(buildFrameOpacities(progress));
+      return;
+    }
+
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(renderProgress);
+    }
+  }, [buildFrameOpacities, readScrollProgress, renderProgress]);
 
   useEffect(() => {
     if (!images.length) return;
 
-    // Preload all images
     images.forEach((src) => {
       const img = new window.Image();
       img.src = src;
     });
 
-    // If reduced motion, show final frame
-    if (prefersReducedMotion()) {
-      setFrameOpacities(images.map((_, i) => (i === finalFrame ? 1 : 0)));
-      return;
-    }
+    updateTargetProgress(true);
 
-    const handleScroll = () => {
-      if (rafRef.current !== null) return;
-      rafRef.current = requestAnimationFrame(() => {
-        computeOpacities();
-        rafRef.current = null;
-      });
-    };
+    const requestProgressUpdate = () => updateTargetProgress(false);
 
-    // Initial computation
-    computeOpacities();
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
+    window.addEventListener("scroll", requestProgressUpdate, { passive: true });
+    window.addEventListener("resize", requestProgressUpdate, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      window.removeEventListener("scroll", requestProgressUpdate);
+      window.removeEventListener("resize", requestProgressUpdate);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [images, finalFrame, computeOpacities]);
+  }, [images, updateTargetProgress]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = () => setIsReducedMotion(media.matches);
+
+    handleChange();
+    media.addEventListener?.("change", handleChange);
+
+    return () => {
+      media.removeEventListener?.("change", handleChange);
+    };
+  }, []);
 
   if (!images.length) return null;
 
@@ -171,10 +176,6 @@ export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
     <div
       ref={containerRef}
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
-      style={{
-        maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
-        WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)"
-      }}
       aria-hidden="true"
     >
       {images.map((src, index) => (
@@ -182,16 +183,17 @@ export const AnimatedHeroBackground: React.FC<AnimatedHeroBackgroundProps> = ({
           key={src}
           src={src}
           alt=""
+          data-hero-frame={index + 1}
           decoding="async"
           loading={index === 0 ? "eager" : "lazy"}
           onError={(event) => {
             event.currentTarget.style.opacity = "0";
           }}
           style={{
-            opacity: frameOpacities[index] ?? 0,
-            transition: "opacity 0.2s ease-in-out",
+            opacity: (frameOpacities[index] ?? 0) * imageOpacity,
+            transition: `opacity ${isReducedMotion ? 220 : 320}ms cubic-bezier(.16,1,.3,1)`,
           }}
-          className="absolute inset-0 h-full w-full object-cover object-bottom motion-reduce:transition-none"
+          className={`absolute inset-0 h-full w-full scale-[1.015] object-cover object-[center_72%] brightness-[1.05] contrast-[1.04] saturate-[1.06] ${imageClassName}`}
           draggable={false}
         />
       ))}

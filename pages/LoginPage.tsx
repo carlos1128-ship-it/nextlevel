@@ -111,9 +111,9 @@ const CreditCardIcon = () => (
 
 /* Static data */
 const METRICS = [
-  { title: "Gestão", label: "Vendas, custos, clientes e produtos organizados em uma visão executiva.", icon: ChartIcon },
-  { title: "Lucro real", label: "Margem, desperdício e oportunidade separados do faturamento bruto.", icon: TrendingUpIcon },
-  { title: "Decisão com IA", label: "Alertas práticos para agir antes que o problema vire prejuízo.", icon: BrainIcon },
+  { title: "Operação visível", label: "Vendas, custos, clientes e produtos em uma leitura simples.", icon: ChartIcon },
+  { title: "Lucro real", label: "Faturamento separado de margem, desperdício e risco de caixa.", icon: TrendingUpIcon },
+  { title: "Próximo passo", label: "Alertas práticos para agir antes que a perda apareça no caixa.", icon: BrainIcon },
 ];
 
 const HERO_GROWTH_FRAMES = [
@@ -125,78 +125,78 @@ const HERO_GROWTH_FRAMES = [
 ];
 
 const TARGET_SEGMENTS = [
-  { title: "Comércios que vendem todos os dias", text: "Veja vendas, custos, clientes e margem sem depender de planilhas soltas." },
-  { title: "Prestadores com atendimento intenso", text: "Organize solicitações, retornos e oportunidades antes que bons clientes esfriem." },
-  { title: "E-commerces e marketplaces", text: "Entenda pedidos, produtos, canais e margem para vender mais sem queimar lucro." },
-  { title: "Empresas saindo do improviso", text: "Transforme dados espalhados em uma rotina de decisão mais previsível." },
+  { title: "Comércios com venda diária", text: "Veja o que vende, o que dá margem e onde o dinheiro fica parado." },
+  { title: "Serviços com atendimento intenso", text: "Organize retornos, pedidos e oportunidades antes que bons clientes esfriem." },
+  { title: "E-commerces e marketplaces", text: "Entenda pedidos, canais e produtos para crescer sem queimar lucro." },
+  { title: "Empresas saindo do improviso", text: "Troque planilhas soltas por uma rotina de decisão mais previsível." },
 ];
 
 const PROBLEMS = [
-  { title: "Faturamento sem lucro visível", text: "A venda entra, mas margem, custo e desperdício continuam difíceis de provar." },
-  { title: "Oportunidades esquecidas", text: "Mensagens se espalham entre WhatsApp, Instagram e rotina da equipe." },
-  { title: "Custos fora da decisão", text: "Despesas, produtos e operação não conversam com preço, estoque e campanha." },
-  { title: "Ação tarde demais", text: "Sem sinal claro, o empresário só percebe o problema quando ele já custou caro." },
+  { title: "Venda entra, lucro não aparece", text: "O caixa movimenta, mas margem, custo e desperdício continuam difíceis de provar." },
+  { title: "Cliente quente fica sem retorno", text: "Mensagens se espalham entre WhatsApp, Instagram e rotina da equipe." },
+  { title: "Custo não chega na decisão", text: "Despesa, produto e operação ficam longe de preço, estoque e campanha." },
+  { title: "O sinal chega tarde", text: "Sem alerta claro, o empresário só percebe o problema quando ele já custou caro." },
 ];
 
 const SOLUTIONS = [
-  { title: "Centraliza sinais críticos", text: "Reúne vendas, clientes, custos, produtos e canais em uma leitura acionável." },
-  { title: "Mostra onde o lucro escapa", text: "Separa faturamento, margem, custos e desperdícios para revelar o resultado real." },
-  { title: "Prioriza o atendimento", text: "Organiza conversas, intenção de compra e oportunidades vindas dos canais digitais." },
-  { title: "Recomenda o próximo passo", text: "A IA interpreta sinais do negócio e sugere ações que protegem caixa e crescimento." },
-  { title: "Gera relatórios úteis", text: "Transforma dados em análises simples, prontas para decisão." },
-  { title: "Conecta operação e ROI", text: "Une visão financeira, comercial e administrativa em um só painel." },
+  { title: "Une dados que hoje ficam espalhados", text: "Vendas, clientes, custos, produtos e canais entram na mesma leitura." },
+  { title: "Mostra a margem por trás da venda", text: "Separa faturamento, custo, desperdício e lucro para revelar o resultado real." },
+  { title: "Aponta oportunidades no atendimento", text: "Conversas com intenção de compra deixam de depender da memória da equipe." },
+  { title: "Recomenda a próxima ação", text: "A IA transforma sinal do negócio em decisão prática para proteger caixa." },
+  { title: "Gera leitura executiva", text: "Relatórios saem simples, objetivos e prontos para orientar o dia." },
+  { title: "Liga operação a ROI", text: "Cada insight precisa mostrar impacto em margem, venda ou tempo economizado." },
 ];
 
 const FEATURES = [
   {
     icon: ChartIcon,
-    title: "Gestão de vendas",
-    desc: "Entenda o que vende, o que dá margem e quais produtos merecem atenção.",
+    title: "Vendas com margem",
+    desc: "Mostre quais vendas realmente ajudam o caixa e quais só aumentam movimento.",
     color: "from-lime-400/15 to-emerald-400/5",
     border: "border-lime-400/20",
   },
   {
     icon: ShieldIcon,
-    title: "Controle de custos",
-    desc: "Separe faturamento de lucro real com custos, despesas e indicadores claros.",
+    title: "Custos sob controle",
+    desc: "Traga custo e despesa para a decisão antes de ajustar preço ou campanha.",
     color: "from-green-400/15 to-teal-400/5",
     border: "border-green-400/20",
   },
   {
     icon: TrendingUpIcon,
-    title: "Produtos e margem",
-    desc: "Acompanhe preço, custo e margem para decidir o que vender, ajustar ou pausar.",
+    title: "Produtos que merecem foco",
+    desc: "Veja o que escalar, ajustar ou pausar com base em preço, custo e margem.",
     color: "from-cyan-400/15 to-blue-400/5",
     border: "border-cyan-400/20",
   },
   {
     icon: WhatsAppIcon,
-    title: "Clientes e atendimento",
-    desc: "Organize conversas, intenção de compra e oportunidades vindas de WhatsApp e Instagram.",
+    title: "Atendimento que não deixa dinheiro parado",
+    desc: "Priorize conversas com intenção de compra em WhatsApp e Instagram.",
     color: "from-violet-400/15 to-purple-400/5",
     border: "border-violet-400/20",
   },
   {
     icon: ZapIcon,
-    title: "Relatórios automáticos",
-    desc: "Receba leituras simples sobre vendas, custos, produtos e pontos de atenção.",
+    title: "Relatórios que dizem o que fazer",
+    desc: "Receba leituras curtas sobre vendas, custos, produtos e pontos de atenção.",
     color: "from-violet-400/15 to-purple-400/5",
     border: "border-violet-400/20",
   },
   {
     icon: BrainIcon,
-    title: "Alertas e recomendações com IA",
-    desc: "A IA analisa sinais do negócio e recomenda próximos passos com foco em resultado.",
+    title: "IA que prioriza ação",
+    desc: "Transforme sinais do negócio em próximos passos com foco em resultado.",
     color: "from-emerald-400/15 to-cyan-400/5",
     border: "border-emerald-400/20",
   },
 ];
 
 const HOW_IT_WORKS = [
-  { title: "Conecte ou cadastre seus dados", text: "Adicione vendas, custos, clientes, produtos ou canais sem expor complexidade." },
-  { title: "A Next Level organiza", text: "A plataforma transforma dados brutos em indicadores que o dono entende." },
-  { title: "A IA interpreta sinais", text: "Riscos, oportunidades e padrões importantes aparecem antes da urgência." },
-  { title: "Você age com clareza", text: "O empresário decide com base em dados, impacto e próximo passo." },
+  { title: "Conecte ou cadastre os dados", text: "Vendas, custos, clientes, produtos e canais entram sem expor complexidade." },
+  { title: "A Next Level organiza a operação", text: "Dados brutos viram indicadores que o dono entende rápido." },
+  { title: "A IA encontra sinais importantes", text: "Riscos, oportunidades e padrões aparecem antes da urgência." },
+  { title: "Você decide com prioridade", text: "Cada ação vem ligada a impacto, margem e próximo passo." },
 ];
 
 const INTELLIGENCE_CARDS = [
@@ -207,12 +207,12 @@ const INTELLIGENCE_CARDS = [
 ];
 
 const FAQS = [
-  { question: "A Next Level substitui meu sistema de gestão?", answer: "Não necessariamente. Ela funciona como uma camada de inteligência para centralizar sinais, apoiar decisões e complementar ferramentas que o negócio já usa." },
+  { question: "A Next Level substitui meu sistema de gestão?", answer: "Não precisa substituir. Ela funciona como camada de inteligência para centralizar sinais, apoiar decisões e complementar ferramentas que o negócio já usa." },
   { question: "Preciso saber usar IA?", answer: "Não. A plataforma entrega análises, recomendações e automações em linguagem simples, sem exigir conhecimento técnico." },
-  { question: "Funciona com WhatsApp e Instagram?", answer: "Sim, conforme o plano e as integrações disponíveis. A ideia é aproximar atendimento, cliente e oportunidade da visão de gestão." },
-  { question: "A plataforma serve para negócio pequeno?", answer: "Sim. Ela foi pensada para quem precisa de mais controle sem montar uma equipe grande de análise, tecnologia ou atendimento." },
-  { question: "Qual plano devo escolher?", answer: "Essencial para organização e indicadores. Premium para IA, relatórios e automação. Business para integrações, escala e análise avançada." },
-  { question: "Escolho o plano antes ou depois da conta?", answer: "Você pode escolher um plano agora. A seleção fica salva e a assinatura continua após criar conta ou entrar." },
+  { question: "Funciona com WhatsApp e Instagram?", answer: "Sim, conforme o plano e as integrações disponíveis. A ideia é aproximar atendimento, cliente e oportunidade da decisão de gestão." },
+  { question: "Serve para negócio pequeno?", answer: "Sim. Foi pensada para quem precisa de mais controle sem montar uma equipe grande de análise, tecnologia ou atendimento." },
+  { question: "Qual plano devo escolher?", answer: "Essencial para organizar a base. Premium para IA, relatórios e atendimento conectado. Business para escala, integrações e análise avançada." },
+  { question: "Escolho o plano antes ou depois da conta?", answer: "Você pode escolher agora. A seleção fica salva e a assinatura continua após criar conta ou entrar." },
 ];
 
 type FooterInfoKey =
@@ -386,7 +386,11 @@ type NeonParticle = {
   driftPhase: number;
 };
 
-const NeonSnowBackground: React.FC = () => {
+const NeonSnowBackground: React.FC<{ className?: string; fixed?: boolean; intensity?: number }> = ({
+  className = "",
+  fixed = true,
+  intensity = 1,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -424,7 +428,8 @@ const NeonSnowBackground: React.FC = () => {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const count = width < 768 ? 30 : width < 1280 ? 48 : 68;
+      const baseCount = width < 768 ? 30 : width < 1280 ? 48 : 68;
+      const count = Math.max(12, Math.round(baseCount * intensity));
       particles = Array.from({ length: count }, () => createParticle());
     };
 
@@ -477,7 +482,13 @@ const NeonSnowBackground: React.FC = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 opacity-70" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className={`pointer-events-none ${fixed ? "fixed" : "absolute"} inset-0 z-0 opacity-70 ${className}`}
+    />
+  );
 };
 
 const LandingMotionStyles = () => (
@@ -503,20 +514,51 @@ const LandingMotionStyles = () => (
     .nl-glow-shift { animation: nlGlowShift 9s ease-in-out infinite; }
     .nl-card-hover { transition: transform .28s ease, border-color .28s ease, background .28s ease, box-shadow .28s ease; }
     .nl-card-hover:hover { transform: translateY(-5px); border-color: rgba(182,255,0,.28); box-shadow: 0 24px 90px rgba(0,0,0,.28), 0 0 38px rgba(182,255,0,.08); }
-    @supports (animation-timeline: view()) {
-      .nl-scroll-reveal {
-        opacity: 0;
-        transform: translateY(24px);
-        animation: nlRevealUp both cubic-bezier(.16,1,.3,1);
-        animation-timeline: view();
-        animation-range: entry 0% cover 28%;
-      }
+    .nl-reveal-scroll {
+      opacity: 0;
+      transform: translate3d(var(--nl-reveal-x, 0), var(--nl-reveal-y, 24px), 0);
+      filter: blur(4px);
+      transition:
+        opacity var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
+        transform var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
+        filter var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1);
+      transition-delay: var(--nl-reveal-delay, 0ms);
+      will-change: opacity, transform, filter;
+    }
+    .nl-reveal-scroll.is-visible {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      filter: blur(0);
+    }
+    .nl-reveal-stagger {
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition: none;
+    }
+    .nl-reveal-stagger > * {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+      filter: blur(4px);
+      transition:
+        opacity var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
+        transform var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1),
+        filter var(--nl-reveal-duration, 650ms) cubic-bezier(.16,1,.3,1);
+      transition-delay: calc(var(--nl-reveal-delay, 0ms) + (var(--nl-reveal-index, 0) * var(--nl-stagger, 70ms)));
+      will-change: opacity, transform, filter;
+    }
+    .nl-reveal-stagger.is-visible > * {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      filter: blur(0);
     }
     @media (prefers-reduced-motion: reduce) {
-      .nl-reveal, .nl-scroll-reveal, .nl-float, .nl-glow-shift {
+      .nl-reveal, .nl-reveal-scroll, .nl-reveal-stagger > *, .nl-float, .nl-glow-shift {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
+        filter: none !important;
+        transition: none !important;
       }
       .nl-card-hover, .nl-card-hover:hover {
         transition: none !important;
@@ -819,7 +861,7 @@ const LoginPage: React.FC = () => {
       }
       navigate(pendingPlan ? buildPlanosSubscribeUrl(pendingPlan) : "/planos", { replace: true });
     } catch {
-      setError("Nao foi possivel validar seu acesso agora. Tente novamente em instantes.");
+      setError("Não foi possível validar seu acesso agora. Tente novamente em instantes.");
     }
   };
 
@@ -889,12 +931,12 @@ const LoginPage: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen max-w-[100vw] overflow-x-clip bg-[#030508] text-white"
+      className="min-h-screen overflow-x-clip bg-[#030508] text-white"
       onMouseMove={handleMouseMove}
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-    >
-      <LandingMotionStyles />
-      <NeonSnowBackground />
+      >
+        <LandingMotionStyles />
+        <NeonSnowBackground className="opacity-35" intensity={0.62} />
 
       {/* Grid bg pattern */}
       <div className="pointer-events-none fixed inset-0 z-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%220%200%2040%2040%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200h1v40H0zM0%200h40v1H0z%22%20fill%3D%22rgba(255%2C255%2C255%2C0.022)%22/%3E%3C/svg%3E')] opacity-55" />
@@ -928,64 +970,65 @@ const LoginPage: React.FC = () => {
 
       <div className="relative z-10 mx-auto max-w-[1680px] px-4 sm:px-8 lg:px-12 2xl:px-16">
 
-        {/* Hero wrapper — tall to give scroll space for frame animation */}
+        {/* Hero wrapper - tall to give scroll space for frame animation */}
         <section
           data-hero-wrapper
-          className="relative left-1/2 w-screen -translate-x-1/2"
+          className="relative left-1/2 w-screen -translate-x-1/2 bg-[#030508]"
           style={{ height: "160vh" }}
         >
-          <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden text-center">
-            {/* Layer 1: Animated hero background frames (scroll-controlled) */}
-            <AnimatedHeroBackground
-              images={HERO_GROWTH_FRAMES}
-              className="z-0"
+          <div className="sticky top-0 flex h-[100dvh] flex-col items-center justify-center overflow-hidden bg-[#030508] text-center">
+            {/* Layer 1: particles integrated into the hero stack */}
+            <NeonSnowBackground
+              fixed={false}
+              intensity={0.92}
+              className="z-[1] opacity-75 [mask-image:linear-gradient(180deg,transparent_0%,black_14%,black_84%,transparent_100%)]"
             />
 
-            {/* Layer 2: Subtle dark overlay for text readability */}
-            <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(3,5,8,0.45)_0%,rgba(3,5,8,0.25)_40%,rgba(3,5,8,0.65)_100%)]" />
-            <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(180deg,rgba(3,5,8,0.55)_0%,rgba(3,5,8,0.18)_42%,rgba(3,5,8,0.75)_100%)]" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-1/4 bg-[linear-gradient(180deg,transparent,rgba(3,5,8,0.92))]" />
+            {/* Layer 2: Animated hero background frames (scroll-controlled) */}
+            <AnimatedHeroBackground
+              images={HERO_GROWTH_FRAMES}
+              className="z-[2]"
+              imageOpacity={0.88}
+              imageClassName="object-[center_74%] md:object-[center_68%]"
+            />
 
-            {/* Layer 3: Hero content — title, subtitle, tags, CTAs */}
-            <div className="relative z-[3] mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-8 lg:px-12">
-              <RevealOnScroll delay={0.1}>
-                <div className="mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
-                  <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">Cérebro digital para PMEs</span>
-                </div>
-              </RevealOnScroll>
+            {/* Layer 3: dark blend overlays for readability and seamless edges */}
+            <div className="pointer-events-none absolute inset-0 z-[3] bg-[radial-gradient(ellipse_at_50%_38%,rgba(3,5,8,0.34)_0%,rgba(3,5,8,0.24)_34%,rgba(3,5,8,0.64)_78%,rgba(3,5,8,0.9)_100%)]" />
+            <div className="pointer-events-none absolute inset-0 z-[4] bg-[linear-gradient(180deg,rgba(3,5,8,0.84)_0%,rgba(3,5,8,0.28)_24%,rgba(3,5,8,0.22)_56%,rgba(3,5,8,0.88)_100%)]" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-[4] w-1/4 bg-[linear-gradient(90deg,rgba(3,5,8,0.9),transparent)]" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-[4] w-1/4 bg-[linear-gradient(270deg,rgba(3,5,8,0.9),transparent)]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-1/3 bg-[linear-gradient(180deg,transparent,rgba(3,5,8,0.98))]" />
 
-              <RevealOnScroll delay={0.2}>
-                <h1 className="mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
-                  A inteligência tática que a sua operação <span className="text-lime-300">precisava.</span>
-                </h1>
-              </RevealOnScroll>
+            {/* Layer 4: Hero content */}
+            <div className="relative z-[5] mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-8 lg:px-12">
+              <div className="nl-reveal mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-lime-400/25 bg-lime-400/8 px-4 py-2 shadow-[0_0_36px_rgba(182,255,0,0.08)]">
+                <span className="flex h-2 w-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_6px_rgba(182,255,0,0.8)]"></span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-lime-300 sm:text-[11px] sm:tracking-[0.22em]">IA para vender mais sem perder margem</span>
+              </div>
 
-              <RevealOnScroll delay={0.3}>
-                <p className="mt-7 max-w-3xl text-sm leading-7 text-zinc-300 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-lg sm:leading-9">
-                  Saia do escuro. A Next Level capta dados de vendas, atendimento e custos para mostrar a margem verdadeira e as prioridades do seu negócio com alertas da IA.
-                </p>
-              </RevealOnScroll>
+              <h1 className="nl-reveal nl-delay-1 mx-auto max-w-[1240px] text-4xl font-black leading-[1.02] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] sm:text-6xl lg:text-7xl xl:text-[5.8rem] xl:leading-[0.94]">
+                Transforme vendas, custos e atendimento em <span className="text-lime-300">lucro real.</span>
+              </h1>
 
-              <RevealOnScroll delay={0.4}>
-                <div className="mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
-                  {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
-                    <span key={item} className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-2 backdrop-blur-sm">{item}</span>
-                  ))}
-                </div>
-              </RevealOnScroll>
+              <p className="nl-reveal nl-delay-2 mt-7 max-w-3xl text-base leading-8 text-zinc-300 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] sm:text-xl sm:leading-9">
+                A Next Level reúne vendas, custos, clientes e atendimento para mostrar onde a margem escapa e qual ação tomar antes que o problema vire prejuízo.
+              </p>
 
-              <RevealOnScroll delay={0.5}>
-                <div className="mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
-                  <button onClick={() => focusAuth(true)}
-                    className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
-                    Acessar plataforma <ArrowRight />
-                  </button>
-                  <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
-                    Ver como funciona
-                  </button>
-                </div>
-              </RevealOnScroll>
+              <div className="nl-reveal nl-delay-2 mt-5 flex flex-wrap justify-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-zinc-500">
+                {["Vendas", "Financeiro", "Atendimento", "Relatórios", "IA"].map((item) => (
+                  <span key={item} className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-2 backdrop-blur-sm">{item}</span>
+                ))}
+              </div>
+
+              <div className="nl-reveal nl-delay-3 mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+                <button onClick={() => focusAuth(true)}
+                  className="flex min-h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-lime-400 px-8 py-4 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 shadow-[0_0_42px_rgba(182,255,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-lime-300/70 sm:w-auto">
+                  Criar minha conta <ArrowRight />
+                </button>
+                <button onClick={() => scrollToSection("como-funciona")} className="min-h-[54px] w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-4 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30 sm:w-auto">
+                  Ver como funciona
+                </button>
+              </div>
 
               <div className="nl-reveal nl-delay-4 mt-12 grid w-full grid-cols-1 gap-5 text-left md:grid-cols-3">
                 {METRICS.map((m) => (
@@ -1006,13 +1049,13 @@ const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="pb-12 lg:pb-16">
+        <RevealOnScroll as="section" className="pb-12 lg:pb-16">
           <div className="grid gap-4 rounded-[32px] border border-lime-400/15 bg-[linear-gradient(135deg,rgba(182,255,0,0.08),rgba(255,255,255,0.025),rgba(3,5,8,0.95))] p-4 md:grid-cols-[1.1fr_0.9fr] lg:p-6">
               <div className="rounded-[22px] border border-white/[0.07] bg-[#060a0d] p-5">
                 <div className="mb-5 flex items-center justify-between border-b border-white/[0.06] pb-4">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Visão do negócio</p>
-                    <p className="mt-1 text-sm text-zinc-500">Dados organizados para decisão</p>
+                    <p className="mt-1 text-sm text-zinc-500">Dados organizados para agir melhor</p>
                   </div>
                   <span className="rounded-full bg-lime-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-950">IA ativa</span>
                 </div>
@@ -1034,27 +1077,27 @@ const LoginPage: React.FC = () => {
               </div>
               <div className="rounded-[22px] border border-lime-400/15 bg-lime-400/[0.045] p-5">
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300/80">Recomendação da IA</p>
-                <h3 className="mt-3 text-2xl font-black leading-tight text-white">Ajuste produtos de baixa margem antes de aumentar anúncios.</h3>
+                <h3 className="mt-3 text-2xl font-black leading-tight text-white">Revise produtos de baixa margem antes de colocar mais dinheiro em anúncio.</h3>
                 <p className="mt-4 text-sm leading-7 text-zinc-400">
-                  A proposta é simples: mostrar onde existe lucro, onde existe vazamento e qual ação merece prioridade.
+                  A proposta é simples: mostrar onde existe lucro, onde existe vazamento e qual decisão merece prioridade.
                 </p>
               </div>
           </div>
-        </section>
+        </RevealOnScroll>
 
         <RevealOnScroll as="section" className="py-16 scroll-mt-20">
           <div className="mb-9 max-w-4xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">Para quem é?</p>
-            <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-              Para empresários que precisam decidir com clareza, sem virar analistas de dados.
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">
-              A Next Level foi criada para negócios que vendem, atendem clientes, lidam com custos e precisam tomar decisões rápidas sem depender de planilhas espalhadas ou achismo.
-            </p>
+              <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
+                Para donos que precisam enxergar lucro, atendimento e operação sem virar analista.
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-zinc-400">
+                A Next Level foi criada para empresas que vendem, atendem clientes e precisam decidir rápido com base em margem, não em achismo.
+              </p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <RevealOnScroll className="grid gap-4 sm:grid-cols-2" stagger={70} duration={620}>
               {TARGET_SEGMENTS.map((item) => (
                 <div key={item.title} className="nl-card-hover rounded-[24px] border border-white/[0.08] bg-white/[0.025] p-5">
                   <div className="mb-4 h-1.5 w-10 rounded-full bg-lime-300 shadow-[0_0_18px_rgba(182,255,0,0.45)]" />
@@ -1068,7 +1111,7 @@ const LoginPage: React.FC = () => {
                   <h3 className={`mt-3 text-lg font-black leading-tight ${item.tone}`}>{item.value}</h3>
                 </div>
               ))}
-            </div>
+            </RevealOnScroll>
             <FeatureScreenshot detail={{ title: "Visão geral da operação", image: "/login-features/gestao-vendas.png" }} />
           </div>
         </RevealOnScroll>
@@ -1076,24 +1119,21 @@ const LoginPage: React.FC = () => {
         <RevealOnScroll as="section" id="problemas" className="py-16 scroll-mt-20">
           <div className="mb-8 max-w-3xl">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">O problema</p>
-            <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-              O problema não é falta de esforço. É falta de sinal confiável.
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">
-              Quando vendas, atendimento, custos e clientes ficam espalhados, o empresário trabalha muito, mas decide com pouca clareza.
-            </p>
+              <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
+                O problema não é falta de esforço. É falta de sinal confiável.
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-zinc-400">
+                Quando vendas, atendimento, custos e clientes ficam espalhados, o empresário trabalha muito, mas decide tarde.
+              </p>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <RevealOnScroll className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" stagger={75} duration={620}>
             {PROBLEMS.map((item) => (
               <div key={item.title} className="nl-card-hover rounded-[26px] border border-white/[0.08] bg-white/[0.025] p-6">
-                <div className="mb-5 flex h-9 w-9 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-300/10 text-lime-300">
-                  <ZapIcon />
-                </div>
                 <h3 className="text-base font-black text-white">{item.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-zinc-400">{item.text}</p>
               </div>
             ))}
-          </div>
+          </RevealOnScroll>
         </RevealOnScroll>
 
         <RevealOnScroll as="section" id="o-que-fazemos" className="py-16 scroll-mt-20">
@@ -1103,23 +1143,20 @@ const LoginPage: React.FC = () => {
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">O que a Next Level faz</p>
                 <h2 className="text-3xl sm:text-5xl font-black leading-[0.96] tracking-tight text-white">
-                  Transforma dados soltos em gestão, atendimento e próximos passos.
+                  Transforma dados soltos em decisões que protegem caixa e aumentam margem.
                 </h2>
                 <p className="mt-5 max-w-3xl text-sm leading-7 text-zinc-300">
-                  A plataforma centraliza informações importantes do negócio, organiza vendas, custos, clientes e atendimento, e usa IA para apontar riscos, oportunidades e próximos passos.
+                  A plataforma centraliza vendas, custos, clientes e canais digitais. Depois usa IA para apontar risco, oportunidade e próxima ação em linguagem de dono.
                 </p>
               </div>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <RevealOnScroll className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" stagger={70} duration={620}>
                 {SOLUTIONS.map((item) => (
                   <div key={item.title} className="nl-card-hover rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-6">
-                    <div className="mb-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-lime-300 text-zinc-950">
-                      <CheckIcon />
-                    </div>
                     <h3 className="text-sm font-black text-white">{item.title}</h3>
                     <p className="mt-2 text-xs leading-6 text-zinc-400">{item.text}</p>
                   </div>
                 ))}
-              </div>
+              </RevealOnScroll>
             </div>
           </div>
         </RevealOnScroll>
@@ -1128,24 +1165,21 @@ const LoginPage: React.FC = () => {
           <div className="text-center mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">O que a Next Level entrega</p>
             <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-[-0.04em] text-white max-w-2xl mx-auto">
-              Ferramentas essenciais para gerir com <span className="text-lime-300">margem e previsibilidade.</span>
+              O que muda na rotina do dono.
             </h2>
             <p className="mt-4 max-w-lg mx-auto text-sm leading-7 text-zinc-400">
-              Menos telas soltas, mais leitura estratégica da operação.
+              Cada recurso responde uma pergunta simples: onde ganhar, onde parar perda e qual ação vem agora.
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={80} duration={650}>
             {FEATURES.map((f) => (
               <div key={f.title} className={`nl-card-hover rounded-[28px] border ${f.border} bg-gradient-to-b ${f.color} p-7 group`}>
-                <div className="flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/[0.06] text-lime-300 mb-4 group-hover:bg-lime-400/15 transition">
-                  <f.icon />
-                </div>
                 <h3 className="text-base font-black tracking-tight text-white mb-2">{f.title}</h3>
                 <p className="text-sm leading-6 text-zinc-400">{f.desc}</p>
               </div>
             ))}
-          </div>
+          </RevealOnScroll>
 
         </RevealOnScroll>
 
@@ -1160,7 +1194,7 @@ const LoginPage: React.FC = () => {
                 </h2>
               </div>
               <p className="text-sm leading-7 text-zinc-300">
-                A Next Level conecta visão financeira, administrativa, comercial e operacional para o empresário entender causa, impacto e próxima ação.
+                A Next Level conecta visão financeira, comercial e operacional para o empresário entender causa, impacto e próxima ação sem depender de cinco ferramentas abertas.
               </p>
             </div>
           </div>
@@ -1172,31 +1206,28 @@ const LoginPage: React.FC = () => {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-[0.96]">
               Do dado solto ao próximo passo.
             </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar informação espalhada em decisão prática.</p>
+            <p className="mt-4 text-sm leading-7 text-zinc-400">Um fluxo simples para transformar informação espalhada em decisão prática, sem sobrecarregar a equipe.</p>
           </div>
-          <div className="grid gap-4 lg:grid-cols-4">
-            {HOW_IT_WORKS.map((step, index) => (
-              <div key={step.title} className="relative rounded-[24px] border border-white/[0.08] bg-white/[0.025] p-5">
-                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-2xl bg-lime-300 text-sm font-black text-zinc-950">
-                  {index + 1}
-                </div>
+          <RevealOnScroll className="grid gap-4 lg:grid-cols-4" stagger={85} duration={650}>
+            {HOW_IT_WORKS.map((step) => (
+              <div key={step.title} className="relative border-t border-white/[0.1] pt-5">
                 <h3 className="text-base font-black text-white">{step.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-zinc-400">{step.text}</p>
               </div>
             ))}
-          </div>
+          </RevealOnScroll>
         </RevealOnScroll>
 
-        <section id="pricing" className="py-16 scroll-mt-20">
+        <RevealOnScroll as="section" id="pricing" className="py-16 scroll-mt-20">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Planos</p>
               <h2 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white max-w-xl leading-[0.94]">
-                Escolha o nível de inteligência da sua operação.
+                Escolha o plano para o momento da sua operação.
               </h2>
             </div>
             <div className="flex flex-col gap-3">
-              <p className="text-sm text-zinc-400 max-w-sm">Comece organizando a operação ou avance para IA, automação e canais conectados.</p>
+              <p className="text-sm text-zinc-400 max-w-sm">Comece organizando a operação. Avance quando precisar de IA, automação e canais conectados.</p>
               <div className="flex items-center gap-3">
                 <div className="flex rounded-2xl border border-white/10 bg-white/[0.03] p-1">
                   <button type="button" onClick={() => setBillingAnnual(false)}
@@ -1218,7 +1249,7 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <RevealOnScroll className="grid gap-4 lg:grid-cols-3" stagger={90} duration={680}>
             {UPDATED_PRICING.map((plan) => (
               <div key={plan.name} className={`relative flex flex-col rounded-[28px] border p-6 transition hover:-translate-y-1 duration-300 ${
                 plan.recommended
@@ -1275,8 +1306,8 @@ const LoginPage: React.FC = () => {
                 </p>
               </div>
             ))}
-          </div>
-        </section>
+          </RevealOnScroll>
+        </RevealOnScroll>
 
         <RevealOnScroll as="section" id="login" className="py-16 scroll-mt-20 lg:py-20">
           <div className="mx-auto max-w-[1240px]">
@@ -1286,7 +1317,7 @@ const LoginPage: React.FC = () => {
                 Entre para transformar clareza em resultado.
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
-                Crie sua conta ou acesse sua central para acompanhar vendas, custos, clientes, relatórios e recomendações da IA.
+                Crie sua conta ou acesse sua central para acompanhar vendas, custos, clientes, relatórios e recomendações da IA em um só lugar.
               </p>
             </div>
             <AuthPanel
@@ -1307,32 +1338,32 @@ const LoginPage: React.FC = () => {
           </div>
         </RevealOnScroll>
 
-        <section id="faq" className="py-20 scroll-mt-20">
+        <RevealOnScroll as="section" id="faq" className="py-20 scroll-mt-20">
           <div className="mb-10 text-center">
             <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/70 mb-3">Dúvidas comuns</p>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-white">Perguntas frequentes</h2>
           </div>
-          <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
+          <RevealOnScroll className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2" stagger={70} duration={620}>
             {FAQS.map((faq) => (
               <div key={faq.question} className="rounded-[22px] border border-white/[0.08] bg-white/[0.025] p-5">
                 <h3 className="text-base font-black text-white">{faq.question}</h3>
                 <p className="mt-3 text-sm leading-6 text-zinc-400">{faq.answer}</p>
               </div>
             ))}
-          </div>
-        </section>
+          </RevealOnScroll>
+        </RevealOnScroll>
 
-        <section className="py-10 pb-16">
+        <RevealOnScroll as="section" className="py-10 pb-16">
           <div className="relative overflow-hidden rounded-[32px] border border-lime-400/[0.15] bg-[linear-gradient(135deg,rgba(182,255,0,0.14),rgba(8,11,16,0.97)_40%,rgba(3,5,7,1))] p-8 sm:p-12">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(182,255,0,0.18),transparent_25%)]" />
             <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
               <div className="max-w-2xl">
                 <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-lime-300/80 mb-3">Comece com clareza</p>
                 <h2 className="text-4xl sm:text-5xl font-black leading-[0.94] tracking-tight text-white">
-                  Pare de operar no escuro. Comece a agir com IA.
+                  Veja onde o lucro pode crescer. Comece hoje.
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-zinc-300/80">
-                  Organize seus dados e veja onde seu negócio pode vender melhor, perder menos e crescer com margem.
+                  Organize seus dados e descubra onde vender melhor, perder menos e crescer com margem.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row shrink-0">
@@ -1347,7 +1378,7 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
+        </RevealOnScroll>
 
         {activeFooterInfo ? (
           <RevealOnScroll as="section" id="footer-info" className="scroll-mt-20 pb-10">
