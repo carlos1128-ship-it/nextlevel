@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useToast } from "../components/Toast";
-import { EmptyState, ErrorState, LoadingState } from "../components/AsyncState";
-import { TableCard, FormCard, FilterCard, MetricCard } from "../components/ui/Card";
 import { UsersIcon } from "../components/icons";
 import { useAuth } from "../App";
 import { getErrorMessage } from "../src/services/error";
@@ -182,178 +180,165 @@ const Customers = () => {
   };
 
   const statusClass = (status?: string | null) => {
-    if (status === "CONFIRMED" || status === "COMPLETED") return "border-lime-400/30 bg-lime-400/10 text-lime-200";
-    if (status === "CANCELLED") return "border-red-400/30 bg-red-500/10 text-red-200";
+    if (status === "CONFIRMED" || status === "COMPLETED") return "success";
+    if (status === "CANCELLED") return "danger";
     if (status === "NEEDS_HUMAN" || status === "NEEDS_INFO" || status === "PENDING_DATA") {
-      return "border-amber-400/30 bg-amber-500/10 text-amber-200";
+      return "warning";
     }
-    return "border-zinc-700 bg-zinc-900 text-zinc-300";
+    return "muted";
   };
 
   return (
-    <div className="space-y-6">
-      <div className="nl-enter flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-lime-300/80">Base de clientes</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Clientes</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-            Organize contatos, origem, interesse e sinais comerciais em uma tela limpa para vender melhor.
-          </p>
+    <div className="nl-page">
+      <div className="nl-page-header">
+        <div className="nl-page-header__meta">
+          <p className="nl-eyebrow">Relacionamento & Vendas</p>
+          <h1 className="nl-page-title">Base de Clientes</h1>
+          <p className="nl-page-subtitle">Organize contatos, origem, interesse e sinais comerciais em uma tela limpa para vender melhor.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={resetForm} className="nl-button-secondary">
-            Limpar formulario
+        <div className="flex gap-2">
+          <button type="button" onClick={resetForm} className="nl-button-secondary py-2 text-xs">
+            Limpar Form
           </button>
-          <button type="button" onClick={loadCustomers} className="nl-button-primary">
-            Atualizar
+          <button type="button" onClick={loadCustomers} className="nl-button-primary py-2 text-xs">
+            Sincronizar
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <FormCard className="nl-enter">
-          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px] mb-8">
+        <section className="nl-card p-6 md:p-8">
+          <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                {editingId ? "Edicao ativa" : "Novo cadastro"}
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)]">
+                {editingId ? "Edição Direta" : "Nova Prospecção"}
               </p>
-              <h2 className="mt-1 text-xl font-black tracking-tight text-zinc-100">
-                {editingId ? "Atualizar cliente" : "Cadastrar cliente"}
+              <h2 className="mt-1 text-xl font-black tracking-tight text-[var(--nl-text-primary)]">
+                {editingId ? "Atualizar Ficha" : "Adicionar Cliente"}
               </h2>
             </div>
-            {editingId ? (
-              <span className="w-max rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">
-                Modo edicao
-              </span>
-            ) : null}
+            {editingId && (
+              <span className="nl-badge-neon text-[10px]">Alteração Ativa</span>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-            <div className="lg:col-span-4">
-              <label htmlFor="customer-name" className="nl-label">Nome</label>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <div className="lg:col-span-4 flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Nome de Contato</span>
               <input
-                id="customer-name"
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder="Nome do cliente"
+                placeholder="Ex: João Silva"
                 className="nl-input"
               />
             </div>
-            <div className="lg:col-span-3">
-              <label htmlFor="customer-email" className="nl-label">Email</label>
+            <div className="lg:col-span-4 flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">E-mail Principal</span>
               <input
-                id="customer-email"
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                placeholder="cliente@email.com"
+                placeholder="cliente@servidor.com"
                 className="nl-input"
               />
             </div>
-            <div className="lg:col-span-3">
-              <label htmlFor="customer-phone" className="nl-label">Telefone</label>
+            <div className="lg:col-span-2 flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">WhatsApp / Tel</span>
               <input
-                id="customer-phone"
                 value={form.phone}
                 onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-                placeholder="WhatsApp ou telefone"
+                placeholder="+55 11..."
                 className="nl-input"
               />
             </div>
-            <div className="flex items-end lg:col-span-2">
-              <button type="submit" className="nl-button-primary w-full">
-                {editingId ? "Salvar" : "Adicionar"}
+            <div className="flex flex-col justify-end lg:col-span-2">
+              <button type="submit" className="nl-button-primary w-full py-3">
+                {editingId ? "Salvar" : "Fixar"}
               </button>
             </div>
           </form>
-        </FormCard>
+        </section>
 
-        <div className="space-y-4">
-          <MetricCard interactive className="nl-enter">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Clientes no filtro</p>
-                <p className="mt-3 text-4xl font-black leading-none tracking-tight text-zinc-100">{pagination.total}</p>
-                <p className="mt-2 text-xs font-semibold text-zinc-500">
-                  Pagina {pagination.page} de {pagination.totalPages || 1}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-lime-400/20 bg-lime-400/10 p-3 text-lime-300">
-                <UsersIcon className="h-5 w-5" />
+        <div className="space-y-6">
+          <div className="nl-card p-6 relative overflow-hidden flex flex-col justify-between h-[160px]">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--nl-neon)] opacity-[0.03] blur-3xl pointer-events-none" />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)]">Alcance Total</p>
+              <p className="mt-3 text-4xl font-black text-[var(--nl-text-primary)] leading-none">{pagination.total}</p>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-[11px] text-[var(--nl-text-muted)] font-bold">
+              <span>CONTATOS NA BASE</span>
+              <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center text-[var(--nl-neon)]">
+                <UsersIcon className="h-4 w-4" />
               </div>
             </div>
-          </MetricCard>
+          </div>
 
-          <FilterCard className="nl-enter">
-            <p className="mb-4 text-sm font-black text-zinc-200">Filtros</p>
+          <section className="nl-card p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)] mb-4">Filtragem Dinâmica</p>
             <div className="space-y-4">
-              <div>
-                <label htmlFor="customer-search" className="nl-label">Busca</label>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold uppercase text-[var(--nl-text-muted)] px-1">Pesquisar</span>
                 <input
-                  id="customer-search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Nome, email ou telefone"
-                  className="nl-input"
+                  placeholder="Nome ou contato..."
+                  className="nl-input text-xs py-2"
                 />
               </div>
-              <div>
-                <label htmlFor="customer-limit" className="nl-label">Itens por pagina</label>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold uppercase text-[var(--nl-text-muted)] px-1">Exibição</span>
                 <select
-                  id="customer-limit"
                   value={limit}
                   onChange={(e) => setLimit(Number(e.target.value) || 10)}
-                  className="nl-input"
+                  className="nl-input text-xs py-2"
                 >
                   {[5, 10, 20, 50].map((option) => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option}>{option} por página</option>
                   ))}
                 </select>
               </div>
             </div>
-          </FilterCard>
+          </section>
         </div>
       </div>
 
       {loading ? (
-        <LoadingState />
+        <div className="py-20 flex justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--nl-neon)] border-t-transparent" />
+        </div>
       ) : error ? (
-        <ErrorState
-          title="Erro ao carregar clientes"
-          description={error}
-          actionLabel="Tentar novamente"
-          onAction={loadCustomers}
-        />
+        <section className="nl-card p-10 text-center border-red-900/30">
+          <h3 className="text-xl font-bold text-red-200">Falha ao rastrear clientes</h3>
+          <p className="text-sm text-[var(--nl-text-secondary)] mt-2">{error}</p>
+          <button onClick={loadCustomers} className="nl-button-secondary mt-6">Tentar novamente</button>
+        </section>
       ) : items.length === 0 ? (
-        <EmptyState
-          title="Nenhum cliente cadastrado"
-          description="Cadastre clientes para calcular LTV, ticket medio e segmentar vendas."
-        />
+        <section className="nl-card p-20 text-center border-dashed">
+          <p className="text-xl font-bold text-[var(--nl-text-muted)]">Ambiente Vazio</p>
+          <p className="text-sm text-[var(--nl-text-secondary)] mt-1">Nenhum registro encontrado com os critérios atuais.</p>
+        </section>
       ) : (
-        <TableCard className="nl-enter">
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
+        <section className="nl-card overflow-hidden">
+          <div className="px-6 py-5 flex items-center justify-between border-b border-white/5">
             <div>
-              <p className="text-sm font-black text-zinc-100">
-                {pagination.total} cliente{pagination.total === 1 ? "" : "s"}
-              </p>
-              <p className="mt-1 text-xs text-zinc-500">
-                Pagina {pagination.page} de {pagination.totalPages || 1}
-              </p>
+              <p className="text-[13px] font-bold text-[var(--nl-text-primary)]">{pagination.total} Clientes Registrados</p>
+              <p className="text-[11px] text-[var(--nl-text-muted)] mt-0.5">Página {pagination.page} de {pagination.totalPages || 1}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <button
-                className="nl-button-secondary min-h-0 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40"
+                className="nl-button-secondary py-1.5 px-3 text-xs"
                 onClick={() => changePage(page - 1)}
                 disabled={page <= 1}
               >
                 Anterior
               </button>
               <button
-                className="nl-button-secondary min-h-0 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40"
+                className="nl-button-secondary py-1.5 px-3 text-xs"
                 onClick={() => changePage(page + 1)}
                 disabled={pagination.totalPages !== 0 && page >= pagination.totalPages}
               >
-                Proxima
+                Próxima
               </button>
             </div>
           </div>
@@ -362,56 +347,60 @@ const Customers = () => {
             <table className="nl-table">
               <thead>
                 <tr>
-                  <th className="text-left">Cliente</th>
-                  <th className="text-left">Email</th>
-                  <th className="text-left">Telefone</th>
-                  <th className="text-left">Origem</th>
-                  <th className="text-left">Interesse</th>
-                  <th className="text-left">Data/Hora</th>
-                  <th className="text-left">Status</th>
-                  <th className="text-left">Observacao</th>
-                  <th className="text-left">Criado em</th>
-                  <th className="text-right">Acoes</th>
+                  <th>Cliente / Contato</th>
+                  <th>Origem / Interesse</th>
+                  <th>Data/Hora Desejada</th>
+                  <th>Status Comercial</th>
+                  <th>Sinais & Notas</th>
+                  <th className="text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="text-zinc-200">
+              <tbody>
                 {items.map((customer) => {
                   const status = customer.status || customer.latestAction?.status;
+                  const sClass = statusClass(status);
                   return (
-                    <tr key={customer.id} className="border-t border-zinc-800/80">
-                      <td className="font-bold text-zinc-100">{customer.name}</td>
-                      <td>{customer.email || "-"}</td>
-                      <td>{customer.phone || "-"}</td>
-                      <td>{formatChannel(customer)}</td>
-                      <td className="max-w-[220px] truncate">{formatInterest(customer)}</td>
-                      <td>{formatDesiredDateTime(customer)}</td>
+                    <tr key={customer.id}>
                       <td>
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${statusClass(status)}`}>
+                        <div className="font-bold text-[var(--nl-text-primary)]">{customer.name}</div>
+                        <div className="text-[11px] text-[var(--nl-text-muted)] mt-0.5">{customer.email || customer.phone || "Sem contato"}</div>
+                      </td>
+                      <td>
+                        <div className="text-[13px] text-[var(--nl-text-secondary)] font-medium">{formatChannel(customer)}</div>
+                        <div className="text-[11px] text-[var(--nl-text-muted)] mt-0.5 max-w-[180px] truncate" title={formatInterest(customer)}>
+                          {formatInterest(customer)}
+                        </div>
+                      </td>
+                      <td className="text-[12px] text-[var(--nl-text-secondary)]">
+                        {formatDesiredDateTime(customer)}
+                      </td>
+                      <td>
+                        <span className={`nl-badge-${sClass}`}>
                           {formatStatus(status)}
                         </span>
                       </td>
-                      <td
-                        className="max-w-[420px] whitespace-normal text-xs leading-5 text-zinc-400"
-                        title={formatLatestNote(customer)}
-                      >
-                        {formatLatestNote(customer)}
+                      <td className="max-w-[300px]">
+                        <p className="text-[12px] text-[var(--nl-text-secondary)] leading-relaxed line-clamp-2" title={formatLatestNote(customer)}>
+                          {formatLatestNote(customer)}
+                        </p>
                       </td>
-                      <td>{new Date(customer.createdAt).toLocaleDateString("pt-BR")}</td>
-                      <td className="space-x-2 text-right">
-                        <button
-                          type="button"
-                          className="nl-button-secondary min-h-0 px-3 py-2 text-xs"
-                          onClick={() => handleEdit(customer)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          className="nl-button-danger min-h-0 px-3 py-2 text-xs"
-                          onClick={() => handleDelete(customer.id)}
-                        >
-                          Excluir
-                        </button>
+                      <td className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            className="nl-button-secondary py-1.5 px-3 text-xs"
+                            onClick={() => handleEdit(customer)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            className="nl-button-danger py-1.5 px-3 text-xs"
+                            onClick={() => handleDelete(customer.id)}
+                          >
+                            Remover
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -419,7 +408,7 @@ const Customers = () => {
               </tbody>
             </table>
           </div>
-        </TableCard>
+        </section>
       )}
     </div>
   );
