@@ -1,0 +1,144 @@
+/*
+ * NEXT LEVEL AI — Animations & Scroll Effects
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+.nl-reveal,
+.nl-reveal-left,
+.nl-reveal-right,
+.nl-reveal-scale {
+  opacity: 0;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.nl-reveal        { transform: translateY(40px); }
+.nl-reveal-left   { transform: translateX(-40px); }
+.nl-reveal-right  { transform: translateX(40px); }
+.nl-reveal-scale  { transform: scale(0.92) translateY(20px); }
+
+/* ── Visible state (added by IntersectionObserver) ── */
+.nl-reveal.nl-is-visible,
+.nl-reveal-left.nl-is-visible,
+.nl-reveal-right.nl-is-visible,
+.nl-reveal-scale.nl-is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.nl-stagger-child {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nl-stagger-child.nl-is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes dashboard-drop {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-8deg) rotateX(4deg) translateY(40px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) translateY(0) scale(1);
+  }
+}
+
+.animate-dashboard-drop {
+  animation: dashboard-drop 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(-12px) rotate(1deg); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(-15px) rotate(-1deg); }
+}
+
+.animate-float         { animation: float 6s ease-in-out infinite; }
+.animate-float-delayed { animation: float-delayed 7s ease-in-out infinite 1s; }
+
+@keyframes pulse-neon {
+  0%   { box-shadow: 0 0 0 0    rgba(182, 255, 0, 0.4); }
+  70%  { box-shadow: 0 0 0 10px rgba(182, 255, 0, 0);   }
+  100% { box-shadow: 0 0 0 0    rgba(182, 255, 0, 0);   }
+}
+
+.animate-pulse-neon { animation: pulse-neon 2s infinite; }
+
+.nl-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.nl-card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+
+.nl-card-hover-neon:hover {
+  border-color: rgba(182, 255, 0, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 0, 0.15),
+    0 24px 60px rgba(0, 0, 0, 0.3);
+}
+
+.prompt-chip {
+  transition: transform 0.2s ease, border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.prompt-chip:hover {
+  transform: translateY(-3px);
+  border-color: rgba(182, 255, 0, 0.5);
+  color: #B6FF00;
+  background: rgba(182, 255, 0, 0.06);
+}
+
+.chart-bar {
+  transition: background-color 0.2s ease;
+}
+
+.chart-bar:hover {
+  background-color: #B6FF00;
+}
+
+.trust-card {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trust-card:hover {
+  background-color: white;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nl-reveal,
+  .nl-reveal-left,
+  .nl-reveal-right,
+  .nl-reveal-scale,
+  .nl-stagger-child {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .animate-float,
+  .animate-float-delayed,
+  .animate-pulse-neon,
+  .animate-dashboard-drop {
+    animation: none !important;
+  }
+
+  .nl-card-hover,
+  .nl-card-hover-neon,
+  .prompt-chip,
+  .chart-bar,
+  .trust-card {
+    transition: none !important;
+  }
+}
