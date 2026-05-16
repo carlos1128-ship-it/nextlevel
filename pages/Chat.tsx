@@ -159,7 +159,7 @@ const Chat = () => {
   const canSend = useMemo(() => input.trim().length > 0 && !isTyping, [input, isTyping]);
 
   return (
-    <div className="nl-page flex flex-col h-[calc(100vh-140px)]">
+    <div className="flex flex-col h-[calc(100vh-140px)] w-full">
       <div className="nl-page-header border-b border-white/5 pb-6 mb-0">
         <div className="nl-page-header__meta">
           <p className="nl-eyebrow">Motor de Inteligência Cognitiva</p>
