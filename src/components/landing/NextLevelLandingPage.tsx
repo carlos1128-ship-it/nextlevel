@@ -339,7 +339,7 @@ export function NextLevelLandingPage({
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <button type="button" onClick={() => scrollToSection("topo")} className="flex items-center gap-2 cursor-pointer group">
             <div className="w-3 h-3 rounded-full bg-[#B6FF00] shadow-[0_0_12px_rgba(182,255,0,0.6)] group-hover:scale-110 transition-transform" />
-            <span className="font-bold tracking-tight text-lg text-white">NEXT LEVEL AI</span>
+            <span className="font-bold tracking-tight text-lg text-white">NEXT LEVEL</span>
           </button>
 
           <div className="hidden md:flex items-center gap-8">
@@ -355,7 +355,7 @@ export function NextLevelLandingPage({
               Entrar
             </button>
             <button type="button" onClick={() => focusAuth(true)} className="hidden md:flex bg-[#B6FF00] text-[#080D0B] font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-[#9BE600] transition-all hover:scale-[1.02] active:scale-[0.98]">
-              Teste grátis
+              Começar agora
             </button>
             <button type="button" onClick={() => setMobileOpen((v) => !v)} className="md:hidden text-white">
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -400,14 +400,14 @@ export function NextLevelLandingPage({
             </h1>
 
             <p className="nl-body text-[#AEB8B4] mb-10 max-w-[560px]">
-              A NEXT LEVEL AI centraliza vendas, clientes, produtos, custos, atendimento e relatórios em
+              A NEXT LEVEL centraliza vendas, clientes, produtos, custos, atendimento e relatórios em
               uma plataforma inteligente. Veja o lucro real e receba recomendações da IA para decidir
               melhor todos os dias.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10 w-full sm:w-auto">
               <button type="button" onClick={() => focusAuth(true)} className="bg-[#B6FF00] text-[#080D0B] font-semibold px-8 py-4 rounded-full hover:bg-[#9BE600] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(182,255,0,0.25)]">
-                Teste grátis <ArrowRight size={18} />
+                Começar agora <ArrowRight size={18} />
               </button>
               <button type="button" onClick={() => scrollToSection("funcionalidades")} className="bg-transparent text-white border border-[#2E3935] font-semibold px-8 py-4 rounded-full hover:bg-[#1A221F] transition-all flex items-center justify-center">
                 Ver como funciona
@@ -563,7 +563,7 @@ export function NextLevelLandingPage({
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto mb-16 max-w-3xl text-center">
             <span className="nl-eyebrow mb-4 block text-[#6B7470]">SISTEMA DE GESTÃO EMPRESARIAL</span>
-            <h2 className="nl-h2 mb-6">A NEXT LEVEL AI é um ERP simples, inteligente e conectado</h2>
+            <h2 className="nl-h2 mb-6">A NEXT LEVEL é um ERP simples, inteligente e conectado</h2>
             <p className="nl-body text-[#6B7470]">
               Controle financeiro, vendas, clientes, produtos, custos e atendimento em uma central feita para empresários que precisam de clareza sem depender de planilhas.
             </p>
@@ -593,7 +593,7 @@ export function NextLevelLandingPage({
             <span className="nl-eyebrow mb-4 block text-[#B6FF00]">GESTÃO DE PONTA A PONTA</span>
             <h2 className="nl-h2 mb-6">Da venda ao relatório: sua operação conectada em uma única plataforma</h2>
             <p className="nl-body text-[#AEB8B4]">
-              A NEXT LEVEL AI organiza os dados do negócio, cruza informações de vendas, custos, produtos e atendimento, e transforma tudo em indicadores, relatórios e próximos passos.
+              A NEXT LEVEL organiza os dados do negócio, cruza informações de vendas, custos, produtos e atendimento, e transforma tudo em indicadores, relatórios e próximos passos.
             </p>
           </div>
 
@@ -760,7 +760,7 @@ export function NextLevelLandingPage({
             <span className="nl-eyebrow mb-4 block text-[#6B7470]">INTEGRAÇÕES</span>
             <h2 className="nl-h2 mb-6 text-[#080D0B]">Conecte os canais que movem sua operação</h2>
             <p className="nl-body mb-8 text-[#6B7470]">
-              Traga dados de vendas, atendimento, campanhas, marketplaces e pagamentos para dentro da NEXT LEVEL AI e acompanhe tudo em uma visão centralizada.
+              Traga dados de vendas, atendimento, campanhas, marketplaces e pagamentos para dentro da NEXT LEVEL e acompanhe tudo em uma visão centralizada.
             </p>
             <button type="button" onClick={() => focusAuth(true)} className="inline-flex items-center gap-2 border-b-2 border-[#B6FF00] pb-1 font-bold text-[#080D0B] transition-colors hover:text-[#1C3F3A]">
               Ver todas as integrações <ArrowRight size={16} />
@@ -828,7 +828,7 @@ export function NextLevelLandingPage({
             <span className="nl-eyebrow mb-4 block text-[#1C3F3A]">SEGURANÇA E CONFIANÇA</span>
             <h2 className="nl-h2 mb-6">Gestão empresarial exige dados bem protegidos</h2>
             <p className="nl-body text-[#4A5450]">
-              A NEXT LEVEL AI organiza informações sensíveis da empresa com foco em segurança, controle de acesso e clareza para tomada de decisão.
+              A NEXT LEVEL organiza informações sensíveis da empresa com foco em segurança, controle de acesso e clareza para tomada de decisão.
             </p>
           </div>
 
@@ -979,7 +979,7 @@ export function NextLevelLandingPage({
 
             <div className="relative z-10 flex flex-col justify-center gap-4 sm:flex-row">
               <button type="button" onClick={() => focusAuth(true)} className="flex items-center justify-center gap-2 rounded-full bg-[#B6FF00] px-10 py-5 text-lg font-bold text-[#080D0B] shadow-[0_0_30px_rgba(182,255,0,0.3)] transition-all hover:scale-[1.02] hover:bg-[#9BE600]">
-                Teste grátis agora <ArrowRight size={20} />
+                Começar agora <ArrowRight size={20} />
               </button>
               <button type="button" onClick={() => focusAuth(false)} className="flex items-center justify-center rounded-full border border-[#2E3935] bg-transparent px-10 py-5 text-lg font-bold text-white transition-all hover:bg-[#1A221F]">
                 Entrar na minha conta
@@ -1005,7 +1005,7 @@ export function NextLevelLandingPage({
           <div className="md:w-1/3">
             <div className="mb-6 flex items-center gap-2">
               <div className="h-4 w-4 rounded-full bg-[#B6FF00]" />
-              <span className="text-xl font-bold tracking-tight text-white">NEXT LEVEL AI</span>
+              <span className="text-xl font-bold tracking-tight text-white">NEXT LEVEL</span>
             </div>
             <p className="max-w-xs text-sm text-[#6B7470]">ERP, inteligência operacional e automação para empresas brasileiras.</p>
           </div>
@@ -1033,7 +1033,7 @@ export function NextLevelLandingPage({
         </div>
 
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-[#1A221F] pt-8 md:flex-row">
-          <p className="text-xs text-[#6B7470]">© 2026 NEXT LEVEL AI. Todos os direitos reservados.</p>
+          <p className="text-xs text-[#6B7470]">© 2026 NEXT LEVEL. Todos os direitos reservados.</p>
           <div className="flex gap-6">
             {["Política de Privacidade", "Termos de Uso"].map((label) => (
               <button key={label} type="button" onClick={() => scrollToSection("seguranca")} className="text-xs text-[#6B7470] transition-colors hover:text-[#B6FF00]">
