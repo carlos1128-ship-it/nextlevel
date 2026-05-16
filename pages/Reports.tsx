@@ -329,7 +329,7 @@ const Reports = () => {
   }, [reportRef, aiSummary, aiLoading, generateAiSummary, addToast]);
 
   return (
-    <div className="nl-page">
+    <div className="w-full">
       {/* Header */}
       <div className="nl-page-header">
         <div className="nl-page-header__meta">
