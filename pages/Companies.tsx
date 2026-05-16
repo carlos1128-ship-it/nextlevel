@@ -197,191 +197,195 @@ const Companies = () => {
   }, [companies.length]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Empresas</h1>
-          <p className="mt-2 text-zinc-400">{summaryText}</p>
+    <div className="nl-page">
+      <div className="nl-page-header">
+        <div className="nl-page-header__meta">
+          <p className="nl-eyebrow">Gestão de Ambiente</p>
+          <h1 className="nl-page-title">Cerebros Empresariais</h1>
+          <p className="nl-page-subtitle">{summaryText}</p>
         </div>
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-2 rounded-2xl bg-lime-400 px-6 py-3 text-base font-black text-zinc-900 transition hover:opacity-90"
+          className="nl-button-primary"
         >
-          <PlusIcon className="h-5 w-5" /> Nova empresa
+          {showForm ? "Fechar Form" : "Nova Empresa"}
         </button>
       </div>
 
       {showForm ? (
-        <form
-          onSubmit={onSubmit}
-          className="grid grid-cols-1 gap-4 rounded-3xl border border-zinc-900 bg-zinc-950 p-5 md:grid-cols-2 xl:grid-cols-4"
-        >
-          <input
-            value={form.name}
-            onChange={(e) => onChangeForm("name", e.target.value)}
-            placeholder="Nome da empresa"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400 xl:col-span-2"
-          />
-          <input
-            value={form.sector}
-            onChange={(e) => onChangeForm("sector", e.target.value)}
-            placeholder="Setor"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400"
-          />
-          <input
-            value={form.segment}
-            onChange={(e) => onChangeForm("segment", e.target.value)}
-            placeholder="Segmento"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400"
-          />
-          <input
-            value={form.document}
-            onChange={(e) => onChangeForm("document", e.target.value)}
-            placeholder="CNPJ ou CPF"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400"
-          />
-          <input
-            type="date"
-            value={form.openedAt}
-            onChange={(e) => onChangeForm("openedAt", e.target.value)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-lime-400"
-          />
-          <textarea
-            value={form.description}
-            onChange={(e) => onChangeForm("description", e.target.value)}
-            placeholder="Descrição curta do que a empresa faz"
-            rows={4}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400 md:col-span-2 xl:col-span-2"
-          />
-          <button
-            type="submit"
-            disabled={loadingSubmit}
-            className="rounded-xl bg-lime-400 px-4 py-3 font-black text-zinc-900 transition hover:opacity-90 disabled:opacity-50 md:col-span-2 xl:col-span-2"
-          >
-            {loadingSubmit ? "Salvando..." : "Salvar Empresa"}
-          </button>
-        </form>
+        <section className="nl-card p-6 md:p-8 mb-8 border-[var(--nl-neon)]/30">
+          <h2 className="text-[14px] font-bold uppercase tracking-[0.12em] text-[var(--nl-text-muted)] mb-6">Informações da Nova Operação</h2>
+          <form onSubmit={onSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+            <div className="lg:col-span-2 flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Nome Fantasia</span>
+              <input
+                value={form.name}
+                onChange={(e) => onChangeForm("name", e.target.value)}
+                placeholder="Ex: Next Level Shop"
+                className="nl-input"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Setor</span>
+              <input
+                value={form.sector}
+                onChange={(e) => onChangeForm("sector", e.target.value)}
+                placeholder="Varejo, SaaS..."
+                className="nl-input"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Documento (CNPJ/CPF)</span>
+              <input
+                value={form.document}
+                onChange={(e) => onChangeForm("document", e.target.value)}
+                placeholder="00.000.000/0001-00"
+                className="nl-input"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Fundada em</span>
+              <input
+                type="date"
+                value={form.openedAt}
+                onChange={(e) => onChangeForm("openedAt", e.target.value)}
+                className="nl-input"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5 lg:col-span-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Descrição Breve</span>
+              <input
+                value={form.description}
+                onChange={(e) => onChangeForm("description", e.target.value)}
+                placeholder="Ex: E-commerce de moda masculina..."
+                className="nl-input"
+              />
+            </div>
+            <div className="flex flex-col justify-end">
+              <button
+                type="submit"
+                disabled={loadingSubmit}
+                className="nl-button-primary w-full"
+              >
+                {loadingSubmit ? "Processando..." : "Subir Empresa"}
+              </button>
+            </div>
+          </form>
+        </section>
       ) : null}
 
       {loadingPage ? (
-        <LoadingState />
-      ) : loadError ? (
-        <ErrorState
-          title="Erro ao carregar empresas"
-          description={loadError}
-          actionLabel="Tentar novamente"
-          onAction={() => void loadCompanies()}
-        />
-      ) : companies.length === 0 ? (
-        <EmptyState
-          title="Nenhuma empresa cadastrada"
-          description="Cadastre a primeira empresa para liberar os módulos de análise."
-          actionLabel="Criar primeira empresa"
-          onAction={() => setShowForm(true)}
-        />
-      ) : (
-        <div className="overflow-x-auto rounded-3xl border border-zinc-900 bg-zinc-950">
-          <table className="w-full min-w-[980px] text-left text-sm">
-            <thead className="border-b border-zinc-900 uppercase tracking-[0.12em] text-zinc-500">
-              <tr>
-                <th className="p-4">Empresa</th>
-                <th className="p-4">Setor / Segmento</th>
-                <th className="p-4">Documento</th>
-                <th className="p-4">Tempo Aberta</th>
-                <th className="p-4">Descrição</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(Array.isArray(companies) ? companies : []).map((company) => {
-                const isSelected = getCompanyId(company) === selectedCompanyId;
-                return (
-                  <tr key={getCompanyId(company) || company.name} className="border-b border-zinc-900 last:border-b-0">
-                    <td className="p-4 font-semibold text-zinc-100">{company.name || "-"}</td>
-                    <td className="p-4 text-zinc-300">
-                      {[company.sector, company.segment].filter(Boolean).join(" / ") || "Não informado"}
-                    </td>
-                    <td className="p-4 text-zinc-300">{company.document || "Não informado"}</td>
-                    <td className="p-4 text-zinc-300">{formatOpenedAge(company.openedAt)}</td>
-                    <td className="max-w-xs p-4 text-zinc-400">{company.description || "Sem descrição"}</td>
-                    <td className="p-4">
-                      <span className={`rounded-full px-3 py-1 text-sm font-bold ${isSelected ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-300"}`}>
-                        {isSelected ? "Ativa" : "Disponível"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-4">
-                        <button
-                          type="button"
-                          onClick={() => selectCompany(getCompanyId(company))}
-                          className="text-lime-400 transition hover:text-lime-300"
-                        >
-                          Selecionar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => askDeleteCompany(company)}
-                          disabled={deletingCompanyId === getCompanyId(company)}
-                          className="inline-flex items-center gap-2 text-red-400 transition hover:text-red-300 disabled:opacity-50"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                          Excluir
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="py-20 flex justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--nl-neon)] border-t-transparent" />
         </div>
+      ) : loadError ? (
+        <section className="nl-card p-10 text-center border-red-900/30">
+          <h3 className="text-xl font-bold text-red-200">Falha ao carregar empresas</h3>
+          <p className="text-sm text-[var(--nl-text-secondary)] mt-2">{loadError}</p>
+          <button onClick={() => void loadCompanies()} className="nl-button-secondary mt-6">Tentar novamente</button>
+        </section>
+      ) : companies.length === 0 ? (
+        <section className="nl-card p-20 text-center border-dashed">
+          <p className="text-xl font-bold text-[var(--nl-text-muted)]">Ambiente Vazio</p>
+          <p className="text-sm text-[var(--nl-text-secondary)] mt-1">Conecte sua primeira empresa para ativar a inteligência.</p>
+          <button onClick={() => setShowForm(true)} className="nl-button-primary mt-8">Começar Agora</button>
+        </section>
+      ) : (
+        <section className="nl-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="nl-table">
+              <thead>
+                <tr>
+                  <th>Empresa</th>
+                  <th>Atuação</th>
+                  <th>Documento / Tempo</th>
+                  <th>Status</th>
+                  <th className="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(Array.isArray(companies) ? companies : []).map((company) => {
+                  const isSelected = getCompanyId(company) === selectedCompanyId;
+                  return (
+                    <tr key={getCompanyId(company) || company.name} className={isSelected ? "bg-[rgba(182,255,0,0.02)]" : ""}>
+                      <td>
+                        <div className="font-bold text-[var(--nl-text-primary)]">{company.name || "-"}</div>
+                        <p className="text-[11px] text-[var(--nl-text-muted)] mt-0.5 max-w-[200px] truncate">{company.description || "Sem descrição"}</p>
+                      </td>
+                      <td className="text-[13px] text-[var(--nl-text-secondary)]">
+                        {[company.sector, company.segment].filter(Boolean).join(" · ") || "Indefinido"}
+                      </td>
+                      <td>
+                        <div className="text-[13px] text-[var(--nl-text-primary)]">{company.document || "—"}</div>
+                        <p className="text-[11px] text-[var(--nl-text-muted)] mt-0.5">{formatOpenedAge(company.openedAt)}</p>
+                      </td>
+                      <td>
+                        <span className={`nl-badge-${isSelected ? "success" : "muted"}`}>
+                          {isSelected ? "Ativa" : "Disponível"}
+                        </span>
+                      </td>
+                      <td className="text-right">
+                        <div className="flex justify-end gap-2">
+                          {!isSelected && (
+                            <button
+                              type="button"
+                              onClick={() => selectCompany(getCompanyId(company))}
+                              className="nl-button-secondary py-1.5 px-3 text-xs"
+                            >
+                              Focar
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => askDeleteCompany(company)}
+                            disabled={deletingCompanyId === getCompanyId(company)}
+                            className="p-2 rounded-lg border border-red-900/30 hover:bg-red-950/20 transition text-red-400"
+                            title="Remover"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
       {companyToDelete ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-3xl border border-lime-400/20 bg-zinc-950 p-6 shadow-[0_0_50px_rgba(182,255,0,0.08)]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-400">Exclusao Permanente</p>
-                <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-100">Excluir empresa?</h2>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+          <div className="w-full max-w-md nl-card border-red-900/30 p-6 md:p-8 animate-in fade-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-16 w-16 rounded-full bg-red-950/30 flex items-center justify-center mb-6">
+                <TrashIcon className="h-8 w-8 text-red-500" />
               </div>
-              <button
-                type="button"
-                onClick={() => setCompanyToDelete(null)}
-                className="rounded-xl border border-zinc-800 p-2 text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
-              >
-                <XIcon className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-zinc-900 bg-zinc-900/60 p-4 text-sm text-zinc-300">
-              <p>
-                Tem certeza que deseja excluir <span className="font-bold text-zinc-100">{companyToDelete.name}</span>?
+              <p className="nl-eyebrow text-red-400">Ação Irreversível</p>
+              <h2 className="text-xl font-black text-[var(--nl-text-primary)] mt-2">Remover Operação?</h2>
+              <p className="text-sm text-[var(--nl-text-secondary)] mt-4 leading-relaxed">
+                Você está prestes a excluir permanentemente <span className="text-[var(--nl-text-primary)] font-bold">{companyToDelete.name}</span>. Todos os dados de vendas, produtos e inteligência associados serão perdidos.
               </p>
-              <p className="mt-2 text-zinc-400">
-                Está ação não pode ser desfeita e removerá dados associados, incluindo transações, produtos,
-                clientes, custos, leads, insights e configurações ligadas a está empresa.
-              </p>
-            </div>
 
-            <div className="mt-6 flex flex-col-reverse gap-3 md:flex-row md:justify-end">
-              <button
-                type="button"
-                onClick={() => setCompanyToDelete(null)}
-                className="rounded-2xl border border-zinc-800 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-200 transition hover:border-zinc-700"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteCompany}
-                disabled={Boolean(deletingCompanyId)}
-                className="rounded-2xl border border-red-500/40 bg-red-500/10 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-red-300 transition hover:bg-red-500/15 disabled:opacity-50"
-              >
-                {deletingCompanyId ? "Excluindo..." : "Confirmar Exclusao"}
-              </button>
+              <div className="grid grid-cols-2 gap-3 w-full mt-8">
+                <button
+                  type="button"
+                  onClick={() => setCompanyToDelete(null)}
+                  className="nl-button-secondary"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteCompany}
+                  disabled={Boolean(deletingCompanyId)}
+                  className="nl-button-danger"
+                >
+                  {deletingCompanyId ? "Excluindo..." : "Confirmar"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

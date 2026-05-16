@@ -136,15 +136,15 @@ function AuthAccessSection({
   return (
     <section id="login" className="scroll-mt-24 bg-[#080D0B] px-4 py-24 md:px-8">
       <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div>
-          <span className="nl-eyebrow mb-5 block text-[#B6FF00]">ACESSO À PLATAFORMA</span>
-          <h2 className="nl-h2 mb-6 text-white">Entre na sua central de gestão</h2>
-          <p className="nl-body max-w-xl text-[#AEB8B4]">
+        <div className="reveal">
+          <span className="nl-eyebrow mb-5 block text-[#B6FF00] reveal-delay-1">ACESSO À PLATAFORMA</span>
+          <h2 className="nl-h2 mb-6 text-white reveal-delay-2">Entre na sua central de gestão</h2>
+          <p className="nl-body max-w-xl text-[#AEB8B4] reveal-delay-3">
             Acesse sua conta para acompanhar vendas, financeiro, clientes, produtos, relatórios e recomendações da IA.
           </p>
 
           {(subscribeIntent || selectedPlanLabel) && (
-            <div className="mt-8 rounded-3xl border border-[#B6FF00]/25 bg-[#B6FF00]/10 p-5">
+            <div className="mt-8 rounded-3xl border border-[#B6FF00]/25 bg-[#B6FF00]/10 p-5 reveal-delay-4">
               <p className="text-sm font-bold text-white">
                 {isRegisterView ? "Crie sua conta para continuar sua assinatura." : "Entre para continuar sua assinatura."}
               </p>
@@ -152,13 +152,13 @@ function AuthAccessSection({
             </div>
           )}
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-3 reveal-delay-5">
             {[
               { label: "Dados protegidos", value: "Sessão segura" },
               { label: "Operação guiada", value: "Sem complexidade" },
               { label: "Plano preservado", value: "Checkout real" },
             ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-[#2E3935] bg-[#0D1210] p-4">
+              <div key={item.label} className="rounded-2xl border border-[#2E3935] bg-[#0D1210] p-4 group hover:border-[#B6FF00]/30 transition-colors">
                 <div className="mb-4 h-2 w-2 rounded-full bg-[#B6FF00]" />
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-white">{item.label}</p>
                 <p className="mt-2 text-xs text-[#6B7470]">{item.value}</p>
@@ -380,22 +380,22 @@ export function NextLevelLandingPage({
           <div className="pointer-events-none absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-[#1C3F3A] opacity-20 blur-[120px]" />
 
           <div className="relative z-10 flex text-left lg:w-[52%]">
-            <div className="nl-landing-hero-copy">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2E3935] bg-[#1A221F] px-4 py-1.5">
+            <div className="nl-landing-hero-copy reveal">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2E3935] bg-[#1A221F] px-4 py-1.5 reveal-delay-1">
                 <div className="nl-pulse-neon h-1.5 w-1.5 rounded-full bg-[#B6FF00]" />
                 <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>
               </div>
 
-              <h1 className="nl-h1 nl-landing-hero-title mb-6 text-white">
+              <h1 className="nl-h1 nl-landing-hero-title mb-6 text-white reveal-delay-2">
                 O sistema de gestão com IA para controlar vendas, atendimento e financeiro em um só lugar
               </h1>
 
-              <p className="nl-body mb-7 max-w-xl text-[#AEB8B4]">
+              <p className="nl-body mb-7 max-w-xl text-[#AEB8B4] reveal-delay-3">
                 A NEXT LEVEL AI centraliza vendas, clientes, produtos, custos, atendimento e relatórios em uma plataforma inteligente.
                 Veja o lucro real, entenda sua operação e receba recomendações da IA para decidir melhor todos os dias.
               </p>
 
-              <div className="mb-7 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
+              <div className="mb-7 flex w-full flex-col gap-4 sm:w-auto sm:flex-row reveal-delay-4">
                 <button type="button" onClick={() => focusAuth(true)} className="flex items-center justify-center gap-2 rounded-full bg-[#B6FF00] px-8 py-4 font-semibold text-[#080D0B] shadow-[0_0_20px_rgba(182,255,0,0.2)] transition-all hover:scale-[1.02] hover:bg-[#9BE600] active:scale-[0.98]">
                   Teste grátis <ArrowRight size={18} />
                 </button>
@@ -404,7 +404,7 @@ export function NextLevelLandingPage({
                 </button>
               </div>
 
-              <p className="text-xs font-medium tracking-wide text-[#6B7470]">
+              <p className="text-xs font-medium tracking-wide text-[#6B7470] reveal-delay-5">
                 Vendas · Financeiro · Clientes · Produtos · Custos · Atendimento · Relatórios · IA
               </p>
             </div>

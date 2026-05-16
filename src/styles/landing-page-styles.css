@@ -81,7 +81,8 @@
 .nl-shadow-neon {
   box-shadow:
     0 0 0 1px rgba(182, 255, 0, 0.22),
-    0 18px 42px rgba(182, 255, 0, 0.14);
+    0 18px 42px rgba(182, 255, 0, 0.14),
+    0 0 60px rgba(182, 255, 0, 0.05);
 }
 
 .nl-shadow-soft {
@@ -131,6 +132,31 @@
 .nl-pulse-neon {
   animation: nl-pulse-neon-anim 2s infinite;
 }
+
+@keyframes nl-reveal-anim {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  animation: nl-reveal-anim 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.reveal-delay-1 { animation-delay: 0.1s; }
+.reveal-delay-2 { animation-delay: 0.2s; }
+.reveal-delay-3 { animation-delay: 0.3s; }
+.reveal-delay-4 { animation-delay: 0.4s; }
+.reveal-delay-5 { animation-delay: 0.5s; }
+.reveal-delay-6 { animation-delay: 0.6s; }
+.reveal-delay-7 { animation-delay: 0.7s; }
+.reveal-delay-8 { animation-delay: 0.8s; }
 
 @media (prefers-reduced-motion: reduce) {
   .nl-float,

@@ -197,61 +197,66 @@ function writeNicheModalDone(key: string) {
 const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
   const { username } = useAuth();
   return (
-    <aside className="nl-sidebar fixed left-0 top-0 z-50 hidden h-screen flex-col p-4 lg:flex">
-      <div className="shrink-0">
-        <Link to={DASHBOARD_ROUTE} className="mb-7 flex items-center gap-2 rounded-2xl px-2 py-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#B6FF00]" />
-          <span className="nl-sidebar-logo text-lg">NEXT LEVEL</span>
+    <aside className="nl-sidebar fixed left-0 top-0 z-50 hidden md:flex">
+      <div className="nl-sidebar__logo-area shrink-0">
+        <Link to={DASHBOARD_ROUTE} className="flex items-center gap-2 px-2 py-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-[var(--nl-neon)]" />
+          <span className="nl-sidebar__brand">NEXT LEVEL</span>
         </Link>
-        <p className="mb-5 px-2 text-[10px] font-black uppercase tracking-[0.22em] text-zinc-600">
+        <p className="nl-sidebar__tagline px-2">
           Operação segura
         </p>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
-        <nav aria-label="Menu principal">
-          <ul className="space-y-1">
+      
+      <div className="nl-sidebar__nav">
+        <nav aria-label="Menu principal" className="h-full flex flex-col">
+          <ul className="flex flex-col gap-1">
             {(Array.isArray(primaryItems) ? primaryItems : []).map((item) => (
               <li key={item.path}>
                 <NavLink
                   to={item.path}
-                  className={({ isActive }) => `nl-nav-item group ${isActive ? "is-active" : ""}`}
+                  className={({ isActive }) => `nl-nav-item ${isActive ? "active" : ""}`}
                 >
-                  <item.icon className="h-[18px] w-[18px] shrink-0" />
+                  <item.icon className="nl-nav-item__icon" />
                   <span className="min-w-0 truncate">{item.name}</span>
                 </NavLink>
               </li>
             ))}
           </ul>
           {moreItems.length > 0 ? (
-            <details className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-2">
-              <summary className="cursor-pointer px-2 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-600">
-                Mais ferramentas
-              </summary>
-              <ul className="mt-2 space-y-1">
-                {moreItems.map((item) => (
-                  <li key={item.path}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) => `nl-nav-item group ${isActive ? "is-active" : ""}`}
-                    >
-                      <item.icon className="h-[18px] w-[18px] shrink-0" />
-                      <span className="min-w-0 truncate">{item.name}</span>
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </details>
+            <div className="mt-2">
+              <div className="nl-sidebar__divider" />
+              <details className="mt-2 group">
+                <summary className="nl-eyebrow cursor-pointer px-3 py-2 list-none flex items-center justify-between">
+                  Mais ferramentas
+                  <svg className="h-4 w-4 text-zinc-500 transition-transform group-open:-rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </summary>
+                <ul className="mt-1 flex flex-col gap-1">
+                  {moreItems.map((item) => (
+                    <li key={item.path}>
+                      <NavLink
+                        to={item.path}
+                        className={({ isActive }) => `nl-nav-item ${isActive ? "active" : ""}`}
+                      >
+                        <item.icon className="nl-nav-item__icon" />
+                        <span className="min-w-0 truncate">{item.name}</span>
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
           ) : null}
         </nav>
       </div>
 
-      <Link to="/profile" className="group mt-5 flex shrink-0 items-center gap-3 border-t border-white/[0.07] pt-5" aria-label="Acessar perfil">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#B6FF00]/20 bg-[#B6FF00] text-sm font-black text-[#080D0B] transition-all group-hover:border-[#B6FF00]">
+      <Link to="/profile" className="nl-sidebar__profile group shrink-0" aria-label="Acessar perfil">
+        <div className="nl-avatar">
           {username?.charAt(0).toUpperCase() || "U"}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-zinc-100">{username || "Usuário"}</p>
-          <p className="text-[10px] uppercase tracking-widest text-zinc-600">Ver perfil</p>
+          <p className="truncate text-sm font-bold text-[var(--nl-text-primary)]">{username || "Usuário"}</p>
+          <p className="text-[10px] uppercase tracking-widest text-[var(--nl-text-muted)]">Ver perfil</p>
         </div>
       </Link>
     </aside>
@@ -262,26 +267,26 @@ const Header = () => {
   const { username, isAdmin } = useAuth();
 
   return (
-    <header className="nl-topbar sticky top-0 z-40 flex items-center justify-between px-5 lg:justify-end lg:px-8">
-      <Link to={DASHBOARD_ROUTE} className="flex items-center gap-2 text-lg font-black text-[#B6FF00] lg:hidden">
+    <header className="nl-topbar sticky top-0 z-40 w-full justify-between md:justify-end">
+      <Link to={DASHBOARD_ROUTE} className="flex items-center gap-2 text-[15px] font-black text-[#B6FF00] md:hidden">
         <span className="h-2.5 w-2.5 rounded-full bg-[#B6FF00]" />
         NEXT LEVEL
       </Link>
       <div className="flex items-center gap-4">
         {isAdmin ? (
-          <Link to="/admin/system-health" className="rounded-xl p-2 text-zinc-500 transition-colors hover:bg-white/[0.05] hover:text-[#B6FF00]" aria-label="Painel admin">
+          <Link to="/admin/system-health" className="text-[var(--nl-text-muted)] transition-colors hover:text-[var(--nl-neon)]" aria-label="Painel admin">
             <ShieldIcon className="h-5 w-5" />
           </Link>
         ) : null}
-        <Link to="/settings" className="rounded-xl p-2 text-zinc-500 transition-colors hover:bg-white/[0.05] hover:text-[#B6FF00]" aria-label="Configurações">
+        <Link to="/settings" className="text-[var(--nl-text-muted)] transition-colors hover:text-[var(--nl-neon)]" aria-label="Configurações">
           <SettingsIcon className="h-5 w-5" />
         </Link>
-        <Link to="/profile" className="group flex items-center gap-2.5" aria-label="Menu do usuário">
+        <Link to="/profile" className="nl-topbar__user group" aria-label="Menu do usuário">
           <div className="hidden text-right sm:block">
-            <p className="text-xs font-bold text-zinc-100 transition-colors group-hover:text-[#B6FF00]">{username || "Usuário"}</p>
-            <p className="text-[9px] uppercase tracking-[0.16em] text-zinc-600">Estratégico</p>
+            <p className="text-sm font-bold text-[var(--nl-text-primary)] transition-colors group-hover:text-[var(--nl-neon)]">{username || "Usuário"}</p>
+            <p className="nl-eyebrow !mb-0 text-right">Estratégico</p>
           </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#B6FF00]/20 bg-[#B6FF00] text-xs font-black text-[#080D0B] transition-all group-hover:border-[#B6FF00]">
+          <div className="nl-avatar">
             {username?.charAt(0).toUpperCase() || "U"}
           </div>
         </Link>
@@ -452,10 +457,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
         className={`transition duration-500 ${showNicheModal ? "pointer-events-none blur-[15px] saturate-[0.8] brightness-[0.76]" : ""}`}
       >
         <Sidebar primaryItems={primaryItems} moreItems={moreItems} />
-        <main className="min-h-screen min-h-0 flex-col lg:pl-[220px]">
+        <main className="nl-main min-h-[100dvh] md:pl-[var(--nl-sidebar-w)]">
           <Header />
-          <div className="nl-page-shell">
-            <div className="nl-page-content">{children}</div>
+          <div className="nl-page">
+            <div className="nl-page-inner">{children}</div>
           </div>
         </main>
         <BottomNav items={primaryItems} />
