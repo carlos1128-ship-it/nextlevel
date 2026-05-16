@@ -26,6 +26,8 @@ import {
   X,
 } from "lucide-react";
 import "../../styles/landing-page-styles.css";
+import "../../styles/animations.css";
+import { useLandingReveal } from "../../hooks/useLandingReveal";
 
 export type LandingPlanKey = "COMMON" | "PREMIUM" | "PRO_BUSINESS";
 
@@ -307,6 +309,7 @@ export function NextLevelLandingPage({
   plans,
   onSelectPlan,
 }: NextLevelLandingPageProps) {
+  useLandingReveal();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const focusAuth = (register: boolean) => {
@@ -330,30 +333,31 @@ export function NextLevelLandingPage({
   ];
 
   return (
-    <div className="font-inter nl-landing-shell min-h-screen overflow-x-hidden bg-[#080D0B] text-white selection:bg-[#B6FF00] selection:text-black">
-      <nav className="nl-glass-panel fixed left-0 right-0 top-0 z-50 flex h-[76px] items-center px-4 md:px-12">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-          <button type="button" onClick={() => scrollToSection("topo")} className="group flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-[#B6FF00] shadow-[0_0_12px_rgba(182,255,0,0.6)] transition-transform group-hover:scale-110" />
-            <span className="text-lg font-bold tracking-tight text-white">NEXT LEVEL AI</span>
+    <div className="font-inter bg-[#080D0B] text-white min-h-screen overflow-x-hidden selection:bg-[#B6FF00] selection:text-black">
+      {/* ─── NAVBAR ─────────────────────────────────────────────────── */}
+      <nav className="fixed top-0 left-0 right-0 h-[76px] z-50 nl-glass-panel flex items-center px-6 md:px-12">
+        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+          <button type="button" onClick={() => scrollToSection("topo")} className="flex items-center gap-2 cursor-pointer group">
+            <div className="w-3 h-3 rounded-full bg-[#B6FF00] shadow-[0_0_12px_rgba(182,255,0,0.6)] group-hover:scale-110 transition-transform" />
+            <span className="font-bold tracking-tight text-lg text-white">NEXT LEVEL AI</span>
           </button>
 
-          <div className="hidden items-center gap-8 md:flex">
+          <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
-              <button key={item.label} type="button" onClick={() => runNavAction(item.action)} className="text-sm text-[#FAFAF5] transition-colors hover:text-[#B6FF00]">
+              <button key={item.label} type="button" onClick={() => runNavAction(item.action)} className="text-[#FAFAF5] text-sm hover:text-[#B6FF00] transition-colors">
                 {item.label}
               </button>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <button type="button" onClick={() => focusAuth(false)} className="hidden items-center justify-center text-sm font-medium text-[#AEB8B4] transition-colors hover:text-white md:flex">
+            <button type="button" onClick={() => focusAuth(false)} className="hidden md:flex text-[#AEB8B4] text-sm font-medium hover:text-white transition-colors">
               Entrar
             </button>
-            <button type="button" onClick={() => focusAuth(true)} className="hidden items-center justify-center rounded-full bg-[#B6FF00] px-6 py-2.5 text-sm font-semibold text-[#080D0B] transition-all hover:scale-[1.02] hover:bg-[#9BE600] active:scale-[0.98] md:flex">
+            <button type="button" onClick={() => focusAuth(true)} className="hidden md:flex bg-[#B6FF00] text-[#080D0B] font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-[#9BE600] transition-all hover:scale-[1.02] active:scale-[0.98]">
               Teste grátis
             </button>
-            <button type="button" onClick={() => setMobileOpen((value) => !value)} className="text-white md:hidden" aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}>
+            <button type="button" onClick={() => setMobileOpen((v) => !v)} className="md:hidden text-white">
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -375,148 +379,180 @@ export function NextLevelLandingPage({
         )}
       </nav>
 
-      <section id="topo" className="nl-landing-hero-section mx-auto max-w-7xl px-4 md:px-8">
-        <div className="nl-shadow-dark-card nl-landing-hero-card relative flex flex-col items-center gap-10 overflow-hidden rounded-[48px] border border-[#2E3935] bg-[#0D1210] p-7 md:p-12 lg:flex-row lg:gap-14 lg:p-16 xl:p-20">
-          <div className="pointer-events-none absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-[#1C3F3A] opacity-20 blur-[120px]" />
+      {/* ─── SECTION 1 — HERO (full-bleed, full-height) ─────────────── */}
+      <section id="topo" className="relative min-h-screen flex items-center pt-24 pb-16 px-6 md:px-12 bg-[#080D0B] overflow-hidden">
+        {/* Ambient glows */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-[900px] h-[900px] rounded-full bg-[#1C3F3A] blur-[220px] opacity-[0.18]" />
+          <div className="absolute bottom-0 right-1/3 w-[500px] h-[500px] rounded-full bg-[#B6FF00] blur-[220px] opacity-[0.04]" />
+        </div>
 
-          <div className="relative z-10 flex text-left lg:w-[52%]">
-            <div className="nl-landing-hero-copy reveal">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2E3935] bg-[#1A221F] px-4 py-1.5 reveal-delay-1">
-                <div className="nl-pulse-neon h-1.5 w-1.5 rounded-full bg-[#B6FF00]" />
-                <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>
-              </div>
-
-              <h1 className="nl-h1 nl-landing-hero-title mb-6 text-white reveal-delay-2">
-                O sistema de gestão com IA para controlar vendas, atendimento e financeiro em um só lugar
-              </h1>
-
-              <p className="nl-body mb-7 max-w-xl text-[#AEB8B4] reveal-delay-3">
-                A NEXT LEVEL AI centraliza vendas, clientes, produtos, custos, atendimento e relatórios em uma plataforma inteligente.
-                Veja o lucro real, entenda sua operação e receba recomendações da IA para decidir melhor todos os dias.
-              </p>
-
-              <div className="mb-7 flex w-full flex-col gap-4 sm:w-auto sm:flex-row reveal-delay-4">
-                <button type="button" onClick={() => focusAuth(true)} className="flex items-center justify-center gap-2 rounded-full bg-[#B6FF00] px-8 py-4 font-semibold text-[#080D0B] shadow-[0_0_20px_rgba(182,255,0,0.2)] transition-all hover:scale-[1.02] hover:bg-[#9BE600] active:scale-[0.98]">
-                  Teste grátis <ArrowRight size={18} />
-                </button>
-                <button type="button" onClick={() => scrollToSection("funcionalidades")} className="flex items-center justify-center rounded-full border border-[#2E3935] bg-transparent px-8 py-4 font-semibold text-white transition-all hover:bg-[#1A221F]">
-                  Ver como funciona
-                </button>
-              </div>
-
-              <p className="text-xs font-medium tracking-wide text-[#6B7470] reveal-delay-5">
-                Vendas · Financeiro · Clientes · Produtos · Custos · Atendimento · Relatórios · IA
-              </p>
+        <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center relative z-10">
+          {/* LEFT — Copy */}
+          <div className="flex flex-col items-start nl-reveal-left">
+            <div className="inline-flex items-center gap-2 bg-[#1A221F] border border-[#2E3935] px-4 py-1.5 rounded-full mb-8">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#B6FF00] animate-pulse-neon" />
+              <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>
             </div>
+
+            <h1 className="nl-h1 text-white mb-7">
+              O sistema de gestão com IA para controlar vendas, atendimento e financeiro em um só lugar
+            </h1>
+
+            <p className="nl-body text-[#AEB8B4] mb-10 max-w-[560px]">
+              A NEXT LEVEL AI centraliza vendas, clientes, produtos, custos, atendimento e relatórios em
+              uma plataforma inteligente. Veja o lucro real e receba recomendações da IA para decidir
+              melhor todos os dias.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-10 w-full sm:w-auto">
+              <button type="button" onClick={() => focusAuth(true)} className="bg-[#B6FF00] text-[#080D0B] font-semibold px-8 py-4 rounded-full hover:bg-[#9BE600] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(182,255,0,0.25)]">
+                Teste grátis <ArrowRight size={18} />
+              </button>
+              <button type="button" onClick={() => scrollToSection("funcionalidades")} className="bg-transparent text-white border border-[#2E3935] font-semibold px-8 py-4 rounded-full hover:bg-[#1A221F] transition-all flex items-center justify-center">
+                Ver como funciona
+              </button>
+            </div>
+
+            <p className="text-xs text-[#6B7470] tracking-wide font-medium">
+              Vendas · Financeiro · Clientes · Produtos · Custos · Atendimento · Relatórios · IA
+            </p>
           </div>
 
-          <div className="relative z-10 w-full lg:w-[48%]">
-            <div className="nl-dashboard-tilt nl-landing-hero-mockup relative h-[430px] w-full md:h-[500px]">
-              <div className="nl-shadow-floating absolute inset-0 flex overflow-hidden rounded-[24px] border border-[#2E3935] bg-[#080D0B]">
-                <div className="hidden w-48 flex-col gap-2 border-r border-[#2E3935] bg-[#0D1210] p-4 md:flex">
-                  <div className="mb-6 flex items-center gap-2 px-2">
-                    <div className="h-2 w-2 rounded-full bg-[#B6FF00]" />
-                    <span className="text-xs font-bold">NEXT LEVEL</span>
+          {/* RIGHT — Dashboard mockup */}
+          <div className="relative w-full nl-reveal-scale" style={{ perspective: "1000px" }}>
+            <div className="animate-dashboard-drop">
+              <div className="relative w-full" style={{ transform: "rotateY(-4deg) rotateX(2deg)", transformStyle: "preserve-3d" }}>
+
+                {/* Main dashboard */}
+                <div className="bg-[#080D0B] rounded-[24px] border border-[#2E3935] nl-shadow-floating flex overflow-hidden lg:min-h-[580px]">
+
+                  {/* Sidebar */}
+                  <div className="w-[180px] bg-[#0D1210] border-r border-[#2E3935] p-4 hidden lg:flex flex-col gap-1 shrink-0">
+                    <div className="flex items-center gap-2 mb-6 px-2 py-1 text-left">
+                      <div className="w-2 h-2 rounded-full bg-[#B6FF00]" />
+                      <span className="font-bold text-[11px] tracking-wide text-white">NEXT LEVEL</span>
+                    </div>
+                    {[
+                      { icon: Activity,      label: "Início",          active: true },
+                      { icon: ShoppingCart,  label: "Vendas" },
+                      { icon: DollarSign,    label: "Financeiro" },
+                      { icon: Users,         label: "Clientes" },
+                      { icon: Package,       label: "Produtos" },
+                      { icon: CreditCard,    label: "Custos" },
+                      { icon: MessageSquare, label: "Atendimento IA" },
+                      { icon: BarChart3,     label: "Relatórios" },
+                    ].map((item, i) => (
+                      <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[11px] font-medium transition-colors ${
+                        item.active ? "bg-[#1A221F] text-[#B6FF00]" : "text-[#6B7470] hover:text-white"
+                      }`}>
+                        <item.icon size={14} />
+                        {item.label}
+                      </div>
+                    ))}
                   </div>
-                  {[
-                    { icon: Activity, label: "Início", active: true },
-                    { icon: ShoppingCart, label: "Vendas" },
-                    { icon: DollarSign, label: "Financeiro" },
-                    { icon: Users, label: "Clientes" },
-                    { icon: Package, label: "Produtos" },
-                    { icon: CreditCard, label: "Custos" },
-                    { icon: MessageSquare, label: "Atendimento IA" },
-                    { icon: BarChart3, label: "Relatórios" },
-                  ].map((item) => (
-                    <div key={item.label} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium ${item.active ? "bg-[#1A221F] text-[#B6FF00]" : "text-[#6B7470]"}`}>
-                      <item.icon size={14} />
-                      {item.label}
+
+                  {/* Dashboard content */}
+                  <div className="flex-1 bg-[#141B18] p-6 overflow-hidden">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-white font-semibold text-sm">Visão Geral</h3>
+                      <span className="text-[10px] bg-[#1A221F] px-2 py-1 rounded-full text-[#AEB8B4]">Hoje</span>
+                    </div>
+
+                    {/* KPI row */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-white rounded-xl p-4 nl-shadow-soft">
+                        <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase tracking-wider text-left">Lucro real</p>
+                        <p className="text-2xl font-bold text-gray-900 mb-2 text-left">R$ 47.320</p>
+                        <div className="flex gap-0.5 h-8 items-end">
+                          {[40, 60, 45, 80, 55, 90, 100].map((h, i) => (
+                            <div key={i} className="flex-1 bg-[#B6FF00] rounded-t-sm" style={{ height: `${h}%` }} />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-xl p-4 nl-shadow-soft flex flex-col justify-between">
+                        <div className="text-left">
+                          <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase tracking-wider">Vendas do mês</p>
+                          <p className="text-2xl font-bold text-gray-900">1.847</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-emerald-600 text-[11px] font-semibold">
+                          <TrendingUp size={12} /><span>+12,4% vs mês ant.</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-[#1A221F] rounded-xl p-4 border border-[#2E3935] text-left">
+                        <p className="text-[10px] text-[#6B7470] font-semibold mb-1 uppercase tracking-wider">Margem</p>
+                        <p className="text-2xl font-bold text-white mb-2">34%</p>
+                        <div className="w-full bg-[#080D0B] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-[#B6FF00] h-full rounded-full" style={{ width: "34%" }} />
+                        </div>
+                      </div>
+                      <div className="bg-[#1A221F] rounded-xl p-4 border border-[#2E3935] text-left">
+                        <p className="text-[10px] text-[#6B7470] font-semibold mb-1 uppercase tracking-wider">Clientes atendidos</p>
+                        <p className="text-2xl font-bold text-white mb-2">329</p>
+                        <div className="flex -space-x-2">
+                          {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="w-6 h-6 rounded-full bg-[#222C28] border-2 border-[#1A221F]" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mini chart */}
+                    <div className="bg-[#1A221F] rounded-xl p-4 border border-[#2E3935] text-left">
+                      <p className="text-[10px] text-[#6B7470] font-bold uppercase mb-3">Vendas — últimos 7 dias</p>
+                      <div className="flex gap-1.5 h-16 items-end">
+                        {[30, 50, 40, 70, 55, 85, 100].map((h, i) => (
+                          <div key={i} className="chart-bar flex-1 bg-[#2A3830] rounded-t" style={{ height: `${h}%` }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating: AI insight */}
+                <div className="absolute -left-16 top-[30%] bg-[#0D1210] border border-[#B6FF00]/40 p-4 rounded-2xl nl-shadow-neon w-[260px] animate-float z-20 hidden lg:block text-left">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-full bg-[#1C3F3A] flex items-center justify-center text-[#B6FF00]">
+                      <Bot size={12} />
+                    </div>
+                    <span className="text-xs font-semibold text-[#B6FF00]">Recomendação da IA</span>
+                  </div>
+                  <p className="text-xs text-[#E6EAE4] leading-relaxed">
+                    Queda de margem em Produto Y detectada. Revise preço antes de escalar anúncios.
+                  </p>
+                </div>
+
+                {/* Floating: WhatsApp chat */}
+                <div className="absolute -right-12 bottom-16 bg-white p-3 rounded-2xl nl-shadow-floating w-[210px] animate-float-delayed z-20 hidden lg:block text-left">
+                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-[10px] font-bold text-gray-700 uppercase leading-none">Atendimento Ativo</span>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="bg-gray-100 p-2 rounded-lg rounded-tl-none text-[10px] text-gray-600 self-start max-w-[85%]">
+                      Qual o prazo para SP?
+                    </div>
+                    <div className="bg-[#1C3F3A] p-2 rounded-lg rounded-tr-none text-[10px] text-white self-end max-w-[85%]">
+                      1 a 2 dias úteis. Quer ver o catálogo? 😉
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating: Channels */}
+                <div className="absolute -right-8 top-6 bg-[#1A221F] border border-[#2E3935] p-3 rounded-xl nl-shadow-floating flex-col gap-2 z-10 hidden lg:flex animate-float text-left" style={{ animationDelay: "2s" }}>
+                  <div className="text-[9px] text-[#6B7470] font-bold uppercase tracking-wider mb-1">Canais conectados</div>
+                  {["WhatsApp", "Instagram", "Mercado Livre"].map((plat) => (
+                    <div key={plat} className="flex items-center gap-2 text-xs text-white">
+                      <div className="w-3 h-3 rounded-full bg-[#B6FF00] flex items-center justify-center">
+                        <Check size={8} className="text-[#080D0B]" />
+                      </div>
+                      {plat}
                     </div>
                   ))}
                 </div>
-
-                <div className="relative flex-1 overflow-hidden bg-[#141B18] p-4 md:p-6">
-                  <div className="mb-6 flex items-center justify-between">
-                    <h3 className="font-semibold text-white">Visão Geral</h3>
-                    <span className="rounded-full bg-[#1A221F] px-2 py-1 text-[10px] text-[#AEB8B4]">Hoje</span>
-                  </div>
-
-                  <div className="mb-6 grid grid-cols-2 gap-4">
-                    <div className="nl-shadow-soft rounded-xl bg-white p-4">
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Lucro real</p>
-                      <p className="mb-2 text-xl font-bold text-gray-900">R$ 47.320</p>
-                      <div className="flex h-8 items-end gap-1">
-                        {[40, 60, 45, 80, 55, 90, 100].map((height, index) => (
-                          <div key={index} className="flex-1 rounded-t-sm bg-[#B6FF00]" style={{ height: `${height}%` }} />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="nl-shadow-soft flex flex-col justify-between rounded-xl bg-white p-4">
-                      <div>
-                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Vendas do mês</p>
-                        <p className="text-xl font-bold text-gray-900">1.847</p>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-[#1C3F3A]">
-                        <TrendingUp size={12} />
-                        <span>+12,4% vs mês ant.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-xl border border-[#2E3935] bg-[#1A221F] p-4">
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[#6B7470]">Margem</p>
-                      <p className="mb-2 text-xl font-bold text-white">34%</p>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#080D0B]">
-                        <div className="h-full w-[34%] rounded-full bg-[#B6FF00]" />
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-[#2E3935] bg-[#1A221F] p-4">
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[#6B7470]">Clientes atendidos</p>
-                      <p className="mb-2 text-xl font-bold text-white">329</p>
-                      <div className="flex -space-x-2">
-                        {[1, 2, 3, 4].map((item) => (
-                          <div key={item} className="h-6 w-6 rounded-full border-2 border-[#1A221F] bg-[#222C28]" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="nl-shadow-neon nl-float absolute -left-6 top-1/2 z-20 w-[240px] -translate-y-1/2 rounded-2xl border border-[#B6FF00]/40 bg-[#0D1210] p-4 md:-left-12 md:w-[280px]">
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#1C3F3A] text-[#B6FF00]">
-                    <Bot size={12} />
-                  </div>
-                  <span className="text-xs font-semibold text-[#B6FF00]">Recomendação da IA</span>
-                </div>
-                <p className="text-sm leading-relaxed text-[#E6EAE4]">
-                  A IA detectou queda de margem em um produto e recomenda revisar preço antes de aumentar anúncios.
-                </p>
-              </div>
-
-              <div className="nl-shadow-floating nl-float-delayed absolute bottom-12 right-0 z-20 w-[210px] rounded-2xl bg-white p-3 md:-right-8 md:w-[220px]">
-                <div className="mb-3 flex items-center gap-2 border-b border-gray-100 pb-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500" />
-                  <span className="text-[10px] font-bold uppercase text-gray-800">Atendimento Ativo</span>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <div className="max-w-[85%] self-start rounded-lg rounded-tl-none bg-gray-100 p-2 text-[10px] text-gray-600">Oi, qual o prazo de entrega para SP?</div>
-                  <div className="max-w-[85%] self-end rounded-lg rounded-tr-none bg-[#1C3F3A] p-2 text-[10px] text-white">Olá! Para SP o prazo é de 1 a 2 dias úteis. Quer ver o catálogo?</div>
-                </div>
-              </div>
-
-              <div className="nl-shadow-floating nl-float absolute right-0 top-8 z-10 hidden flex-col gap-2 rounded-xl border border-[#2E3935] bg-[#1A221F] p-3 md:flex">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-[#6B7470]">Canais conectados</div>
-                {["WhatsApp", "Instagram", "Mercado Livre"].map((platform) => (
-                  <div key={platform} className="flex items-center gap-2 text-xs text-white">
-                    <div className="flex h-3 w-3 items-center justify-center rounded-full bg-[#B6FF00]">
-                      <Check size={8} className="text-[#080D0B]" />
-                    </div>
-                    {platform}
-                  </div>
-                ))}
               </div>
             </div>
           </div>
