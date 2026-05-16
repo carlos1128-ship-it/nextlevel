@@ -394,7 +394,7 @@ const Reports = () => {
       ) : chartData.length === 0 ? (
         <EmptyState
           title="Sem dados para relatório"
-          description="Cadastre transações para gerar visualizacoes e exportacoes."
+          description="Cadastre transações para gerar visualizações e exportações."
         />
       ) : (
         // ── Conteúdo capturável pelo PDF ────────────────────────────────────

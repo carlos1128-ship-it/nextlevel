@@ -87,7 +87,7 @@ export function resolveMetadata(pathname: string): Metadata {
     "/add-data": "Adicionar dados | Next Level",
     "/usage": "Uso do plano | Next Level",
     "/plan-usage": "Uso do plano | Next Level",
-    "/admin/system-health": "System Health | Next Level",
+    "/admin/system-health": "Saúde do sistema | Next Level",
   };
 
   const isKnownRoute = normalizedPath in pageTitleMap;

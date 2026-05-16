@@ -154,7 +154,7 @@ const Integrations = () => {
     const message = params.get("integration_message");
     const providerLabel = provider === "mercadolivre" ? "Mercado Livre" : "Instagram";
     addToast(
-      message || (status === "connected" ? `${providerLabel} conectado.` : `Nao foi possivel conectar o ${providerLabel}.`),
+      message || (status === "connected" ? `${providerLabel} conectado.` : `Não foi possível conectar o ${providerLabel}.`),
       status === "connected" ? "success" : "error",
     );
     window.history.replaceState({}, "", window.location.pathname);
@@ -362,7 +362,7 @@ const Integrations = () => {
       return;
     }
     if (!canUseMarketplaces) {
-      addToast("Mercado Livre esta disponivel a partir do plano Premium.", "error");
+      addToast("Mercado Livre está disponível a partir do plano Premium.", "error");
       return;
     }
 
@@ -372,7 +372,7 @@ const Integrations = () => {
       const session = await getMercadoLivreConnectUrl(selectedCompanyId, returnTo);
       window.location.assign(session.authUrl);
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel iniciar o Mercado Livre."), "error");
+      addToast(getErrorMessage(error, "Não foi possível iniciar o Mercado Livre."), "error");
       setMercadoLivreLoading(false);
     }
   };
@@ -399,7 +399,7 @@ const Integrations = () => {
       await refreshMercadoLivre();
       addToast("Mercado Livre desconectado.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel desconectar Mercado Livre."), "error");
+      addToast(getErrorMessage(error, "Não foi possível desconectar Mercado Livre."), "error");
     } finally {
       setMercadoLivreLoading(false);
     }
@@ -408,19 +408,18 @@ const Integrations = () => {
   if (!canUseMainIntegrations) {
     return (
       <main className="space-y-7">
-        <section className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Integrações
+        <section className="nl-page-header">
+          <p className="nl-page-eyebrow">Integrações</p>
+          <h1 className="nl-page-title">Canais conectados à operação</h1>
+          <p className="nl-page-description">
+            Conecte atendimento, marketplaces e dados de venda para alimentar dashboards, relatórios e IA.
           </p>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-            Canais conectados ao lucro
-          </h1>
         </section>
 
-        <section className="rounded-lg border border-red-500/30 bg-[linear-gradient(155deg,rgba(127,29,29,0.35),rgba(9,9,11,0.96)_58%)] p-7 shadow-2xl shadow-red-950/20">
+        <section className="nl-card border-red-500/25 p-7">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div className="flex gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/15 text-red-300">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-red-400/30 bg-red-500/15 text-red-300">
                 <LockIcon className="h-7 w-7" />
               </div>
               <div>
@@ -438,7 +437,7 @@ const Integrations = () => {
             <button
               type="button"
               onClick={() => navigate("/planos?upgrade=integrations")}
-              className="rounded-lg bg-lime-300 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 transition hover:brightness-105"
+              className="nl-button-primary"
             >
               Ver planos
             </button>
@@ -450,16 +449,15 @@ const Integrations = () => {
 
   return (
     <main className="space-y-7">
-      <section className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-          Integrações
+      <section className="nl-page-header">
+        <p className="nl-page-eyebrow">Integrações</p>
+        <h1 className="nl-page-title">Canais conectados à operação</h1>
+        <p className="nl-page-description">
+          Conecte atendimento, marketplaces e dados de venda para alimentar dashboards, relatórios e IA.
         </p>
-        <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-          Canais conectados ao lucro
-        </h1>
       </section>
 
-      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
+      <section className="nl-card p-5 md:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-3">
             <div>
@@ -474,15 +472,15 @@ const Integrations = () => {
               </p>
             </div>
             <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-3">
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
                 <p className="mt-1 font-bold text-zinc-100">{statusLabel}</p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Saúde</p>
                 <p className="mt-1 font-bold text-zinc-100">{connectionHealthLabel}</p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Atendimento IA</p>
                 <p className="mt-1 font-bold text-zinc-100">{automationLabel}</p>
               </div>
@@ -495,7 +493,7 @@ const Integrations = () => {
                 type="button"
                 onClick={handleRepair}
                 disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="nl-button-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? "Verificando..." : "Reparar conexão"}
               </button>
@@ -510,12 +508,12 @@ const Integrations = () => {
                   isOperationStatus(connection?.status) ||
                   retryRemaining > 0
                 }
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="nl-button-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                   {loading
                   ? "Preparando conexão..."
                   : !canUseMainIntegrations
-                    ? "Disponivel no Premium"
+                    ? "Disponível no Premium"
                   : connection?.status === "provider_warming_up"
                     ? "Preparando conexão..."
                   : retryRemaining > 0
@@ -530,7 +528,7 @@ const Integrations = () => {
                 type="button"
                 onClick={handleDisconnect}
                 disabled={loading || isOperationStatus(connection?.status)}
-                className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
+                className="nl-button-danger disabled:opacity-50"
               >
                 Desconectar
               </button>
@@ -587,12 +585,12 @@ const Integrations = () => {
         ) : null}
         {!canUseMainIntegrations ? (
           <p className="mt-4 rounded-md border border-lime-400/25 bg-lime-400/10 p-3 text-sm font-semibold text-lime-100">
-            Integracoes com WhatsApp e Instagram estao disponiveis a partir do plano Premium.
+            Integrações com WhatsApp e Instagram estão disponíveis a partir do plano Premium.
           </p>
         ) : null}
       </section>
 
-      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
+      <section className="nl-card p-5 md:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-3">
             <div>
@@ -608,19 +606,19 @@ const Integrations = () => {
             </div>
 
             <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-3">
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {getInstagramStatusLabel(instagramStatus)}
                 </p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {instagramStatus?.connected ? "Conta profissional conectada" : "Aguardando conexão"}
                 </p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Oportunidades</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {instagramStatus?.connected ? "Mensagens organizadas" : "Conecte para ativar"}
@@ -646,7 +644,7 @@ const Integrations = () => {
                 type="button"
                 onClick={handleInstagramDisconnect}
                 disabled={instagramLoading}
-                className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
+                className="nl-button-danger disabled:opacity-50"
               >
                 {instagramLoading ? "Desconectando..." : "Desconectar"}
               </button>
@@ -655,12 +653,12 @@ const Integrations = () => {
                 type="button"
                 onClick={handleInstagramConnect}
                 disabled={instagramLoading || !canUseMainIntegrations || Boolean(instagramStatus?.provider_setup_required)}
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="nl-button-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {instagramLoading
                   ? "Abrindo Instagram..."
                   : !canUseMainIntegrations
-                    ? "Disponivel no Premium"
+                    ? "Disponível no Premium"
                   : isInstagramTokenExpired(instagramStatus)
                     ? "Reconectar Instagram"
                     : "Conectar Instagram"}
@@ -670,7 +668,7 @@ const Integrations = () => {
         </div>
       </section>
 
-      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
+      <section className="nl-card p-5 md:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-3">
             <div>
@@ -686,37 +684,37 @@ const Integrations = () => {
             </div>
 
             <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {mercadoLivreStatus?.connected ? "Conectado" : "Desconectado"}
                 </p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {mercadoLivreStatus?.nickname || mercadoLivreStatus?.mlUserId || "Aguardando OAuth"}
                 </p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Receita ML</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {Number(mercadoLivreDashboard?.revenue || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Produtos</p>
                 <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.products || 0}</p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Pedidos</p>
                 <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.orders || 0}</p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Perguntas</p>
                 <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.pendingQuestions || 0} pendentes</p>
               </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
+              <div className="nl-metric-mini">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Última sync</p>
                 <p className="mt-1 font-bold text-zinc-100">
                   {mercadoLivreStatus?.lastSyncAt ? new Date(mercadoLivreStatus.lastSyncAt).toLocaleString("pt-BR") : "Ainda não sincronizado"}
@@ -726,7 +724,7 @@ const Integrations = () => {
 
             {mercadoLivreStatus?.webhook ? (
               <p className="rounded-md border border-lime-400/20 bg-lime-400/10 p-3 text-sm font-semibold text-lime-100">
-                Prova de conexao: ultimo webhook {mercadoLivreStatus.webhook.status.toLowerCase()} em {new Date(mercadoLivreStatus.webhook.lastEventAt).toLocaleString("pt-BR")}.
+                Prova de conexão: último webhook {mercadoLivreStatus.webhook.status.toLowerCase()} em {new Date(mercadoLivreStatus.webhook.lastEventAt).toLocaleString("pt-BR")}.
               </p>
             ) : null}
           </div>
@@ -738,7 +736,7 @@ const Integrations = () => {
                   type="button"
                   onClick={handleMercadoLivreSync}
                   disabled={mercadoLivreSyncing || !canUseMarketplaces}
-                  className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:opacity-50"
+                  className="nl-button-primary disabled:opacity-50"
                 >
                   {mercadoLivreSyncing ? "Reprocessando..." : "Reprocessar integração"}
                 </button>
@@ -746,7 +744,7 @@ const Integrations = () => {
                   type="button"
                   onClick={handleMercadoLivreDisconnect}
                   disabled={mercadoLivreLoading}
-                  className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
+                  className="nl-button-danger disabled:opacity-50"
                 >
                   Desconectar
                 </button>
@@ -756,12 +754,12 @@ const Integrations = () => {
                 type="button"
                 onClick={handleMercadoLivreConnect}
                 disabled={mercadoLivreLoading || !canUseMarketplaces}
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:opacity-50"
+                className="nl-button-primary disabled:opacity-50"
               >
                 {mercadoLivreLoading
                   ? "Abrindo Mercado Livre..."
                   : !canUseMarketplaces
-                    ? "Disponivel no Premium"
+                    ? "Disponível no Premium"
                     : "Conectar Mercado Livre"}
               </button>
             )}
@@ -770,8 +768,8 @@ const Integrations = () => {
       </section>
 
       {!canUseMarketplaces ? (
-        <p className="rounded-lg border border-lime-400/20 bg-lime-400/10 p-4 text-sm font-semibold text-lime-100">
-          Mercado Livre esta disponivel a partir do Premium.
+        <p className="rounded-2xl border border-lime-400/20 bg-lime-400/10 p-4 text-sm font-semibold text-lime-100">
+          Mercado Livre está disponível a partir do Premium.
         </p>
       ) : null}
 

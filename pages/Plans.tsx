@@ -93,7 +93,7 @@ const Plans = () => {
     setSelectedPlan(nextSelection);
     setBillingCycle(nextSelection.billingCycle);
     savePendingSelectedPlan(nextSelection);
-    setMessage(`Voce escolheu o plano ${planSelectionLabel(nextSelection)}. Continue para finalizar o pagamento com seguranca.`);
+    setMessage(`Você escolheu o plano ${planSelectionLabel(nextSelection)}. Continue para finalizar o pagamento com segurança.`);
   }, [params]);
 
   useEffect(() => {
@@ -107,13 +107,13 @@ const Plans = () => {
           setBillingConfigMessage(configResult.value.message);
         } else {
           setCheckoutEnabled(false);
-          setBillingConfigMessage("Pagamento temporariamente indisponivel.");
+          setBillingConfigMessage("Pagamento temporariamente indisponível.");
         }
       })
       .catch(() => {
         setPlans(fallbackPlans);
         setCheckoutEnabled(false);
-        setBillingConfigMessage("Pagamento temporariamente indisponivel.");
+        setBillingConfigMessage("Pagamento temporariamente indisponível.");
       })
       .finally(() => {
         setIsLoadingPlans(false);
@@ -133,7 +133,7 @@ const Plans = () => {
       })
       .catch(() => {
         setBillingLoadError(true);
-        setMessage("Nao foi possivel carregar sua assinatura agora. Tente novamente em instantes.");
+      setMessage("Não foi possível carregar sua assinatura agora. Tente novamente em instantes.");
       })
       .finally(() => setIsLoadingBilling(false));
   }, [isLoggedIn, selectedCompanyId]);
@@ -171,7 +171,7 @@ const Plans = () => {
     }
 
     if (billingLoadError) {
-      setMessage("Nao foi possivel validar sua assinatura agora. Tente novamente em instantes.");
+      setMessage("Não foi possível validar sua assinatura agora. Tente novamente em instantes.");
       return;
     }
 
@@ -199,7 +199,7 @@ const Plans = () => {
         }
 
         if (result.status === "portal_required") {
-          setMessage(result.message || "Abra o ambiente seguro de assinatura para concluir esta alteracao.");
+          setMessage(result.message || "Abra o ambiente seguro de assinatura para concluir esta alteração.");
           await openPortal();
           return;
         }
@@ -222,8 +222,8 @@ const Plans = () => {
       const code = error?.response?.data?.code;
       setMessage(
         code === "PLAN_PRICE_UNAVAILABLE"
-          ? "Este plano esta indisponivel no momento."
-          : "Nao foi possivel iniciar o pagamento agora. Tente novamente em alguns instantes.",
+          ? "Este plano está indisponível no momento."
+          : "Não foi possível iniciar o pagamento agora. Tente novamente em alguns instantes.",
       );
     } finally {
       setLoadingPlanKey(null);
@@ -237,7 +237,7 @@ const Plans = () => {
       const session = await createBillingPortal({ companyId: selectedCompanyId });
       window.location.href = session.portalUrl;
     } catch {
-      setMessage("Nao foi possivel abrir o gerenciamento da assinatura agora.");
+      setMessage("Não foi possível abrir o gerenciamento da assinatura agora.");
     } finally {
       setPortalLoading(false);
     }
@@ -255,9 +255,9 @@ const Plans = () => {
         <header className="flex flex-col gap-5 border-b border-white/10 pb-7 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">NEXT LEVEL</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight md:text-6xl">Escolha seu nivel</h1>
+            <h1 className="mt-3 text-4xl font-black tracking-tight md:text-6xl">Escolha seu nível</h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
-              Selecione um plano e finalize sua assinatura em um ambiente seguro. O acesso e liberado assim que o pagamento for confirmado.
+              Selecione um plano e finalize sua assinatura em um ambiente seguro. O acesso é liberado assim que o pagamento for confirmado.
             </p>
             <p className="mt-2 text-xs font-semibold text-zinc-500">
               {isInitialBillingLoading
@@ -265,11 +265,11 @@ const Plans = () => {
                 : isLoadingBilling
                   ? "Validando plano atual..."
                 : checkoutEnabled
-                  ? "Pagamento seguro disponivel"
-                  : "Pagamento temporariamente indisponivel."}
+                  ? "Pagamento seguro disponível"
+                  : "Pagamento temporariamente indisponível."}
             </p>
             {params.get("upgrade") ? (
-              <p className="mt-3 text-sm font-bold text-lime-300">Seu plano atual nao da acesso a esse recurso.</p>
+              <p className="mt-3 text-sm font-bold text-lime-300">Seu plano atual não dá acesso a esse recurso.</p>
             ) : null}
             {isLoggedIn && hasActiveSubscription ? (
               <div className="mt-5 rounded-lg border border-lime-400/20 bg-lime-400/10 p-4">
@@ -278,13 +278,13 @@ const Plans = () => {
                   {planLabel(currentPlan)} {currentBillingCycle === "ANNUAL" ? "anual" : "mensal"}
                 </p>
                 <p className="mt-2 text-xs leading-5 text-lime-100/80">
-                  Para cancelar, trocar forma de pagamento ou ver cobrancas, abra o gerenciamento da assinatura.
+                  Para cancelar, trocar forma de pagamento ou ver cobranças, abra o gerenciamento da assinatura.
                 </p>
               </div>
             ) : null}
             {selectedPlan ? (
               <p className="mt-3 text-sm font-bold text-lime-300">
-                Voce escolheu o plano {planSelectionLabel(selectedPlan)}.
+                Você escolheu o plano {planSelectionLabel(selectedPlan)}.
               </p>
             ) : null}
           </div>
@@ -329,7 +329,7 @@ const Plans = () => {
                 onClick={logout}
                 className="rounded-lg border border-white/10 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/[0.06]"
               >
-                Encerrar sessao
+                Encerrar sessão
               </button>
               </>
             ) : null}
@@ -373,11 +373,11 @@ const Plans = () => {
                 ? "Aguarde"
                 : isExactCurrentPlan
                   ? "Gerenciar assinatura"
-                  : hasActiveSubscription
-                    ? (isUpgrade ? "Fazer upgrade" : isDowngrade ? "Fazer downgrade" : "Alterar cobranca")
+                    : hasActiveSubscription
+                    ? (isUpgrade ? "Fazer upgrade" : isDowngrade ? "Fazer downgrade" : "Alterar cobrança")
                     : available
                       ? "Assinar agora"
-                      : "Plano indisponivel";
+                      : "Plano indisponível";
 
             return (
               <article
@@ -409,9 +409,9 @@ const Plans = () => {
                 <p className="mt-3 min-h-16 text-sm leading-6 text-zinc-400">{display?.summary || plan.description}</p>
                 <div className="mt-5">
                   <span className="text-4xl font-black">
-                    {price ? formatCurrencyInCents(displayAmountInCents) : "Indisponivel"}
+                    {price ? formatCurrencyInCents(displayAmountInCents) : "Indisponível"}
                   </span>
-                  <span className="ml-2 text-sm text-zinc-500">{billingCycle === "MONTHLY" ? "/mes" : "/ano"}</span>
+                  <span className="ml-2 text-sm text-zinc-500">{billingCycle === "MONTHLY" ? "/mês" : "/ano"}</span>
                 </div>
                 <div className="mt-5 rounded-lg border border-lime-300/[0.16] bg-lime-300/[0.055] p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-300">{display.aiTier}</p>
@@ -444,11 +444,11 @@ const Plans = () => {
                 <p className={`mt-3 min-h-10 text-xs font-semibold leading-5 ${actionAvailable ? "text-lime-200" : "text-zinc-500"}`}>
                   {hasActiveSubscription
                     ? isExactCurrentPlan
-                      ? "Cancele, veja cobrancas ou atualize a forma de pagamento no ambiente seguro."
-                      : "A alteracao deste plano sera aplicada de forma segura na sua assinatura."
+                      ? "Cancele, veja cobranças ou atualize a forma de pagamento no ambiente seguro."
+                      : "A alteração deste plano será aplicada de forma segura na sua assinatura."
                     : available
                       ? "Pagamento em ambiente seguro."
-                      : "Este plano ainda nao esta pronto para pagamento."}
+                      : "Este plano ainda não está pronto para pagamento."}
                 </p>
               </article>
             );
