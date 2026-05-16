@@ -1,0 +1,113 @@
+/* ─── Base font ────────────────────────────────────────────────────────────── */
+.font-inter {
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* ─── Typography scale ─────────────────────────────────────────────────────── */
+.nl-h1 {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1.02;
+}
+@media (min-width: 768px) {
+  .nl-h1 {
+    font-size: 68px;
+  }
+}
+
+.nl-h2 {
+  font-size: 32px;
+  font-weight: 760;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+}
+@media (min-width: 768px) {
+  .nl-h2 {
+    font-size: 48px;
+  }
+}
+
+.nl-h3 {
+  font-size: 21px;
+  font-weight: 720;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+@media (min-width: 768px) {
+  .nl-h3 {
+    font-size: 24px;
+  }
+}
+
+.nl-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.nl-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+@media (min-width: 768px) {
+  .nl-body {
+    font-size: 18px;
+    line-height: 1.55;
+  }
+}
+
+/* ─── Shadow utilities ─────────────────────────────────────────────────────── */
+.nl-shadow-dark-card {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.nl-shadow-floating {
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+}
+
+.nl-shadow-neon {
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 0, 0.22),
+    0 18px 42px rgba(182, 255, 0, 0.14);
+}
+
+.nl-shadow-soft {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Glass panel (navbar) ─────────────────────────────────────────────────── */
+.nl-glass-panel {
+  background: rgba(13, 18, 16, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(46, 57, 53, 0.5);
+}
+
+/* ─── Noise texture (trust section background) ─────────────────────────────── */
+.nl-noise {
+  position: relative;
+}
+.nl-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+
+/* ─── Hero dashboard tilt ──────────────────────────────────────────────────── */
+.nl-dashboard-tilt {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+.nl-dashboard-tilt > :first-child {
+  transform: rotateY(-5deg) rotateX(2deg) scale(0.95);
+  transform-origin: center center;
+}

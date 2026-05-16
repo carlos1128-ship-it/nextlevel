@@ -10,8 +10,8 @@ import { getErrorMessage } from "../src/services/error";
 const CHAT_STORAGE_KEY = "chat_history_v1";
 const QUICK_PROMPTS = [
   "Resuma as perdas de hoje e me diga onde agir primeiro.",
-  "Quais setores da empresa merecem mais atenção agora?",
-  "Monte um plano de otimização de custos para está semana.",
+  "Quais áreas da empresa merecem mais atenção agora?",
+  "Monte um plano de otimização de custos para esta semana.",
 ];
 
 const TypingIndicator = () => (
@@ -159,16 +159,16 @@ const Chat = () => {
   const canSend = useMemo(() => input.trim().length > 0 && !isTyping, [input, isTyping]);
 
   return (
-    <div className="flex h-[calc(100vh-120px)] min-h-0 flex-col overflow-hidden rounded-[28px] border border-zinc-900 bg-zinc-950">
-      <header className="border-b border-zinc-900 px-5 py-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-lime-400">Assistente IA</p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-100">Chat estratégico</h1>
-            <p className="mt-1 text-sm text-zinc-400">
-              Conversando sobre <span className="text-zinc-200">{companyName}</span>
-            </p>
-          </div>
+    <div className="nl-page flex flex-col h-[calc(100vh-140px)]">
+      <div className="nl-page-header border-b border-white/5 pb-6 mb-0">
+        <div className="nl-page-header__meta">
+          <p className="nl-eyebrow">Motor de Inteligência Cognitiva</p>
+          <h1 className="nl-page-title">Análise Estratégica</h1>
+          <p className="nl-page-subtitle">
+            Consulte dados cruzados da <span className="text-[var(--nl-text-primary)] font-bold italic">{companyName}</span> para decisões baseadas em evidências.
+          </p>
+        </div>
+        <div className="flex shrink-0 gap-3">
           <button
             onClick={() => {
               localStorage.removeItem(CHAT_STORAGE_KEY);
@@ -180,91 +180,115 @@ const Chat = () => {
                 },
               ]);
             }}
-            className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-zinc-200 transition hover:border-lime-400/40"
+            className="nl-button-secondary text-[10px] py-1.5 px-4"
             type="button"
           >
-            Limpar conversa
+            Limpar Memória
           </button>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
+      </div>
+
+      <div className="flex-1 min-h-0 flex flex-col bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl rounded-b-3xl border-x border-b border-white/5 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+           <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-[var(--nl-neon)] opacity-[0.03] blur-[120px] rounded-full" />
+           <div className="absolute bottom-[-10%] left-[-5%] w-[300px] h-[300px] bg-blue-500 opacity-[0.02] blur-[100px] rounded-full" />
+        </div>
+
+        <div className="flex flex-wrap gap-2 px-6 pt-4 pb-2 z-10">
           {QUICK_PROMPTS.map((prompt) => (
             <button
               key={prompt}
               type="button"
               onClick={() => void sendMessage(prompt)}
               disabled={isTyping}
-              className="rounded-full border border-zinc-800 bg-black px-4 py-2 text-xs text-zinc-300 transition hover:border-lime-400/40 hover:text-zinc-100 disabled:opacity-50"
+              className="text-[10px] font-bold py-1.5 px-3 rounded-full border border-white/5 bg-white/5 text-[var(--nl-text-muted)] hover:text-white hover:border-white/10 hover:bg-white/10 transition-all disabled:opacity-50"
             >
               {prompt}
             </button>
           ))}
         </div>
-      </header>
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(182,255,0,0.08),_transparent_30%),linear-gradient(180deg,#090b10_0%,#050608_100%)] p-5">
-        {safeMessages.length === 0 ? (
-          <EmptyState
-            title="Conversa vazia"
-            description="Envie uma pergunta para iniciar o chat com a IA."
-          />
-        ) : (
-          safeMessages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex items-start gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {msg.sender === "ai" ? (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-lime-400/15 text-lime-400">
-                  <LightbulbIcon className="h-4 w-4" />
-                </div>
-              ) : null}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 scroll-smooth z-10 custom-scrollbar">
+          {safeMessages.length === 0 ? (
+            <div className="h-full flex items-center justify-center opacity-30 grayscale scale-90">
+              <EmptyState
+                title="Pronto para Análise"
+                description="Submeta uma dúvida estratégica para iniciar."
+              />
+            </div>
+          ) : (
+            safeMessages.map((msg) => (
               <div
-                className={`max-w-[88%] rounded-3xl p-4 shadow-md md:max-w-[70%] ${msg.sender === "user"
-                    ? "rounded-br-md bg-lime-400 text-zinc-900"
-                    : "rounded-bl-md border border-zinc-800 bg-zinc-900 text-zinc-100"
-                  }`}
+                key={msg.id}
+                className={`flex items-start gap-4 ${msg.sender === "user" ? "flex-row-reverse" : "justify-start"}`}
               >
-                <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{msg.text}</p>
-              </div>
-              {msg.sender === "user" ? (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-black">
-                  <UserIcon className="h-5 w-5 text-zinc-100" />
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shadow-lg ${
+                  msg.sender === "ai" 
+                    ? "bg-[var(--nl-neon)] text-black" 
+                    : "bg-white/5 border border-white/10 text-white"
+                }`}>
+                  {msg.sender === "ai" ? "NL" : (username?.[0] || "U")}
                 </div>
-              ) : null}
+                
+                <div
+                  className={`relative p-4 rounded-2xl max-w-[80%] lg:max-w-[70%] border transition-all ${
+                    msg.sender === "user"
+                      ? "bg-white/5 border-white/10 rounded-tr-none text-[var(--nl-text-primary)]"
+                      : "nl-card-glass border-[var(--nl-neon)]/15 rounded-tl-none text-[var(--nl-text-secondary)] shadow-[0_4px_30px_rgba(0,0,0,0.2)]"
+                  }`}
+                >
+                  <p className="text-[13px] leading-relaxed whitespace-pre-wrap selection:bg-[var(--nl-neon)] selection:text-black">
+                    {msg.text}
+                  </p>
+                  <span className="absolute bottom-[-18px] right-2 text-[9px] font-black uppercase tracking-widest opacity-20">
+                    {msg.sender === "ai" ? "Next Intelligence" : "Protocolo de Usuário"}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+          {isTyping && (
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--nl-neon)] text-black flex items-center justify-center text-xs font-black animate-pulse">
+                NL
+              </div>
+              <div className="nl-card-glass border-[var(--nl-neon)]/15 rounded-2xl rounded-tl-none p-4 shadow-xl">
+                 <div className="flex gap-1.5 py-1">
+                    <span className="w-1.5 h-1.5 bg-[var(--nl-neon)] rounded-full animate-bounce delay-0" />
+                    <span className="w-1.5 h-1.5 bg-[var(--nl-neon)] rounded-full animate-bounce delay-150" />
+                    <span className="w-1.5 h-1.5 bg-[var(--nl-neon)] rounded-full animate-bounce delay-300" />
+                 </div>
+              </div>
             </div>
-          ))
-        )}
-        {isTyping ? (
-          <div className="flex items-start justify-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-lime-400/15 text-lime-400">
-              <LightbulbIcon className="h-4 w-4" />
-            </div>
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900">
-              <TypingIndicator />
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="p-6 bg-transparent z-10">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-[var(--nl-neon)] to-blue-500 rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition-opacity" />
+            <div className="relative">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && void sendMessage()}
+                placeholder="Busque por perdas ocultas, tendências ou planos de ação..."
+                className="w-full h-14 bg-black border border-white/10 rounded-2xl py-0 px-6 text-[var(--nl-text-primary)] text-sm transition focus:border-[var(--nl-neon)]/50 focus:outline-none pr-16 shadow-2xl placeholder:opacity-40"
+              />
+              <button
+                type="button"
+                onClick={() => void sendMessage()}
+                disabled={!canSend}
+                className="absolute right-2 top-1.5 bottom-1.5 w-12 flex items-center justify-center rounded-xl bg-[var(--nl-neon)] text-black transition hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale"
+              >
+                <SendIcon className="h-5 w-5" />
+              </button>
             </div>
           </div>
-        ) : null}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="border-t border-zinc-900 bg-black/40 p-4">
-        <div className="relative">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && void sendMessage()}
-            placeholder="Pergunte sobre perdas, fluxo de caixa, operação, vendas ou oportunidades..."
-            className="w-full rounded-full border border-zinc-800 bg-zinc-900 py-3 pl-5 pr-14 text-zinc-100 transition focus:border-lime-400 focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={() => void sendMessage()}
-            disabled={!canSend}
-            className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-lime-400 text-zinc-900 transition hover:opacity-90 disabled:opacity-50"
-          >
-            <SendIcon className="h-5 w-5" />
-          </button>
+          <p className="mt-3 text-center text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--nl-text-muted)] opacity-50">
+            Powered by Next Cognitive Core v2.5 • Decisões baseadas em real-time data
+          </p>
         </div>
       </div>
     </div>

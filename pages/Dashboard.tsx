@@ -62,7 +62,7 @@ const PERIODS: Array<{ label: string; value: DashboardPeriod }> = [
   { label: "Hoje", value: "today" },
   { label: "Ontem", value: "yesterday" },
   { label: "7 dias", value: "7d" },
-  { label: "Mes", value: "month" },
+  { label: "Mês", value: "month" },
   { label: "Ano", value: "year" },
 ];
 const FORECAST_HORIZONS: Array<7 | 15 | 30> = [7, 15, 30];
@@ -189,32 +189,29 @@ const KpiCard: React.FC<
 > = ({ title, value, change, changeType, icon: Icon, color, iconAccent, status = "ok", reason, sourceLabel }) => {
   const isMuted = status !== "ok";
   return (
-    <div className={`nl-card nl-card-interactive flex min-w-[260px] flex-col p-6 ${isMuted ? "border-amber-500/25" : ""}`}>
-      <div className="mb-4 flex items-start justify-between">
-        <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">
-          {title}
-        </span>
-        <div className="rounded-xl border border-zinc-800 bg-black/60 p-2">
-          <Icon className={`h-5 w-5 ${iconAccent || color}`} />
-        </div>
+    <div className="nl-metric-card">
+      <div className="nl-metric-card__label">
+        {title}
       </div>
-      <p className={`text-[clamp(22px,2.4vw,32px)] md:text-[clamp(24px,2.2vw,36px)] font-black leading-none tracking-tighter whitespace-normal break-words ${isMuted ? "text-amber-200" : "text-zinc-100"}`}>
+      <div className="nl-metric-card__icon bg-black/60 border border-[var(--nl-border)]">
+        <Icon className={`h-4 w-4 ${iconAccent || color}`} />
+      </div>
+      <div className={`nl-metric-card__value ${isMuted ? "text-[#F5B84B]" : ""}`}>
         {value}
-      </p>
-      <div
-        className={`mt-2 flex items-center text-[11px] font-black ${
-          changeType === "increase" ? "text-lime-400" : changeType === "decrease" ? "text-red-500" : "text-zinc-500"
-        }`}
-      >
-        {changeType === "increase" ? (
-          <ArrowUpRightIcon className="mr-1 h-3.5 w-3.5" />
-        ) : changeType === "decrease" ? (
-          <ArrowDownRightIcon className="mr-1 h-3.5 w-3.5" />
-        ) : null}
-        {change} <span className="ml-1 font-medium text-zinc-500">no período selecionado</span>
       </div>
-      {reason ? <p className="mt-3 text-[11px] leading-5 text-zinc-500">{translateMetricReason(reason)}</p> : null}
-      {sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{sourceLabel}</p> : null}
+      <div className="nl-metric-card__delta flex items-center gap-1">
+        <span className={changeType === "increase" ? "text-[var(--nl-success)]" : changeType === "decrease" ? "text-[var(--nl-danger)]" : "text-[var(--nl-text-muted)]"}>
+          {changeType === "increase" ? (
+            <ArrowUpRightIcon className="inline mr-1 h-3.5 w-3.5" />
+          ) : changeType === "decrease" ? (
+            <ArrowDownRightIcon className="inline mr-1 h-3.5 w-3.5" />
+          ) : null}
+          {change}
+        </span>
+        {" "}no período selecionado
+      </div>
+      {reason ? <p className="nl-metric-card__hint">{translateMetricReason(reason)}</p> : null}
+      {sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-[var(--nl-neon)]">{sourceLabel}</p> : null}
     </div>
   );
 };
@@ -282,15 +279,15 @@ const GrowthMetricCard: React.FC<{
   legacyText: string;
   accentColor: string;
 }> = ({ title, description, legacyText, accentColor }) => (
-  <div className="nl-card nl-card-interactive flex flex-col p-5">
-    <div className="flex items-start justify-between gap-2">
-      <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
-      <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
+  <div className="nl-metric-card">
+    <div className="flex items-start justify-between gap-2 mb-2">
+      <span className="nl-metric-card__label">{title}</span>
+      <span className="nl-status-badge nl-status-badge--muted">
         Em config.
       </span>
     </div>
-    <p className={`mt-4 text-2xl font-black tracking-tight ${accentColor}`}>{legacyText}</p>
-    <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
+    <div className={`nl-metric-card__value ${accentColor}`}>{legacyText}</div>
+    <div className="nl-metric-card__hint">{description}</div>
   </div>
 );
 
@@ -339,19 +336,19 @@ const RealMetricCard: React.FC<{
   accentColor: string;
   metric?: DashboardMetricResult;
 }> = ({ title, description, accentColor, metric }) => (
-  <div className="nl-card nl-card-interactive flex flex-col p-5">
-    <div className="flex items-start justify-between gap-2">
-      <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
-      <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
+  <div className="nl-metric-card">
+    <div className="flex items-start justify-between gap-2 mb-2">
+      <span className="nl-metric-card__label">{title}</span>
+      <span className="nl-status-badge nl-status-badge--muted">
         {metric?.status === "ok" ? "Real" : "Honesto"}
       </span>
     </div>
-    <p className={`mt-4 text-2xl font-black tracking-tight ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
+    <div className={`nl-metric-card__value ${metric?.status === "ok" ? accentColor : "text-[#F5B84B]"}`}>
       {metric?.formatted || "NEXT LEVEL"}
-    </p>
-    <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
-    {metric?.reason ? <p className="mt-2 text-[11px] leading-5 text-zinc-600">{translateMetricReason(metric.reason)}</p> : null}
-    {metric?.sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{metric.sourceLabel}</p> : null}
+    </div>
+    <div className="nl-metric-card__hint">{description}</div>
+    {metric?.reason ? <div className="nl-metric-card__hint !text-[var(--nl-text-secondary)]">{translateMetricReason(metric.reason)}</div> : null}
+    {metric?.sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-[var(--nl-neon)]">{metric.sourceLabel}</p> : null}
   </div>
 );
 
@@ -633,7 +630,7 @@ const Dashboard = () => {
 
   const handleExport = async () => {
     if (!dashboardExportRef.current) {
-      addToast("Relatorio ainda nao esta pronto para exportar.", "info");
+      addToast("Relatório ainda não está pronto para exportar.", "info");
       return;
     }
 
@@ -669,9 +666,9 @@ const Dashboard = () => {
       const label = PERIODS.find((item) => item.value === activePeriod)?.label || activePeriod;
       const date = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
       pdf.save(`dashboard-next-level-${label.toLowerCase()}-${date}.pdf`);
-      addToast("Relatorio visual exportado com sucesso.", "success");
+      addToast("Relatório visual exportado com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Falha ao exportar relatorio."), "error");
+      addToast(getErrorMessage(error, "Falha ao exportar relatório."), "error");
     } finally {
       setIsExporting(false);
     }
@@ -721,50 +718,45 @@ const Dashboard = () => {
   };
 
   return (
-    <div ref={dashboardExportRef} className="space-y-7 overflow-x-hidden bg-[#040507]">
-      <header className="grid max-w-full gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,auto)] xl:items-end">
-        <div className="min-w-0">
-          <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visão Geral</h1>
-          <p className="mt-2 text-base font-medium text-zinc-400 md:text-lg">
-            Olá, {username || "Usuário"}. Aqui está o panorama estratégico do período selecionado.
+    <div ref={dashboardExportRef} className="space-y-7 overflow-x-hidden">
+      <div className="nl-page-header">
+        <div className="nl-page-header__meta">
+          <p className="nl-eyebrow">Início</p>
+          <h1 className="nl-page-title">Visão Geral</h1>
+          <p className="nl-page-subtitle">
+            Panorama estratégico da sua empresa no período selecionado.
           </p>
         </div>
-        <div className="flex w-full max-w-full min-w-0 flex-wrap gap-3 xl:w-auto xl:justify-end">
+        <div className="nl-page-header__actions">
           <Link
             to="/settings#dashboard"
-            className="min-w-0 flex-[1_1_140px] rounded-2xl border border-lime-400/30 bg-lime-400/10 px-4 py-3 text-center text-[11px] font-black uppercase tracking-[0.14em] text-lime-300 transition hover:border-lime-400/60 sm:flex-none"
+            className="nl-button-secondary"
           >
             Personalizar
           </Link>
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="min-w-0 flex-[1_1_170px] rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-100 transition hover:bg-zinc-900 disabled:opacity-50 sm:flex-none"
+            className="nl-button-secondary disabled:opacity-50 inline-flex"
           >
-            {isExporting ? "Gerando PDF..." : "Exportar relatorio"}
+            {isExporting ? "Gerando PDF..." : "Exportar relatório"}
           </button>
           <button
             onClick={() => void loadMetrics()}
             disabled={isUpdating}
-            className={`min-w-0 flex-[1_1_132px] rounded-2xl bg-lime-400 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-900 transition ${
-              isUpdating ? "opacity-50" : "hover:opacity-90"
-            } sm:flex-none`}
+            className={`nl-button-primary disabled:opacity-50`}
           >
             {isUpdating ? "Atualizando..." : "Atualizar"}
           </button>
         </div>
-      </header>
+      </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="nl-filter-group mb-6 mt-6">
         {PERIODS.map((period) => (
           <button
             key={period.value}
             onClick={() => setActivePeriod(period.value)}
-            className={`rounded-2xl px-6 py-2 text-[11px] font-black uppercase tracking-[0.18em] transition ${
-              activePeriod === period.value
-                ? "bg-lime-400 text-zinc-900"
-                : "border border-zinc-800 bg-zinc-950 text-zinc-500 hover:text-zinc-200"
-            }`}
+            className={`nl-filter-pill ${activePeriod === period.value ? "active" : ""}`}
           >
             {period.label}
           </button>
@@ -946,7 +938,7 @@ const Dashboard = () => {
 
       {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && !hasChartData ? (
         <div className="nl-card nl-card-empty grid place-items-center p-10 text-zinc-500">
-          Nenhum dado disponível ainda para este período.
+          Nenhum dado encontrado no período selecionado. Cadastre vendas, produtos e custos para liberar esta análise.
         </div>
       ) : (isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) ? (
         <div className="grid min-h-0 grid-cols-1 gap-5 xl:grid-cols-3">

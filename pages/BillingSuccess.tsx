@@ -24,7 +24,7 @@ const BillingSuccess = () => {
   const title = useMemo(() => {
     if (state === "success") return "Pagamento confirmado.";
     if (state === "waiting") return "Estamos liberando seu acesso.";
-    if (state === "failed") return "Nao foi possivel confirmar automaticamente";
+    if (state === "failed") return "Não foi possível confirmar automaticamente";
     return "Confirmando pagamento...";
   }, [state]);
 
@@ -44,7 +44,7 @@ const BillingSuccess = () => {
       if (active) {
         await refreshBilling(true);
         setState("success");
-        setMessage("Plano ativado. Voce sera levado ao dashboard.");
+        setMessage("Plano ativado. Você será levado ao dashboard.");
         if (redirectTimerRef.current) window.clearTimeout(redirectTimerRef.current);
         redirectTimerRef.current = window.setTimeout(() => {
           navigate("/dashboard", { replace: true });

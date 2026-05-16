@@ -194,7 +194,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(
         error,
-        "Não foi possível carregar importacoes da empresa ativa.",
+        "Não foi possível carregar importações da empresa ativa.",
       );
       if (!handled) {
         const message = getErrorMessage(error, "Não foi possível carregar o histórico.");
@@ -480,7 +480,7 @@ const AddData = () => {
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-lime-300">
                 Histórico
               </p>
-              <h2 className="mt-2 text-2xl font-black text-zinc-50">Importacoes recentes</h2>
+              <h2 className="mt-2 text-2xl font-black text-zinc-50">Importações recentes</h2>
             </div>
             <span className="rounded-full border border-zinc-700 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
               {history.length} itens

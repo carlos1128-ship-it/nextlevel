@@ -93,7 +93,7 @@ const Plans = () => {
     setSelectedPlan(nextSelection);
     setBillingCycle(nextSelection.billingCycle);
     savePendingSelectedPlan(nextSelection);
-    setMessage(`Voce escolheu o plano ${planSelectionLabel(nextSelection)}. Continue para finalizar o pagamento com seguranca.`);
+    setMessage(`Você escolheu o plano ${planSelectionLabel(nextSelection)}. Continue para finalizar o pagamento com segurança.`);
   }, [params]);
 
   useEffect(() => {
@@ -107,13 +107,13 @@ const Plans = () => {
           setBillingConfigMessage(configResult.value.message);
         } else {
           setCheckoutEnabled(false);
-          setBillingConfigMessage("Pagamento temporariamente indisponivel.");
+          setBillingConfigMessage("Pagamento temporariamente indisponível.");
         }
       })
       .catch(() => {
         setPlans(fallbackPlans);
         setCheckoutEnabled(false);
-        setBillingConfigMessage("Pagamento temporariamente indisponivel.");
+        setBillingConfigMessage("Pagamento temporariamente indisponível.");
       })
       .finally(() => {
         setIsLoadingPlans(false);
@@ -133,7 +133,7 @@ const Plans = () => {
       })
       .catch(() => {
         setBillingLoadError(true);
-        setMessage("Nao foi possivel carregar sua assinatura agora. Tente novamente em instantes.");
+      setMessage("Não foi possível carregar sua assinatura agora. Tente novamente em instantes.");
       })
       .finally(() => setIsLoadingBilling(false));
   }, [isLoggedIn, selectedCompanyId]);
@@ -171,7 +171,7 @@ const Plans = () => {
     }
 
     if (billingLoadError) {
-      setMessage("Nao foi possivel validar sua assinatura agora. Tente novamente em instantes.");
+      setMessage("Não foi possível validar sua assinatura agora. Tente novamente em instantes.");
       return;
     }
 
@@ -199,7 +199,7 @@ const Plans = () => {
         }
 
         if (result.status === "portal_required") {
-          setMessage(result.message || "Abra o ambiente seguro de assinatura para concluir esta alteracao.");
+          setMessage(result.message || "Abra o ambiente seguro de assinatura para concluir esta alteração.");
           await openPortal();
           return;
         }
@@ -222,8 +222,8 @@ const Plans = () => {
       const code = error?.response?.data?.code;
       setMessage(
         code === "PLAN_PRICE_UNAVAILABLE"
-          ? "Este plano esta indisponivel no momento."
-          : "Nao foi possivel iniciar o pagamento agora. Tente novamente em alguns instantes.",
+          ? "Este plano está indisponível no momento."
+          : "Não foi possível iniciar o pagamento agora. Tente novamente em alguns instantes.",
       );
     } finally {
       setLoadingPlanKey(null);
@@ -237,7 +237,7 @@ const Plans = () => {
       const session = await createBillingPortal({ companyId: selectedCompanyId });
       window.location.href = session.portalUrl;
     } catch {
-      setMessage("Nao foi possivel abrir o gerenciamento da assinatura agora.");
+      setMessage("Não foi possível abrir o gerenciamento da assinatura agora.");
     } finally {
       setPortalLoading(false);
     }
@@ -245,110 +245,101 @@ const Plans = () => {
   const showGlobalPlanLoading = Boolean(loadingPlanKey || portalLoading);
 
   return (
-    <div className="min-h-screen bg-[#030508] px-5 py-8 text-white">
+    <div className="nl-page min-h-screen bg-[#030508] px-5 py-8 overflow-y-auto custom-scrollbar">
       {showGlobalPlanLoading ? (
-        <div className="fixed inset-0 z-[80]">
+        <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm shadow-2xl">
           <NextLevelLoader />
         </div>
       ) : null}
+      
       <div className="mx-auto max-w-7xl">
-        <header className="flex flex-col gap-5 border-b border-white/10 pb-7 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">NEXT LEVEL</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight md:text-6xl">Escolha seu nivel</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
-              Selecione um plano e finalize sua assinatura em um ambiente seguro. O acesso e liberado assim que o pagamento for confirmado.
+        <header className="flex flex-col gap-8 border-b border-white/5 pb-10 md:flex-row md:items-end md:justify-between pt-4">
+          <div className="flex-1">
+            <p className="nl-eyebrow text-[var(--nl-neon)] mb-3">Infraestrutura Estratégica</p>
+            <h1 className="text-4xl font-black tracking-tight md:text-6xl text-white">Escolha seu nível de <span className="text-[var(--nl-neon)] italic">ROI</span>.</h1>
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-[var(--nl-text-secondary)]">
+              Selecione o plano ideal para a escala da sua operação. A ativação é instantânea e o processamento de pagamentos é feito sob rigorosos protocolos de segurança.
             </p>
-            <p className="mt-2 text-xs font-semibold text-zinc-500">
-              {isInitialBillingLoading
-                ? "Preparando pagamento..."
-                : isLoadingBilling
-                  ? "Validando plano atual..."
-                : checkoutEnabled
-                  ? "Pagamento seguro disponivel"
-                  : "Pagamento temporariamente indisponivel."}
-            </p>
-            {params.get("upgrade") ? (
-              <p className="mt-3 text-sm font-bold text-lime-300">Seu plano atual nao da acesso a esse recurso.</p>
-            ) : null}
-            {isLoggedIn && hasActiveSubscription ? (
-              <div className="mt-5 rounded-lg border border-lime-400/20 bg-lime-400/10 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-lime-300">Plano atual</p>
-                <p className="mt-2 text-lg font-black text-white">
-                  {planLabel(currentPlan)} {currentBillingCycle === "ANNUAL" ? "anual" : "mensal"}
-                </p>
-                <p className="mt-2 text-xs leading-5 text-lime-100/80">
-                  Para cancelar, trocar forma de pagamento ou ver cobrancas, abra o gerenciamento da assinatura.
-                </p>
+            
+            <div className="mt-8 flex items-center gap-4">
+               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest ${checkoutEnabled ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-400" : "border-amber-500/20 bg-amber-500/5 text-amber-400"}`}>
+                  <span className={`h-2 w-2 rounded-full ${checkoutEnabled ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+                  {isInitialBillingLoading ? "Iniciando Segurança..." : checkoutEnabled ? "Ambiente Seguro Ativo" : "Checkout em Manutenção"}
+               </div>
+               {params.get("upgrade") && (
+                 <span className="text-[10px] font-black uppercase tracking-widest text-[#B2FF00] animate-pulse">Upgrade Requerido</span>
+               )}
+            </div>
+
+            {isLoggedIn && hasActiveSubscription && (
+              <div className="mt-8 nl-card-glass p-5 border-emerald-500/20 max-w-md">
+                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Assinatura Ativa</p>
+                <div className="flex items-center justify-between mt-1">
+                   <h2 className="text-xl font-black text-white">
+                     {planLabel(currentPlan)} <span className="opacity-40 text-sm font-medium">({currentBillingCycle === "ANNUAL" ? "Anual" : "Mensal"})</span>
+                   </h2>
+                   <button onClick={openPortal} className="text-[10px] font-bold text-[var(--nl-neon)] uppercase tracking-widest hover:underline">Gerenciar</button>
+                </div>
               </div>
-            ) : null}
-            {selectedPlan ? (
-              <p className="mt-3 text-sm font-bold text-lime-300">
-                Voce escolheu o plano {planSelectionLabel(selectedPlan)}.
+            )}
+            {selectedPlan && !hasActiveSubscription && (
+              <p className="mt-6 text-sm font-bold text-[var(--nl-neon)] animate-pulse">
+                Você escolheu o plano {planSelectionLabel(selectedPlan)}. Finalize abaixo.
               </p>
-            ) : null}
+            )}
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex rounded-lg border border-white/10 bg-white/[0.04] p-1">
+
+          <div className="flex flex-col items-end gap-5">
+            <div className="flex rounded-xl border border-white/5 bg-white/[0.02] p-1.5 backdrop-blur-md">
               <button
                 type="button"
                 onClick={() => updateBillingCycle("MONTHLY")}
-                className={`rounded-md px-5 py-2 text-xs font-black uppercase tracking-[0.14em] ${billingCycle === "MONTHLY" ? "bg-white text-zinc-950" : "text-zinc-400"}`}
+                className={`rounded-lg px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] transition-all ${billingCycle === "MONTHLY" ? "bg-white text-zinc-950 shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
               >
                 Mensal
               </button>
               <button
                 type="button"
                 onClick={() => updateBillingCycle("ANNUAL")}
-                className={`rounded-md px-5 py-2 text-xs font-black uppercase tracking-[0.14em] ${billingCycle === "ANNUAL" ? "bg-lime-300 text-zinc-950" : "text-zinc-400"}`}
+                className={`rounded-lg px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] transition-all flex items-center gap-2 ${billingCycle === "ANNUAL" ? "bg-[var(--nl-neon)] text-zinc-950 shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
               >
-                Anual
+                Anual <span className="px-1.5 py-0.5 rounded bg-black/10 text-[8px] font-black">-15% OFF</span>
               </button>
             </div>
-            {isLoggedIn ? (
-              <>
-              {hasActiveSubscription ? (
+            {isLoggedIn && (
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={openPortal}
-                  disabled={portalLoading}
-                  className="rounded-lg border border-lime-300/40 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-lime-200 disabled:opacity-60"
+                  onClick={() => navigate("/dashboard")}
+                  className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:bg-white/5 transition-all"
                 >
-                  {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
+                  Dashboard
                 </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => navigate("/dashboard")}
-                className="rounded-lg border border-white/10 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/[0.06]"
-              >
-                Voltar ao dashboard
-              </button>
-              <button
-                type="button"
-                onClick={logout}
-                className="rounded-lg border border-white/10 px-4 py-2 text-xs font-bold text-zinc-300 hover:bg-white/[0.06]"
-              >
-                Encerrar sessao
-              </button>
-              </>
-            ) : null}
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:bg-white/5 transition-all"
+                >
+                  Sair
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
-        {message ? (
-          <div className="mt-6 rounded-lg border border-lime-400/20 bg-lime-400/10 px-4 py-3 text-sm font-bold text-lime-200">
+        {message && !hasActiveSubscription && (
+          <div className="mt-8 p-4 rounded-xl border border-[var(--nl-neon)]/20 bg-[var(--nl-neon)]/5 text-xs font-bold text-[var(--nl-neon)] animate-pulse">
             {message}
           </div>
-        ) : null}
+        )}
 
-        {isActuallyUnavailable && billingConfigMessage ? (
-          <div className="mt-4 rounded-lg border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm font-bold text-amber-100">
+        {isActuallyUnavailable && billingConfigMessage && (
+          <div className="mt-8 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs font-bold text-amber-200">
             {billingConfigMessage}
           </div>
-        ) : null}
+        )}
 
-        <section className="mt-8 grid gap-5 lg:grid-cols-3">
+        <section className="mt-12 grid gap-8 lg:grid-cols-3 mb-16">
           {orderedPlans.map((plan) => {
             const display = PLAN_DISPLAY[plan.key];
             const price = plan.prices[billingCycle];
@@ -366,89 +357,97 @@ const Plans = () => {
             const isDowngrade = hasActiveSubscription && plan.level < currentPlanLevel;
             const actionAvailable = !isLoadingBilling && !billingLoadError && (hasActiveSubscription || available);
             const buttonLabel = loading
-              ? "Preparando..."
+              ? "Processando..."
               : portalLoading && hasActiveSubscription
-                ? "Abrindo..."
+                ? "Abrindo Portal..."
               : isInitialBillingLoading
                 ? "Aguarde"
                 : isExactCurrentPlan
-                  ? "Gerenciar assinatura"
-                  : hasActiveSubscription
-                    ? (isUpgrade ? "Fazer upgrade" : isDowngrade ? "Fazer downgrade" : "Alterar cobranca")
+                  ? "Minha Assinatura"
+                    : hasActiveSubscription
+                    ? (isUpgrade ? "Mudar para este" : isDowngrade ? "Mudar para este" : "Mudar Faturamento")
                     : available
-                      ? "Assinar agora"
-                      : "Plano indisponivel";
+                      ? "Assinar Agora"
+                      : "Sob Consulta";
 
             return (
               <article
                 key={plan.key}
-                className={`relative flex min-h-[520px] flex-col rounded-lg border p-6 ${
+                className={`relative flex min-h-[600px] flex-col rounded-3xl border p-8 transition-all duration-500 overflow-hidden ${
                   isSelected
-                    ? "border-lime-300 bg-[linear-gradient(160deg,rgba(182,255,0,0.14),rgba(8,10,14,1)_58%)] shadow-[0_0_65px_rgba(182,255,0,0.18)]"
-                    : plan.key === "PREMIUM"
-                      ? "border-lime-400/35 bg-[linear-gradient(160deg,rgba(182,255,0,0.1),rgba(8,10,14,1)_60%)] shadow-[0_0_55px_rgba(182,255,0,0.1)]"
-                      : "border-white/[0.08] bg-white/[0.035]"
+                    ? "border-[var(--nl-neon)] bg-[linear-gradient(160deg,rgba(178,255,0,0.1),rgba(3,5,8,1)_40%)] shadow-[0_0_80px_rgba(178,255,0,0.05)]"
+                    : "border-white/5 bg-white/[0.02]"
                 }`}
               >
-                {isSelected && !isCurrentPlan ? (
-                  <span className="absolute left-5 top-5 rounded-full border border-lime-300/40 bg-lime-300/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-lime-200">
-                    Selecionado
-                  </span>
-                ) : null}
-                {isCurrentPlan ? (
-                  <span className="absolute left-5 top-5 rounded-full border border-lime-300/40 bg-lime-300/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-lime-200">
-                    Plano atual
-                  </span>
-                ) : null}
-                {plan.key === "PREMIUM" ? (
-                  <span className="absolute right-5 top-5 rounded-full bg-lime-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-950">
-                    Mais escolhido
-                  </span>
-                ) : null}
-                <h2 className="mt-10 text-2xl font-black">{getPublicPlanName(plan.key, plan.name)}</h2>
-                <p className="mt-3 min-h-16 text-sm leading-6 text-zinc-400">{display?.summary || plan.description}</p>
-                <div className="mt-5">
-                  <span className="text-4xl font-black">
-                    {price ? formatCurrencyInCents(displayAmountInCents) : "Indisponivel"}
-                  </span>
-                  <span className="ml-2 text-sm text-zinc-500">{billingCycle === "MONTHLY" ? "/mes" : "/ano"}</span>
+                <div className="absolute inset-0 pointer-events-none opacity-20">
+                   {isSelected && <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--nl-neon)] blur-[100px]" />}
                 </div>
-                <div className="mt-5 rounded-lg border border-lime-300/[0.16] bg-lime-300/[0.055] p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-300">{display.aiTier}</p>
-                  <ul className="mt-3 space-y-1.5">
-                    {display.aiLimitItems.map((item) => (
-                      <li key={item} className="text-sm font-bold leading-5 text-zinc-100">{item}</li>
-                    ))}
-                  </ul>
+
+                <div className="mb-8 flex items-center justify-between">
+                   {plan.key === "PREMIUM" && (
+                     <span className="rounded-full bg-[var(--nl-neon)] px-3 py-1 text-[9px] font-black uppercase text-black ring-4 ring-[var(--nl-neon)]/10">
+                       Popular
+                     </span>
+                   )}
+                   {isCurrentPlan && (
+                     <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[9px] font-black uppercase text-emerald-400">
+                       Plano Atual
+                     </span>
+                   )}
                 </div>
-                <ul className="mt-6 flex-1 space-y-3">
+
+                <h2 className="text-3xl font-black text-white">{getPublicPlanName(plan.key, plan.name)}</h2>
+                <p className="mt-4 min-h-[50px] text-xs leading-relaxed text-[var(--nl-text-secondary)]">{display?.summary || plan.description}</p>
+                
+                <div className="mt-8 flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-white">
+                    {price ? formatCurrencyInCents(displayAmountInCents) : "--"}
+                  </span>
+                  <span className="text-[10px] font-black text-[var(--nl-text-muted)] uppercase tracking-widest">{billingCycle === "MONTHLY" ? "/ mensal" : "/ anual"}</span>
+                </div>
+
+                <div className="mt-10 mb-8 p-5 rounded-2xl bg-white/5 border border-white/5">
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nl-neon)] mb-4">{display.aiTier}</p>
+                   <div className="space-y-3">
+                      {display.aiLimitItems.map((item) => (
+                        <div key={item} className="flex items-center gap-3">
+                           <div className="h-1.5 w-1.5 rounded-full bg-[var(--nl-neon)]" />
+                           <span className="text-[11px] font-bold text-white opacity-80">{item}</span>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+
+                <ul className="flex-1 space-y-4">
                   {(display?.features || plan.features).map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-sm text-zinc-300">
-                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-lime-300" />
-                      {feature}
+                    <li key={feature} className="flex items-start gap-3">
+                      <svg className="h-4 w-4 shrink-0 text-[var(--nl-neon)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-[13px] text-[var(--nl-text-secondary)]">{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <button
-                  type="button"
-                  disabled={!actionAvailable || loading || isInitialBillingLoading || (hasActiveSubscription && portalLoading)}
-                  onClick={() => subscribe(plan.key)}
-                  className={`mt-7 rounded-lg px-5 py-4 text-sm font-black uppercase tracking-[0.14em] transition ${
-                    actionAvailable
-                      ? "bg-lime-300 text-zinc-950 hover:brightness-105"
-                      : "cursor-not-allowed border border-amber-400/25 bg-amber-400/10 text-amber-200"
-                  }`}
-                >
-                  {buttonLabel}
-                </button>
-                <p className={`mt-3 min-h-10 text-xs font-semibold leading-5 ${actionAvailable ? "text-lime-200" : "text-zinc-500"}`}>
-                  {hasActiveSubscription
-                    ? isExactCurrentPlan
-                      ? "Cancele, veja cobrancas ou atualize a forma de pagamento no ambiente seguro."
-                      : "A alteracao deste plano sera aplicada de forma segura na sua assinatura."
-                    : available
-                      ? "Pagamento em ambiente seguro."
-                      : "Este plano ainda nao esta pronto para pagamento."}
+
+                <div className="mt-10">
+                  <button
+                    type="button"
+                    disabled={!actionAvailable || loading || isInitialBillingLoading || (hasActiveSubscription && portalLoading)}
+                    onClick={() => subscribe(plan.key)}
+                    className={`w-full py-4 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all ${
+                      isExactCurrentPlan
+                        ? "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                        : actionAvailable
+                        ? "bg-[var(--nl-neon)] text-black hover:scale-[1.02] active:scale-95 shadow-[0_4px_25px_rgba(182,255,0,0.15)]"
+                        : "bg-white/5 border border-white/5 text-zinc-600 grayscale cursor-not-allowed"
+                    }`}
+                  >
+                    {buttonLabel}
+                  </button>
+                </div>
+                
+                <p className="mt-4 text-center text-[9px] font-bold uppercase tracking-widest text-[var(--nl-text-muted)] opacity-60">
+                  Segurança Stripe de Ponta a Ponta
                 </p>
               </article>
             );

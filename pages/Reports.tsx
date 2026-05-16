@@ -53,16 +53,16 @@ const KpiCard = ({
   value: string;
   accent: "green" | "red" | "blue" | "white";
 }) => {
-  const colors = {
-    green: "text-lime-400 border-lime-400/20 bg-lime-400/5",
-    red: "text-red-400 border-red-400/20 bg-red-400/5",
-    blue: "text-blue-400 border-blue-400/20 bg-blue-400/5",
-    white: "text-zinc-100 border-zinc-700 bg-zinc-900",
-  };
+  const isNeon = accent === "green" || (accent === "blue" && value !== "0");
   return (
-    <div className={`rounded-2xl border p-5 ${colors[accent]}`}>
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{label}</p>
-      <p className={`mt-1 text-2xl font-black tracking-tight ${colors[accent].split(" ")[0]}`}>{value}</p>
+    <div className="nl-card p-5 relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+      {isNeon && <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--nl-neon)] opacity-[0.03] blur-2xl pointer-events-none" />}
+      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)]">{label}</p>
+      <div className="mt-2">
+        <p className={`text-2xl font-black tracking-tight ${accent === "red" ? "text-red-400" : isNeon ? "text-[var(--nl-neon)]" : "text-[var(--nl-text-primary)]"}`}>
+          {value}
+        </p>
+      </div>
     </div>
   );
 };
@@ -71,12 +71,15 @@ const KpiCard = ({
 const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolean }) => {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
-        <div className="mt-3 space-y-2">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-3 animate-pulse rounded-full bg-zinc-800" style={{ width: `${80 - i * 12}%` }} />
-          ))}
+      <div className="nl-card p-6 md:p-8 border-[var(--nl-neon)]/30 bg-gradient-to-br from-[rgba(182,255,0,0.05)] to-transparent relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--nl-neon)] opacity-[0.02] blur-[100px] pointer-events-none" />
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nl-neon)] flex items-center gap-2">
+          <span className="animate-pulse">✨</span> Gerando Inteligência Artificial
+        </p>
+        <div className="mt-6 space-y-3">
+          <div className="h-4 animate-pulse rounded-full bg-white/5 w-[90%]" />
+          <div className="h-4 animate-pulse rounded-full bg-white/5 w-[75%]" />
+          <div className="h-4 animate-pulse rounded-full bg-white/5 w-[85%]" />
         </div>
       </div>
     );
@@ -90,16 +93,19 @@ const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolea
     .filter(Boolean);
 
   return (
-    <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
-      <ul className="mt-3 space-y-2">
+    <div className="nl-card p-6 md:p-8 border-[var(--nl-neon)]/30 bg-gradient-to-br from-[rgba(182,255,0,0.05)] to-transparent relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--nl-neon)] opacity-[0.02] blur-[100px] pointer-events-none" />
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--nl-neon)] flex items-center gap-2 mb-6">
+        <span>✨</span> Insight Executivo Next Level
+      </p>
+      <div className="grid gap-4 md:grid-cols-2">
         {lines.map((line, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm leading-snug text-zinc-200">
-            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-lime-400" />
-            {line}
-          </li>
+          <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-black/20 border border-white/5 hover:border-[var(--nl-neon)]/20 transition-colors">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--nl-neon)] shadow-[0_0_8px_var(--nl-neon)]" />
+            <p className="text-[13px] leading-relaxed text-[var(--nl-text-secondary)]">{line}</p>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
@@ -323,19 +329,20 @@ const Reports = () => {
   }, [reportRef, aiSummary, aiLoading, generateAiSummary, addToast]);
 
   return (
-    <div className="space-y-6">
+    <div className="nl-page">
       {/* Header */}
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Relatórios</h1>
-          <p className="mt-1 text-sm text-zinc-500">Analise financeira orientada por dados e IA.</p>
+      <div className="nl-page-header">
+        <div className="nl-page-header__meta">
+          <p className="nl-eyebrow">Inteligência Financeira</p>
+          <h1 className="nl-page-title">Relatórios & Insights</h1>
+          <p className="nl-page-subtitle">Analise financeira orientada por dados e IA para decisões estratégicas.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-300 outline-none transition hover:border-zinc-600"
+            className="nl-input py-2 text-xs w-[140px]"
           >
             <option value="30d">Últimos 30 dias</option>
             <option value="90d">Últimos 90 dias</option>
@@ -345,7 +352,7 @@ const Reports = () => {
           <select
             value={sector}
             onChange={(e) => setSector(e.target.value)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-300 outline-none transition hover:border-zinc-600"
+            className="nl-input py-2 text-xs w-[140px]"
           >
             <option value="geral">Todos os setores</option>
             <option value="ecommerce">E-commerce</option>
@@ -356,30 +363,30 @@ const Reports = () => {
           <button
             type="button"
             onClick={load}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-800"
+            className="nl-button-secondary py-2 text-xs"
           >
-            Atualizar
+            Sincronizar
           </button>
 
           <button
             type="button"
             onClick={generateAiSummary}
             disabled={aiLoading || !selectedCompanyId}
-            className="rounded-xl border border-lime-400/40 bg-lime-400/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-lime-400 transition hover:bg-lime-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="nl-button-primary py-2 text-xs border-[var(--nl-neon)]/30 group"
           >
-            {aiLoading ? "Analisando..." : "Sumário IA"}
+            <span className={aiLoading ? "animate-pulse" : "group-hover:scale-110 transition-transform"}>✨</span> {aiLoading ? "Analisando..." : "Insight IA"}
           </button>
 
           <button
             type="button"
             onClick={handleExportPdf}
             disabled={pdfLoading || loading || !selectedCompanyId}
-            className="rounded-xl bg-lime-400 px-5 py-2 text-xs font-black uppercase tracking-wide text-zinc-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="nl-button-primary py-2 text-xs"
           >
-            {pdfLoading ? "Gerando PDF..." : "Exportar PDF"}
+            {pdfLoading ? "Gerando..." : "Baixar PDF"}
           </button>
         </div>
-      </header>
+      </div>
 
       {/* States */}
       {loading ? (
@@ -394,73 +401,66 @@ const Reports = () => {
       ) : chartData.length === 0 ? (
         <EmptyState
           title="Sem dados para relatório"
-          description="Cadastre transações para gerar visualizacoes e exportacoes."
+          description="Cadastre transações para gerar visualizações e exportações."
         />
       ) : (
         // ── Conteúdo capturável pelo PDF ────────────────────────────────────
-        <div ref={reportRef} className="space-y-6 rounded-2xl bg-[#09090b] p-2">
-
+        <div ref={reportRef} className="space-y-8 rounded-3xl bg-[#09090b] p-4 md:p-6">
           {/* Branding no PDF */}
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-            <div>
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-lime-400">Next Level AI</span>
-              <p className="mt-0.5 text-[11px] text-zinc-600">
-                Relatório gerado em {new Date().toLocaleDateString("pt-BR")}
-              </p>
+          <div className="flex items-center justify-between border-b border-white/5 pb-6">
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] font-black uppercase tracking-[0.25em] text-[var(--nl-neon)]">Next Level Core</span>
+              <p className="text-[11px] text-[var(--nl-text-muted)] font-medium">Relatório Estratégico · Gerado em {new Date().toLocaleDateString("pt-BR")}</p>
             </div>
-            <span className="rounded-xl bg-lime-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-lime-400">
-              Confidencial
-            </span>
+            <div className="nl-badge-neon text-[10px]">Documento Confidencial</div>
           </div>
 
           {/* AI Summary */}
           <AiSummaryCard text={aiSummary} loading={aiLoading} />
 
           {/* KPIs */}
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <KpiCard label="Receita Total" value={asCurrency(totals.income)} accent="green" />
-            <KpiCard label="Despesas" value={asCurrency(totals.expense)} accent="red" />
-            <KpiCard label="Saldo" value={asCurrency(totals.balance)} accent={totals.balance >= 0 ? "blue" : "red"} />
-            <KpiCard label="Margem líquida" value={`${margin}%`} accent={margin >= 20 ? "green" : margin >= 0 ? "blue" : "red"} />
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <KpiCard label="Faturamento Bruto" value={asCurrency(totals.income)} accent="green" />
+            <KpiCard label="Despesas Operacionais" value={asCurrency(totals.expense)} accent="red" />
+            <KpiCard label="Resultado Líquido" value={asCurrency(totals.balance)} accent={totals.balance >= 0 ? "blue" : "red"} />
+            <KpiCard label="Margem de Lucro" value={`${margin}%`} accent={margin >= 20 ? "green" : margin >= 0 ? "blue" : "red"} />
           </div>
 
           {/* Charts row 1 */}
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
-              <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Lucros e Perdas</h2>
-              <p className="mb-4 text-[11px] text-zinc-500">Evolução mensal de receitas vs despesas</p>
-              <div className="h-[280px] w-full min-w-0">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <div className="nl-card p-6 border-white/5 bg-black/20">
+              <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-[var(--nl-text-muted)] mb-6">Fluxo de Caixa (L/P)</h3>
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={lineData} margin={{ top: 10, right: 12, left: 0, bottom: 4 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#18181b" />
-                    <XAxis dataKey="month" stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
-                    <YAxis stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} tickFormatter={(v) => formatCompact(Number(v))} />
-                    <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: number, n: string) => [asCurrency(Number(v)), n]} />
-                    <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} formatter={(v) => <span className={v === "Lucro" ? "text-lime-400" : "text-red-400"}>{v}</span>} />
-                    <Line type="monotone" dataKey="Lucro" stroke="#B6FF00" strokeWidth={2} dot={{ r: 3, fill: "#B6FF00", strokeWidth: 0 }} activeDot={{ r: 5 }} />
-                    <Line type="monotone" dataKey="Perda" stroke="#f87171" strokeWidth={2} dot={{ r: 3, fill: "#f87171", strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                  <LineChart data={lineData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis dataKey="month" stroke="rgba(255,255,255,0.3)" fontSize={11} axisLine={false} tickLine={false} />
+                    <YAxis stroke="rgba(255,255,255,0.3)" fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => formatCompact(Number(v))} />
+                    <Tooltip contentStyle={{ backgroundColor: "#131517", borderColor: "#24282c", borderRadius: 12, fontSize: 12 }} formatter={(v: number, n: string) => [asCurrency(Number(v)), n]} />
+                    <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700, paddingTop: 20 }} formatter={(v) => <span className={v === "Lucro" ? "text-[var(--nl-neon)]" : "text-red-400"}>{v}</span>} />
+                    <Line type="monotone" dataKey="Lucro" stroke="var(--nl-neon)" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: "#FFF" }} />
+                    <Line type="monotone" dataKey="Perda" stroke="#f87171" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: "#FFF" }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
-              <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Projeções de crescimento</h2>
-              <p className="mb-4 text-[11px] text-zinc-500">Tendência projetada com base no saldo atual</p>
-              <div className="h-[280px] w-full min-w-0">
+            <div className="nl-card p-6 border-white/5 bg-black/20">
+              <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-[var(--nl-text-muted)] mb-6">Escalabilidade Projetada</h3>
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={projectionData} margin={{ top: 10, right: 12, left: 0, bottom: 4 }}>
+                  <AreaChart data={projectionData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="rptGrowth" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#B6FF00" stopOpacity={0.35} />
-                        <stop offset="95%" stopColor="#B6FF00" stopOpacity={0.04} />
+                        <stop offset="5%" stopColor="var(--nl-neon)" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="var(--nl-neon)" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#18181b" />
-                    <XAxis dataKey="year" stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
-                    <YAxis stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} tickFormatter={(v) => formatCompact(Number(v))} />
-                    <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v: number) => [asCurrency(Number(v)), "Projeção"]} />
-                    <Area type="monotone" dataKey="total" stroke="#B6FF00" strokeWidth={2} fill="url(#rptGrowth)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis dataKey="year" stroke="rgba(255,255,255,0.3)" fontSize={11} axisLine={false} tickLine={false} />
+                    <YAxis stroke="rgba(255,255,255,0.3)" fontSize={11} axisLine={false} tickLine={false} tickFormatter={(v) => formatCompact(Number(v))} />
+                    <Tooltip contentStyle={{ backgroundColor: "#131517", borderColor: "#24282c", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [asCurrency(Number(v)), "Projeção"]} />
+                    <Area type="monotone" dataKey="total" stroke="var(--nl-neon)" strokeWidth={3} fill="url(#rptGrowth)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -468,31 +468,29 @@ const Reports = () => {
           </div>
 
           {/* Chart row 2 */}
-          <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
-            <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Eficiência vs Média do Setor</h2>
-            <p className="mb-4 text-[11px] text-zinc-500">Comparativo de eficiência e desperdício financeiro</p>
-            <div className="h-[260px] w-full min-w-0">
+          <div className="nl-card p-6 border-white/5 bg-black/20">
+            <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-[var(--nl-text-muted)] mb-6">Peer Benchmarking (Setor)</h3>
+            <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={comparisonData} margin={{ top: 10, right: 12, left: 0, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#18181b" />
-                  <XAxis dataKey="name" stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
-                  <YAxis stroke="#52525b" tick={{ fill: "#71717a", fontSize: 11 }} />
-                  <Tooltip contentStyle={TOOLTIP_STYLE} />
-                  <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} formatter={(v) => <span className={v === "Desperdício" ? "text-red-400" : "text-lime-400"}>{v === "Desperdício" ? "Desperdício" : v}</span>} />
-                  <Bar dataKey="Desperdício" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={48} />
-                  <Bar dataKey="Eficiência" fill="#B6FF00" radius={[4, 4, 0, 0]} maxBarSize={48} />
+                <BarChart data={comparisonData} margin={{ top: 0, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={11} axisLine={false} tickLine={false} />
+                  <YAxis stroke="rgba(255,255,255,0.3)" fontSize={11} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: "#131517", borderColor: "#24282c", borderRadius: 12, fontSize: 12 }} />
+                  <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700, paddingTop: 20 }} formatter={(v) => <span className={v === "Desperdício" ? "text-red-400" : "text-[var(--nl-neon)]"}>{v}</span>} />
+                  <Bar dataKey="Desperdício" fill="#f87171" radius={[6, 6, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="Eficiência" fill="var(--nl-neon)" radius={[6, 6, 0, 0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <p className="mt-3 text-[11px] text-zinc-600">
-              Pico financeiro do período:{" "}
-              <span className="font-bold text-zinc-400">{formatCompact(maxValue)}</span>
+            <p className="mt-4 text-[11px] text-[var(--nl-text-muted)] text-center">
+              Pico de Faturamento: <span className="text-[var(--nl-text-primary)] font-bold">{formatCompact(maxValue)}</span>
             </p>
           </div>
-
-          {/* Footer PDF */}
-          <div className="border-t border-zinc-800 pt-4 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-700">
-            Next Level AI — Relatório Confidencial — {new Date().toLocaleDateString("pt-BR")}
+          <div className="flex items-center justify-between pt-4 border-t border-white/5 text-[9px] font-bold uppercase tracking-[0.3em] text-white/20">
+            <span>Next Level Platform v2.0</span>
+            <span>Relatório Confidencial Digital</span>
+            <span>{new Date().getFullYear()} © Todos os direitos reservados.</span>
           </div>
         </div>
       )}

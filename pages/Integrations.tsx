@@ -154,7 +154,7 @@ const Integrations = () => {
     const message = params.get("integration_message");
     const providerLabel = provider === "mercadolivre" ? "Mercado Livre" : "Instagram";
     addToast(
-      message || (status === "connected" ? `${providerLabel} conectado.` : `Nao foi possivel conectar o ${providerLabel}.`),
+      message || (status === "connected" ? `${providerLabel} conectado.` : `Não foi possível conectar o ${providerLabel}.`),
       status === "connected" ? "success" : "error",
     );
     window.history.replaceState({}, "", window.location.pathname);
@@ -209,9 +209,6 @@ const Integrations = () => {
 
     if (rawQr.startsWith("data:image")) {
       setQrImage(rawQr);
-      console.info("whatsapp.qr.frontend.rendered", {
-        source: "base64",
-      });
       return;
     }
 
@@ -225,9 +222,6 @@ const Integrations = () => {
     })
       .then((image) => {
         setQrImage(image);
-        console.info("whatsapp.qr.frontend.rendered", {
-          source: "code",
-        });
       })
       .catch(() => setQrImage(null));
   }, [connection?.qrCode]);
@@ -362,7 +356,7 @@ const Integrations = () => {
       return;
     }
     if (!canUseMarketplaces) {
-      addToast("Mercado Livre esta disponivel a partir do plano Premium.", "error");
+      addToast("Mercado Livre está disponível a partir do plano Premium.", "error");
       return;
     }
 
@@ -372,7 +366,7 @@ const Integrations = () => {
       const session = await getMercadoLivreConnectUrl(selectedCompanyId, returnTo);
       window.location.assign(session.authUrl);
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel iniciar o Mercado Livre."), "error");
+      addToast(getErrorMessage(error, "Não foi possível iniciar o Mercado Livre."), "error");
       setMercadoLivreLoading(false);
     }
   };
@@ -399,7 +393,7 @@ const Integrations = () => {
       await refreshMercadoLivre();
       addToast("Mercado Livre desconectado.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Nao foi possivel desconectar Mercado Livre."), "error");
+      addToast(getErrorMessage(error, "Não foi possível desconectar Mercado Livre."), "error");
     } finally {
       setMercadoLivreLoading(false);
     }
@@ -407,30 +401,29 @@ const Integrations = () => {
 
   if (!canUseMainIntegrations) {
     return (
-      <main className="space-y-7">
-        <section className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Integrações
-          </p>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-            Canais conectados ao lucro
-          </h1>
-        </section>
+      <div className="nl-page">
+        <div className="nl-page-header">
+          <div className="nl-page-header__meta">
+            <p className="nl-eyebrow">Integrações</p>
+            <h1 className="nl-page-title">Canais conectados</h1>
+            <p className="nl-page-subtitle">
+              Conecte atendimento, marketplaces e dados de venda para alimentar sua inteligência.
+            </p>
+          </div>
+        </div>
 
-        <section className="rounded-lg border border-red-500/30 bg-[linear-gradient(155deg,rgba(127,29,29,0.35),rgba(9,9,11,0.96)_58%)] p-7 shadow-2xl shadow-red-950/20">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div className="flex gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/15 text-red-300">
-                <LockIcon className="h-7 w-7" />
+        <section className="nl-card border-red-500/25 p-7">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex gap-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-red-400/30 bg-red-500/10 text-red-300">
+                <LockIcon className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-red-300">
-                  Disponível no Premium
-                </p>
-                <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                  Assine Premium para ter integrações e mais.
+                <span className="nl-badge-danger mb-2">Restrito ao plano Premium</span>
+                <h2 className="text-xl font-bold text-[var(--nl-text-primary)]">
+                  Recurso bloqueado
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-300">
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--nl-text-secondary)]">
                   As integrações automáticas liberam conexão com canais de venda, atendimento e dados em tempo real para sua empresa.
                 </p>
               </div>
@@ -438,67 +431,78 @@ const Integrations = () => {
             <button
               type="button"
               onClick={() => navigate("/planos?upgrade=integrations")}
-              className="rounded-lg bg-lime-300 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-950 transition hover:brightness-105"
+              className="nl-button-primary"
             >
-              Ver planos
+              Fazer upgrade
             </button>
           </div>
         </section>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="space-y-7">
-      <section className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-          Integrações
-        </p>
-        <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-          Canais conectados ao lucro
-        </h1>
-      </section>
+    <div className="nl-page">
+      <div className="nl-page-header">
+        <div className="nl-page-header__meta">
+          <p className="nl-eyebrow">Conectividade & Dados</p>
+          <h1 className="nl-page-title">Sincronização de Canais</h1>
+          <p className="nl-page-subtitle">
+            Centralize seus pontos de contato e vendas para alimentar o motor de inteligência e atendimento.
+          </p>
+        </div>
+      </div>
 
-      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 space-y-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-                WhatsApp
-              </p>
-              <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                WhatsApp
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-                Conecte o atendimento da sua empresa ao WhatsApp.
-              </p>
+      <section className="nl-card p-6 md:p-8 mb-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex gap-5 min-w-0 flex-1">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+               <span className="text-2xl">📱</span>
             </div>
-            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-3">
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
-                <p className="mt-1 font-bold text-zinc-100">{statusLabel}</p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Saúde</p>
-                <p className="mt-1 font-bold text-zinc-100">{connectionHealthLabel}</p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Atendimento IA</p>
-                <p className="mt-1 font-bold text-zinc-100">{automationLabel}</p>
-              </div>
+            <div className="min-w-0">
+               <div className="flex flex-wrap items-center gap-3 mb-1.5">
+                  <h2 className="text-xl font-black text-[var(--nl-text-primary)]">WhatsApp Business</h2>
+                  <span className={`nl-badge-${isConnected(connection?.status) ? "success" : "muted"}`}>
+                     {statusLabel}
+                  </span>
+               </div>
+               <p className="text-[13px] leading-relaxed text-[var(--nl-text-secondary)] mb-6 max-w-2xl">
+                 Conecte o motor de atendimento agêntico diretamente ao número oficial da empresa para automação de vendas e suporte 24/7.
+               </p>
+
+               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-1">
+                     <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)]">Saúde do Link</span>
+                     <span className="text-xs font-bold text-[var(--nl-text-primary)]">{connectionHealthLabel}</span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                     <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)]">Agente Ativado</span>
+                     <span className="text-xs font-bold text-[var(--nl-text-primary)]">{automationLabel}</span>
+                  </div>
+               </div>
             </div>
           </div>
 
-          <div className="flex shrink-0 gap-3">
+          <div className="flex shrink-0 gap-3 pt-1">
             {isConnected(connection?.status) ? (
-              <button
-                type="button"
-                onClick={handleRepair}
-                disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading ? "Verificando..." : "Reparar conexão"}
-              </button>
+              <div className="flex flex-col gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleRepair}
+                  disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
+                  className="nl-button-primary py-2 px-6 text-xs"
+                >
+                  {loading ? "Verificando..." : "Sincronizar Canal"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDisconnect}
+                  disabled={loading || isOperationStatus(connection?.status)}
+                  className="nl-button-secondary text-red-400 border-red-900/30 hover:bg-red-950/20 py-2 text-xs"
+                >
+                  Interromper Fluxo
+                </button>
+              </div>
             ) : (
               <button
                 type="button"
@@ -510,64 +514,50 @@ const Integrations = () => {
                   isOperationStatus(connection?.status) ||
                   retryRemaining > 0
                 }
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="nl-button-primary px-8 py-3"
               >
                   {loading
-                  ? "Preparando conexão..."
+                  ? "Gerando Instância..."
                   : !canUseMainIntegrations
-                    ? "Disponivel no Premium"
+                    ? "Upgrade Necessário"
                   : connection?.status === "provider_warming_up"
-                    ? "Preparando conexão..."
+                    ? "Iniciando Motor..."
                   : retryRemaining > 0
                     ? `Aguarde ${retryRemaining}s`
                   : isQrPending(connection?.status)
-                    ? "Aguardando leitura"
-                    : "Conectar WhatsApp"}
+                    ? "Aguardando Leitura"
+                    : "Conectar Agora"}
               </button>
             )}
-            {isConnected(connection?.status) ? (
-              <button
-                type="button"
-                onClick={handleDisconnect}
-                disabled={loading || isOperationStatus(connection?.status)}
-                className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
-              >
-                Desconectar
-              </button>
-            ) : null}
           </div>
         </div>
 
         {(connection?.status === "qr_pending" && hasQrData(connection)) || qrImage ? (
-          <div className="mt-6 grid gap-5 border-t border-zinc-900 pt-5 lg:grid-cols-[320px_1fr]">
-            <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-zinc-800 bg-lime-50 p-5">
-              {qrImage ? (
-                <img src={qrImage} alt="QR Code do WhatsApp" className="h-72 w-72" />
-              ) : (
-                <p className="text-center text-sm font-bold text-zinc-900">
-                  QR indisponível no momento
-                </p>
-              )}
+          <div className="mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center gap-10">
+            <div className="h-[280px] w-[280px] rounded-3xl border border-white/5 bg-white p-6 shadow-[0_0_50px_rgba(255,255,255,0.05)] shrink-0">
+               {qrImage ? (
+                  <img src={qrImage} alt="QR Auth" className="w-full h-full" />
+               ) : (
+                  <div className="h-full w-full flex items-center justify-center text-zinc-900 font-bold text-center text-xs">
+                    Gerando Semente de Autenticação...
+                  </div>
+               )}
             </div>
-            <div className="space-y-4">
-              {connection?.pairingCode ? (
-                <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    Código de pareamento
-                  </p>
-                  <p className="mt-2 font-mono text-2xl font-black text-lime-300">
-                    {connection.pairingCode}
-                  </p>
-                </div>
-              ) : null}
-              <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                  Próximo passo
-                </p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-200">
-                  Leia o QR Code com o WhatsApp da empresa para concluir a conexão.
-                </p>
-              </div>
+            <div className="max-w-md">
+               <h3 className="text-lg font-bold text-[var(--nl-text-primary)] mb-2">Escaneie o QR Code</h3>
+               <p className="text-sm text-[var(--nl-text-secondary)] leading-relaxed mb-6">
+                 Abra o WhatsApp em seu celular → Aparelhos Conectados → Conectar um aparelho.
+               </p>
+               {connection?.pairingCode && (
+                 <div className="nl-card-glass p-4 border-emerald-500/20 mb-4 inline-block w-full">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1">Código de Pareamento</p>
+                    <p className="text-3xl font-black text-white font-mono tracking-widest">{connection.pairingCode}</p>
+                 </div>
+               )}
+               <div className="flex items-center gap-2 text-[11px] text-[var(--nl-text-muted)] bg-white/5 py-2 px-3 rounded-lg border border-white/5">
+                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                  Após a leitura, a sincronização levará cerca de 5 segundos.
+               </div>
             </div>
           </div>
         ) : null}
@@ -576,206 +566,170 @@ const Integrations = () => {
         connection?.status === "rate_limited" ||
         connection?.status === "qr_not_ready" ||
         connection?.status === "error" ? (
-          <p className={`mt-4 rounded-md border p-3 text-sm font-semibold ${
+          <div className={`mt-6 p-4 rounded-xl border flex items-center gap-4 ${
             connection.status === "error"
-              ? "border-red-500/30 bg-red-950/30 text-red-200"
-              : "border-amber-500/30 bg-amber-500/10 text-amber-100"
+              ? "border-red-500/20 bg-red-500/5 text-red-300"
+              : "border-amber-500/20 bg-amber-500/5 text-amber-200"
           }`}>
-            {sanitizeCustomerConnectionMessage(connection.message || connection.lastError) || "Não foi possível gerar o QR Code agora."}
-            {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
-          </p>
-        ) : null}
-        {!canUseMainIntegrations ? (
-          <p className="mt-4 rounded-md border border-lime-400/25 bg-lime-400/10 p-3 text-sm font-semibold text-lime-100">
-            Integracoes com WhatsApp e Instagram estao disponiveis a partir do plano Premium.
-          </p>
+            <span className="text-lg">{connection.status === "error" ? "❌" : "⏳"}</span>
+            <div className="text-xs font-medium">
+               <p>{sanitizeCustomerConnectionMessage(connection.message || connection.lastError) || "Ocorreu um atraso na inicialização do serviço."}</p>
+               {retryRemaining > 0 && <p className="mt-1 opacity-70">Aguardando cooldown: {retryRemaining} segundos.</p>}
+            </div>
+          </div>
         ) : null}
       </section>
 
-      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 space-y-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-                Integração
-              </p>
-              <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                Instagram
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-                Organize mensagens e oportunidades vindas do Instagram.
-              </p>
+      <section className="nl-card p-6 md:p-8 mb-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex gap-5 min-w-0 flex-1">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-pink-500/20 bg-pink-500/10 text-pink-400">
+               <span className="text-2xl">📸</span>
             </div>
+            <div className="min-w-0">
+               <div className="flex flex-wrap items-center gap-3 mb-1.5">
+                  <h2 className="text-xl font-black text-[var(--nl-text-primary)]">Instagram Direct</h2>
+                  <span className={`nl-badge-${instagramStatus?.connected ? "success" : "muted"}`}>
+                     {getInstagramStatusLabel(instagramStatus)}
+                  </span>
+               </div>
+               <p className="text-[13px] leading-relaxed text-[var(--nl-text-secondary)] mb-6 max-w-2xl">
+                 Integre seus DMs para captação automática de leads e resposta rápida a interessados em seus produtos e serviços.
+               </p>
 
-            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-3">
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {getInstagramStatusLabel(instagramStatus)}
-                </p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {instagramStatus?.connected ? "Conta profissional conectada" : "Aguardando conexão"}
-                </p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Oportunidades</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {instagramStatus?.connected ? "Mensagens organizadas" : "Conecte para ativar"}
-                </p>
-              </div>
+               {isInstagramTokenExpired(instagramStatus) && (
+                 <div className="inline-flex items-center gap-2 rounded-lg bg-amber-500/10 py-1.5 px-3 text-[11px] font-bold text-amber-300 border border-amber-500/20">
+                   ⚠️ Renovação de Acesso Necessária
+                 </div>
+               )}
             </div>
-
-            {instagramStatus?.provider_setup_required ? (
-              <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
-                A conexão com Instagram está temporariamente indisponível. Tente novamente em instantes.
-              </p>
-            ) : null}
-            {isInstagramTokenExpired(instagramStatus) ? (
-              <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
-                Token expirado / Reconexão necessária.
-              </p>
-            ) : null}
           </div>
 
-          <div className="flex shrink-0 gap-3">
+          <div className="flex shrink-0 gap-3 pt-1">
             {instagramStatus?.connected && !isInstagramTokenExpired(instagramStatus) ? (
               <button
                 type="button"
                 onClick={handleInstagramDisconnect}
                 disabled={instagramLoading}
-                className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
+                className="nl-button-secondary text-red-400 border-red-900/30 hover:bg-red-950/20 py-2 px-6 text-xs"
               >
-                {instagramLoading ? "Desconectando..." : "Desconectar"}
+                {instagramLoading ? "Processando..." : "Desativar Canal"}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={handleInstagramConnect}
                 disabled={instagramLoading || !canUseMainIntegrations || Boolean(instagramStatus?.provider_setup_required)}
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="nl-button-primary px-8 py-3"
               >
                 {instagramLoading
-                  ? "Abrindo Instagram..."
-                  : !canUseMainIntegrations
-                    ? "Disponivel no Premium"
+                  ? "Sincronizando..."
                   : isInstagramTokenExpired(instagramStatus)
-                    ? "Reconectar Instagram"
-                    : "Conectar Instagram"}
+                    ? "Renovar Conexão"
+                    : "Liberar Acesso Instagram"}
               </button>
             )}
           </div>
         </div>
       </section>
 
-      <section className="rounded-lg border border-lime-400/25 bg-zinc-950 p-5 shadow-2xl shadow-lime-950/20">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 space-y-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-lime-300">
-                Mercado Livre
-              </p>
-              <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                Mercado Livre
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-                Conecte sua conta vendedora para importar produtos, pedidos, vendas e dados operacionais automaticamente.
-              </p>
+      <section className="nl-card p-6 md:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex gap-5 min-w-0 flex-1">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-500/10 text-blue-400">
+               <span className="text-2xl">🎒</span>
             </div>
+            <div className="min-w-0">
+               <div className="flex flex-wrap items-center gap-3 mb-1.5">
+                  <h2 className="text-xl font-black text-[var(--nl-text-primary)]">Mercado Livre (Beta)</h2>
+                  <span className={`nl-badge-${mercadoLivreStatus?.connected ? "success" : "muted"}`}>
+                     {mercadoLivreStatus?.connected ? "Conectado" : "Inativo"}
+                  </span>
+               </div>
+               <p className="text-[13px] leading-relaxed text-[var(--nl-text-secondary)] mb-6 max-w-2xl">
+                 Evolua sua conta vendedora com importação automática de pedidos, estoque centralizado e relatórios de métricas avançadas.
+               </p>
 
-            <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Status</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {mercadoLivreStatus?.connected ? "Conectado" : "Desconectado"}
-                </p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {mercadoLivreStatus?.nickname || mercadoLivreStatus?.mlUserId || "Aguardando OAuth"}
-                </p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Receita ML</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {Number(mercadoLivreDashboard?.revenue || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Produtos</p>
-                <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.products || 0}</p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Pedidos</p>
-                <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.orders || 0}</p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Perguntas</p>
-                <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.pendingQuestions || 0} pendentes</p>
-              </div>
-              <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-3">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Última sync</p>
-                <p className="mt-1 font-bold text-zinc-100">
-                  {mercadoLivreStatus?.lastSyncAt ? new Date(mercadoLivreStatus.lastSyncAt).toLocaleString("pt-BR") : "Ainda não sincronizado"}
-                </p>
-              </div>
+               {mercadoLivreStatus?.connected && (
+                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="flex flex-col gap-1">
+                       <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)]">Câmbio Acumulado</span>
+                       <span className="text-xs font-bold text-emerald-400">
+                         {Number(mercadoLivreDashboard?.revenue || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                       </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                       <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)]">Catálogo</span>
+                       <span className="text-xs font-bold text-[var(--nl-text-primary)]">{mercadoLivreDashboard?.products || 0} Skus</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                       <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)]">Pendências</span>
+                       <span className="text-xs font-bold text-amber-400">{mercadoLivreDashboard?.pendingQuestions || 0} Ações</span>
+                    </div>
+                 </div>
+               )}
             </div>
-
-            {mercadoLivreStatus?.webhook ? (
-              <p className="rounded-md border border-lime-400/20 bg-lime-400/10 p-3 text-sm font-semibold text-lime-100">
-                Prova de conexao: ultimo webhook {mercadoLivreStatus.webhook.status.toLowerCase()} em {new Date(mercadoLivreStatus.webhook.lastEventAt).toLocaleString("pt-BR")}.
-              </p>
-            ) : null}
           </div>
 
-          <div className="flex shrink-0 flex-wrap gap-3">
+          <div className="flex shrink-0 flex-wrap gap-3 pt-1">
             {mercadoLivreStatus?.connected ? (
-              <>
+              <div className="flex flex-col gap-2 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={handleMercadoLivreSync}
                   disabled={mercadoLivreSyncing || !canUseMarketplaces}
-                  className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:opacity-50"
+                  className="nl-button-primary py-2 px-6 text-xs"
                 >
-                  {mercadoLivreSyncing ? "Reprocessando..." : "Reprocessar integração"}
+                  {mercadoLivreSyncing ? "Reprocessando..." : "Sincronizar Dados"}
                 </button>
                 <button
                   type="button"
                   onClick={handleMercadoLivreDisconnect}
                   disabled={mercadoLivreLoading}
-                  className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-red-400 hover:text-red-300 disabled:opacity-50"
+                  className="nl-button-secondary text-red-400 border-red-900/30 hover:bg-red-950/20 py-2 text-xs"
                 >
-                  Desconectar
+                  Liberar Catálogo
                 </button>
-              </>
+              </div>
             ) : (
               <button
                 type="button"
                 onClick={handleMercadoLivreConnect}
                 disabled={mercadoLivreLoading || !canUseMarketplaces}
-                className="rounded-md bg-lime-400 px-4 py-2 text-sm font-black text-zinc-950 transition hover:bg-lime-300 disabled:opacity-50"
+                className="nl-button-primary px-8 py-3"
               >
                 {mercadoLivreLoading
-                  ? "Abrindo Mercado Livre..."
+                  ? "Sincronizando..."
                   : !canUseMarketplaces
-                    ? "Disponivel no Premium"
+                    ? "Exclusivo PREMIUM"
                     : "Conectar Mercado Livre"}
               </button>
             )}
           </div>
         </div>
+
+        {mercadoLivreStatus?.connected && (
+          <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+            <p className="text-[11px] font-medium text-[var(--nl-text-muted)] bg-white/5 px-2 py-1 rounded">
+              {mercadoLivreStatus?.lastSyncAt ? `Sincronia estável: ${new Date(mercadoLivreStatus.lastSyncAt).toLocaleString("pt-BR")}` : "Aguardando fluxo de entrada..."}
+            </p>
+            {mercadoLivreStatus?.webhook && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase text-emerald-400">Webhooks Operacionais</span>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
-      {!canUseMarketplaces ? (
-        <p className="rounded-lg border border-lime-400/20 bg-lime-400/10 p-4 text-sm font-semibold text-lime-100">
-          Mercado Livre esta disponivel a partir do Premium.
+      {!canUseMarketplaces && (
+        <p className="text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mt-6">
+          ⚠ Mercado Livre está disponível apenas no plano Premium.
         </p>
-      ) : null}
+      )}
 
-    </main>
+    </div>
   );
 };
 

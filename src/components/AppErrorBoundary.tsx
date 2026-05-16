@@ -36,7 +36,7 @@ class AppErrorBoundary extends React.Component<
               Erro protegido
             </p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-white">
-              Nao foi possivel concluir esta etapa agora
+              Não foi possível concluir esta etapa agora
             </h1>
             <p className="mt-4 text-base leading-8 text-zinc-300">
               Recarregue a pagina ou volte para o dashboard. Se o problema persistir, tente novamente

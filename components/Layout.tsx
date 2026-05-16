@@ -55,7 +55,7 @@ const navItems: SidebarNavItem[] = [
 const adminNavItem: SidebarNavItem = {
   id: "admin-system-health",
   path: "/admin/system-health",
-  name: "System Health",
+  name: "Saúde do sistema",
   icon: ShieldIcon,
 };
 const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
@@ -197,68 +197,66 @@ function writeNicheModalDone(key: string) {
 const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
   const { username } = useAuth();
   return (
-    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-zinc-200 bg-white p-6 text-zinc-800 dark:border-zinc-900 dark:bg-[#080b10] dark:text-zinc-100 lg:flex">
-      <div className="shrink-0">
-        <div className="mb-8 text-4xl font-black tracking-tight text-lime-500 dark:text-lime-400">NEXT LEVEL</div>
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operação Segura</p>
+    <aside className="nl-sidebar fixed left-0 top-0 z-50 hidden md:flex">
+      <div className="nl-sidebar__logo-area shrink-0">
+        <Link to={DASHBOARD_ROUTE} className="flex items-center gap-2 px-2 py-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-[var(--nl-neon)]" />
+          <span className="nl-sidebar__brand">NEXT LEVEL</span>
+        </Link>
+        <p className="nl-sidebar__tagline px-2">
+          Operação segura
+        </p>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
-        <nav aria-label="Menu principal">
-          <ul className="space-y-1">
+      
+      <div className="nl-sidebar__nav">
+        <nav aria-label="Menu principal" className="h-full flex flex-col">
+          <ul className="flex flex-col gap-1">
             {(Array.isArray(primaryItems) ? primaryItems : []).map((item) => (
               <li key={item.path}>
                 <NavLink
                   to={item.path}
-                  className={({ isActive }) =>
-                    `group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
-                      isActive
-                        ? "bg-lime-100 text-lime-700 dark:bg-lime-400/20 dark:text-lime-300"
-                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-                    }`
-                  }
+                  className={({ isActive }) => `nl-nav-item ${isActive ? "active" : ""}`}
                 >
-                  <item.icon className="mr-3 h-5 w-5 shrink-0" />
+                  <item.icon className="nl-nav-item__icon" />
                   <span className="min-w-0 truncate">{item.name}</span>
                 </NavLink>
               </li>
             ))}
           </ul>
           {moreItems.length > 0 ? (
-            <details className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-900 dark:bg-zinc-950/70">
-              <summary className="cursor-pointer px-2 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
-                Mais ferramentas
-              </summary>
-              <ul className="mt-2 space-y-1">
-                {moreItems.map((item) => (
-                  <li key={item.path}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) =>
-                        `group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
-                          isActive
-                            ? "bg-lime-100 text-lime-700 dark:bg-lime-400/20 dark:text-lime-300"
-                            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-                        }`
-                      }
-                    >
-                      <item.icon className="mr-3 h-5 w-5 shrink-0" />
-                      <span className="min-w-0 truncate">{item.name}</span>
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </details>
+            <div className="mt-2">
+              <div className="nl-sidebar__divider" />
+              <details className="mt-2 group">
+                <summary className="nl-eyebrow cursor-pointer px-3 py-2 list-none flex items-center justify-between">
+                  Mais ferramentas
+                  <svg className="h-4 w-4 text-zinc-500 transition-transform group-open:-rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </summary>
+                <ul className="mt-1 flex flex-col gap-1">
+                  {moreItems.map((item) => (
+                    <li key={item.path}>
+                      <NavLink
+                        to={item.path}
+                        className={({ isActive }) => `nl-nav-item ${isActive ? "active" : ""}`}
+                      >
+                        <item.icon className="nl-nav-item__icon" />
+                        <span className="min-w-0 truncate">{item.name}</span>
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
           ) : null}
         </nav>
       </div>
 
-      <Link to="/profile" className="group mt-5 flex shrink-0 items-center gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-900" aria-label="Acessar perfil">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 font-bold text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
+      <Link to="/profile" className="nl-sidebar__profile group shrink-0" aria-label="Acessar perfil">
+        <div className="nl-avatar">
           {username?.charAt(0).toUpperCase() || "U"}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{username || "Usuário"}</p>
-          <p className="text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ver perfil</p>
+          <p className="truncate text-sm font-bold text-[var(--nl-text-primary)]">{username || "Usuário"}</p>
+          <p className="text-[10px] uppercase tracking-widest text-[var(--nl-text-muted)]">Ver perfil</p>
         </div>
       </Link>
     </aside>
@@ -269,23 +267,26 @@ const Header = () => {
   const { username, isAdmin } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-200 bg-white/95 px-6 backdrop-blur dark:border-zinc-900 dark:bg-[#101218]/95 lg:justify-end lg:px-8">
-      <div className="text-lg font-black text-lime-500 dark:text-lime-400 lg:hidden">NEXT LEVEL</div>
+    <header className="nl-topbar sticky top-0 z-40 w-full justify-between md:justify-end">
+      <Link to={DASHBOARD_ROUTE} className="flex items-center gap-2 text-[15px] font-black text-[#B6FF00] md:hidden">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#B6FF00]" />
+        NEXT LEVEL
+      </Link>
       <div className="flex items-center gap-4">
         {isAdmin ? (
-          <Link to="/admin/system-health" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Painel admin">
+          <Link to="/admin/system-health" className="text-[var(--nl-text-muted)] transition-colors hover:text-[var(--nl-neon)]" aria-label="Painel admin">
             <ShieldIcon className="h-5 w-5" />
           </Link>
         ) : null}
-        <Link to="/settings" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Configurações">
+        <Link to="/settings" className="text-[var(--nl-text-muted)] transition-colors hover:text-[var(--nl-neon)]" aria-label="Configurações">
           <SettingsIcon className="h-5 w-5" />
         </Link>
-        <Link to="/profile" className="group flex items-center gap-2.5" aria-label="Menu do usuário">
+        <Link to="/profile" className="nl-topbar__user group" aria-label="Menu do usuário">
           <div className="hidden text-right sm:block">
-            <p className="text-xs font-bold text-zinc-800 transition-colors group-hover:text-lime-500 dark:text-zinc-100 dark:group-hover:text-lime-400">{username || "Usuário"}</p>
-            <p className="text-[9px] uppercase tracking-tighter text-zinc-400 dark:text-zinc-500">Estratégico</p>
+            <p className="text-sm font-bold text-[var(--nl-text-primary)] transition-colors group-hover:text-[var(--nl-neon)]">{username || "Usuário"}</p>
+            <p className="nl-eyebrow !mb-0 text-right">Estratégico</p>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 text-xs font-black text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
+          <div className="nl-avatar">
             {username?.charAt(0).toUpperCase() || "U"}
           </div>
         </Link>
@@ -295,14 +296,14 @@ const Header = () => {
 };
 
 const BottomNav = ({ items }: { items: SidebarNavItem[] }) => (
-  <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around border-t border-zinc-200 bg-white/95 p-2 backdrop-blur lg:hidden dark:border-zinc-800 dark:bg-zinc-950/95" aria-label="Menu Mobile">
+  <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around border-t border-white/[0.08] bg-[#080D0B]/95 p-2 backdrop-blur lg:hidden" aria-label="Menu Mobile">
     {(Array.isArray(items) ? items : []).filter((item) => item.isPrimary).map((item) => (
       <NavLink
         key={item.path}
         to={item.path}
         className={({ isActive }) =>
           `relative flex flex-1 flex-col items-center rounded-xl p-2 text-[10px] font-bold uppercase tracking-tight transition-all ${
-            isActive ? "text-lime-500" : "text-zinc-500 dark:text-zinc-400"
+            isActive ? "bg-[#B6FF00]/12 text-[#B6FF00]" : "text-zinc-500"
           }`
         }
       >
@@ -318,7 +319,7 @@ const FloatingActionButton = () => {
 
   const actions = [
     { name: "Nova empresa", icon: BuildingIcon, path: "/companies" },
-    { name: "Novo Relatório", icon: BarChartIcon, path: "/reports" },
+    { name: "Novo relatório", icon: BarChartIcon, path: "/reports" },
     { name: "Nova conversa", icon: MessageSquareIcon, path: "/chat" },
   ];
 
@@ -331,7 +332,7 @@ const FloatingActionButton = () => {
               key={action.name}
               to={action.path}
               onClick={() => setIsOpen(false)}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800 transition-all hover:scale-105 hover:border-lime-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/[0.08] bg-[#171D1A] text-zinc-100 transition-all hover:scale-105 hover:border-[#B6FF00]/45"
               role="menuitem"
             >
               <action.icon className="h-5 w-5" />
@@ -343,7 +344,7 @@ const FloatingActionButton = () => {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`flex h-14 w-14 items-center justify-center rounded-full text-zinc-900 shadow-2xl transition-all duration-300 ${
-          isOpen ? "bg-red-500 text-white" : "bg-lime-400"
+          isOpen ? "bg-red-500 text-white" : "bg-[#B6FF00]"
         }`}
         aria-label={isOpen ? "Fechar menu de ações" : "Abrir menu de ações"}
         aria-expanded={isOpen}
@@ -449,16 +450,18 @@ const Layout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F8F9FA] text-zinc-800 dark:bg-[#040507] dark:text-zinc-100">
+    <div className="nl-app-shell">
       <div
         id="dashboard-main"
         aria-hidden={showNicheModal || undefined}
         className={`transition duration-500 ${showNicheModal ? "pointer-events-none blur-[15px] saturate-[0.8] brightness-[0.76]" : ""}`}
       >
         <Sidebar primaryItems={primaryItems} moreItems={moreItems} />
-        <main className="min-h-screen min-h-0 flex-col lg:pl-64">
+        <main className="nl-main min-h-[100dvh] md:pl-[var(--nl-sidebar-w)]">
           <Header />
-          <div className="mx-auto w-full max-w-7xl flex-1 min-h-0 overflow-x-hidden p-4 md:p-8">{children}</div>
+          <div className="nl-page">
+            <div className="nl-page-inner">{children}</div>
+          </div>
         </main>
         <BottomNav items={primaryItems} />
         <FloatingActionButton />
