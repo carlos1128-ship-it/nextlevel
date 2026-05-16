@@ -70,7 +70,7 @@ const Costs = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar custos.");
+      const message = getErrorMessage(err, "Não foi possível carregar custos.");
       setError(message);
       addToast(message, "error");
     } finally {

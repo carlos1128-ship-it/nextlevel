@@ -330,7 +330,7 @@ export function NextLevelLandingPage({
   ];
 
   return (
-    <div className="font-inter min-h-screen overflow-x-hidden bg-[#080D0B] text-white selection:bg-[#B6FF00] selection:text-black">
+    <div className="font-inter nl-landing-shell min-h-screen overflow-x-hidden bg-[#080D0B] text-white selection:bg-[#B6FF00] selection:text-black">
       <nav className="nl-glass-panel fixed left-0 right-0 top-0 z-50 flex h-[76px] items-center px-4 md:px-12">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
           <button type="button" onClick={() => scrollToSection("topo")} className="group flex items-center gap-2">
@@ -375,27 +375,27 @@ export function NextLevelLandingPage({
         )}
       </nav>
 
-      <section id="topo" className="mx-auto max-w-7xl px-4 pb-20 pt-32 md:px-8">
-        <div className="nl-shadow-dark-card relative flex flex-col items-center gap-16 overflow-hidden rounded-[48px] border border-[#2E3935] bg-[#0D1210] p-8 md:p-16 lg:flex-row lg:p-20">
+      <section id="topo" className="nl-landing-hero-section mx-auto max-w-7xl px-4 md:px-8">
+        <div className="nl-shadow-dark-card nl-landing-hero-card relative flex flex-col items-center gap-10 overflow-hidden rounded-[48px] border border-[#2E3935] bg-[#0D1210] p-7 md:p-12 lg:flex-row lg:gap-14 lg:p-16 xl:p-20">
           <div className="pointer-events-none absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-[#1C3F3A] opacity-20 blur-[120px]" />
 
-          <div className="relative z-10 flex text-left lg:w-1/2">
-            <div>
-              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#2E3935] bg-[#1A221F] px-4 py-1.5">
+          <div className="relative z-10 flex text-left lg:w-[52%]">
+            <div className="nl-landing-hero-copy">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2E3935] bg-[#1A221F] px-4 py-1.5">
                 <div className="nl-pulse-neon h-1.5 w-1.5 rounded-full bg-[#B6FF00]" />
                 <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>
               </div>
 
-              <h1 className="nl-h1 mb-6 text-white">
+              <h1 className="nl-h1 nl-landing-hero-title mb-6 text-white">
                 O sistema de gestão com IA para controlar vendas, atendimento e financeiro em um só lugar
               </h1>
 
-              <p className="nl-body mb-10 max-w-xl text-[#AEB8B4]">
+              <p className="nl-body mb-7 max-w-xl text-[#AEB8B4]">
                 A NEXT LEVEL AI centraliza vendas, clientes, produtos, custos, atendimento e relatórios em uma plataforma inteligente.
                 Veja o lucro real, entenda sua operação e receba recomendações da IA para decidir melhor todos os dias.
               </p>
 
-              <div className="mb-10 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
+              <div className="mb-7 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
                 <button type="button" onClick={() => focusAuth(true)} className="flex items-center justify-center gap-2 rounded-full bg-[#B6FF00] px-8 py-4 font-semibold text-[#080D0B] shadow-[0_0_20px_rgba(182,255,0,0.2)] transition-all hover:scale-[1.02] hover:bg-[#9BE600] active:scale-[0.98]">
                   Teste grátis <ArrowRight size={18} />
                 </button>
@@ -410,8 +410,8 @@ export function NextLevelLandingPage({
             </div>
           </div>
 
-          <div className="relative z-10 w-full lg:w-1/2">
-            <div className="nl-dashboard-tilt relative h-[430px] w-full md:h-[500px]">
+          <div className="relative z-10 w-full lg:w-[48%]">
+            <div className="nl-dashboard-tilt nl-landing-hero-mockup relative h-[430px] w-full md:h-[500px]">
               <div className="nl-shadow-floating absolute inset-0 flex overflow-hidden rounded-[24px] border border-[#2E3935] bg-[#080D0B]">
                 <div className="hidden w-48 flex-col gap-2 border-r border-[#2E3935] bg-[#0D1210] p-4 md:flex">
                   <div className="mb-6 flex items-center gap-2 px-2">

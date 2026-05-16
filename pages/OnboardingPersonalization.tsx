@@ -28,7 +28,7 @@ const BUSINESS_OPTIONS: Array<{ key: BusinessType; label: string; description: s
   { key: "law_office", label: "Advocacia", description: "Leads, consultas, pipeline e follow-up juridico." },
   { key: "local_services", label: "Serviços locais", description: "Agendamentos, recorrencia e custos operacionais." },
   { key: "retail_store", label: "Loja fisica / varejo", description: "Produtos, horarios de pico e ticket médio." },
-  { key: "restaurant", label: "Restaurante / delivery", description: "Cardapio, pedidos, pico e custos de entrega." },
+  { key: "restaurant", label: "Restaurante / delivery", description: "Cardápio, pedidos, pico e custos de entrega." },
   { key: "marketplace_seller", label: "Marketplace seller", description: "Taxas, frete, margem e produtos campeoes." },
   { key: "other", label: "Outros", description: "Configuração balanceada para comecar rápido." },
 ];
@@ -119,11 +119,11 @@ const MODULE_LABELS: Record<string, string> = {
 };
 
 const MODULE_PRIORITY_OPTIONS = [
-  { key: "products", label: "Produtos/servicos" },
+  { key: "products", label: "Produtos/serviços" },
   { key: "attendant", label: "Atendente IA" },
-  { key: "integrations", label: "Integracoes" },
-  { key: "market_intelligence", label: "Market intel" },
-  { key: "automations", label: "Projetos/automacoes" },
+  { key: "integrations", label: "Integrações" },
+  { key: "market_intelligence", label: "Inteligência de mercado" },
+  { key: "automations", label: "Projetos/automações" },
   { key: "customers", label: "Clientes" },
   { key: "costs", label: "Custos" },
   { key: "financial", label: "Financeiro" },
@@ -299,9 +299,9 @@ const OnboardingPersonalization = () => {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.32em] text-lime-300">NEXT LEVEL</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-6xl">Conte para a Next sobre seu negocio</h1>
+            <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-6xl">Conte para a Next sobre seu negócio</h1>
             <p className="mt-4 max-w-3xl text-sm font-medium text-zinc-400 md:text-base">
-              Assim a plataforma organiza o painel e gera recomendacoes mais uteis para sua operacao.
+              Assim a plataforma organiza o painel e gera recomendações mais úteis para sua operação.
             </p>
           </div>
           <div className="hidden rounded-3xl border border-lime-400/20 bg-lime-400/10 px-5 py-4 text-right md:block">
@@ -346,7 +346,7 @@ const OnboardingPersonalization = () => {
                     Descrição livre
                   </span>
                   <span className="mt-2 block text-sm font-bold text-zinc-200">
-                    Descreva seu negocio
+                    Descreva seu negócio
                   </span>
                   <textarea
                     value={form.customBusinessDescription || form.originalBusinessDescription || ""}
@@ -356,7 +356,7 @@ const OnboardingPersonalization = () => {
                     }}
                     rows={4}
                     className="mt-4 w-full resize-none rounded-2xl border border-zinc-800 bg-[#05070a] px-4 py-3 text-sm font-medium text-zinc-100 outline-none transition focus:border-lime-400"
-                    placeholder="Ex: consultoria para restaurantes, curso online, clinica odontologica, loja de pecas..."
+                    placeholder="Ex: consultoria para restaurantes, curso online, clínica odontológica, loja de peças..."
                   />
                 </label>
               ) : null}
@@ -367,7 +367,7 @@ const OnboardingPersonalization = () => {
             <section>
               <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Operação</p>
               <h2 className="mt-2 text-3xl font-black tracking-tighter">Como sua empresa funciona hoje?</h2>
-              <p className="mt-2 text-sm text-zinc-500">Cada resposta liga ou desliga recomendações, sem encher seu painel de coisa inutil.</p>
+              <p className="mt-2 text-sm text-zinc-500">Cada resposta liga ou desliga recomendações, sem encher seu painel de coisa inútil.</p>
               <div className="mt-6 grid gap-3 md:grid-cols-2">
                 {OPERATION_TOGGLES.map((item) => {
                   const checked = Boolean(form[item.key]);
@@ -439,7 +439,7 @@ const OnboardingPersonalization = () => {
                   <option value="sales">Vendas</option>
                   <option value="customers">Clientes</option>
                   <option value="operations">Operacao</option>
-                  <option value="automation">Automacao</option>
+                  <option value="automation">Automação</option>
                 </select>
               </label>
             </section>

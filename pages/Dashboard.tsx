@@ -62,7 +62,7 @@ const PERIODS: Array<{ label: string; value: DashboardPeriod }> = [
   { label: "Hoje", value: "today" },
   { label: "Ontem", value: "yesterday" },
   { label: "7 dias", value: "7d" },
-  { label: "Mes", value: "month" },
+  { label: "Mês", value: "month" },
   { label: "Ano", value: "year" },
 ];
 const FORECAST_HORIZONS: Array<7 | 15 | 30> = [7, 15, 30];
@@ -633,7 +633,7 @@ const Dashboard = () => {
 
   const handleExport = async () => {
     if (!dashboardExportRef.current) {
-      addToast("Relatorio ainda nao esta pronto para exportar.", "info");
+      addToast("Relatório ainda não está pronto para exportar.", "info");
       return;
     }
 
@@ -669,9 +669,9 @@ const Dashboard = () => {
       const label = PERIODS.find((item) => item.value === activePeriod)?.label || activePeriod;
       const date = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
       pdf.save(`dashboard-next-level-${label.toLowerCase()}-${date}.pdf`);
-      addToast("Relatorio visual exportado com sucesso.", "success");
+      addToast("Relatório visual exportado com sucesso.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Falha ao exportar relatorio."), "error");
+      addToast(getErrorMessage(error, "Falha ao exportar relatório."), "error");
     } finally {
       setIsExporting(false);
     }
@@ -721,32 +721,33 @@ const Dashboard = () => {
   };
 
   return (
-    <div ref={dashboardExportRef} className="space-y-7 overflow-x-hidden bg-[#040507]">
+    <div ref={dashboardExportRef} className="space-y-7 overflow-x-hidden">
       <header className="grid max-w-full gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,auto)] xl:items-end">
         <div className="min-w-0">
-          <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Visão Geral</h1>
-          <p className="mt-2 text-base font-medium text-zinc-400 md:text-lg">
-            Olá, {username || "Usuário"}. Aqui está o panorama estratégico do período selecionado.
+          <p className="nl-page-eyebrow">Início</p>
+          <h1 className="nl-page-title mt-2">Visão Geral</h1>
+          <p className="nl-page-description mt-2">
+            Olá, {username || "Usuário"}. Acompanhe vendas, caixa, margem e sinais da IA no período selecionado.
           </p>
         </div>
         <div className="flex w-full max-w-full min-w-0 flex-wrap gap-3 xl:w-auto xl:justify-end">
           <Link
             to="/settings#dashboard"
-            className="min-w-0 flex-[1_1_140px] rounded-2xl border border-lime-400/30 bg-lime-400/10 px-4 py-3 text-center text-[11px] font-black uppercase tracking-[0.14em] text-lime-300 transition hover:border-lime-400/60 sm:flex-none"
+            className="nl-button-secondary min-w-0 flex-[1_1_140px] text-center sm:flex-none"
           >
             Personalizar
           </Link>
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="min-w-0 flex-[1_1_170px] rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-100 transition hover:bg-zinc-900 disabled:opacity-50 sm:flex-none"
+            className="nl-button-secondary min-w-0 flex-[1_1_170px] disabled:opacity-50 sm:flex-none"
           >
-            {isExporting ? "Gerando PDF..." : "Exportar relatorio"}
+            {isExporting ? "Gerando PDF..." : "Exportar relatório"}
           </button>
           <button
             onClick={() => void loadMetrics()}
             disabled={isUpdating}
-            className={`min-w-0 flex-[1_1_132px] rounded-2xl bg-lime-400 px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-zinc-900 transition ${
+            className={`nl-button-primary min-w-0 flex-[1_1_132px] ${
               isUpdating ? "opacity-50" : "hover:opacity-90"
             } sm:flex-none`}
           >
@@ -762,8 +763,8 @@ const Dashboard = () => {
             onClick={() => setActivePeriod(period.value)}
             className={`rounded-2xl px-6 py-2 text-[11px] font-black uppercase tracking-[0.18em] transition ${
               activePeriod === period.value
-                ? "bg-lime-400 text-zinc-900"
-                : "border border-zinc-800 bg-zinc-950 text-zinc-500 hover:text-zinc-200"
+                ? "bg-[#B6FF00] text-zinc-950"
+                : "border border-white/[0.08] bg-white/[0.035] text-zinc-500 hover:text-zinc-200"
             }`}
           >
             {period.label}
@@ -946,7 +947,7 @@ const Dashboard = () => {
 
       {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && !hasChartData ? (
         <div className="nl-card nl-card-empty grid place-items-center p-10 text-zinc-500">
-          Nenhum dado disponível ainda para este período.
+          Nenhum dado encontrado no período selecionado. Cadastre vendas, produtos e custos para liberar esta análise.
         </div>
       ) : (isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) ? (
         <div className="grid min-h-0 grid-cols-1 gap-5 xl:grid-cols-3">

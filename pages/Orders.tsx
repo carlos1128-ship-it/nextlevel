@@ -55,7 +55,7 @@ const Orders = () => {
       });
       setOrders(normalized);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar pedidos.");
+      const message = getErrorMessage(err, "Não foi possível carregar pedidos.");
       setError(message);
       addToast(message, "error");
     } finally {

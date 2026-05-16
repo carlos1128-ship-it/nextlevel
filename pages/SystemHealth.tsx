@@ -151,7 +151,7 @@ const SystemHealth = () => {
       setBusyCompanyId(companyId);
       const updated = await resetAdminQuota(companyId);
       setQuotas((current) => current.map((item) => (item.companyId === companyId ? updated : item)));
-      addToast("Quota resetada com sucesso.");
+      addToast("Cota resetada com sucesso.");
     } catch {
       addToast("Falha ao resetar quota.", "error");
     } finally {
@@ -326,7 +326,7 @@ const SystemHealth = () => {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
-        <Panel title="Quota management" subtitle="Reset manual, boost de tokens e ajuste de plano">
+        <Panel title="Gestão de cotas" subtitle="Reset manual, reforço de tokens e ajuste de plano">
           <div className="overflow-x-auto">
             <table className="min-w-full text-left">
               <thead>
@@ -365,7 +365,7 @@ const SystemHealth = () => {
                               void handleQuotaBoost(
                                 quota,
                                 { llmTokensUsed: quota.llmTokensUsed + 10000 },
-                                "Bonus de 10k tokens aplicado."
+                                "Bônus de 10k tokens aplicado."
                               )
                             }
                             label="+10k tokens"
@@ -376,7 +376,7 @@ const SystemHealth = () => {
                               void handleQuotaBoost(
                                 quota,
                                 { whatsappMessagesSent: Math.max(0, quota.whatsappMessagesSent - 500) },
-                                "Quota de mensagens ajustada."
+                                "Cota de mensagens ajustada."
                               )
                             }
                             label="+500 msgs"

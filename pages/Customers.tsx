@@ -56,7 +56,7 @@ const Customers = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar os clientes.");
+      const message = getErrorMessage(err, "Não foi possível carregar os clientes.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -169,8 +169,8 @@ const Customers = () => {
   const formatStatus = (status?: string | null) => {
     const labels: Record<string, string> = {
       PENDING_CONFIRMATION: "Aguardando confirmacao",
-      NEEDS_INFO: "Aguardando informacoes",
-      PENDING_DATA: "Aguardando informacoes",
+      NEEDS_INFO: "Aguardando informações",
+      PENDING_DATA: "Aguardando informações",
       NEEDS_HUMAN: "Precisa de atendimento humano",
       CONFIRMED: "Confirmado",
       CANCELLED: "Cancelado",

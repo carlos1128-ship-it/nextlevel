@@ -49,7 +49,7 @@ const Settings = () => {
       addToast("Nível de detalhamento atualizado.", "success");
     } catch (error) {
       setDetailLevel(previous);
-      addToast(getErrorMessage(error, "Falha ao salvar nivel de detalhamento."), "error");
+      addToast(getErrorMessage(error, "Falha ao salvar nível de detalhamento."), "error");
     } finally {
       setSaving(false);
     }
@@ -57,7 +57,7 @@ const Settings = () => {
 
   const handleUpdateName = async () => {
     if (!name.trim()) {
-      addToast("Informe um nome valido.", "info");
+      addToast("Informe um nome válido.", "info");
       return;
     }
 
@@ -98,66 +98,69 @@ const Settings = () => {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">Configurações</h1>
+      <section className="nl-page-header">
+        <p className="nl-page-eyebrow">Conta e operação</p>
+        <h1 className="nl-page-title">Configurações</h1>
+      </section>
 
       <CompanyPersonalizationPanel companyId={selectedCompanyId} onToast={addToast} />
 
       <DashboardPersonalizationPanel companyId={selectedCompanyId} onToast={addToast} />
 
-      <section className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="nl-card space-y-5 p-6">
         <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Perfil</h2>
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-lime-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="nl-input"
             placeholder="Nome"
           />
           <button
             onClick={handleUpdateName}
             disabled={saving}
-            className="rounded-xl bg-lime-300 px-4 py-2.5 text-sm font-bold text-zinc-900 disabled:opacity-50"
+            className="nl-button-primary disabled:opacity-50"
           >
             Salvar nome
           </button>
         </div>
       </section>
 
-      <section className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Seguranca</h2>
+      <section className="nl-card space-y-5 p-6">
+        <h2 className="text-lg font-bold text-zinc-100">Segurança</h2>
         <div className="grid gap-3 md:grid-cols-2">
           <input
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             placeholder="Senha atual"
-            className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-lime-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="nl-input"
           />
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Nova senha"
-            className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-lime-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="nl-input"
           />
         </div>
         <button
           onClick={handlePasswordChange}
           disabled={saving}
-          className="rounded-xl border border-zinc-300 px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="nl-button-secondary disabled:opacity-50"
         >
           Alterar senha
         </button>
       </section>
 
-      <section className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Preferencias</h2>
+      <section className="nl-card space-y-5 p-6">
+        <h2 className="text-lg font-bold text-zinc-100">Preferências</h2>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-zinc-600 dark:text-zinc-300">Tema atual: {theme === "dark" ? "Escuro" : "Claro"}</p>
           <button
             onClick={handleThemeToggle}
             disabled={saving}
-            className="rounded-xl border border-zinc-300 px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            className="nl-button-secondary disabled:opacity-50"
           >
             {theme === "dark" ? "Mudar para Claro" : "Mudar para Escuro"}
           </button>
@@ -169,18 +172,18 @@ const Settings = () => {
             value={detailLevel}
             onChange={(e) => handleDetailChange(e.target.value as DetailLevel)}
             disabled={saving}
-            className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-900 focus:outline-none focus:ring-2 focus:ring-lime-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="nl-input font-bold"
           >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="low">Baixo</option>
+            <option value="medium">Médio</option>
+            <option value="high">Alto</option>
           </select>
         </div>
       </section>
 
       <button
         onClick={handleLogout}
-        className="w-full rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-700"
+        className="w-full rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-700"
       >
         Logout
       </button>
