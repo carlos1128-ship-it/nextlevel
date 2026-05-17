@@ -394,7 +394,9 @@ export function SplashScreen({
               transition={{ duration: 0.6 }}
             />
             <AnimatePresence mode="popLayout">
-              <CurrentScene key={sceneKey} sceneKey={sceneKey} />
+              <motion.div key={sceneKey} style={{ position: 'absolute', inset: 0 }}>
+                <CurrentScene sceneKey={sceneKey} />
+              </motion.div>
             </AnimatePresence>
           </div>
         </motion.div>
