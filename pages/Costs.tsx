@@ -70,7 +70,7 @@ const Costs = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Não foi possível carregar custos.");
+      const message = getErrorMessage(err, "Nao foi possivel carregar custos.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -169,59 +169,68 @@ const Costs = () => {
   const totalAmount = items.reduce((acc, item) => acc + Number(item.amount || 0), 0);
 
   return (
-    <div className="nl-page">
-      <div className="nl-page-header">
-        <div className="nl-page-header__meta">
-          <p className="nl-eyebrow">Gestão Operacional</p>
-          <h1 className="nl-page-title">Custos & Despesas</h1>
-          <p className="nl-page-subtitle">Controle despesas por categoria e período para enxergar lucro real, não apenas faturamento.</p>
+    <div className="space-y-6">
+      <div className="nl-enter flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-lime-300/80">Custos operacionais</p>
+          <h1 className="mt-1 text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Custos</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+            Controle despesas por categoria e periodo para enxergar lucro real, nao apenas faturamento.
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button type="button" onClick={resetForm} className="nl-button-secondary py-2 text-xs">
-            Limpar Form
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={resetForm} className="nl-button-secondary">
+            Limpar formulario
           </button>
-          <button type="button" onClick={loadCosts} className="nl-button-primary py-2 text-xs">
-            Sincronizar
+          <button type="button" onClick={loadCosts} className="nl-button-primary">
+            Atualizar
           </button>
         </div>
-      </div>      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px] mb-8">
-        <section className="nl-card p-6 md:p-8">
-          <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <FormCard className="nl-enter">
+          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)]">
-                {editingId ? "Edição Direta" : "Fluxo de Caixa"}
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                {editingId ? "Edicao ativa" : "Novo custo"}
               </p>
-              <h2 className="mt-1 text-xl font-black tracking-tight text-[var(--nl-text-primary)]">
-                {editingId ? "Atualizar Movimentação" : "Lançar Despesa"}
+              <h2 className="mt-1 text-xl font-black tracking-tight text-zinc-100">
+                {editingId ? "Atualizar custo" : "Registrar custo"}
               </h2>
             </div>
-            {editingId && (
-              <span className="nl-badge-neon text-[10px]">Alteração Ativa</span>
-            )}
+            {editingId ? (
+              <span className="w-max rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">
+                Modo edicao
+              </span>
+            ) : null}
           </div>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-            <div className="lg:col-span-4 flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Descrição do Gasto</span>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+            <div className="lg:col-span-3">
+              <label htmlFor="cost-name" className="nl-label">Nome</label>
               <input
+                id="cost-name"
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder="Ex: Aluguel Fevereiro"
+                placeholder="Ex: Aluguel, embalagem"
                 className="nl-input"
               />
             </div>
-            <div className="lg:col-span-3 flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Classificação</span>
+            <div className="lg:col-span-3">
+              <label htmlFor="cost-category" className="nl-label">Categoria</label>
               <input
+                id="cost-category"
                 value={form.category}
                 onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-                placeholder="Marketing, Fixo..."
+                placeholder="Fixo, marketing, entrega"
                 className="nl-input"
               />
             </div>
-            <div className="lg:col-span-2 flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Valor (R$)</span>
+            <div className="lg:col-span-2">
+              <label htmlFor="cost-amount" className="nl-label">Valor</label>
               <input
+                id="cost-amount"
                 inputMode="decimal"
                 value={form.amount}
                 onChange={(e) => setForm((prev) => ({ ...prev, amount: e.target.value }))}
@@ -229,122 +238,144 @@ const Costs = () => {
                 className="nl-input font-bold"
               />
             </div>
-            <div className="lg:col-span-3 flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Data Competência</span>
+            <div className="lg:col-span-2">
+              <label htmlFor="cost-date" className="nl-label">Data</label>
               <input
+                id="cost-date"
                 type="date"
                 value={form.date}
                 onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
                 className="nl-input"
               />
             </div>
-            <div className="flex flex-col justify-end lg:col-span-12">
-              <button type="submit" className="nl-button-primary w-full py-3">
-                {editingId ? "Salvar Alterações" : "Registrar na Planilha"}
+            <div className="flex items-end lg:col-span-2">
+              <button type="submit" className="nl-button-primary w-full">
+                {editingId ? "Salvar" : "Registrar"}
               </button>
             </div>
           </form>
-        </section>
+        </FormCard>
 
-        <div className="space-y-6">
-          <div className="nl-card p-6 relative overflow-hidden flex flex-col justify-between h-[160px]">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-red-500 opacity-[0.03] blur-3xl pointer-events-none" />
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)]">Saída Acumulada</p>
-              <p className="mt-3 text-3xl font-black text-red-400 leading-none">{asCurrency(totalAmount)}</p>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-[11px] text-[var(--nl-text-muted)] font-bold">
-              <span>{pagination.total} LANÇAMENTOS</span>
-              <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center text-red-400">
-                <ReceiptIcon className="h-4 w-4" />
+        <div className="space-y-4">
+          <MetricCard interactive className="nl-enter">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Total no filtro</p>
+                <p className="mt-3 text-3xl font-black leading-none tracking-tight text-zinc-100">
+                  {asCurrency(totalAmount)}
+                </p>
+                <p className="mt-2 text-xs font-semibold text-zinc-500">
+                  {pagination.total} custo{pagination.total === 1 ? "" : "s"} encontrados
+                </p>
+              </div>
+              <div className="rounded-2xl border border-lime-400/20 bg-lime-400/10 p-3 text-lime-300">
+                <DollarSignIcon className="h-5 w-5" />
               </div>
             </div>
-          </div>
+          </MetricCard>
 
-          <section className="nl-card p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)] mb-4">Filtragem Estratégica</p>
+          <FilterCard className="nl-enter">
+            <p className="mb-4 text-sm font-black text-zinc-200">Filtros</p>
             <div className="space-y-4">
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold uppercase text-[var(--nl-text-muted)] px-1">Termo</span>
+              <div>
+                <label htmlFor="cost-search" className="nl-label">Busca</label>
                 <input
+                  id="cost-search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Pesquisar..."
-                  className="nl-input text-xs py-2"
+                  placeholder="Nome ou categoria"
+                  className="nl-input"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase text-[var(--nl-text-muted)] px-1">Início</span>
+              <div>
+                <label htmlFor="cost-category-filter" className="nl-label">Categoria exata</label>
+                <input
+                  id="cost-category-filter"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="Opcional"
+                  className="nl-input"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="cost-start" className="nl-label">Inicio</label>
                   <input
+                    id="cost-start"
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="nl-input text-[10px] py-1.5"
+                    className="nl-input"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase text-[var(--nl-text-muted)] px-1">Fim</span>
+                <div>
+                  <label htmlFor="cost-end" className="nl-label">Fim</label>
                   <input
+                    id="cost-end"
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="nl-input text-[10px] py-1.5"
+                    className="nl-input"
                   />
                 </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold uppercase text-[var(--nl-text-muted)] px-1">Visualização</span>
+              <div>
+                <label htmlFor="cost-limit" className="nl-label">Itens por pagina</label>
                 <select
+                  id="cost-limit"
                   value={limit}
                   onChange={(e) => setLimit(Number(e.target.value) || 10)}
-                  className="nl-input text-xs py-2"
+                  className="nl-input"
                 >
                   {[5, 10, 20, 50].map((option) => (
-                    <option key={option} value={option}>{option} por página</option>
+                    <option key={option} value={option}>{option}</option>
                   ))}
                 </select>
               </div>
             </div>
-          </section>
+          </FilterCard>
         </div>
       </div>
+
       {loading ? (
-        <div className="py-20 flex justify-center">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--nl-neon)] border-t-transparent" />
-        </div>
+        <LoadingState />
       ) : error ? (
-        <section className="nl-card p-10 text-center border-red-900/30">
-          <h3 className="text-xl font-bold text-red-200">Erro na Recuperação de Dados</h3>
-          <p className="text-sm text-[var(--nl-text-secondary)] mt-2">{error}</p>
-          <button onClick={loadCosts} className="nl-button-secondary mt-6">Recarregar</button>
-        </section>
+        <ErrorState
+          title="Erro ao carregar custos"
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={loadCosts}
+        />
       ) : items.length === 0 ? (
-        <section className="nl-card p-20 text-center border-dashed">
-          <p className="text-xl font-bold text-[var(--nl-text-muted)]">Nenhuma Despesa</p>
-          <p className="text-sm text-[var(--nl-text-secondary)] mt-1">Refine seus filtros ou adicione um novo lançamento.</p>
-        </section>
+        <EmptyState
+          title="Nenhum custo registrado"
+          description="Cadastre custos operacionais para calcular lucro real e margem."
+        />
       ) : (
-        <section className="nl-card overflow-hidden">
-          <div className="px-6 py-5 flex items-center justify-between border-b border-white/5">
+        <TableCard className="nl-enter">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
             <div>
-              <p className="text-[13px] font-bold text-[var(--nl-text-primary)]">{pagination.total} Lançamentos</p>
-              <p className="text-[11px] text-[var(--nl-text-muted)] mt-0.5">Visão consolidada do período</p>
+              <p className="text-sm font-black text-zinc-100">
+                {pagination.total} custo{pagination.total === 1 ? "" : "s"}
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Pagina {pagination.page} de {pagination.totalPages || 1}
+              </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <button
-                className="nl-button-secondary py-1.5 px-3 text-xs"
+                className="nl-button-secondary min-h-0 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => changePage(page - 1)}
                 disabled={page <= 1}
               >
                 Anterior
               </button>
               <button
-                className="nl-button-secondary py-1.5 px-3 text-xs"
+                className="nl-button-secondary min-h-0 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => changePage(page + 1)}
                 disabled={pagination.totalPages !== 0 && page >= pagination.totalPages}
               >
-                Próxima
+                Proxima
               </button>
             </div>
           </div>
@@ -353,59 +384,47 @@ const Costs = () => {
             <table className="nl-table">
               <thead>
                 <tr>
-                  <th>Descrição / Item</th>
-                  <th>Classificação</th>
-                  <th>Data Competência</th>
-                  <th className="text-right">Valor Total</th>
-                  <th className="text-right">Gerenciamento</th>
+                  <th className="text-left">Nome</th>
+                  <th className="text-left">Categoria</th>
+                  <th className="text-left">Data</th>
+                  <th className="text-right">Valor</th>
+                  <th className="text-right">Acoes</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-zinc-200">
                 {items.map((cost) => (
-                  <tr key={cost.id}>
-                    <td>
-                      <div className="font-bold text-[var(--nl-text-primary)] flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-red-400/10 flex items-center justify-center text-red-400">
-                           <ReceiptIcon className="h-4 w-4" />
-                        </div>
+                  <tr key={cost.id} className="border-t border-zinc-800/80">
+                    <td className="font-bold text-zinc-100">
+                      <span className="inline-flex items-center gap-2">
+                        <ReceiptIcon className="h-4 w-4 text-lime-300" />
                         {cost.name}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)] bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
-                        {cost.category || "Sem Categ."}
                       </span>
                     </td>
-                    <td className="text-[13px] text-[var(--nl-text-secondary)] font-medium">
-                      {new Date(cost.date).toLocaleDateString("pt-BR")}
-                    </td>
-                    <td className="text-right font-black text-red-400 text-[14px]">
-                      {asCurrency(Number(cost.amount || 0))}
-                    </td>
-                    <td className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          className="nl-button-secondary py-1.5 px-3 text-xs"
-                          onClick={() => handleEdit(cost)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          className="nl-button-danger py-1.5 px-3 text-xs"
-                          onClick={() => handleDelete(cost.id)}
-                        >
-                          Remover
-                        </button>
-                      </div>
+                    <td>{cost.category || "-"}</td>
+                    <td>{new Date(cost.date).toLocaleDateString("pt-BR")}</td>
+                    <td className="text-right font-black text-zinc-100">{asCurrency(Number(cost.amount || 0))}</td>
+                    <td className="space-x-2 text-right">
+                      <button
+                        type="button"
+                        className="nl-button-secondary min-h-0 px-3 py-2 text-xs"
+                        onClick={() => handleEdit(cost)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="nl-button-danger min-h-0 px-3 py-2 text-xs"
+                        onClick={() => handleDelete(cost.id)}
+                      >
+                        Excluir
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </section>
+        </TableCard>
       )}
     </div>
   );

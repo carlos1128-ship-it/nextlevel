@@ -184,231 +184,179 @@ const Products = () => {
     }
   };
 
-
   const changePage = (next: number) => {
     setPage(Math.max(1, Math.min(next, pagination.totalPages || 1)));
   };
 
   return (
-    <div className="nl-page">
-      <div className="nl-page-header">
-        <div className="nl-page-header__meta">
-          <p className="nl-eyebrow">Gestão de Inventário</p>
-          <h1 className="nl-page-title">Produtos & Serviços</h1>
-          <p className="nl-page-subtitle">
-            Catalogação unificada, análise de markup e saúde financeira por unidade de negócio.
-          </p>
+    <main className="space-y-6">
+      <section className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Catálogo operacional</p>
+          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Produtos e Serviços</h1>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={() => {
               setEditingId(null);
               setForm(emptyForm());
             }}
-            className="nl-button-secondary py-2"
+            className="rounded-xl border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-lime-400"
           >
-            Resetar Formulário
+            Limpar formulario
           </button>
           <button
             type="button"
             onClick={loadProducts}
-            className="nl-button-primary py-2"
+            className="rounded-xl bg-lime-400 px-4 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
           >
-            Sincronizar Catálogo
+            Atualizar
           </button>
-        </div>
-      </div>
-
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-4 mb-8">
-        <div className="lg:col-span-3 nl-card p-6 md:p-8">
-          <h3 className="text-xs font-black uppercase tracking-[0.14em] text-[var(--nl-text-muted)] mb-8 flex items-center gap-2">
-             <span className="h-1.5 w-1.5 rounded-full bg-[var(--nl-neon)] shadow-[0_0_8px_var(--nl-neon)]" />
-             {editingId ? "Editor de Item" : "Novo Cadastro"}
-          </h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-12">
-            <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-1.5">
-               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)] px-1">Título</span>
-               <input
-                 value={form.name}
-                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                 placeholder="Cerveja Artesanal 500ml"
-                 className="nl-input text-xs"
-               />
-            </div>
-            <div className="md:col-span-2 lg:col-span-2 flex flex-col gap-1.5">
-               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)] px-1">Referência</span>
-               <input
-                 value={form.sku}
-                 onChange={(e) => setForm((prev) => ({ ...prev, sku: e.target.value }))}
-                 placeholder="SKU-992"
-                 className="nl-input text-xs"
-               />
-            </div>
-            <div className="md:col-span-3 lg:col-span-2 flex flex-col gap-1.5">
-               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)] px-1">Preço Público</span>
-               <input
-                 value={form.price}
-                 onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
-                 placeholder="0,00"
-                 className="nl-input text-xs font-bold"
-               />
-            </div>
-            <div className="md:col-span-3 lg:col-span-2 flex flex-col gap-1.5">
-               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)] px-1">Custo Bruto</span>
-               <input
-                 value={form.cost}
-                 onChange={(e) => setForm((prev) => ({ ...prev, cost: e.target.value }))}
-                 placeholder="0,00"
-                 className="nl-input text-xs"
-               />
-            </div>
-            <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)] px-1">Categoria Operacional</span>
-                <input
-                  value={form.category}
-                  onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-                  placeholder="Bebidas / Destilados"
-                  className="nl-input text-xs"
-                />
-            </div>
-            <div className="md:col-span-2 lg:col-span-3 flex flex-col gap-1.5">
-               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)] px-1">Outras Taxas (Impostos/Frete)</span>
-               <div className="flex gap-2">
-                 <input
-                   value={form.tax}
-                   onChange={(e) => setForm((prev) => ({ ...prev, tax: e.target.value }))}
-                   placeholder="Imposto"
-                   className="nl-input text-[10px] py-1.5"
-                 />
-                 <input
-                   value={form.shipping}
-                   onChange={(e) => setForm((prev) => ({ ...prev, shipping: e.target.value }))}
-                   placeholder="Frete"
-                   className="nl-input text-[10px] py-1.5"
-                 />
-               </div>
-            </div>
-            <div className="md:col-span-6 lg:col-span-12 flex items-end">
-                <button
-                  type="submit"
-                  className="nl-button-primary w-full py-2.5 text-xs font-black uppercase tracking-widest"
-                >
-                  {editingId ? "Salvar Edição" : "Cadastrar Produto"}
-                </button>
-            </div>
-          </form>
-
-          <div
-            className={`mt-6 rounded-2xl border p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 ${previewClassName} shadow-[0_0_20px_rgba(0,0,0,0.1)]`}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col">
-                <p className="text-[10px] font-black uppercase tracking-[0.15em] opacity-60">Estimativa de Markup</p>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <p className="text-3xl font-black">{preview.netMargin.toFixed(0)}%</p>
-                  <p className="text-xs font-bold opacity-60">líquido</p>
-                </div>
-              </div>
-              <div className="h-10 w-px bg-white/10 hidden md:block" />
-              <div className="flex flex-col">
-                <p className="text-[10px] font-black uppercase tracking-[0.15em] opacity-60">Resultado Unitário</p>
-                <p className="text-xl font-black mt-1">{asCurrency(preview.grossProfit)}</p>
-              </div>
-            </div>
-
-            <div className="text-[11px] font-bold py-2 px-3 rounded-xl bg-white/5 border border-white/5 max-w-[280px]">
-              {preview.warningLevel === "WARNING" ? (
-                <p className="flex items-center gap-2">⚠️ <span className="opacity-80">Atenção: Margem abaixo do ideal configurado (15%).</span></p>
-              ) : preview.warningLevel === "CRITICAL" ? (
-                <p className="flex items-center gap-2">⛔ <span className="opacity-90">Risco: Custo excedendo preço de venda. Unidade deficitária.</span></p>
-              ) : (
-                <p className="flex items-center gap-2">✅ <span className="opacity-80">Canal Saudável: Margem dentro da meta operacional.</span></p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="nl-card p-5 md:p-7 space-y-5">
-          <h2 className="text-[14px] font-bold uppercase tracking-[0.12em] text-[var(--nl-text-muted)]">
-            Filtros
-          </h2>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Busca Geral</span>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Nome, SKU..."
-                className="nl-input"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--nl-text-muted)] px-1">Categoria</span>
-              <input
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Filtrar por cat."
-                className="nl-input"
-              />
-            </div>
-            <div className="flex items-center justify-between gap-4 pt-2">
-              <span className="text-[11px] font-bold text-[var(--nl-text-muted)] uppercase tracking-wider">Itens / Pág</span>
-              <select
-                value={limit}
-                onChange={(e) => setLimit(Number(e.target.value) || 10)}
-                className="bg-[#181A1D] border border-[var(--nl-border)] rounded-lg px-2 py-1 text-[12px] text-[var(--nl-text-primary)] focus:outline-none focus:border-[var(--nl-neon)]"
-              >
-                {[5, 10, 20, 50].map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-          </div>
         </div>
       </section>
 
-      {loading ? (
-        <div className="py-20 flex justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--nl-neon)] border-t-transparent" />
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--nl-text-muted)]">Carregando catálogo...</p>
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <FormCard className="lg:col-span-3">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-12">
+            <input
+              value={form.name}
+              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              placeholder="Nome do produto"
+              className="nl-input md:col-span-3"
+            />
+            <input
+              value={form.sku}
+              onChange={(e) => setForm((prev) => ({ ...prev, sku: e.target.value }))}
+              placeholder="SKU"
+              className="nl-input md:col-span-2"
+            />
+            <input
+              value={form.category}
+              onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+              placeholder="Categoria"
+              className="nl-input md:col-span-2"
+            />
+            <input
+              value={form.price}
+              onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
+              placeholder="Preço venda (BRL)"
+              className="nl-input md:col-span-1"
+            />
+            <input
+              value={form.cost}
+              onChange={(e) => setForm((prev) => ({ ...prev, cost: e.target.value }))}
+              placeholder="Custo"
+              className="nl-input md:col-span-1"
+            />
+            <input
+              value={form.tax}
+              onChange={(e) => setForm((prev) => ({ ...prev, tax: e.target.value }))}
+              placeholder="Impostos"
+              className="nl-input md:col-span-1"
+            />
+            <input
+              value={form.shipping}
+              onChange={(e) => setForm((prev) => ({ ...prev, shipping: e.target.value }))}
+              placeholder="Frete"
+              className="nl-input md:col-span-1"
+            />
+            <button
+              type="submit"
+              className="nl-button-primary md:col-span-1"
+            >
+              {editingId ? "Salvar" : "Add"}
+            </button>
+          </form>
+
+          <div
+            className={`mt-4 rounded-2xl border p-4 transition-colors ${previewClassName}`}
+            role="status"
+            aria-live="polite"
+            aria-label={`Margem ${preview.netMargin.toFixed(1)} por cento, lucro ${asCurrency(preview.grossProfit)}`}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em]">Margem em tempo real</p>
+                <p className="mt-2 text-2xl font-black">{preview.netMargin.toFixed(2)}%</p>
+              </div>
+              <div className="text-sm">
+                <p>Lucro líquido (estim.): {asCurrency(preview.grossProfit)}</p>
+                {preview.warningLevel === "WARNING" ? (
+                  <p className="mt-1">⚠️ Margem abaixo de 10%.</p>
+                ) : null}
+                {preview.warningLevel === "CRITICAL" ? (
+                  <p className="mt-1 font-bold">Prejuizo ou margem zero</p>
+                ) : null}
+              </div>
+            </div>
           </div>
-        </div>
+        </FormCard>
+
+        <FilterCard className="space-y-3">
+          <p className="text-sm font-semibold text-zinc-300">Filtros</p>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nome, SKU ou categoria"
+            className="nl-input"
+          />
+          <input
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Categoria exata (opcional)"
+            className="nl-input"
+          />
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-xs text-zinc-500">Itens por página</label>
+            <select
+              value={limit}
+              onChange={(e) => setLimit(Number(e.target.value) || 10)}
+              className="nl-input min-h-0 py-2 text-xs"
+            >
+              {[5, 10, 20, 50].map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+        </FilterCard>
+      </section>
+
+      {loading ? (
+        <LoadingState />
       ) : error ? (
-        <section className="nl-card p-10 text-center border-red-900/30">
-          <h3 className="text-xl font-bold text-red-200">Erro no catálogo</h3>
-          <p className="text-sm text-[var(--nl-text-secondary)] mt-2">{error}</p>
-          <button onClick={loadProducts} className="nl-button-secondary mt-6">Tentar novamente</button>
-        </section>
+        <ErrorState
+          title="Erro ao carregar produtos"
+          description={error}
+          actionLabel="Tentar novamente"
+          onAction={loadProducts}
+        />
       ) : items.length === 0 ? (
-        <section className="nl-card p-20 text-center border-dashed">
-          <p className="text-xl font-bold text-[var(--nl-text-muted)]">Nenhum produto cadastrado</p>
-          <p className="text-sm text-[var(--nl-text-secondary)] mt-1">Sua lista está vazia. Comece adicionando um item acima.</p>
-        </section>
+        <EmptyState
+          title="Nenhum produto encontrado"
+          description="Cadastre produtos para destravar margens, precificacao e LTV."
+        />
       ) : (
-        <section className="nl-card overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-4 p-5 md:px-7 border-b border-[var(--nl-border)] bg-[rgba(255,255,255,0.01)]">
+        <TableCard>
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
             <div>
-              <h3 className="text-[14px] font-bold text-[var(--nl-text-primary)]">
-                Itens Listados ({pagination.total})
-              </h3>
-              <p className="text-[11px] text-[var(--nl-text-muted)] font-bold uppercase tracking-wider">
-                Pág. {pagination.page} / {pagination.totalPages || 1}
+              <p className="text-sm font-semibold text-zinc-200">
+                {pagination.total} produto{pagination.total === 1 ? "" : "s"}
+              </p>
+              <p className="text-xs text-zinc-500">
+                Página {pagination.page} de {pagination.totalPages || 1}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <button
-                className="nl-button-secondary py-1.5 px-3 text-xs"
+                className="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-200 disabled:opacity-40"
                 onClick={() => changePage(page - 1)}
                 disabled={page <= 1}
               >
                 Anterior
               </button>
               <button
-                className="nl-button-secondary py-1.5 px-3 text-xs"
+                className="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-200 disabled:opacity-40"
                 onClick={() => changePage(page + 1)}
                 disabled={pagination.totalPages !== 0 && page >= pagination.totalPages}
               >
@@ -421,16 +369,18 @@ const Products = () => {
             <table className="nl-table">
               <thead>
                 <tr>
-                  <th>Produto</th>
-                  <th>Categoria / SKU</th>
-                  <th>Marketplace</th>
-                  <th className="text-right">Preço</th>
-                  <th className="text-right">Custo</th>
-                  <th className="text-right">Margem</th>
-                  <th className="text-right">Ações</th>
+                  <th className="px-3 py-2 text-left">Produto</th>
+                  <th className="px-3 py-2 text-left">Categoria</th>
+                  <th className="px-3 py-2 text-left">SKU</th>
+                  <th className="px-3 py-2 text-left">Status ML</th>
+                  <th className="px-3 py-2 text-right">Estoque</th>
+                  <th className="px-3 py-2 text-right">Preço</th>
+                  <th className="px-3 py-2 text-right">Custo</th>
+                  <th className="px-3 py-2 text-right">Margem</th>
+                  <th className="px-3 py-2 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-zinc-100">
                 {items.map((product) => {
                   const financials =
                     product.financials ??
@@ -440,60 +390,51 @@ const Products = () => {
                       Number(product.shipping ?? 0),
                       Number(product.price ?? 0),
                     );
-                  const financialBadge =
+                  const financialClassName =
                     financials.warningLevel === "CRITICAL"
-                      ? "danger"
+                      ? "border border-red-500/50 bg-red-500/25 text-red-100"
                       : financials.warningLevel === "WARNING"
-                        ? "muted"
-                        : "neon";
+                        ? "border border-amber-400/40 bg-amber-400/15 text-amber-100"
+                        : "border border-lime-400/25 bg-lime-400/10 text-lime-200";
 
                   return (
-                    <tr key={product.id}>
-                      <td>
-                        <div className="font-bold text-[var(--nl-text-primary)]">{product.name}</div>
-                        <p className="text-[11px] text-[var(--nl-text-muted)] mt-0.5">
-                          ID: {product.id.slice(-8).toUpperCase()}
+                    <tr key={product.id} className="border-t border-zinc-800/80">
+                      <td className="px-3 py-2">
+                        <div className="font-semibold">{product.name}</div>
+                        <p className="text-xs text-zinc-500">
+                          Criado em {new Date(product.createdAt).toLocaleDateString("pt-BR")}
                         </p>
                       </td>
-                      <td>
-                        <div className="text-[13px] text-[var(--nl-text-secondary)]">{product.category || "Sem cat."}</div>
-                        <p className="text-[11px] font-mono text-[var(--nl-text-muted)] mt-0.5">{product.sku || "N/A"}</p>
-                      </td>
-                      <td>
-                        <span className={`nl-badge-${product.marketplaceStatus === "active" ? "success" : "muted"}`}>
-                          {product.marketplaceStatus || "Local"}
-                        </span>
-                      </td>
-                      <td className="text-right font-bold text-[var(--nl-text-primary)]">{asCurrency(product.price)}</td>
-                      <td className="text-right text-[var(--nl-text-secondary)]">
+                      <td className="px-3 py-2">{product.category || "—"}</td>
+                      <td className="px-3 py-2">{product.sku || "—"}</td>
+                      <td className="px-3 py-2">{product.marketplaceStatus || "—"}</td>
+                      <td className="px-3 py-2 text-right">{product.availableQuantity ?? "—"}</td>
+                      <td className="px-3 py-2 text-right font-semibold">{asCurrency(product.price)}</td>
+                      <td className="px-3 py-2 text-right text-zinc-200">
                         {product.cost !== null && product.cost !== undefined ? asCurrency(product.cost) : "—"}
                       </td>
-                      <td className="text-right">
-                        <span className={`nl-badge-${financialBadge}`}>
+                      <td className="px-3 py-2 text-right">
+                        <div className={`inline-flex rounded-xl px-3 py-1 text-sm font-semibold ${financialClassName}`}>
                           {financials.warningLevel === "CRITICAL"
                             ? "Prejuizo"
                             : `${financials.netMargin.toFixed(1)}%`}
-                        </span>
-                      </td>
-                      <td className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            className="p-2 rounded-lg border border-[var(--nl-border)] hover:bg-[rgba(255,255,255,0.05)] transition text-[var(--nl-text-secondary)]"
-                            onClick={() => handleEdit(product)}
-                            title="Editar"
-                          >
-                            ✎
-                          </button>
-                          <button
-                            type="button"
-                            className="p-2 rounded-lg border border-red-900/30 hover:bg-red-950/20 transition text-red-400"
-                            onClick={() => handleDelete(product.id)}
-                            title="Excluir"
-                          >
-                            ✕
-                          </button>
                         </div>
+                      </td>
+                      <td className="space-x-2 px-3 py-2 text-right">
+                        <button
+                          type="button"
+                          className="nl-button-secondary min-h-0 px-3 py-2 text-xs"
+                          onClick={() => handleEdit(product)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          className="nl-button-danger min-h-0 px-3 py-2 text-xs"
+                          onClick={() => handleDelete(product.id)}
+                        >
+                          Excluir
+                        </button>
                       </td>
                     </tr>
                   );
@@ -501,9 +442,9 @@ const Products = () => {
               </tbody>
             </table>
           </div>
-        </section>
+        </TableCard>
       )}
-    </div>
+    </main>
   );
 };
 

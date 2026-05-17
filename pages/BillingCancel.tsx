@@ -11,7 +11,7 @@ const BillingCancel = () => {
           Assinatura nao concluida
         </p>
         <h1 className="mt-4 text-4xl font-black tracking-tight">
-          Você pode escolher um plano quando quiser
+          Voce pode escolher um plano quando quiser
         </h1>
         <p className="mt-4 text-sm leading-7 text-zinc-400">
           Assinatura não concluída. Você pode escolher um plano quando quiser.

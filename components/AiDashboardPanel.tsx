@@ -36,7 +36,7 @@ function MiniCard({
       </div>
       <h3 className="text-lg font-black tracking-tight text-zinc-100">{card?.title || "Aguardando dados suficientes"}</h3>
       <p className="mt-2 text-sm leading-6 text-zinc-400">
-        {card?.summary || "Conecte uma integração ou adicione dados para liberar esta análise."}
+        {card?.summary || "Conecte uma integracao ou adicione dados para liberar esta analise."}
       </p>
       {card?.recommendation ? (
         <p className="mt-3 text-sm font-semibold leading-6 text-lime-200">{card.recommendation}</p>
@@ -66,11 +66,11 @@ export default function AiDashboardPanel({
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Camada inteligente</p>
           <h2 className="mt-2 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
-            NEXT LEVEL entende o negócio inteiro
+            NEXT LEVEL entende o negocio inteiro
           </h2>
         </div>
         <span className="rounded-full border border-zinc-800 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
-          Em análise contínua
+          Em analise continua
         </span>
       </div>
 
@@ -83,7 +83,7 @@ export default function AiDashboardPanel({
 
       {data?.nextBestActions?.length ? (
         <FeatureCard>
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Próximas ações</p>
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Proximas acoes</p>
           <div className="grid gap-3 md:grid-cols-3">
             {data.nextBestActions.map((action) => (
               <div key={`${action.type}-${action.title}`} className="rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 transition hover:border-lime-400/25">
@@ -97,7 +97,7 @@ export default function AiDashboardPanel({
 
       {data?.missingData?.length ? (
         <p className="text-xs leading-5 text-zinc-500">
-          Para melhorar a precisão: {data.missingData.join(", ")}.
+          Para melhorar a precisao: {data.missingData.join(", ")}.
         </p>
       ) : null}
     </AppCard>

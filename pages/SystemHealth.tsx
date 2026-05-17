@@ -151,7 +151,7 @@ const SystemHealth = () => {
       setBusyCompanyId(companyId);
       const updated = await resetAdminQuota(companyId);
       setQuotas((current) => current.map((item) => (item.companyId === companyId ? updated : item)));
-      addToast("Cota resetada com sucesso.");
+      addToast("Quota resetada com sucesso.");
     } catch {
       addToast("Falha ao resetar quota.", "error");
     } finally {
@@ -181,116 +181,113 @@ const SystemHealth = () => {
   };
 
   return (
-    <div className="nl-page">
-      <div className="nl-page-header">
-        <div className="nl-page-header__meta">
-          <p className="nl-eyebrow">Plataforma</p>
-          <h1 className="nl-page-title">Saúde do Sistema</h1>
-          <p className="nl-page-subtitle">
-            Monitore a operação em tempo real, gerencie quotas e audite alterações críticas.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void loadOperations()}
-          className="nl-button-primary"
-        >
-          Atualizar painel
-        </button>
-      </div>
-
-      <section className="nl-card bg-gradient-to-br from-[rgba(182,255,0,0.05)] to-transparent border-[rgba(182,255,0,0.2)] p-6 md:p-8 mb-8">
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-[32px] border border-zinc-800 bg-[radial-gradient(circle_at_top_right,_rgba(182,255,0,0.12),_transparent_35%),linear-gradient(135deg,#0a0d12_0%,#131822_55%,#0a0d12_100%)] p-6 md:p-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <span className="nl-badge-neon mb-3">SuperAdmin Activo</span>
-            <h2 className="text-2xl md:text-3xl font-black text-[var(--nl-text-primary)]">
-              Operação consolidada.
-            </h2>
-            <p className="mt-2 text-sm text-[var(--nl-text-secondary)] max-w-xl">
-              Visão técnica do core: Banco, Redis, LLMs e conectores externos em uma única tela de auditoria.
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-lime-300">
+              <ShieldIcon className="h-4 w-4" />
+              Central do SuperAdmin
+            </div>
+            <h1 className="max-w-3xl text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
+              Operação, custos e incidentes em uma única visão.
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm text-zinc-400">
+              Monitoramos banco, Redis, LLMs, quotas e trilha de auditoria em tempo quase real.
             </p>
           </div>
-          <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-wider text-[var(--nl-text-muted)]">
-            <span className="flex items-center gap-1.5 font-bold">
-              <div className="h-2 w-2 rounded-full bg-[var(--nl-neon)] animate-pulse" />
-              Sincronizado
-            </span>
-          </div>
+          <button
+            type="button"
+            onClick={() => void loadOperations()}
+            className="inline-flex items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-950/80 px-4 py-3 text-sm font-bold text-zinc-100 transition hover:border-lime-400 hover:text-lime-300"
+          >
+            Atualizar agora
+          </button>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-8">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          title="Faturamento Est."
-          value={asCurrency(usage.totals.monthlyRevenue)}
-          helper="Receita mensal projetada"
-          icon={<DollarSignIcon />}
-          isNeon
-        />
-        <MetricCard
-          title="Tokens (30d)"
+          title="Tokens na plataforma"
           value={asCompactNumber(usage.totals.totalTokens)}
-          helper="Consumo de LLMs"
-          icon={<RadarIcon />}
+          subtitle="Consumo mensal agregado"
+          icon={<RadarIcon className="h-5 w-5 text-lime-300" />}
         />
         <MetricCard
-          title="Mensagens"
+          title="Mensagens WhatsApp"
           value={asCompactNumber(usage.totals.totalMessages)}
-          helper="WhatsApp / Instagram"
-          icon={<ActivityIcon />}
+          subtitle="Volume consolidado"
+          icon={<ActivityIcon className="h-5 w-5 text-sky-300" />}
+        />
+        <MetricCard
+          title="Receita mensal"
+          value={asCurrency(usage.totals.monthlyRevenue)}
+          subtitle="Mensalidades estimadas"
+          icon={<DollarSignIcon className="h-5 w-5 text-emerald-300" />}
         />
         <MetricCard
           title="Lucro estimado"
           value={asCurrency(usage.totals.estimatedProfit)}
-          helper={`Custo IA: ${asCurrency(usage.totals.aiCostEstimate)}`}
-          icon={<ShieldIcon />}
-          isNeon={usage.totals.estimatedProfit > 0}
+          subtitle={`Custo IA ${asCurrency(usage.totals.aiCostEstimate)}`}
+          icon={<BuildingIcon className="h-5 w-5 text-amber-200" />}
         />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr] mb-8">
-        <Panel title="Saúde do Core" subtitle="Banco, Redis, IA e provedores">
+      <section className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+        <Panel title="Saude do core" subtitle="Banco, Redis, IA e provedores">
           <div className="grid gap-3 md:grid-cols-3">
             <ServiceStatusCard title="Database" status={health.services.database.status} latency={health.services.database.latencyMs} />
             <ServiceStatusCard title="Redis" status={health.services.redis.status} latency={health.services.redis.latencyMs} />
-            <ServiceStatusCard title="AI (Gemini)" status={health.services.ai.status} latency={health.services.ai.avgLatencyMs} />
+            <ServiceStatusCard title="AI" status={health.services.ai.status} latency={health.services.ai.avgLatencyMs} />
           </div>
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-5 flex flex-wrap gap-2">
             {Object.entries(health.providers as Record<string, string>).map(([provider, status]) => (
-              <span key={provider} className={`nl-badge-${status === "up" || status === "configured" ? "success" : "muted"}`}>
+              <span key={provider} className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider ${statusClassName(status)}`}>
                 {provider}: {status}
               </span>
             ))}
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="h-64 rounded-2xl border border-[var(--nl-border)] bg-[rgba(255,255,255,0.01)] p-5">
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)] mb-4">Latência Média</h4>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="h-72 rounded-3xl border border-zinc-800 bg-black/20 p-4">
+              <div className="mb-4 text-xs font-black uppercase tracking-[0.22em] text-zinc-500">Tempo de resposta médio</div>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={health.requestTimeline}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="label" stroke="rgba(255,255,255,0.3)" fontSize={10} axisLine={false} tickLine={false} />
-                  <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                  <XAxis dataKey="label" stroke="#71717a" fontSize={12} />
+                  <YAxis stroke="#71717a" fontSize={12} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "#131517", borderColor: "#24282c", borderRadius: 12, fontSize: 12 }}
+                    contentStyle={{
+                      backgroundColor: "#09090b",
+                      borderColor: "#3f3f46",
+                      borderRadius: 16,
+                      color: "#fafafa",
+                    }}
                   />
-                  <Line type="monotone" dataKey="avgResponseTime" stroke="var(--nl-neon)" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="avgResponseTime" stroke="#B6FF00" strokeWidth={3} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="h-64 rounded-2xl border border-[var(--nl-border)] bg-[rgba(255,255,255,0.01)] p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)]">Sucesso vs Falha</h4>
-                <span className="text-[10px] font-bold text-red-400">Err: {health.successVsFailure.errorRateLastWindow.toFixed(1)}%</span>
+            <div className="h-72 rounded-3xl border border-zinc-800 bg-black/20 p-4">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">Sucesso vs falha</div>
+                <div className="text-xs font-semibold text-zinc-400">
+                  Erro 10min: {health.successVsFailure.errorRateLastWindow.toFixed(2)}%
+                </div>
               </div>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={successFailureData} dataKey="value" nameKey="name" innerRadius={45} outerRadius={70} paddingAngle={5} stroke="none">
+                  <Pie data={successFailureData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={4}>
                     {successFailureData.map((entry, index) => (
                       <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ backgroundColor: "#131517", borderColor: "#24282c", borderRadius: 12, fontSize: 12 }}
+                    contentStyle={{
+                      backgroundColor: "#09090b",
+                      borderColor: "#3f3f46",
+                      borderRadius: 16,
+                      color: "#fafafa",
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -298,82 +295,103 @@ const SystemHealth = () => {
           </div>
         </Panel>
 
-        <Panel title="Audit Feed" subtitle="Trilha de segurança em tempo real">
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 nl-scrollbar">
+        <Panel title="Live audit feed" subtitle="Polling automático das alterações críticas">
+          <div className="space-y-3">
             {auditFeed.length ? (
-              auditFeed.slice(0, 10).map((item) => (
-                <div key={item.id} className="p-4 rounded-xl border border-[var(--nl-border)] bg-[rgba(255,255,255,0.02)]">
+              auditFeed.slice(0, 8).map((item) => (
+                <div key={item.id} className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[13px] font-bold text-[var(--nl-text-primary)]">{item.action}</p>
-                      <p className="text-[11px] text-[var(--nl-text-muted)] mt-1">
-                        {item.company?.name || "Global"} · {formatDateTime(item.createdAt)}
+                      <p className="text-sm font-bold text-zinc-100">{item.action}</p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {item.company?.name || "Plataforma"} · {item.actorType} · {formatDateTime(item.createdAt)}
                       </p>
                     </div>
-                    <span className={`nl-badge-${item.actorType === "SYSTEM" ? "muted" : "neon"} text-[9px]`}>
+                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${statusClassName(item.actorType === "SYSTEM" ? "configured" : "up")}`}>
                       {item.actorType}
                     </span>
                   </div>
-                  <pre className="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-[10px] font-mono text-[var(--nl-text-secondary)] whitespace-pre-wrap">
-                    {typeof item.details === "string" ? item.details : JSON.stringify(item.details || {}, null, 2)}
+                  <pre className="mt-3 overflow-x-auto rounded-2xl bg-black/30 p-3 text-xs text-zinc-400">
+                    {typeof item.details === "string"
+                      ? item.details
+                      : JSON.stringify(item.details || {}, null, 2)}
                   </pre>
                 </div>
               ))
             ) : (
-              <EmptyState label="Sem trilha de auditoria recente." />
+              <EmptyState label="Sem trilhas recentes de auditoria." />
             )}
           </div>
         </Panel>
-      </div>
+      </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.3fr_1fr] mb-8">
-        <Panel title="Controle de Quotas" subtitle="Gestão manual de limites e faturamento">
+      <section className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
+        <Panel title="Quota management" subtitle="Reset manual, boost de tokens e ajuste de plano">
           <div className="overflow-x-auto">
-            <table className="nl-table">
+            <table className="min-w-full text-left">
               <thead>
-                <tr>
-                  <th>Empresa / Setor</th>
-                  <th>Plano</th>
-                  <th>Consumo</th>
-                  <th>Ciclo</th>
-                  <th className="text-right">Ações</th>
+                <tr className="border-b border-zinc-800 text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+                  <th className="px-3 py-3">Empresa</th>
+                  <th className="px-3 py-3">Plano</th>
+                  <th className="px-3 py-3">Tokens</th>
+                  <th className="px-3 py-3">Msgs</th>
+                  <th className="px-3 py-3">Ciclo</th>
+                  <th className="px-3 py-3">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {quotas.map((quota) => {
                   const isBusy = busyCompanyId === quota.companyId;
                   return (
-                    <tr key={quota.id}>
-                      <td>
-                        <div className="font-bold text-[var(--nl-text-primary)]">{quota.company.name}</div>
-                        <div className="text-[11px] text-[var(--nl-text-muted)]">{quota.company.sector || "Geral"}</div>
+                    <tr key={quota.id} className="border-b border-zinc-900/80 align-top">
+                      <td className="px-3 py-4">
+                        <div className="font-bold text-zinc-100">{quota.company.name}</div>
+                        <div className="text-xs text-zinc-500">{quota.company.sector || "Sem setor"}</div>
                       </td>
-                      <td>
-                        <span className={`nl-badge-${quota.currentTier === "ENTERPRISE" ? "neon" : quota.currentTier === "PRO" ? "success" : "muted"}`}>
+                      <td className="px-3 py-4">
+                        <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${statusClassName(quota.currentTier === "ENTERPRISE" ? "configured" : quota.currentTier === "PRO" ? "up" : "unknown")}`}>
                           {quota.currentTier}
                         </span>
                       </td>
-                      <td>
-                        <div className="text-[13px] text-[var(--nl-text-primary)]">
-                          {asCompactNumber(quota.llmTokensUsed)} tokens
-                        </div>
-                        <div className="text-[11px] text-[var(--nl-text-muted)]">
-                          {asCompactNumber(quota.whatsappMessagesSent)} msgs
-                        </div>
-                      </td>
-                      <td className="text-[12px] text-[var(--nl-text-secondary)]">{formatDateTime(quota.billingCycleEnd)}</td>
-                      <td className="text-right">
-                        <div className="flex flex-wrap justify-end gap-1.5">
-                          <ActionButton disabled={isBusy} onClick={() => void handleResetQuota(quota.companyId)} label="Reset" />
+                      <td className="px-3 py-4 text-sm text-zinc-200">{asCompactNumber(quota.llmTokensUsed)}</td>
+                      <td className="px-3 py-4 text-sm text-zinc-200">{asCompactNumber(quota.whatsappMessagesSent)}</td>
+                      <td className="px-3 py-4 text-xs text-zinc-400">{formatDateTime(quota.billingCycleEnd)}</td>
+                      <td className="px-3 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          <ActionButton disabled={isBusy} onClick={() => void handleResetQuota(quota.companyId)} label="Resetar" />
                           <ActionButton
                             disabled={isBusy}
-                            onClick={() => void handleQuotaBoost(quota, { llmTokensUsed: quota.llmTokensUsed + 50000 }, "+50k Tokens")}
-                            label="+Tokens"
+                            onClick={() =>
+                              void handleQuotaBoost(
+                                quota,
+                                { llmTokensUsed: quota.llmTokensUsed + 10000 },
+                                "Bonus de 10k tokens aplicado."
+                              )
+                            }
+                            label="+10k tokens"
                           />
                           <ActionButton
                             disabled={isBusy}
-                            onClick={() => void handleQuotaBoost(quota, { currentTier: "ENTERPRISE" }, "Upgrade Enterprise")}
-                            label="UP"
+                            onClick={() =>
+                              void handleQuotaBoost(
+                                quota,
+                                { whatsappMessagesSent: Math.max(0, quota.whatsappMessagesSent - 500) },
+                                "Quota de mensagens ajustada."
+                              )
+                            }
+                            label="+500 msgs"
+                          />
+                          <ActionButton
+                            disabled={isBusy}
+                            onClick={() => void handleQuotaBoost(quota, { currentTier: "PRO" }, "Plano ajustado para PRO.")}
+                            label="PRO"
+                          />
+                          <ActionButton
+                            disabled={isBusy}
+                            onClick={() =>
+                              void handleQuotaBoost(quota, { currentTier: "ENTERPRISE" }, "Plano ajustado para ENTERPRISE.")
+                            }
+                            label="Enterprise"
                           />
                         </div>
                       </td>
@@ -382,59 +400,71 @@ const SystemHealth = () => {
                 })}
               </tbody>
             </table>
+            {!quotas.length && !isLoading ? <EmptyState label="Nenhuma quota encontrada." /> : null}
           </div>
         </Panel>
 
-        <Panel title="Market Concentration" subtitle="Uso de recursos por tenant">
-          <div className="h-64 mb-6">
+        <Panel title="Consumo por empresa" subtitle="Quem puxa custo e quem deixa margem">
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={usage.companies.slice(0, 6)}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey="companyName" stroke="rgba(255,255,255,0.3)" fontSize={10} axisLine={false} tickLine={false} />
-                <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} axisLine={false} tickLine={false} />
+              <BarChart data={usage.companies.slice(0, 8)}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis dataKey="companyName" stroke="#71717a" fontSize={11} interval={0} angle={-18} textAnchor="end" height={64} />
+                <YAxis stroke="#71717a" fontSize={12} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#131517", borderColor: "#24282c", borderRadius: 12, fontSize: 12 }}
+                  contentStyle={{
+                    backgroundColor: "#09090b",
+                    borderColor: "#3f3f46",
+                    borderRadius: 16,
+                    color: "#fafafa",
+                  }}
                 />
-                <Bar dataKey="llmTokensUsed" fill="var(--nl-neon)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="llmTokensUsed" fill="#B6FF00" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="space-y-3">
-            {usage.companies.slice(0, 4).map((c) => (
-              <div key={c.companyId} className="flex items-center justify-between p-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[var(--nl-border)]">
-                <div>
-                  <p className="text-[13px] font-bold text-[var(--nl-text-primary)]">{c.companyName}</p>
-                  <p className="text-[10px] text-[var(--nl-text-muted)] uppercase tracking-widest">{c.currentTier}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[12px] font-bold text-[var(--nl-neon)]">{asCurrency(c.profitEstimate)}</p>
-                  <p className="text-[10px] text-[var(--nl-text-muted)]">Margem Est.</p>
+          <div className="mt-4 space-y-3">
+            {usage.companies.slice(0, 5).map((company) => (
+              <div key={company.companyId} className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-bold text-zinc-100">{company.companyName}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">{company.currentTier}</p>
+                  </div>
+                  <div className="text-right text-xs text-zinc-400">
+                    <p>Margem: {asCurrency(company.profitEstimate)}</p>
+                    <p>Custo IA: {asCurrency(company.aiCostEstimate)}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </Panel>
-      </div>
+      </section>
 
-      <Panel title="Error Logs & Incidentes" subtitle="Rastreio granular das últimas exceções">
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <Panel title="Error logs" subtitle="Últimos 50 erros para debug rápido">
+        <div className="grid gap-3">
           {errorLogs.length ? (
             errorLogs.slice(0, 12).map((item) => (
-              <div key={item.id} className="p-4 rounded-xl border border-red-900/20 bg-red-950/10 flex flex-col justify-between min-h-[100px]">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-red-400 font-mono">{item.method} {item.statusCode}</span>
-                    <span className="text-[10px] text-[var(--nl-text-muted)]">{item.responseTime}ms</span>
+              <div key={item.id} className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold text-zinc-100">
+                      {item.method} {item.path}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {item.company?.name || "Sem empresa"} · {formatDateTime(item.createdAt)}
+                    </p>
                   </div>
-                  <p className="text-[13px] font-bold text-[var(--nl-text-primary)] truncate" title={item.path}>{item.path}</p>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-red-300">{item.statusCode}</p>
+                    <p className="text-xs text-zinc-400">{item.responseTime} ms</p>
+                  </div>
                 </div>
-                <p className="text-[11px] text-[var(--nl-text-muted)] mt-2 italic">
-                  {item.company?.name || "Sem Origem"} · {formatDateTime(item.createdAt)}
-                </p>
               </div>
             ))
           ) : (
-            <EmptyState label="Nenhum incidente registrado no momento." />
+            <EmptyState label="Nenhum erro recente registrado." />
           )}
         </div>
       </Panel>
@@ -451,10 +481,10 @@ const Panel = ({
   subtitle: string;
   children: React.ReactNode;
 }) => (
-  <section className="nl-card p-5 md:p-7">
-    <div className="mb-6">
-      <h2 className="text-[14px] font-bold uppercase tracking-[0.12em] text-[var(--nl-text-muted)]">{title}</h2>
-      <p className="mt-1 text-[13px] text-[var(--nl-text-secondary)]">{subtitle}</p>
+  <section className="rounded-[28px] border border-zinc-800 bg-[#0b0d11] p-5 md:p-6">
+    <div className="mb-5">
+      <h2 className="text-lg font-black tracking-tight text-zinc-100">{title}</h2>
+      <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>
     </div>
     {children}
   </section>
@@ -463,28 +493,21 @@ const Panel = ({
 const MetricCard = ({
   title,
   value,
-  helper,
+  subtitle,
   icon,
-  isNeon,
 }: {
   title: string;
   value: string;
-  helper: string;
+  subtitle: string;
   icon: React.ReactNode;
-  isNeon?: boolean;
 }) => (
-  <div className="nl-card relative overflow-hidden p-5 flex flex-col justify-between min-h-[140px]">
-    {isNeon && <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--nl-neon)] opacity-[0.03] blur-3xl pointer-events-none" />}
-    <div className="flex items-start justify-between">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] text-[var(--nl-text-muted)]">
-        {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5 font-bold" })}
-      </div>
+  <div className="rounded-[28px] border border-zinc-800 bg-[#0b0d11] p-5">
+    <div className="mb-4 flex items-center justify-between">
+      <span className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500">{title}</span>
+      <div className="rounded-2xl border border-zinc-800 bg-black/40 p-2">{icon}</div>
     </div>
-    <div className="mt-4">
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--nl-text-muted)]">{title}</p>
-      <span className={`text-2xl font-black block mt-1 ${isNeon ? "text-[var(--nl-neon)]" : "text-[var(--nl-text-primary)]"}`}>{value}</span>
-      <p className="text-[12px] text-[var(--nl-text-secondary)] mt-1">{helper}</p>
-    </div>
+    <p className="text-2xl font-black tracking-tight text-zinc-100">{value}</p>
+    <p className="mt-2 text-sm text-zinc-500">{subtitle}</p>
   </div>
 );
 
@@ -497,15 +520,15 @@ const ServiceStatusCard = ({
   status: string;
   latency: number;
 }) => (
-  <div className="rounded-2xl border border-[var(--nl-border)] bg-[rgba(255,255,255,0.02)] p-5 transition hover:border-[var(--nl-border-active)]">
-    <div className="flex items-center justify-between gap-3 mb-4">
-      <span className="text-[13px] font-bold text-[var(--nl-text-primary)] uppercase tracking-tight">{title}</span>
-      <span className={`nl-badge-${status === "up" || status === "configured" ? "success" : status === "down" ? "danger" : "muted"}`}>
+  <div className="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-4">
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-bold text-zinc-100">{title}</span>
+      <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${statusClassName(status)}`}>
         {status}
       </span>
     </div>
-    <p className="text-3xl font-black text-[var(--nl-text-primary)] tracking-tight">{latency}ms</p>
-    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--nl-text-muted)] mt-1">Latencia Core</p>
+    <p className="mt-4 text-3xl font-black tracking-tight text-zinc-100">{latency} ms</p>
+    <p className="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">Latencia atual</p>
   </div>
 );
 
@@ -522,14 +545,14 @@ const ActionButton = ({
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="rounded-xl border border-[var(--nl-border)] bg-[rgba(255,255,255,0.02)] px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-[var(--nl-text-primary)] transition hover:border-[var(--nl-neon)] hover:text-[var(--nl-neon)] disabled:opacity-30 disabled:cursor-not-allowed"
+    className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-200 transition hover:border-lime-400 hover:text-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
   >
     {label}
   </button>
 );
 
 const EmptyState = ({ label }: { label: string }) => (
-  <div className="rounded-2xl border border-dashed border-[var(--nl-border)] bg-[rgba(255,255,255,0.01)] p-8 text-center text-[13px] text-[var(--nl-text-muted)]">
+  <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/40 p-5 text-sm text-zinc-500">
     {label}
   </div>
 );

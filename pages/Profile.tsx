@@ -56,7 +56,7 @@ const Profile = () => {
       return;
     }
     if (newPassword.length < 8 || !/[A-Za-z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      addToast("A nova senha precisa ter pelo menos 8 caracteres, com letras e números.", "info");
+      addToast("A nova senha precisa ter pelo menos 8 caracteres, com letras e numeros.", "info");
       return;
     }
     try {
@@ -77,7 +77,7 @@ const Profile = () => {
     try {
       setDeleting(true);
       await deleteMyAccount();
-      addToast("Conta excluída com sucesso.", "success");
+      addToast("Conta excluida com sucesso.", "success");
       logout();
     } catch (error) {
       addToast(getErrorMessage(error, "Não foi possível excluir a conta."), "error");
@@ -87,110 +87,88 @@ const Profile = () => {
   };
 
   return (
-    <div className="nl-page max-w-5xl mx-auto">
-      <div className="nl-page-header border-b border-white/5 pb-10 mb-10">
-        <div className="nl-page-header__meta">
-          <p className="nl-eyebrow text-[var(--nl-neon)] mb-3">Gerenciamento de Identidade</p>
-          <h1 className="nl-page-title text-4xl">Meu Perfil Estratégico</h1>
-          <p className="nl-page-subtitle">Configure suas credenciais de acesso e parâmetros de segurança da conta.</p>
-        </div>
-      </div>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">Perfil</h1>
 
-      <section className="nl-card-glass p-8 mb-8 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--nl-neon)] opacity-[0.02] blur-[100px] pointer-events-none group-hover:opacity-[0.04] transition-opacity" />
-        <div className="flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between relative z-10">
-          <div className="flex items-center gap-6">
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-[var(--nl-neon)] text-4xl font-black text-black shadow-[0_10px_40px_rgba(182,255,0,0.2)] transform hover:scale-105 transition-transform">
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-lime-300 text-2xl font-black text-zinc-900">
               {avatarLabel}
-              <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-emerald-500 border-4 border-[#080A0E] animate-pulse" />
             </div>
             <div>
-              <p className="text-3xl font-black text-white tracking-tight leading-none mb-2">{name || username || "Operador"}</p>
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--nl-text-muted)] bg-white/5 px-2 py-0.5 rounded border border-white/5">Nível Operacional Ativo</span>
-                <p className="text-sm font-bold text-[var(--nl-text-secondary)] opacity-60 tracking-tight">{email || "Sem e-mail"}</p>
-              </div>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{name || username || "Usuário"}</p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">{email || "Email não informado"}</p>
             </div>
           </div>
-          <div className="nl-card p-6 border-white/5 bg-black/40 flex flex-col items-center min-w-[140px] rounded-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nl-text-muted)] mb-2">Perímetros</p>
-            <p className="text-4xl font-black text-[var(--nl-neon)] leading-none">{companyCount}</p>
-            <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mt-2">{companyCount === 1 ? "Empresa Ativa" : "Empresas Ativas"}</p>
+          <div className="rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-700">
+            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Empresas</p>
+            <p className="text-2xl font-black text-lime-500">{companyCount}</p>
           </div>
         </div>
       </section>
 
-      <section className="nl-card-glass p-8 mb-8 border-white/5">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nl-text-muted)] mb-8">Dados da Identidade Digital</h2>
-        <div className="grid gap-8 md:grid-cols-2">
-          <div className="flex flex-col gap-3">
-            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)] px-1">Nome Completo do Portador</span>
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-zinc-100">Dados da conta</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Nome</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="nl-input h-12 bg-black border-white/10 focus:border-[var(--nl-neon)]/50"
-              placeholder="Ex: João Silva"
+              className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             />
           </div>
-          <div className="flex flex-col gap-3">
-            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)] px-1">Credencial de Acesso Principle</span>
+          <div>
+            <label className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Email</label>
             <input
               disabled
               value={email}
-              className="nl-input h-12 opacity-30 cursor-not-allowed border-white/5 bg-transparent"
-              placeholder="contato@empresa.com"
+              className="mt-1 w-full rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
             />
           </div>
         </div>
-        <div className="flex justify-end mt-10 pt-8 border-t border-white/5">
-          <button
-            onClick={onSaveProfile}
-            disabled={savingProfile}
-            className="nl-button-primary min-w-[180px] h-12 rounded-xl text-[11px] font-black uppercase tracking-widest"
-          >
-            {savingProfile ? "Processando..." : "Sincronizar Perfil"}
-          </button>
-        </div>
+        <button
+          onClick={onSaveProfile}
+          disabled={savingProfile}
+          className="mt-4 rounded-lg bg-lime-300 px-4 py-2 font-bold text-zinc-900 hover:opacity-90 disabled:opacity-50"
+        >
+          {savingProfile ? "Salvando..." : "Salvar Perfil"}
+        </button>
       </section>
 
-      <section className="nl-card-glass p-8 border-white/5">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--nl-text-muted)] mb-8">Criptografia e Segurança</h2>
-        <div className="grid gap-8 md:grid-cols-2">
-          <div className="flex flex-col gap-3">
-            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)] px-1">Senha Estratégica Atual</span>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="••••••••"
-              className="nl-input h-12 bg-black border-white/10 focus:border-[var(--nl-neon)]/50"
-            />
-          </div>
-          <div className="flex flex-col gap-3">
-            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-[var(--nl-text-muted)] px-1">Novo Código Secreto</span>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Sugerido: 8+ caracteres"
-              className="nl-input h-12 bg-black border-white/10 focus:border-[var(--nl-neon)]/50"
-            />
-          </div>
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-zinc-100">Seguranca</h2>
+        <div className="grid gap-3 md:grid-cols-2">
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="Senha atual"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+          />
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Nova senha"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+          />
         </div>
-        <div className="mt-10 pt-8 border-t border-white/5 flex flex-wrap items-center justify-between gap-6">
+        <div className="mt-4 flex flex-wrap gap-3">
           <button
             onClick={onChangePassword}
             disabled={savingPassword}
-            className="nl-button-secondary border-white/10 hover:border-white/20 px-8 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest text-white"
+            className="rounded-lg border border-zinc-300 px-4 py-2 font-bold text-zinc-900 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
           >
-            {savingPassword ? "Validando..." : "Redefinir Senha"}
+            {savingPassword ? "Atualizando..." : "Alterar Senha"}
           </button>
           <button
             onClick={onDeleteAccount}
             disabled={deleting}
-            className="text-[10px] font-black text-red-500/60 hover:text-red-400 transition-all uppercase tracking-[0.2em] px-5 py-3 border border-red-500/10 rounded-xl hover:bg-red-500/5"
+            className="rounded-lg bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-500 disabled:opacity-50"
           >
-            {deleting ? "Excluíndo Sistema..." : "Deletar Conta Permanentemente"}
+            {deleting ? "Excluindo..." : "Excluir Conta"}
           </button>
         </div>
       </section>
