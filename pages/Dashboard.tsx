@@ -151,7 +151,7 @@ const metricFallbackValue = (metricKey: string) => {
     key.includes("conversion") ||
     key.includes("gap")
   ) {
-    return "0%";
+    return "0,00%";
   }
   return "0";
 };
@@ -162,6 +162,15 @@ const metricDisplayValue = (metricKey: string, metric?: DashboardMetricResult) =
   return formatted && !normalized.includes("dados insuficientes") && formatted !== "NEXT LEVEL"
     ? formatted
     : metricFallbackValue(metricKey);
+};
+
+const formatPercentChange = (value: number) => {
+  const normalized = Number.isFinite(value) ? value : 0;
+  const prefix = normalized > 0 ? "+" : "";
+  return `${prefix}${normalized.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}%`;
 };
 
 const formatDateLabel = (value?: string) => {
@@ -371,11 +380,6 @@ const RealMetricCard: React.FC<{
   <div className="card-base p-5 flex flex-col justify-between transition-all hover:border-white/10">
     <div className="flex items-start justify-between gap-2">
       <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{title}</span>
-      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase ${
-        metric?.status === "ok" ? "bg-lime-900/20 text-lime-400 border border-lime-400/20" : "bg-amber-900/20 text-amber-400 border border-amber-400/20"
-      }`}>
-        {metric?.status === "ok" ? "Real" : "Honesto"}
-      </span>
     </div>
     <div className="mt-4">
       <p className={`text-2xl font-black tracking-tighter ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
@@ -404,6 +408,7 @@ const Dashboard = () => {
   const [aiDashboard, setAiDashboard] = useState<AiDashboardIntelligence | null>(null);
   const [isAiDashboardLoading, setIsAiDashboardLoading] = useState(false);
   const [attendantRoi, setAttendantRoi] = useState<AttendantRoi>({ iaSalesCount: 0, iaRevenue: 0 });
+  const latestMetricsRequestRef = useRef(0);
   const enabledMetricKeys = useMemo(
     () => (isLayoutLoading ? Array.from(DEFAULT_VISIBLE_METRICS) : layout.map((item) => item.metricKey)),
     [isLayoutLoading, layout],
@@ -530,7 +535,7 @@ const Dashboard = () => {
     }
   };
 
-  const loadMetrics = async () => {
+  const loadMetrics = async (periodOverride?: DashboardPeriod) => {
     if (!selectedCompanyId) {
       setMetricsData(null);
       return;
@@ -539,20 +544,29 @@ const Dashboard = () => {
       setMetricsData(null);
       return;
     }
+    const requestId = latestMetricsRequestRef.current + 1;
+    latestMetricsRequestRef.current = requestId;
+    const period = periodOverride || activePeriod;
     setIsUpdating(true);
     try {
       const data = await getDashboardMetrics({
         companyId: selectedCompanyId,
-        period: activePeriod,
+        period,
         metrics: enabledMetricKeys,
         comparePrevious: true,
       });
-      setMetricsData(data);
+      if (latestMetricsRequestRef.current === requestId) {
+        setMetricsData(data);
+      }
     } catch (error) {
-      setMetricsData(null);
-      addToast(getErrorMessage(error, "Não foi possível carregar o dashboard."), "error");
+      if (latestMetricsRequestRef.current === requestId) {
+        setMetricsData(null);
+        addToast(getErrorMessage(error, "Não foi possível carregar o dashboard."), "error");
+      }
     } finally {
-      setIsUpdating(false);
+      if (latestMetricsRequestRef.current === requestId) {
+        setIsUpdating(false);
+      }
     }
   };
 
@@ -715,6 +729,13 @@ const Dashboard = () => {
     void loadForecast(value);
   };
 
+  const handlePeriodChange = (value: DashboardPeriod) => {
+    if (value === activePeriod) return;
+    setActivePeriod(value);
+    setMetricsData(null);
+    void loadMetrics(value);
+  };
+
   const marginDirection = summary.profit >= 0 ? "increase" : "decrease";
   const dynamicGrowthMetrics = layout
     .filter(
@@ -735,15 +756,19 @@ const Dashboard = () => {
   ];
   const metricChange = (item?: DashboardMetricResult) => {
     if (!item || item.status !== "ok") {
-      return { text: item?.status === "not_enough_data" ? "Dados insuficientes" : "Sem dados", type: "flat" as const };
+      return { text: "0,00%", type: "flat" as const };
     }
     const comparison = item.comparison;
-    if (!comparison) {
-      return { text: "Valor real", type: "flat" as const };
+    if (
+      !comparison ||
+      !Number.isFinite(comparison.changePercent) ||
+      !Number.isFinite(comparison.previousValue) ||
+      comparison.previousValue === 0
+    ) {
+      return { text: "0,00%", type: "flat" as const };
     }
-    const prefix = comparison.changePercent > 0 ? "+" : "";
     return {
-      text: `${prefix}${comparison.changePercent.toFixed(2)}%`,
+      text: formatPercentChange(comparison.changePercent),
       type:
         comparison.direction === "up"
           ? ("increase" as const)
@@ -764,9 +789,6 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-[#B6FF00]/12 bg-[#090C09] px-4 text-sm font-semibold text-[#AEB8B4]">
-            Últimos 30 dias
-          </span>
           <button
             onClick={handleExport}
             disabled={isExporting}
@@ -790,7 +812,7 @@ const Dashboard = () => {
         {PERIODS.map((period) => (
           <button
             key={period.value}
-            onClick={() => setActivePeriod(period.value)}
+            onClick={() => handlePeriodChange(period.value)}
             className={`rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] transition-all ${
               activePeriod === period.value
                 ? "bg-[#B6FF00] text-[#050706]"
@@ -968,7 +990,7 @@ const Dashboard = () => {
                 <h2 className="text-lg font-bold tracking-tight text-[#f5f7f2]">Receita por canal</h2>
                 <p className="mt-1 text-xs text-[#8c9479]">Entradas e saídas do período selecionado.</p>
                 <p className="mt-3 text-[34px] font-extrabold leading-none tracking-[-0.03em] text-[#f5f7f2]">
-                  {metric("revenue")?.formatted || asCurrency(summary.revenue)}
+                  {metricDisplayValue("revenue", metric("revenue"))}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8c9479]">
