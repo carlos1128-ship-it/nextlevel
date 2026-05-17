@@ -197,7 +197,7 @@ function normalizeBotConfig(data: any): BotConfig {
     agentName: data?.agentName || data?.botName || "Atendente IA",
     welcomeMessage: data?.welcomeMessage ?? null,
     toneOfVoice: data?.toneOfVoice || "amigavel",
-    tone: data?.tone || data?.toneOfVoice || "AmigÃ¡vel",
+    tone: data?.tone || data?.toneOfVoice || "Amigável",
     instructions: data?.instructions ?? null,
     isActive: Boolean(data?.isActive ?? true),
     isOnline: Boolean(data?.isOnline ?? data?.isActive ?? true),

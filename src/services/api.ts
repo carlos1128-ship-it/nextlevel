@@ -170,7 +170,7 @@ function dispatchFriendlyApiError(error: AxiosError) {
 
   const message = getErrorMessage(
     error,
-    'Nao foi possivel concluir esta etapa agora.',
+    'Não foi possível concluir esta etapa agora.',
   );
 
   window.dispatchEvent(

@@ -9,14 +9,14 @@ import { getErrorMessage } from "../../services/error";
 import type { BusinessType, CompanyOnboardingPayload, CompanyPersonalizationResponse } from "../../types/domain";
 
 const BUSINESS_TYPES: Array<{ value: BusinessType; label: string }> = [
-  { value: "ecommerce_physical", label: "E-commerce fisico" },
+  { value: "ecommerce_physical", label: "E-commerce físico" },
   { value: "ecommerce_digital", label: "Produto digital / infoproduto" },
   { value: "saas", label: "SaaS / software" },
-  { value: "agency", label: "Agencia / marketing" },
+  { value: "agency", label: "Agência / marketing" },
   { value: "medical_clinic", label: "Clínica / saúde" },
   { value: "law_office", label: "Advocacia" },
   { value: "local_services", label: "Serviços locais" },
-  { value: "retail_store", label: "Loja fisica / varejo" },
+  { value: "retail_store", label: "Loja física / varejo" },
   { value: "restaurant", label: "Restaurante / delivery" },
   { value: "marketplace_seller", label: "Marketplace seller" },
   { value: "other", label: "Outro" },
@@ -115,11 +115,11 @@ export default function CompanyPersonalizationPanel({
   };
 
   return (
-    <section id="personalization" className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-900 dark:bg-zinc-950">
+    <section id="personalization" className="nl-card p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-500">Personalizacao</p>
-          <h2 className="mt-2 text-2xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-500">Personalização</p>
+          <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-100">
             Perfil empresarial
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-zinc-500">
@@ -130,14 +130,14 @@ export default function CompanyPersonalizationPanel({
           type="button"
           onClick={reapply}
           disabled={saving || loading || !data?.profile}
-          className="rounded-2xl border border-lime-400/30 bg-lime-400/10 px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-lime-600 transition hover:bg-lime-400/15 disabled:opacity-50 dark:text-lime-300"
+          className="nl-button-secondary border-lime-400/30 text-lime-300 disabled:opacity-50"
         >
           Reaplicar recomendações
         </button>
       </div>
 
       {!companyId ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-zinc-300 p-5 text-sm text-zinc-500 dark:border-zinc-800">
+        <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-5 text-sm text-zinc-500">
           Selecione uma empresa para editar a personalização.
         </div>
       ) : loading ? (
@@ -145,34 +145,34 @@ export default function CompanyPersonalizationPanel({
       ) : (
         <>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+            <label className="text-sm font-bold text-zinc-300">
               Tipo de negócio
               <select
                 value={form.businessType}
                 onChange={(event) => updateField("businessType", event.target.value as BusinessType)}
-                className="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 outline-none focus:border-lime-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+                className="nl-input mt-2"
               >
                 {BUSINESS_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>{type.label}</option>
                 ))}
               </select>
             </label>
-            <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+            <label className="text-sm font-bold text-zinc-300">
               Objetivo principal
               <input
                 value={form.mainGoal || ""}
                 onChange={(event) => updateField("mainGoal", event.target.value)}
                 placeholder="Ex: vender mais, reduzir custos..."
-                className="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 outline-none focus:border-lime-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+                className="nl-input mt-2"
               />
             </label>
-            <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+            <label className="text-sm font-bold text-zinc-300">
               Maturidade de dados
               <input
                 value={form.dataMaturity || ""}
                 onChange={(event) => updateField("dataMaturity", event.target.value)}
                 placeholder="Planilhas, ERP, CRM..."
-                className="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 outline-none focus:border-lime-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+                className="nl-input mt-2"
               />
             </label>
           </div>
@@ -188,7 +188,7 @@ export default function CompanyPersonalizationPanel({
                   className={`rounded-2xl border px-4 py-3 text-left text-sm font-bold transition ${
                     checked
                       ? "border-lime-400/60 bg-lime-400/10 text-lime-700 dark:text-lime-300"
-                      : "border-zinc-200 text-zinc-500 dark:border-zinc-800"
+                      : "border-white/10 text-zinc-500"
                   }`}
                 >
                   {item.label}
@@ -207,7 +207,7 @@ export default function CompanyPersonalizationPanel({
               type="button"
               onClick={saveProfile}
               disabled={saving}
-              className="rounded-2xl bg-lime-400 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-950 transition hover:opacity-90 disabled:opacity-50"
+              className="nl-button-primary disabled:opacity-50"
             >
               {saving ? "Salvando..." : "Salvar perfil"}
             </button>

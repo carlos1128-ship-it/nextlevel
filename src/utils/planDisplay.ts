@@ -28,7 +28,7 @@ export const PLAN_DISPLAY: Record<
     aiLimit: "Chat IA: 400 mensagens/mês • Análises de dados: 30 por mês • Atendente IA: não incluso",
     aiDescription: "Ideal para começar a organizar dados e enxergar os primeiros sinais de margem.",
     features: [
-      "Dashboard para acompanhar a operação",
+      "Painel para acompanhar a operação",
       "Cadastro manual de vendas, custos e produtos",
       "Visão inicial de lucro, vendas e finanças",
       "Relatórios simples para decisão",
@@ -101,7 +101,7 @@ export const PLAN_DISPLAY: Record<
       "Mercado Livre e integrações em maior escala",
       "IA estratégica para decisões avançadas",
       "Automações inteligentes",
-      "Market intelligence",
+      "Inteligência de mercado",
       "Previsões e alertas avançados",
       "Importações inteligentes ilimitadas",
       "Prioridade em novas funcionalidades",

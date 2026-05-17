@@ -11,7 +11,7 @@ const CHAT_STORAGE_KEY = "chat_history_v1";
 const QUICK_PROMPTS = [
   "Resuma as perdas de hoje e me diga onde agir primeiro.",
   "Quais setores da empresa merecem mais atenção agora?",
-  "Monte um plano de otimização de custos para está semana.",
+  "Monte um plano de otimização de custos para esta semana.",
 ];
 
 const TypingIndicator = () => (
@@ -159,11 +159,11 @@ const Chat = () => {
   const canSend = useMemo(() => input.trim().length > 0 && !isTyping, [input, isTyping]);
 
   return (
-    <div className="flex h-[calc(100vh-120px)] min-h-0 flex-col overflow-hidden rounded-[28px] border border-zinc-900 bg-zinc-950">
-      <header className="border-b border-zinc-900 px-5 py-4">
+    <div className="nl-card flex h-[calc(100vh-120px)] min-h-0 flex-col overflow-hidden">
+      <header className="border-b border-white/[0.08] bg-[#111613]/70 px-5 py-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-lime-400">Assistente IA</p>
+            <p className="nl-eyebrow">Assistente IA</p>
             <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-100">Chat estratégico</h1>
             <p className="mt-1 text-sm text-zinc-400">
               Conversando sobre <span className="text-zinc-200">{companyName}</span>
@@ -180,7 +180,7 @@ const Chat = () => {
                 },
               ]);
             }}
-            className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-zinc-200 transition hover:border-lime-400/40"
+            className="nl-button-secondary"
             type="button"
           >
             Limpar conversa
@@ -193,7 +193,7 @@ const Chat = () => {
               type="button"
               onClick={() => void sendMessage(prompt)}
               disabled={isTyping}
-              className="rounded-full border border-zinc-800 bg-black px-4 py-2 text-xs text-zinc-300 transition hover:border-lime-400/40 hover:text-zinc-100 disabled:opacity-50"
+              className="nl-chip transition hover:border-lime-400/40 hover:text-zinc-100 disabled:opacity-50"
             >
               {prompt}
             </button>
@@ -201,7 +201,7 @@ const Chat = () => {
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(182,255,0,0.08),_transparent_30%),linear-gradient(180deg,#090b10_0%,#050608_100%)] p-5">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(182,255,0,0.08),_transparent_30%),linear-gradient(180deg,#080D0B_0%,#050706_100%)] p-5">
         {safeMessages.length === 0 ? (
           <EmptyState
             title="Conversa vazia"
@@ -214,20 +214,20 @@ const Chat = () => {
               className={`flex items-start gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.sender === "ai" ? (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-lime-400/15 text-lime-400">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-400/15 text-lime-400">
                   <LightbulbIcon className="h-4 w-4" />
                 </div>
               ) : null}
               <div
                 className={`max-w-[88%] rounded-3xl p-4 shadow-md md:max-w-[70%] ${msg.sender === "user"
-                    ? "rounded-br-md bg-lime-400 text-zinc-900"
-                    : "rounded-bl-md border border-zinc-800 bg-zinc-900 text-zinc-100"
+                    ? "rounded-br-md bg-[#B6FF00] text-[#050706]"
+                    : "rounded-bl-md border border-white/10 bg-[#111613] text-zinc-100"
                   }`}
               >
                 <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{msg.text}</p>
               </div>
               {msg.sender === "user" ? (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-black">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-black/40">
                   <UserIcon className="h-5 w-5 text-zinc-100" />
                 </div>
               ) : null}
@@ -236,10 +236,10 @@ const Chat = () => {
         )}
         {isTyping ? (
           <div className="flex items-start justify-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-lime-400/15 text-lime-400">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-400/15 text-lime-400">
               <LightbulbIcon className="h-4 w-4" />
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900">
+            <div className="rounded-2xl border border-white/10 bg-[#111613]">
               <TypingIndicator />
             </div>
           </div>
@@ -247,7 +247,7 @@ const Chat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-zinc-900 bg-black/40 p-4">
+      <div className="border-t border-white/[0.08] bg-[#080D0B]/80 p-4">
         <div className="relative">
           <input
             type="text"
@@ -255,13 +255,13 @@ const Chat = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && void sendMessage()}
             placeholder="Pergunte sobre perdas, fluxo de caixa, operação, vendas ou oportunidades..."
-            className="w-full rounded-full border border-zinc-800 bg-zinc-900 py-3 pl-5 pr-14 text-zinc-100 transition focus:border-lime-400 focus:outline-none"
+            className="nl-input rounded-full py-3 pl-5 pr-14"
           />
           <button
             type="button"
             onClick={() => void sendMessage()}
             disabled={!canSend}
-            className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-lime-400 text-zinc-900 transition hover:opacity-90 disabled:opacity-50"
+            className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#B6FF00] text-[#050706] transition hover:bg-[#9BE600] disabled:opacity-50"
           >
             <SendIcon className="h-5 w-5" />
           </button>

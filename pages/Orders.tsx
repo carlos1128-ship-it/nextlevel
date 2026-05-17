@@ -55,7 +55,7 @@ const Orders = () => {
       });
       setOrders(normalized);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar pedidos.");
+      const message = getErrorMessage(err, "Não foi possível carregar pedidos.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -68,17 +68,18 @@ const Orders = () => {
   }, [selectedCompanyId]);
 
   return (
-    <main className="space-y-6">
-      <section className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <main className="nl-page space-y-6">
+      <section className="nl-page-header">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-lime-300">Pedidos de todos os canais</p>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Pedidos</h1>
+          <p className="nl-eyebrow">Pedidos de todos os canais</p>
+          <h1 className="nl-title">Pedidos</h1>
+          <p className="nl-subtitle">Acompanhe vendas importadas, Mercado Livre e registros manuais em uma única visão.</p>
         </div>
         <button
           type="button"
           onClick={loadOrders}
           disabled={loading || !selectedCompanyId}
-          className="rounded-xl bg-lime-400 px-5 py-3 text-xs font-black uppercase tracking-[0.16em] text-zinc-950 disabled:opacity-50"
+          className="nl-button-primary disabled:opacity-50"
         >
           {loading ? "Atualizando..." : "Atualizar lista"}
         </button>
@@ -89,10 +90,10 @@ const Orders = () => {
       ) : error ? (
         <ErrorState title="Erro nos pedidos" description={error} actionLabel="Tentar novamente" onAction={loadOrders} />
       ) : orders.length === 0 ? (
-        <EmptyState title="Nenhum pedido encontrado" description="Pedidos importados do Mercado Livre, CSV, iFood ou cadastros manuais aparecerao aqui quando houver dados confirmados." />
+        <EmptyState title="Nenhum pedido encontrado" description="Pedidos importados do Mercado Livre, CSV, iFood ou cadastros manuais aparecerão aqui quando houver dados confirmados." />
       ) : (
-        <section className="overflow-x-auto rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
-          <table className="min-w-full divide-y divide-zinc-800 text-sm">
+        <section className="nl-table-shell p-4">
+          <table className="nl-table">
             <thead className="text-xs uppercase text-zinc-500">
               <tr>
                 <th className="px-3 py-2 text-left">Pedido</th>
@@ -103,7 +104,7 @@ const Orders = () => {
                 <th className="px-3 py-2 text-right">Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-900 text-zinc-100">
+            <tbody className="divide-y divide-white/[0.08] text-zinc-100">
               {orders.map((order) => {
                 const isMl = order.type === "ml";
                 const id = isMl ? order.item.mlOrderId : order.item.externalId || order.item.id;
@@ -121,7 +122,7 @@ const Orders = () => {
                 const currency = isMl ? order.item.currencyId || "BRL" : "BRL";
 
                 return (
-                <tr key={`${order.type}-${id}`} className="hover:bg-zinc-900/60">
+                <tr key={`${order.type}-${id}`}>
                   <td className="px-3 py-3 font-mono text-xs text-lime-300">{id}</td>
                   <td className="px-3 py-3">{new Date(date).toLocaleString("pt-BR")}</td>
                   <td className="px-3 py-3">

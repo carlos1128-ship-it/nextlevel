@@ -56,7 +56,7 @@ const Customers = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar os clientes.");
+      const message = getErrorMessage(err, "Não foi possível carregar os clientes.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -84,7 +84,7 @@ const Customers = () => {
       return;
     }
     if (!form.name.trim()) {
-      addToast("Nome e obrigatorio.", "info");
+      addToast("Nome é obrigatório.", "info");
       return;
     }
 
@@ -168,13 +168,13 @@ const Customers = () => {
 
   const formatStatus = (status?: string | null) => {
     const labels: Record<string, string> = {
-      PENDING_CONFIRMATION: "Aguardando confirmacao",
-      NEEDS_INFO: "Aguardando informacoes",
-      PENDING_DATA: "Aguardando informacoes",
+      PENDING_CONFIRMATION: "Aguardando confirmação",
+      NEEDS_INFO: "Aguardando informações",
+      PENDING_DATA: "Aguardando informações",
       NEEDS_HUMAN: "Precisa de atendimento humano",
       CONFIRMED: "Confirmado",
       CANCELLED: "Cancelado",
-      COMPLETED: "Concluido",
+      COMPLETED: "Concluído",
       LEAD: "Lead novo",
       NEW: "Lead novo",
     };
@@ -191,18 +191,18 @@ const Customers = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="nl-enter flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="nl-page space-y-6">
+      <div className="nl-page-header">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-lime-300/80">Base de clientes</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Clientes</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+          <p className="nl-eyebrow">Base de clientes</p>
+          <h1 className="nl-title">Clientes</h1>
+          <p className="nl-subtitle">
             Organize contatos, origem, interesse e sinais comerciais em uma tela limpa para vender melhor.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={resetForm} className="nl-button-secondary">
-            Limpar formulario
+            Limpar formulário
           </button>
           <button type="button" onClick={loadCustomers} className="nl-button-primary">
             Atualizar
@@ -215,7 +215,7 @@ const Customers = () => {
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                {editingId ? "Edicao ativa" : "Novo cadastro"}
+                {editingId ? "Edição ativa" : "Novo cadastro"}
               </p>
               <h2 className="mt-1 text-xl font-black tracking-tight text-zinc-100">
                 {editingId ? "Atualizar cliente" : "Cadastrar cliente"}
@@ -223,7 +223,7 @@ const Customers = () => {
             </div>
             {editingId ? (
               <span className="w-max rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">
-                Modo edicao
+                Modo edição
               </span>
             ) : null}
           </div>

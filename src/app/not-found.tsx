@@ -58,7 +58,7 @@ export default function NotFound() {
             to="/dashboard"
             className="inline-flex items-center justify-center rounded-2xl bg-lime-400 px-6 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 transition hover:-translate-y-0.5 hover:brightness-105"
           >
-            Voltar ao Dashboard
+            Voltar ao painel
           </Link>
           <Link
             to="/"

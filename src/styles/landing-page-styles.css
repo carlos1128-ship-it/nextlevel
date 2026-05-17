@@ -5,21 +5,22 @@
 
 /* ─── Typography scale ─────────────────────────────────────────────────────── */
 .nl-h1 {
-  font-size: 40px;
+  font-size: 34px;
   font-weight: 800;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
   line-height: 1.02;
+  overflow-wrap: anywhere;
 }
 @media (min-width: 768px) {
   .nl-h1 {
-    font-size: 68px;
+    font-size: 56px;
   }
 }
 
 .nl-h2 {
   font-size: 32px;
   font-weight: 760;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   line-height: 1.06;
 }
 @media (min-width: 768px) {
@@ -31,7 +32,7 @@
 .nl-h3 {
   font-size: 21px;
   font-weight: 720;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1.2;
 }
 @media (min-width: 768px) {

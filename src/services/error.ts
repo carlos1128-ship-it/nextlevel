@@ -57,7 +57,7 @@ export function getErrorMessage(error: unknown, fallback = "Erro na requisicao."
       return "Não encontramos o recurso que você tentou acessar. Volte e tente novamente pelo menu principal.";
     }
     if (error.response?.status && error.response.status >= 500) {
-      return "Nao foi possivel concluir esta etapa agora. Tente novamente em instantes.";
+      return "Não foi possível concluir esta etapa agora. Tente novamente em instantes.";
     }
     if (error.message) return error.message;
   }

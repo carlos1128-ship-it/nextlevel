@@ -29,7 +29,7 @@ export const AppCard = ({
   ...props
 }: AppCardProps) => (
   <div
-    className={joinClassNames(variantClass[variant], interactive && "nl-card-interactive", className)}
+    className={joinClassNames(variantClass[variant], "nl-enter", interactive && "nl-card-interactive", className)}
     {...props}
   >
     {children}

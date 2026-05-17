@@ -20,7 +20,7 @@ const InsightCard: React.FC<StrategicInsightCard> = ({ title, description, categ
   };
 
   return (
-    <div className={`rounded-2xl border p-5 md:p-6 ${colorClasses[color]}`}>
+    <div className={`nl-card p-5 md:p-6 ${colorClasses[color]}`}>
       <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${textColors[color]}`}>
         {category}
       </span>
@@ -58,12 +58,13 @@ const Insights = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="nl-page space-y-8">
+      <header className="nl-page-header">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Insights</h1>
-          <p className="mt-2 text-sm text-zinc-400 md:text-base">
-            Analises praticas geradas a partir dos dados reais da empresa.
+          <p className="nl-eyebrow">Inteligência operacional</p>
+          <h1 className="nl-title">Insights</h1>
+          <p className="nl-subtitle">
+            Análises práticas geradas a partir dos dados reais da empresa.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -82,7 +83,7 @@ const Insights = () => {
             type="button"
             onClick={handleGenerateInsights}
             disabled={refreshing || loading}
-            className="rounded-2xl bg-lime-400 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="nl-button-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             {refreshing ? "Gerando..." : "Gerar insights"}
           </button>
@@ -92,7 +93,7 @@ const Insights = () => {
       {loading ? <LoadingState /> : null}
 
       {error ? (
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
+        <div className="nl-card border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
           <span className="font-bold">IA em modo seguro: </span>
           {error}
           {source === "cache" ? " (exibindo cache recente)" : ""}
@@ -106,8 +107,8 @@ const Insights = () => {
           ))}
         </div>
       ) : !loading ? (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-sm text-zinc-400">
-          Nenhum insight dinamico foi retornado ainda. Conecte dados, importe vendas ou gere novamente depois de atualizar o financeiro.
+        <div className="nl-card p-6 text-sm text-zinc-400">
+          Nenhum insight dinâmico foi retornado ainda. Conecte dados, importe vendas ou gere novamente depois de atualizar o financeiro.
         </div>
       ) : null}
     </div>

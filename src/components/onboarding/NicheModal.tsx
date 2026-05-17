@@ -80,7 +80,7 @@ const nicheOptions: NicheOption[] = [
   },
   {
     value: "EDUCACAO",
-    title: "Educacao",
+    title: "Educação",
     description: "Fluxo orientado a alunos, agenda e acompanhamento contínuo.",
     accentClassName: "text-violet-300 border-violet-400/20 bg-violet-400/10",
     Icon: EducationIcon,

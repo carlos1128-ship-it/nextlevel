@@ -55,7 +55,7 @@ const navItems: SidebarNavItem[] = [
 const adminNavItem: SidebarNavItem = {
   id: "admin-system-health",
   path: "/admin/system-health",
-  name: "System Health",
+  name: "Saúde do sistema",
   icon: ShieldIcon,
 };
 const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
@@ -197,10 +197,18 @@ function writeNicheModalDone(key: string) {
 const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
   const { username } = useAuth();
   return (
-    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-zinc-200 bg-white p-6 text-zinc-800 dark:border-zinc-900 dark:bg-[#080b10] dark:text-zinc-100 lg:flex">
+    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-72 flex-col border-r border-white/[0.08] bg-[#080D0B] p-5 text-zinc-100 shadow-[18px_0_50px_rgba(0,0,0,0.28)] lg:flex">
       <div className="shrink-0">
-        <div className="mb-8 text-4xl font-black tracking-tight text-lime-500 dark:text-lime-400">NEXT LEVEL</div>
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Operação Segura</p>
+        <Link to={DASHBOARD_ROUTE} className="group mb-7 flex items-center gap-3" aria-label="Ir para o início">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-lime-300/25 bg-lime-300/10 shadow-[0_0_26px_rgba(182,255,0,0.12)]">
+            <span className="h-3 w-3 rounded-full bg-[#B6FF00] shadow-[0_0_16px_rgba(182,255,0,0.72)]" />
+          </span>
+          <span>
+            <span className="block text-xl font-black tracking-tight text-white transition group-hover:text-[#B6FF00]">NEXT LEVEL</span>
+            <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">ERP com IA</span>
+          </span>
+        </Link>
+        <p className="mb-4 px-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Central de gestão</p>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
         <nav aria-label="Menu principal">
@@ -210,10 +218,10 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                    `group relative flex items-center rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all ${
                       isActive
-                        ? "bg-lime-100 text-lime-700 dark:bg-lime-400/20 dark:text-lime-300"
-                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                        ? "border-lime-300/35 bg-lime-300/10 text-[#B6FF00] shadow-[inset_3px_0_0_#B6FF00]"
+                        : "border-transparent text-zinc-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-zinc-100"
                     }`
                   }
                 >
@@ -224,8 +232,8 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
             ))}
           </ul>
           {moreItems.length > 0 ? (
-            <details className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-900 dark:bg-zinc-950/70">
-              <summary className="cursor-pointer px-2 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400">
+            <details className="mt-4 rounded-2xl border border-white/[0.08] bg-[#0D1210] p-2">
+              <summary className="cursor-pointer px-2 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 marker:text-[#B6FF00]">
                 Mais ferramentas
               </summary>
               <ul className="mt-2 space-y-1">
@@ -234,10 +242,10 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
-                        `group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                        `group flex items-center rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all ${
                           isActive
-                            ? "bg-lime-100 text-lime-700 dark:bg-lime-400/20 dark:text-lime-300"
-                            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                            ? "border-lime-300/35 bg-lime-300/10 text-[#B6FF00] shadow-[inset_3px_0_0_#B6FF00]"
+                            : "border-transparent text-zinc-500 hover:border-white/10 hover:bg-white/[0.04] hover:text-zinc-100"
                         }`
                       }
                     >
@@ -252,13 +260,13 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
         </nav>
       </div>
 
-      <Link to="/profile" className="group mt-5 flex shrink-0 items-center gap-3 border-t border-zinc-200 pt-5 dark:border-zinc-900" aria-label="Acessar perfil">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 font-bold text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
+      <Link to="/profile" className="group mt-5 flex shrink-0 items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#111613] p-3 transition hover:border-lime-300/35" aria-label="Acessar perfil">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-300/10 font-bold text-[#B6FF00] transition-all group-hover:border-lime-300/55">
           {username?.charAt(0).toUpperCase() || "U"}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{username || "Usuário"}</p>
-          <p className="text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Ver perfil</p>
+          <p className="truncate text-sm font-bold text-zinc-100">{username || "Usuário"}</p>
+          <p className="text-[10px] uppercase tracking-widest text-zinc-500">Ver perfil</p>
         </div>
       </Link>
     </aside>
@@ -269,23 +277,30 @@ const Header = () => {
   const { username, isAdmin } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-200 bg-white/95 px-6 backdrop-blur dark:border-zinc-900 dark:bg-[#101218]/95 lg:justify-end lg:px-8">
-      <div className="text-lg font-black text-lime-500 dark:text-lime-400 lg:hidden">NEXT LEVEL</div>
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/[0.08] bg-[#101418]/90 px-5 backdrop-blur-xl lg:px-8">
+      <div className="lg:hidden">
+        <p className="text-lg font-black text-[#B6FF00]">NEXT LEVEL</p>
+        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500">ERP com IA</p>
+      </div>
+      <div className="hidden min-w-0 lg:block">
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Inteligência operacional</p>
+        <p className="mt-0.5 text-sm font-semibold text-zinc-300">Centralize dados, acompanhe indicadores e decida com IA.</p>
+      </div>
       <div className="flex items-center gap-4">
         {isAdmin ? (
-          <Link to="/admin/system-health" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Painel admin">
+          <Link to="/admin/system-health" className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-2 text-zinc-400 transition-colors hover:border-lime-300/35 hover:text-[#B6FF00]" aria-label="Painel admin">
             <ShieldIcon className="h-5 w-5" />
           </Link>
         ) : null}
-        <Link to="/settings" className="p-2 text-zinc-400 transition-colors hover:text-lime-500 dark:text-zinc-500 dark:hover:text-lime-400" aria-label="Configurações">
+        <Link to="/settings" className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-2 text-zinc-400 transition-colors hover:border-lime-300/35 hover:text-[#B6FF00]" aria-label="Configurações">
           <SettingsIcon className="h-5 w-5" />
         </Link>
         <Link to="/profile" className="group flex items-center gap-2.5" aria-label="Menu do usuário">
           <div className="hidden text-right sm:block">
-            <p className="text-xs font-bold text-zinc-800 transition-colors group-hover:text-lime-500 dark:text-zinc-100 dark:group-hover:text-lime-400">{username || "Usuário"}</p>
-            <p className="text-[9px] uppercase tracking-tighter text-zinc-400 dark:text-zinc-500">Estratégico</p>
+            <p className="text-xs font-bold text-zinc-100 transition-colors group-hover:text-[#B6FF00]">{username || "Usuário"}</p>
+            <p className="text-[9px] uppercase tracking-[0.16em] text-zinc-500">Estratégico</p>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 text-xs font-black text-zinc-700 transition-all group-hover:border-lime-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:group-hover:border-lime-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-300/10 text-xs font-black text-[#B6FF00] transition-all group-hover:border-lime-300/55">
             {username?.charAt(0).toUpperCase() || "U"}
           </div>
         </Link>
@@ -295,19 +310,19 @@ const Header = () => {
 };
 
 const BottomNav = ({ items }: { items: SidebarNavItem[] }) => (
-  <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around border-t border-zinc-200 bg-white/95 p-2 backdrop-blur lg:hidden dark:border-zinc-800 dark:bg-zinc-950/95" aria-label="Menu Mobile">
+  <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around overflow-x-auto border-t border-white/[0.08] bg-[#080D0B]/95 p-2 backdrop-blur-xl lg:hidden" aria-label="Menu Mobile">
     {(Array.isArray(items) ? items : []).filter((item) => item.isPrimary).map((item) => (
       <NavLink
         key={item.path}
         to={item.path}
         className={({ isActive }) =>
-          `relative flex flex-1 flex-col items-center rounded-xl p-2 text-[10px] font-bold uppercase tracking-tight transition-all ${
-            isActive ? "text-lime-500" : "text-zinc-500 dark:text-zinc-400"
+          `relative flex min-w-[72px] flex-1 flex-col items-center rounded-xl border p-2 text-[10px] font-bold uppercase tracking-tight transition-all ${
+            isActive ? "border-lime-300/30 bg-lime-300/10 text-[#B6FF00]" : "border-transparent text-zinc-500"
           }`
         }
       >
         <item.icon className="h-5 w-5" />
-        <span className="mt-1">{item.name}</span>
+        <span className="mt-1 max-w-[68px] truncate">{item.name}</span>
       </NavLink>
     ))}
   </nav>
@@ -331,7 +346,7 @@ const FloatingActionButton = () => {
               key={action.name}
               to={action.path}
               onClick={() => setIsOpen(false)}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-800 transition-all hover:scale-105 hover:border-lime-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.1] bg-[#111613] text-zinc-100 transition-all hover:scale-105 hover:border-lime-300/45 hover:text-[#B6FF00]"
               role="menuitem"
             >
               <action.icon className="h-5 w-5" />
@@ -342,8 +357,8 @@ const FloatingActionButton = () => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex h-14 w-14 items-center justify-center rounded-full text-zinc-900 shadow-2xl transition-all duration-300 ${
-          isOpen ? "bg-red-500 text-white" : "bg-lime-400"
+        className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xl transition-all duration-300 ${
+          isOpen ? "bg-red-500 text-white" : "bg-[#B6FF00] text-[#050706] shadow-[0_16px_38px_rgba(182,255,0,0.18)]"
         }`}
         aria-label={isOpen ? "Fechar menu de ações" : "Abrir menu de ações"}
         aria-expanded={isOpen}
@@ -449,16 +464,16 @@ const Layout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F8F9FA] text-zinc-800 dark:bg-[#040507] dark:text-zinc-100">
+    <div className="min-h-screen overflow-x-hidden bg-[#050706] text-zinc-100">
       <div
         id="dashboard-main"
         aria-hidden={showNicheModal || undefined}
         className={`transition duration-500 ${showNicheModal ? "pointer-events-none blur-[15px] saturate-[0.8] brightness-[0.76]" : ""}`}
       >
         <Sidebar primaryItems={primaryItems} moreItems={moreItems} />
-        <main className="min-h-screen min-h-0 flex-col lg:pl-64">
+        <main className="min-h-screen min-h-0 flex-col lg:pl-72">
           <Header />
-          <div className="mx-auto w-full max-w-7xl flex-1 min-h-0 overflow-x-hidden p-4 md:p-8">{children}</div>
+          <div className="mx-auto min-h-0 w-full max-w-[1500px] flex-1 overflow-x-hidden p-4 pb-28 md:p-8 lg:pb-8">{children}</div>
         </main>
         <BottomNav items={primaryItems} />
         <FloatingActionButton />

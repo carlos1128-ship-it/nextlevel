@@ -164,43 +164,51 @@ const FinancialFlow = () => {
   };
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
-      <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Fluxo financeiro</h1>
+    <div className="nl-page space-y-6">
+      <header className="nl-page-header">
+        <div>
+          <p className="nl-eyebrow">Financeiro</p>
+          <h1 className="nl-title">Fluxo financeiro</h1>
+          <p className="nl-subtitle">
+            Registre entradas e saídas, acompanhe margem e veja o impacto financeiro da operação.
+          </p>
+        </div>
+      </header>
 
       <div className="flex flex-wrap gap-3">
         <select
           value={periodDays}
           onChange={(event) => setPeriodDays(Number(event.target.value) as 7 | 30 | 90)}
-          className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-zinc-100 focus:outline-none"
+          className="nl-input max-w-[220px]"
         >
           <option value={30}>Últimos 30 dias</option>
           <option value={7}>Últimos 7 dias</option>
           <option value={90}>Últimos 90 dias</option>
         </select>
-        <span className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm text-zinc-400">
+        <span className="nl-chip">
           Empresa ativa
         </span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
-          <p className="text-sm text-zinc-500">Faturamento do período</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(totalIncome)}</p>
+        <div className="nl-card nl-card-metric min-w-0">
+          <p className="nl-stat-label">Faturamento do período</p>
+          <p className="nl-stat-value">{asCurrency(totalIncome)}</p>
           <p className="mt-2 text-sm font-bold text-zinc-500">Período: {periodDays} dias</p>
         </div>
-        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
-          <p className="text-sm text-zinc-500">Lucro Líquido</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(balance)}</p>
+        <div className="nl-card nl-card-metric min-w-0">
+          <p className="nl-stat-label">Lucro líquido</p>
+          <p className="nl-stat-value">{asCurrency(balance)}</p>
           <p className="mt-2 text-sm font-bold text-zinc-500">Receitas menos saídas</p>
         </div>
-        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
-          <p className="text-sm text-zinc-500">Custos Operacionais</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{asCurrency(totalExpense)}</p>
+        <div className="nl-card nl-card-metric min-w-0">
+          <p className="nl-stat-label">Custos operacionais</p>
+          <p className="nl-stat-value">{asCurrency(totalExpense)}</p>
           <p className="mt-2 text-sm font-bold text-zinc-500">Saídas do período</p>
         </div>
-        <div className="min-w-0 rounded-2xl border border-zinc-900 bg-zinc-950 p-5">
-          <p className="text-sm text-zinc-500">Margem de Lucro</p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-zinc-100 xl:text-3xl">{margin.toFixed(1)}%</p>
+        <div className="nl-card nl-card-metric min-w-0">
+          <p className="nl-stat-label">Margem de lucro</p>
+          <p className="nl-stat-value">{margin.toFixed(1)}%</p>
           <p className="mt-2 text-sm font-bold text-zinc-500">Calculada com dados reais</p>
         </div>
       </div>
@@ -218,10 +226,10 @@ const FinancialFlow = () => {
         />
       ) : (
         <>
-          <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4 shadow-sm min-w-0">
-            <h3 className="mb-4 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Fluxo de caixa (Entradas vs. Saídas)</h3>
+          <div className="nl-card min-w-0 p-5">
+            <h3 className="mb-4 text-2xl font-black tracking-tight text-zinc-100 md:text-3xl">Fluxo de caixa</h3>
             {chartData.length === 0 ? (
-              <div className="grid min-h-[260px] place-items-center rounded-2xl border border-dashed border-zinc-800 text-sm text-zinc-500">
+              <div className="grid min-h-[260px] place-items-center rounded-2xl border border-dashed border-white/10 text-sm text-zinc-500">
                 Sem movimentações no período selecionado.
               </div>
             ) : (
@@ -237,10 +245,10 @@ const FinancialFlow = () => {
                     <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="4 4" stroke="#334155" />
+                <CartesianGrid strokeDasharray="4 4" stroke="#27302b" />
                 <XAxis dataKey="name" stroke="#a1a1aa" />
                 <YAxis stroke="#a1a1aa" />
-                <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: "12px" }} />
+                <Tooltip contentStyle={{ background: "#111613", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }} />
                 <Area type="monotone" dataKey="Entradas" stroke="#B6FF00" fill="url(#colorEntradas)" strokeWidth={2} />
                 <Area type="monotone" dataKey="Saidas" stroke="#ef4444" fill="url(#colorSaidas)" strokeWidth={2} />
               </AreaChart>
@@ -250,12 +258,12 @@ const FinancialFlow = () => {
 
           <form
             onSubmit={submitTransaction}
-            className="grid grid-cols-1 gap-3 rounded-2xl border border-zinc-900 bg-zinc-950 p-4 md:grid-cols-6"
+            className="nl-card grid grid-cols-1 gap-3 p-4 md:grid-cols-6"
           >
             <select
               value={type}
               onChange={(e) => setType(e.target.value as "income" | "expense")}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-100 focus:outline-none"
+              className="nl-input"
             >
               <option value="income">Entrada</option>
               <option value="expense">Saída</option>
@@ -264,30 +272,30 @@ const FinancialFlow = () => {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Valor"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input"
             />
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Descrição"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input"
             />
             <input
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               placeholder="Categoria"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="nl-input"
             />
             <input
               type="datetime-local"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-100 focus:outline-none"
+              className="nl-input"
             />
             <button
               type="submit"
               disabled={loadingSubmit}
-              className="rounded-xl bg-lime-400 px-3 py-2 font-black text-zinc-900 disabled:opacity-50"
+              className="nl-button-primary disabled:opacity-50"
             >
               {loadingSubmit ? "Salvando..." : "Adicionar"}
             </button>
@@ -296,10 +304,10 @@ const FinancialFlow = () => {
           {filteredTransactions.length === 0 ? (
             <EmptyState
               title="Sem transações neste período"
-              description="Altere o filtro ou registre uma nova movimentacao."
+              description="Altere o filtro ou registre uma nova movimentação."
             />
           ) : (
-            <div className="rounded-2xl border border-zinc-900 bg-zinc-950 p-4">
+            <div className="nl-card p-4">
               <h3 className="mb-4 text-xl font-black tracking-tight text-zinc-100">Últimas transações</h3>
               <div className="space-y-3">
                 {filteredTransactions.slice(0, 12).map((tx) => {
@@ -307,7 +315,7 @@ const FinancialFlow = () => {
                   return (
                     <div
                       key={tx.id}
-                      className="flex flex-col gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                      className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-3 md:flex-row md:items-center md:justify-between"
                     >
                       <div>
                         <p className="font-bold text-zinc-100">{tx.description}</p>

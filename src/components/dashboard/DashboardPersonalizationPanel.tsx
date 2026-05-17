@@ -98,7 +98,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
       setAvailableMetrics(metrics);
       setPreferences(sortPreferences(prefs));
     } catch (err) {
-      setError(getErrorMessage(err, "Não foi possível carregar as preferencias."));
+      setError(getErrorMessage(err, "Não foi possível carregar as preferências."));
     } finally {
       setLoading(false);
     }
@@ -140,7 +140,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
       setAvailableMetrics(data.availableMetrics || []);
       setPreferences(sortPreferences(data.preferences || []));
       window.dispatchEvent(new Event("dashboard:preferences-updated"));
-      onToast("Dashboard personalizado salvo.", "success");
+      onToast("Painel personalizado salvo.", "success");
     } catch (err) {
       onToast(getErrorMessage(err, "Falha ao salvar personalização."), "error");
     } finally {
@@ -164,16 +164,16 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
   };
 
   return (
-    <section id="dashboard" className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <section id="dashboard" className="nl-card space-y-5 p-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-600 dark:text-lime-300">
-            Personalizacao
+            Personalização
           </p>
-          <h2 className="text-2xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
-            Dashboard
+          <h2 className="text-2xl font-black tracking-tight text-zinc-100">
+            Painel
           </h2>
-          <p className="mt-1 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1 max-w-2xl text-sm text-zinc-400">
             Escolha quais indicadores aparecem para esta empresa. A preferência fica salva por empresa, não apenas neste navegador.
           </p>
         </div>
@@ -182,15 +182,15 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
             type="button"
             onClick={handleReset}
             disabled={saving || loading}
-            className="rounded-xl border border-zinc-300 px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="nl-button-secondary disabled:opacity-50"
           >
-            Resetar
+            Restaurar
           </button>
           <button
             type="button"
             onClick={handleSave}
             disabled={saving || loading}
-            className="rounded-xl bg-lime-300 px-5 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-zinc-950 disabled:opacity-50"
+            className="nl-button-primary disabled:opacity-50"
           >
             {saving ? "Salvando..." : "Salvar"}
           </button>
@@ -201,10 +201,10 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Buscar metrica, KPI ou widget..."
-          className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-lime-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+          placeholder="Buscar métrica, KPI ou widget..."
+          className="nl-input"
         />
-        <span className="rounded-xl border border-zinc-200 px-4 py-2.5 text-center text-xs font-black uppercase tracking-[0.14em] text-zinc-500 dark:border-zinc-800">
+        <span className="nl-chip justify-center">
           {enabledCount} ativos
         </span>
       </div>
@@ -218,7 +218,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
             className={`rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] transition ${
               category === item
                 ? "bg-lime-300 text-zinc-950"
-                : "border border-zinc-200 text-zinc-500 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100"
+                : "border border-white/10 text-zinc-500 hover:text-zinc-100"
             }`}
           >
             {CATEGORY_LABELS[item]}
@@ -227,7 +227,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
       </div>
 
       {!companyId ? (
-        <div className="rounded-2xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800">
+        <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-zinc-500">
           Selecione uma empresa para personalizar o dashboard.
         </div>
       ) : loading ? (
@@ -244,12 +244,12 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
             return (
               <article
                 key={preference.metricKey}
-                className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950"
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-black text-zinc-900 dark:text-zinc-100">{metric.label}</h3>
+                      <h3 className="text-base font-black text-zinc-100">{metric.label}</h3>
                       <span className="rounded-full border border-zinc-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-500 dark:border-zinc-700">
                         {CATEGORY_LABELS[metric.category]}
                       </span>
@@ -307,7 +307,7 @@ const DashboardPersonalizationPanel = ({ companyId, onToast }: Props) => {
           })}
           {visiblePreferences.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800">
-              Nenhuma metrica encontrada com estes filtros.
+              Nenhuma métrica encontrada com estes filtros.
             </div>
           ) : null}
         </div>

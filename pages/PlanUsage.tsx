@@ -33,7 +33,7 @@ const statusClass: Record<AIUsageFeatureSummary["status"], string> = {
 
 function formatLimit(item: AIUsageFeatureSummary) {
   if (!item.enabled) {
-    return `Disponivel no ${item.feature === "whatsapp_agent" || item.feature === "instagram_agent" ? "Premium" : "plano superior"}`;
+    return `Disponível no ${item.feature === "whatsapp_agent" || item.feature === "instagram_agent" ? "Premium" : "plano superior"}`;
   }
   const used = item.requestCount.toLocaleString("pt-BR");
   if (item.monthlyRequestLimit === null) {
@@ -48,30 +48,30 @@ const UsageRow = ({ item }: { item: AIUsageFeatureSummary; key?: React.Key }) =>
   const barColor = blocked ? "bg-zinc-500" : exceeded ? "bg-red-400" : item.status === "near_limit" ? "bg-yellow-300" : "bg-lime-400";
 
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-900 dark:bg-zinc-950">
+    <section className="nl-card p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-base font-black text-zinc-900 dark:text-zinc-100">{item.label}</h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{formatLimit(item)}</p>
+          <h2 className="text-base font-black text-zinc-100">{item.label}</h2>
+          <p className="mt-1 text-sm text-zinc-400">{formatLimit(item)}</p>
         </div>
         <span className={`w-max rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${statusClass[item.status]}`}>
           {statusLabel[item.status]}
         </span>
       </div>
 
-      <div className="mt-5 h-3 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-900">
+      <div className="mt-5 h-3 overflow-hidden rounded-full bg-[#1B211E]">
         <div
           className={`h-full rounded-full ${barColor}`}
           style={{ width: `${blocked ? 0 : Math.min(100, Math.max(0, item.progressPercent))}%` }}
         />
       </div>
-      <div className="mt-2 flex justify-between text-xs font-semibold text-zinc-500 dark:text-zinc-500">
+      <div className="mt-2 flex justify-between text-xs font-semibold text-zinc-500">
         <span>{blocked ? "Bloqueado neste plano" : `${item.progressPercent}% usado`}</span>
         <span>{item.tokenCount.toLocaleString("pt-BR")} tokens</span>
       </div>
       {item.status === "near_limit" ? (
-        <p className="mt-3 text-sm font-semibold text-yellow-700 dark:text-yellow-200">
-          Voce esta perto do limite do seu plano.
+        <p className="mt-3 text-sm font-semibold text-yellow-200">
+          Você está perto do limite do seu plano.
         </p>
       ) : null}
       {item.status === "exceeded" ? (
@@ -132,7 +132,7 @@ const PlanUsage = () => {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-red-100">
+      <div className="nl-card border-red-500/30 bg-red-500/10 p-8 text-red-100">
         <h1 className="text-xl font-black">Uso do plano indisponível</h1>
         <p className="mt-2 text-sm text-red-200">{error}</p>
       </div>
@@ -141,29 +141,29 @@ const PlanUsage = () => {
 
   if (!usage) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-900 dark:bg-zinc-950">
-        <h1 className="text-xl font-black text-zinc-900 dark:text-zinc-100">Selecione uma empresa</h1>
-        <p className="mt-2 text-sm text-zinc-500">O uso de IA e calculado por empresa ativa.</p>
+      <div className="nl-card p-8">
+        <h1 className="text-xl font-black text-zinc-100">Selecione uma empresa</h1>
+        <p className="mt-2 text-sm text-zinc-500">O uso de IA é calculado por empresa ativa.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <header className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-900 dark:bg-zinc-950">
+    <div className="nl-page space-y-6">
+      <header className="nl-card p-6">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-lime-500 dark:text-lime-400">Uso do plano</p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">
+            <p className="nl-eyebrow">Uso do plano</p>
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-100">
               Plano {planLabels[usage.planKey] || usage.planKey}
             </h1>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-2 text-sm text-zinc-400">
               {usage.currentMonth}. {usage.resetMessage}
             </p>
           </div>
           <Link
             to="/plans"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-lime-400 px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-zinc-950 transition hover:opacity-90"
+            className="nl-button-primary inline-flex items-center justify-center gap-2"
           >
             <CreditCardIcon className="h-4 w-4" />
             Ver planos
@@ -179,7 +179,7 @@ const PlanUsage = () => {
 
       {!exceeded && nearLimit ? (
         <div className="rounded-2xl border border-yellow-400/30 bg-yellow-400/10 p-5 text-sm font-semibold text-yellow-100">
-          Voce esta perto do limite do seu plano.
+          Você está perto do limite do seu plano.
         </div>
       ) : null}
 
@@ -189,13 +189,13 @@ const PlanUsage = () => {
         ))}
       </div>
 
-      <footer className="flex items-start gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 text-sm text-zinc-600 dark:border-zinc-900 dark:bg-zinc-950/70 dark:text-zinc-400">
+      <footer className="nl-card flex items-start gap-3 p-5 text-sm text-zinc-400">
         <ActivityIcon className="mt-0.5 h-5 w-5 shrink-0 text-lime-500" />
         <p>
           O painel considera chamadas de Chat IA, Atendente WhatsApp e Importação Inteligente. Custos internos ficam disponíveis apenas no painel admin.
         </p>
         <p>
-          Tambem considera Atendente Instagram.
+          Também considera Atendente Instagram.
         </p>
       </footer>
     </div>

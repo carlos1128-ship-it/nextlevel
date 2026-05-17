@@ -57,20 +57,20 @@ const CommandCenter = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div className="nl-page space-y-6">
+      <div className="nl-page-header">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Central de Comando</p>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-            Planos de Ação da IA
+          <p className="nl-eyebrow">Central de comando</p>
+          <h1 className="nl-title">
+            Planos de ação da IA
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="nl-subtitle">
             Projetos sugeridos pela IA a partir de conversas, insights, vendas, custos, clientes e integrações conectadas.
           </p>
         </div>
         <button
           onClick={() => void loadActions()}
-          className="self-start rounded-2xl bg-lime-400 px-6 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-900 transition hover:opacity-90"
+          className="nl-button-primary self-start"
         >
           Atualizar
         </button>
@@ -105,7 +105,7 @@ const CommandCenter = () => {
                 className={`mt-auto flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] transition ${
                   executingId === action.id
                     ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
-                    : "bg-[#C5FF00] text-black hover:opacity-90"
+                    : "bg-[#B6FF00] text-black hover:bg-[#9BE600]"
                 }`}
               >
                 {executingId === action.id ? (

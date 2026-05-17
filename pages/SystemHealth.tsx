@@ -234,11 +234,11 @@ const SystemHealth = () => {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <Panel title="Saude do core" subtitle="Banco, Redis, IA e provedores">
+        <Panel title="Saúde do core" subtitle="Banco, Redis, IA e provedores">
           <div className="grid gap-3 md:grid-cols-3">
-            <ServiceStatusCard title="Database" status={health.services.database.status} latency={health.services.database.latencyMs} />
+            <ServiceStatusCard title="Banco de dados" status={health.services.database.status} latency={health.services.database.latencyMs} />
             <ServiceStatusCard title="Redis" status={health.services.redis.status} latency={health.services.redis.latencyMs} />
-            <ServiceStatusCard title="AI" status={health.services.ai.status} latency={health.services.ai.avgLatencyMs} />
+            <ServiceStatusCard title="IA" status={health.services.ai.status} latency={health.services.ai.avgLatencyMs} />
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
             {Object.entries(health.providers as Record<string, string>).map(([provider, status]) => (
@@ -295,7 +295,7 @@ const SystemHealth = () => {
           </div>
         </Panel>
 
-        <Panel title="Live audit feed" subtitle="Polling automático das alterações críticas">
+        <Panel title="Auditoria em tempo real" subtitle="Polling automático das alterações críticas">
           <div className="space-y-3">
             {auditFeed.length ? (
               auditFeed.slice(0, 8).map((item) => (
@@ -326,7 +326,7 @@ const SystemHealth = () => {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
-        <Panel title="Quota management" subtitle="Reset manual, boost de tokens e ajuste de plano">
+        <Panel title="Gestão de cotas" subtitle="Reset manual, boost de tokens e ajuste de plano">
           <div className="overflow-x-auto">
             <table className="min-w-full text-left">
               <thead>
@@ -442,7 +442,7 @@ const SystemHealth = () => {
         </Panel>
       </section>
 
-      <Panel title="Error logs" subtitle="Últimos 50 erros para debug rápido">
+      <Panel title="Logs de erro" subtitle="Últimos 50 erros para debug rápido">
         <div className="grid gap-3">
           {errorLogs.length ? (
             errorLogs.slice(0, 12).map((item) => (

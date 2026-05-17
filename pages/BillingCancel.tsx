@@ -8,10 +8,10 @@ const BillingCancel = () => {
     <div className="flex min-h-screen items-center justify-center bg-[#030508] px-6 text-white">
       <div className="max-w-xl rounded-lg border border-white/10 bg-white/[0.04] p-8 text-center shadow-[0_0_60px_rgba(182,255,0,0.08)]">
         <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300">
-          Assinatura nao concluida
+          Assinatura não concluída
         </p>
         <h1 className="mt-4 text-4xl font-black tracking-tight">
-          Voce pode escolher um plano quando quiser
+          Você pode escolher um plano quando quiser
         </h1>
         <p className="mt-4 text-sm leading-7 text-zinc-400">
           Assinatura não concluída. Você pode escolher um plano quando quiser.

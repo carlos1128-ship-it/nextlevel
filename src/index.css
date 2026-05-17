@@ -3,14 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --primary: #84cc16;
-  --bg: #ffffff;
-  --bg-soft: #f8fafc;
-  --text: #111827;
-  --text-muted: #4b5563;
-  --card: #ffffff;
-  --card-border: #e5e7eb;
-  --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  --primary: #b6ff00;
+  --primary-hover: #9be600;
+  --bg: #050706;
+  --bg-soft: #080d0b;
+  --text: #f5f7f2;
+  --text-muted: #b7c0ba;
+  --text-subtle: #7d8782;
+  --card: #111613;
+  --card-elevated: #171d1a;
+  --input: #181a1d;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --active-border: rgba(182, 255, 0, 0.45);
+  --card-shadow: 0 22px 54px rgba(0, 0, 0, 0.38);
 }
 
 *,
@@ -22,9 +27,12 @@
 }
 
 body {
-  font-family: "Space Grotesk", sans-serif;
-  background-color: #F8F9FA;
-  color: #1A1A1B;
+  font-family: "Sora", "Space Grotesk", sans-serif;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(182, 255, 0, 0.045), transparent 30%),
+    radial-gradient(circle at 88% 8%, rgba(93, 128, 74, 0.08), transparent 32%),
+    #050706;
+  color: var(--text);
   overflow-x: hidden;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -33,8 +41,8 @@ body {
 }
 
 .dark body {
-  background-color: #09090b;
-  color: #f4f4f5;
+  background-color: #050706;
+  color: var(--text);
 }
 
 .neon-glow {
@@ -155,14 +163,14 @@ body {
   .nl-card {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(63, 63, 70, 0.72);
-    border-radius: 24px;
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
     background:
-      linear-gradient(180deg, rgba(24, 24, 27, 0.78), rgba(9, 10, 12, 0.92)),
-      rgba(10, 12, 14, 0.76);
+      linear-gradient(180deg, rgba(23, 29, 26, 0.92), rgba(12, 16, 14, 0.96)),
+      var(--card);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.035),
-      0 18px 48px rgba(0, 0, 0, 0.28);
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      var(--card-shadow);
     transition:
       transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
       border-color 240ms ease,
@@ -172,12 +180,12 @@ body {
 
   .nl-card-interactive:hover,
   .nl-card:hover {
-    border-color: rgba(182, 255, 0, 0.28);
+    border-color: rgba(182, 255, 0, 0.32);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 20px 52px rgba(0, 0, 0, 0.32),
-      0 0 0 1px rgba(182, 255, 0, 0.035),
-      0 0 34px rgba(182, 255, 0, 0.055);
+      0 24px 62px rgba(0, 0, 0, 0.42),
+      0 0 0 1px rgba(182, 255, 0, 0.04),
+      0 0 30px rgba(182, 255, 0, 0.055);
   }
 
   .nl-card-interactive:hover {
@@ -214,17 +222,17 @@ body {
     font-weight: 900;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgb(113, 113, 122);
+    color: var(--text-subtle);
   }
 
   .nl-input {
     width: 100%;
     min-height: 46px;
-    border-radius: 16px;
-    border: 1px solid rgba(63, 63, 70, 0.95);
-    background: rgba(9, 9, 11, 0.78);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(24, 26, 29, 0.86);
     padding: 11px 14px;
-    color: rgb(244, 244, 245);
+    color: var(--text);
     font-size: 14px;
     outline: none;
     transition:
@@ -234,25 +242,25 @@ body {
   }
 
   .nl-input::placeholder {
-    color: rgb(82, 82, 91);
+    color: rgba(183, 192, 186, 0.42);
   }
 
   .nl-input:focus {
-    border-color: rgba(182, 255, 0, 0.58);
-    background: rgba(9, 9, 11, 0.92);
-    box-shadow: 0 0 0 4px rgba(182, 255, 0, 0.08);
+    border-color: var(--active-border);
+    background: rgba(24, 26, 29, 0.96);
+    box-shadow: 0 0 0 4px rgba(182, 255, 0, 0.09);
   }
 
   .nl-button-primary {
     min-height: 46px;
-    border-radius: 16px;
-    background: #b6ff00;
+    border-radius: 12px;
+    background: var(--primary);
     padding: 11px 18px;
     font-size: 12px;
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #09090b;
+    color: #050706;
     transition:
       transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
       filter 180ms ease,
@@ -260,8 +268,8 @@ body {
   }
 
   .nl-button-primary:hover {
-    filter: brightness(0.96);
-    box-shadow: 0 12px 32px rgba(182, 255, 0, 0.12);
+    background: var(--primary-hover);
+    box-shadow: 0 12px 32px rgba(182, 255, 0, 0.16);
   }
 
   .nl-button-primary:active,
@@ -273,13 +281,13 @@ body {
   .nl-button-secondary,
   .nl-button-danger {
     min-height: 42px;
-    border-radius: 14px;
-    border: 1px solid rgba(63, 63, 70, 0.95);
-    background: rgba(24, 24, 27, 0.58);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(23, 29, 26, 0.72);
     padding: 10px 15px;
     font-size: 12px;
     font-weight: 800;
-    color: rgb(228, 228, 231);
+    color: var(--text);
     transition:
       transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
       border-color 180ms ease,
@@ -289,8 +297,8 @@ body {
 
   .nl-button-secondary:hover {
     border-color: rgba(182, 255, 0, 0.42);
-    background: rgba(39, 39, 42, 0.72);
-    color: rgb(244, 244, 245);
+    background: rgba(32, 42, 36, 0.86);
+    color: var(--text);
   }
 
   .nl-button-danger {
@@ -311,7 +319,7 @@ body {
   }
 
   .nl-table thead {
-    color: rgb(113, 113, 122);
+    color: var(--text-subtle);
     font-size: 10px;
     font-weight: 900;
     letter-spacing: 0.12em;
@@ -328,7 +336,103 @@ body {
   }
 
   .nl-table tbody tr:hover {
-    background: rgba(39, 39, 42, 0.48);
+    background: rgba(182, 255, 0, 0.035);
+  }
+
+  .nl-page {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .nl-page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: nl-card-enter 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @media (min-width: 768px) {
+    .nl-page-header {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+  }
+
+  .nl-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(182, 255, 0, 0.78);
+  }
+
+  .nl-title {
+    margin-top: 4px;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .nl-subtitle {
+    margin-top: 8px;
+    max-width: 720px;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .nl-chip {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(23, 29, 26, 0.72);
+    padding: 7px 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .nl-chip-active {
+    border-color: var(--active-border);
+    background: rgba(182, 255, 0, 0.1);
+    color: var(--primary);
+  }
+
+  .nl-table-shell {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 18px;
+    border: 1px solid var(--card-border);
+    background: rgba(8, 13, 11, 0.62);
+  }
+
+  .nl-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .nl-stat-value {
+    margin-top: 6px;
+    font-size: clamp(24px, 2.6vw, 34px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .nl-focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(182, 255, 0, 0.13);
   }
 
   .nl-enter {

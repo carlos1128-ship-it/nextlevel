@@ -105,7 +105,7 @@ const Companies = () => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) {
-      addToast("Nome da empresa e obrigatorio.", "info");
+      addToast("Nome da empresa é obrigatório.", "info");
       return;
     }
     if (!form.sector.trim() && !form.segment.trim()) {
@@ -197,16 +197,17 @@ const Companies = () => {
   }, [companies.length]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+    <div className="nl-page space-y-6">
+      <div className="nl-page-header">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-zinc-100 md:text-5xl">Empresas</h1>
-          <p className="mt-2 text-zinc-400">{summaryText}</p>
+          <p className="nl-eyebrow">Ambiente empresarial</p>
+          <h1 className="nl-title">Empresas</h1>
+          <p className="nl-subtitle">{summaryText}</p>
         </div>
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-2 rounded-2xl bg-lime-400 px-6 py-3 text-base font-black text-zinc-900 transition hover:opacity-90"
+          className="nl-button-primary flex items-center gap-2"
         >
           <PlusIcon className="h-5 w-5" /> Nova empresa
         </button>
@@ -215,49 +216,49 @@ const Companies = () => {
       {showForm ? (
         <form
           onSubmit={onSubmit}
-          className="grid grid-cols-1 gap-4 rounded-3xl border border-zinc-900 bg-zinc-950 p-5 md:grid-cols-2 xl:grid-cols-4"
+          className="nl-card grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-4"
         >
           <input
             value={form.name}
             onChange={(e) => onChangeForm("name", e.target.value)}
             placeholder="Nome da empresa"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400 xl:col-span-2"
+            className="nl-input xl:col-span-2"
           />
           <input
             value={form.sector}
             onChange={(e) => onChangeForm("sector", e.target.value)}
             placeholder="Setor"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400"
+            className="nl-input"
           />
           <input
             value={form.segment}
             onChange={(e) => onChangeForm("segment", e.target.value)}
             placeholder="Segmento"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400"
+            className="nl-input"
           />
           <input
             value={form.document}
             onChange={(e) => onChangeForm("document", e.target.value)}
             placeholder="CNPJ ou CPF"
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400"
+            className="nl-input"
           />
           <input
             type="date"
             value={form.openedAt}
             onChange={(e) => onChangeForm("openedAt", e.target.value)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-lime-400"
+            className="nl-input"
           />
           <textarea
             value={form.description}
             onChange={(e) => onChangeForm("description", e.target.value)}
             placeholder="Descrição curta do que a empresa faz"
             rows={4}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-lime-400 md:col-span-2 xl:col-span-2"
+            className="nl-input md:col-span-2 xl:col-span-2"
           />
           <button
             type="submit"
             disabled={loadingSubmit}
-            className="rounded-xl bg-lime-400 px-4 py-3 font-black text-zinc-900 transition hover:opacity-90 disabled:opacity-50 md:col-span-2 xl:col-span-2"
+            className="nl-button-primary disabled:opacity-50 md:col-span-2 xl:col-span-2"
           >
             {loadingSubmit ? "Salvando..." : "Salvar Empresa"}
           </button>
@@ -281,9 +282,9 @@ const Companies = () => {
           onAction={() => setShowForm(true)}
         />
       ) : (
-        <div className="overflow-x-auto rounded-3xl border border-zinc-900 bg-zinc-950">
+        <div className="nl-table-shell">
           <table className="w-full min-w-[980px] text-left text-sm">
-            <thead className="border-b border-zinc-900 uppercase tracking-[0.12em] text-zinc-500">
+            <thead className="border-b border-white/[0.08] uppercase tracking-[0.12em] text-zinc-500">
               <tr>
                 <th className="p-4">Empresa</th>
                 <th className="p-4">Setor / Segmento</th>
@@ -298,7 +299,7 @@ const Companies = () => {
               {(Array.isArray(companies) ? companies : []).map((company) => {
                 const isSelected = getCompanyId(company) === selectedCompanyId;
                 return (
-                  <tr key={getCompanyId(company) || company.name} className="border-b border-zinc-900 last:border-b-0">
+                  <tr key={getCompanyId(company) || company.name} className="border-b border-white/[0.08] last:border-b-0">
                     <td className="p-4 font-semibold text-zinc-100">{company.name || "-"}</td>
                     <td className="p-4 text-zinc-300">
                       {[company.sector, company.segment].filter(Boolean).join(" / ") || "Não informado"}
@@ -341,7 +342,7 @@ const Companies = () => {
 
       {companyToDelete ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-3xl border border-lime-400/20 bg-zinc-950 p-6 shadow-[0_0_50px_rgba(182,255,0,0.08)]">
+          <div className="nl-card w-full max-w-xl p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-400">Exclusao Permanente</p>
@@ -350,13 +351,13 @@ const Companies = () => {
               <button
                 type="button"
                 onClick={() => setCompanyToDelete(null)}
-                className="rounded-xl border border-zinc-800 p-2 text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
+                className="rounded-xl border border-white/10 p-2 text-zinc-400 transition hover:border-zinc-700 hover:text-zinc-200"
               >
                 <XIcon className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-zinc-900 bg-zinc-900/60 p-4 text-sm text-zinc-300">
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-zinc-300">
               <p>
                 Tem certeza que deseja excluir <span className="font-bold text-zinc-100">{companyToDelete.name}</span>?
               </p>
@@ -370,7 +371,7 @@ const Companies = () => {
               <button
                 type="button"
                 onClick={() => setCompanyToDelete(null)}
-                className="rounded-2xl border border-zinc-800 px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-zinc-200 transition hover:border-zinc-700"
+                className="nl-button-secondary"
               >
                 Cancelar
               </button>

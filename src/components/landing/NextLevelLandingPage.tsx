@@ -386,15 +386,15 @@ export function NextLevelLandingPage({
           <div className="absolute bottom-0 right-1/3 w-[500px] h-[500px] rounded-full bg-[#B6FF00] blur-[220px] opacity-[0.04]" />
         </div>
 
-        <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center relative z-10">
+        <div className="relative z-10 mx-auto grid w-full min-w-0 max-w-[1400px] grid-cols-1 items-center gap-12 lg:grid-cols-2 xl:gap-20">
           {/* LEFT — Copy */}
-          <div className="flex flex-col items-start nl-reveal-left">
+          <div className="flex w-full min-w-0 flex-col items-start nl-reveal-left" style={{ maxWidth: "min(650px, calc(100vw - 48px))" }}>
             <div className="inline-flex items-center gap-2 bg-[#1A221F] border border-[#2E3935] px-4 py-1.5 rounded-full mb-8">
               <div className="w-1.5 h-1.5 rounded-full bg-[#B6FF00] animate-pulse-neon" />
               <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>
             </div>
 
-            <h1 className="nl-h1 text-white mb-7">
+            <h1 className="nl-h1 mb-7 max-w-full text-white">
               O sistema de gestão com IA para controlar vendas, atendimento e financeiro em um só lugar
             </h1>
 
@@ -419,7 +419,7 @@ export function NextLevelLandingPage({
           </div>
 
           {/* RIGHT — Dashboard mockup */}
-          <div className="relative w-full nl-reveal-scale" style={{ perspective: "1000px" }}>
+          <div className="relative w-full min-w-0 overflow-hidden nl-reveal-scale" style={{ perspective: "1000px", maxWidth: "calc(100vw - 48px)" }}>
             <div className="animate-dashboard-drop">
               <div className="relative w-full" style={{ transform: "rotateY(-4deg) rotateX(2deg)", transformStyle: "preserve-3d" }}>
 
@@ -452,7 +452,7 @@ export function NextLevelLandingPage({
                   </div>
 
                   {/* Dashboard content */}
-                  <div className="flex-1 bg-[#141B18] p-6 overflow-hidden">
+                  <div className="flex-1 overflow-hidden bg-[#141B18] p-4 sm:p-6">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="text-white font-semibold text-sm">Visão Geral</h3>
                       <span className="text-[10px] bg-[#1A221F] px-2 py-1 rounded-full text-[#AEB8B4]">Hoje</span>
@@ -462,7 +462,7 @@ export function NextLevelLandingPage({
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="bg-white rounded-xl p-4 nl-shadow-soft">
                         <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase tracking-wider text-left">Lucro real</p>
-                        <p className="text-2xl font-bold text-gray-900 mb-2 text-left">R$ 47.320</p>
+                        <p className="mb-2 whitespace-nowrap text-left text-xl font-bold text-gray-900 sm:text-2xl">R$ 47.320</p>
                         <div className="flex gap-0.5 h-8 items-end">
                           {[40, 60, 45, 80, 55, 90, 100].map((h, i) => (
                             <div key={i} className="flex-1 bg-[#B6FF00] rounded-t-sm" style={{ height: `${h}%` }} />
@@ -472,7 +472,7 @@ export function NextLevelLandingPage({
                       <div className="bg-white rounded-xl p-4 nl-shadow-soft flex flex-col justify-between">
                         <div className="text-left">
                           <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase tracking-wider">Vendas do mês</p>
-                          <p className="text-2xl font-bold text-gray-900">1.847</p>
+                          <p className="text-xl font-bold text-gray-900 sm:text-2xl">1.847</p>
                         </div>
                         <div className="flex items-center gap-1 text-emerald-600 text-[11px] font-semibold">
                           <TrendingUp size={12} /><span>+12,4% no mês</span>

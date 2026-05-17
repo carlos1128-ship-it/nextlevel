@@ -70,7 +70,7 @@ const Costs = () => {
       setItems(data);
       setPagination(meta);
     } catch (err) {
-      const message = getErrorMessage(err, "Nao foi possivel carregar custos.");
+      const message = getErrorMessage(err, "Não foi possível carregar custos.");
       setError(message);
       addToast(message, "error");
     } finally {
@@ -98,11 +98,11 @@ const Costs = () => {
       return;
     }
     if (!form.name.trim()) {
-      addToast("Nome e obrigatorio.", "info");
+      addToast("Nome é obrigatório.", "info");
       return;
     }
     if (!form.amount.trim() || Number.isNaN(Number(form.amount))) {
-      addToast("Valor invalido.", "info");
+      addToast("Valor inválido.", "info");
       return;
     }
     if (!form.date) {
@@ -169,18 +169,18 @@ const Costs = () => {
   const totalAmount = items.reduce((acc, item) => acc + Number(item.amount || 0), 0);
 
   return (
-    <div className="space-y-6">
-      <div className="nl-enter flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="nl-page space-y-6">
+      <div className="nl-page-header">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-lime-300/80">Custos operacionais</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Custos</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-            Controle despesas por categoria e periodo para enxergar lucro real, nao apenas faturamento.
+          <p className="nl-eyebrow">Custos operacionais</p>
+          <h1 className="nl-title">Custos</h1>
+          <p className="nl-subtitle">
+            Controle despesas por categoria e período para enxergar lucro real, não apenas faturamento.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={resetForm} className="nl-button-secondary">
-            Limpar formulario
+            Limpar formulário
           </button>
           <button type="button" onClick={loadCosts} className="nl-button-primary">
             Atualizar
@@ -193,7 +193,7 @@ const Costs = () => {
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                {editingId ? "Edicao ativa" : "Novo custo"}
+                {editingId ? "Edição ativa" : "Novo custo"}
               </p>
               <h2 className="mt-1 text-xl font-black tracking-tight text-zinc-100">
                 {editingId ? "Atualizar custo" : "Registrar custo"}
@@ -201,7 +201,7 @@ const Costs = () => {
             </div>
             {editingId ? (
               <span className="w-max rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">
-                Modo edicao
+                Modo edição
               </span>
             ) : null}
           </div>

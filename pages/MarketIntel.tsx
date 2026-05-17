@@ -86,17 +86,15 @@ const MarketIntel = () => {
   }, [comparisons]);
 
   return (
-    <div className="space-y-8">
-      <header className="relative overflow-hidden rounded-3xl border border-lime-500/20 bg-gradient-to-r from-[#0c101a] via-[#0c1b2d] to-[#0b1020] p-8 text-zinc-100 shadow-2xl">
-        <div className="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-lime-400/10 blur-3xl" />
+    <div className="nl-page space-y-8">
+      <header className="nl-card relative overflow-hidden p-8 text-zinc-100">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lime-300/50 to-transparent" />
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="mb-2 text-xs uppercase tracking-[0.24em] text-zinc-400">
-              Marketing e inteligência de mercado
-            </p>
-            <h1 className="text-3xl font-black tracking-tight text-lime-300">Marketing</h1>
-            <p className="mt-2 max-w-2xl text-sm text-zinc-300">
-              Monitore preços, encontre oportunidades e entenda quando seus produtos precisam de mais dados de mercado.
+            <p className="nl-eyebrow mb-2">Marketing e inteligência de mercado</p>
+            <h1 className="nl-title">Marketing</h1>
+            <p className="nl-subtitle">
+              Monitore preços, identifique oportunidades e entenda quando seus produtos precisam de mais dados de mercado.
             </p>
             {lastRun ? (
               <p className="mt-2 text-xs text-zinc-500">
@@ -108,7 +106,7 @@ const MarketIntel = () => {
             <button
               type="button"
               onClick={handleTrack}
-              className="inline-flex items-center gap-2 rounded-xl border border-lime-400/60 bg-lime-400/10 px-4 py-2 text-sm font-bold text-lime-200 transition hover:scale-[1.01] hover:bg-lime-400/20"
+              className="nl-button-primary inline-flex items-center gap-2"
               disabled={refreshing}
             >
               <RadarIcon className="h-5 w-5" />
@@ -117,7 +115,7 @@ const MarketIntel = () => {
             <button
               type="button"
               onClick={handleRefreshTrends}
-              className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-200 transition hover:scale-[1.01] hover:bg-cyan-400/20"
+              className="nl-button-secondary inline-flex items-center gap-2"
               disabled={refreshing}
             >
               <LightbulbIcon className="h-5 w-5" />
@@ -128,7 +126,7 @@ const MarketIntel = () => {
       </header>
 
       {error ? (
-        <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-100">
+        <div className="nl-card border-red-500/40 bg-red-500/10 p-4 text-sm text-red-100">
           {error}
         </div>
       ) : null}
@@ -167,12 +165,12 @@ const MarketIntel = () => {
           </div>
           <div className="grid gap-3">
             {loading && !comparisons.length ? (
-              <div className="grid min-h-[160px] place-items-center rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
+              <div className="nl-card grid min-h-[160px] place-items-center p-6">
                 <span className="text-2xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</span>
               </div>
             ) : null}
             {!loading && !comparisons.length ? (
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-300">
+              <div className="nl-card p-6 text-sm text-zinc-300">
                 Dados de mercado ainda não disponíveis. Cadastre produtos, conecte canais ou importe dados para iniciar a análise.
               </div>
             ) : null}
@@ -190,7 +188,7 @@ const MarketIntel = () => {
               return (
                 <div
                   key={item.productId}
-                  className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 shadow-md transition hover:border-lime-400/30"
+                  className="nl-card nl-card-interactive p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -206,7 +204,7 @@ const MarketIntel = () => {
                       <span>Média do mercado</span>
                       <span>R$ {marketAvg.toFixed(2)}</span>
                     </div>
-                    <div className="relative h-3 rounded-full bg-zinc-800">
+                    <div className="relative h-3 rounded-full bg-[#1B211E]">
                       <div
                         className={`absolute left-0 top-0 h-3 rounded-full ${
                           item.badge === "acima" ? "bg-amber-400/80" : "bg-emerald-400/80"
@@ -234,9 +232,9 @@ const MarketIntel = () => {
             <h2 className="text-lg font-semibold text-zinc-100">Sinais de mercado</h2>
             <span className="text-xs text-zinc-500">Última semana</span>
           </div>
-          <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-b from-[#0b1b26] via-[#0a0f18] to-[#090b12] p-5 shadow-lg">
+          <div className="nl-card p-5">
             {trends.length === 0 ? (
-              <p className="text-sm text-zinc-400">Funcionalidade em preparação para MVP privado. Nenhum sinal externo confirmado ainda.</p>
+              <p className="text-sm text-zinc-400">Nenhum sinal externo confirmado ainda. Cadastre produtos e atualize a análise para acompanhar tendências.</p>
             ) : (
               <div className="flex flex-wrap gap-3">
                 {trends.map((trend) => {
@@ -280,15 +278,14 @@ const MetricCard = ({
   tone: string;
   icon: React.ReactNode;
 }) => (
-  <div className={`relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br ${tone} p-5`}>
-    <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/5 blur-3xl" />
+  <div className={`nl-card relative overflow-hidden p-5 ${tone}`}>
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-zinc-400">{title}</p>
-        <p className="mt-2 text-3xl font-black text-zinc-50">{value}</p>
+        <p className="nl-stat-label">{title}</p>
+        <p className="nl-stat-value">{value}</p>
         <p className="mt-1 text-xs text-zinc-400">{helper}</p>
       </div>
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black/40 shadow-inner">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black/30 shadow-inner">
         {icon}
       </div>
     </div>

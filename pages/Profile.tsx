@@ -56,7 +56,7 @@ const Profile = () => {
       return;
     }
     if (newPassword.length < 8 || !/[A-Za-z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      addToast("A nova senha precisa ter pelo menos 8 caracteres, com letras e numeros.", "info");
+      addToast("A nova senha precisa ter pelo menos 8 caracteres, com letras e números.", "info");
       return;
     }
     try {
@@ -77,7 +77,7 @@ const Profile = () => {
     try {
       setDeleting(true);
       await deleteMyAccount();
-      addToast("Conta excluida com sucesso.", "success");
+      addToast("Conta excluída com sucesso.", "success");
       logout();
     } catch (error) {
       addToast(getErrorMessage(error, "Não foi possível excluir a conta."), "error");
@@ -87,88 +87,94 @@ const Profile = () => {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">Perfil</h1>
+    <div className="nl-page mx-auto max-w-4xl space-y-6">
+      <header className="nl-page-header">
+        <div>
+          <p className="nl-eyebrow">Conta</p>
+          <h1 className="nl-title">Perfil</h1>
+          <p className="nl-subtitle">Atualize dados da conta, senha e informações do usuário.</p>
+        </div>
+      </header>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="nl-card p-6">
         <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-lime-300 text-2xl font-black text-zinc-900">
+            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#B6FF00] text-2xl font-black text-[#050706]">
               {avatarLabel}
             </div>
             <div>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{name || username || "Usuário"}</p>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">{email || "Email não informado"}</p>
+              <p className="text-xl font-bold text-zinc-100">{name || username || "Usuário"}</p>
+              <p className="text-sm text-zinc-400">{email || "Email não informado"}</p>
             </div>
           </div>
-          <div className="rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-700">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Empresas</p>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+            <p className="text-xs uppercase tracking-widest text-zinc-500">Empresas</p>
             <p className="text-2xl font-black text-lime-500">{companyCount}</p>
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-zinc-100">Dados da conta</h2>
+      <section className="nl-card p-6">
+        <h2 className="mb-4 text-lg font-bold text-zinc-100">Dados da conta</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Nome</label>
+            <label className="nl-label">Nome</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+              className="nl-input"
             />
           </div>
           <div>
-            <label className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Email</label>
+            <label className="nl-label">Email</label>
             <input
               disabled
               value={email}
-              className="mt-1 w-full rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+              className="nl-input opacity-70"
             />
           </div>
         </div>
         <button
           onClick={onSaveProfile}
           disabled={savingProfile}
-          className="mt-4 rounded-lg bg-lime-300 px-4 py-2 font-bold text-zinc-900 hover:opacity-90 disabled:opacity-50"
+          className="nl-button-primary mt-4 disabled:opacity-50"
         >
-          {savingProfile ? "Salvando..." : "Salvar Perfil"}
+          {savingProfile ? "Salvando..." : "Salvar perfil"}
         </button>
       </section>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-zinc-100">Seguranca</h2>
+      <section className="nl-card p-6">
+        <h2 className="mb-4 text-lg font-bold text-zinc-100">Segurança</h2>
         <div className="grid gap-3 md:grid-cols-2">
           <input
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             placeholder="Senha atual"
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="nl-input"
           />
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Nova senha"
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="nl-input"
           />
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
           <button
             onClick={onChangePassword}
             disabled={savingPassword}
-            className="rounded-lg border border-zinc-300 px-4 py-2 font-bold text-zinc-900 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            className="nl-button-secondary disabled:opacity-50"
           >
-            {savingPassword ? "Atualizando..." : "Alterar Senha"}
+            {savingPassword ? "Atualizando..." : "Alterar senha"}
           </button>
           <button
             onClick={onDeleteAccount}
             disabled={deleting}
             className="rounded-lg bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-500 disabled:opacity-50"
           >
-            {deleting ? "Excluindo..." : "Excluir Conta"}
+            {deleting ? "Excluindo..." : "Excluir conta"}
           </button>
         </div>
       </section>

@@ -111,11 +111,11 @@ const Products = () => {
       return;
     }
     if (!form.name.trim()) {
-      addToast("Nome e obrigatorio.", "info");
+      addToast("Nome é obrigatório.", "info");
       return;
     }
     if (!form.price.trim() || Number.isNaN(Number(form.price)) || Number(form.price) <= 0) {
-      addToast("Preço invalido.", "info");
+      addToast("Preço inválido.", "info");
       return;
     }
 
@@ -189,11 +189,12 @@ const Products = () => {
   };
 
   return (
-    <main className="space-y-6">
-      <section className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+    <main className="nl-page space-y-6">
+      <section className="nl-page-header">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Catálogo operacional</p>
-          <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">Produtos e Serviços</h1>
+          <p className="nl-eyebrow">Catálogo operacional</p>
+          <h1 className="nl-title">Produtos e Serviços</h1>
+          <p className="nl-subtitle">Controle preços, custos, margem e categorias para tomar decisões com lucro real.</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -202,14 +203,14 @@ const Products = () => {
               setEditingId(null);
               setForm(emptyForm());
             }}
-            className="rounded-xl border border-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:border-lime-400"
+            className="nl-button-secondary"
           >
-            Limpar formulario
+            Limpar formulário
           </button>
           <button
             type="button"
             onClick={loadProducts}
-            className="rounded-xl bg-lime-400 px-4 py-2 text-sm font-black text-zinc-900 transition hover:brightness-95"
+            className="nl-button-primary"
           >
             Atualizar
           </button>

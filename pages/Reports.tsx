@@ -60,9 +60,9 @@ const KpiCard = ({
     white: "text-zinc-100 border-zinc-700 bg-zinc-900",
   };
   return (
-    <div className={`rounded-2xl border p-5 ${colors[accent]}`}>
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{label}</p>
-      <p className={`mt-1 text-2xl font-black tracking-tight ${colors[accent].split(" ")[0]}`}>{value}</p>
+    <div className={`nl-card p-5 ${colors[accent]}`}>
+      <p className="nl-stat-label">{label}</p>
+      <p className={`mt-2 text-2xl font-black tracking-tight ${colors[accent].split(" ")[0]}`}>{value}</p>
     </div>
   );
 };
@@ -71,7 +71,7 @@ const KpiCard = ({
 const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolean }) => {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
+      <div className="nl-card border-lime-400/20 bg-lime-400/5 p-6">
         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
         <div className="mt-3 space-y-2">
           {[...Array(3)].map((_, i) => (
@@ -90,7 +90,7 @@ const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolea
     .filter(Boolean);
 
   return (
-    <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
+    <div className="nl-card border-lime-400/20 bg-lime-400/5 p-6">
       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
       <ul className="mt-3 space-y-2">
         {lines.map((line, i) => (
@@ -323,19 +323,20 @@ const Reports = () => {
   }, [reportRef, aiSummary, aiLoading, generateAiSummary, addToast]);
 
   return (
-    <div className="space-y-6">
+    <div className="nl-page space-y-6">
       {/* Header */}
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <header className="nl-page-header">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-zinc-100 md:text-4xl">Relatórios</h1>
-          <p className="mt-1 text-sm text-zinc-500">Analise financeira orientada por dados e IA.</p>
+          <p className="nl-eyebrow">Relatórios</p>
+          <h1 className="nl-title">Relatórios</h1>
+          <p className="nl-subtitle">Análise financeira orientada por dados reais e recomendações da IA.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-300 outline-none transition hover:border-zinc-600"
+            className="nl-input min-w-[150px]"
           >
             <option value="30d">Últimos 30 dias</option>
             <option value="90d">Últimos 90 dias</option>
@@ -345,7 +346,7 @@ const Reports = () => {
           <select
             value={sector}
             onChange={(e) => setSector(e.target.value)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-300 outline-none transition hover:border-zinc-600"
+            className="nl-input min-w-[160px]"
           >
             <option value="geral">Todos os setores</option>
             <option value="ecommerce">E-commerce</option>
@@ -356,7 +357,7 @@ const Reports = () => {
           <button
             type="button"
             onClick={load}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-800"
+            className="nl-button-secondary"
           >
             Atualizar
           </button>
@@ -365,7 +366,7 @@ const Reports = () => {
             type="button"
             onClick={generateAiSummary}
             disabled={aiLoading || !selectedCompanyId}
-            className="rounded-xl border border-lime-400/40 bg-lime-400/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-lime-400 transition hover:bg-lime-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="nl-button-secondary border-lime-400/40 text-lime-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {aiLoading ? "Analisando..." : "Sumário IA"}
           </button>
@@ -374,7 +375,7 @@ const Reports = () => {
             type="button"
             onClick={handleExportPdf}
             disabled={pdfLoading || loading || !selectedCompanyId}
-            className="rounded-xl bg-lime-400 px-5 py-2 text-xs font-black uppercase tracking-wide text-zinc-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="nl-button-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pdfLoading ? "Gerando PDF..." : "Exportar PDF"}
           </button>
@@ -394,11 +395,11 @@ const Reports = () => {
       ) : chartData.length === 0 ? (
         <EmptyState
           title="Sem dados para relatório"
-          description="Cadastre transações para gerar visualizacoes e exportacoes."
+          description="Cadastre transações para gerar visualizações e exportações."
         />
       ) : (
         // ── Conteúdo capturável pelo PDF ────────────────────────────────────
-        <div ref={reportRef} className="space-y-6 rounded-2xl bg-[#09090b] p-2">
+        <div ref={reportRef} className="space-y-6 rounded-2xl bg-[#050706] p-2">
 
           {/* Branding no PDF */}
           <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -426,7 +427,7 @@ const Reports = () => {
 
           {/* Charts row 1 */}
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
+            <div className="nl-card p-5">
               <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Lucros e Perdas</h2>
               <p className="mb-4 text-[11px] text-zinc-500">Evolução mensal de receitas vs despesas</p>
               <div className="h-[280px] w-full min-w-0">
@@ -444,7 +445,7 @@ const Reports = () => {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
+            <div className="nl-card p-5">
               <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Projeções de crescimento</h2>
               <p className="mb-4 text-[11px] text-zinc-500">Tendência projetada com base no saldo atual</p>
               <div className="h-[280px] w-full min-w-0">
@@ -468,7 +469,7 @@ const Reports = () => {
           </div>
 
           {/* Chart row 2 */}
-          <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950 p-5">
+          <div className="nl-card p-5">
             <h2 className="mb-1 text-base font-black tracking-tight text-zinc-100">Eficiência vs Média do Setor</h2>
             <p className="mb-4 text-[11px] text-zinc-500">Comparativo de eficiência e desperdício financeiro</p>
             <div className="h-[260px] w-full min-w-0">

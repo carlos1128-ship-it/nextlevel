@@ -50,7 +50,7 @@ const INPUT_MODES: Array<{
   {
     mode: "csv",
     title: "Importar CSV",
-    description: "Preview, sugestão de leitura e confirmação antes de salvar.",
+    description: "Prévia, sugestão de leitura e confirmação antes de salvar.",
     accept: ".csv,text/csv,application/vnd.ms-excel",
   },
   {
@@ -62,7 +62,7 @@ const INPUT_MODES: Array<{
 
 const CATEGORY_OPTIONS = [
   { value: "auto", label: "Detectar automaticamente" },
-  { value: "marketing", label: "Marketing / Trafego" },
+  { value: "marketing", label: "Marketing / Tráfego" },
   { value: "sales", label: "Vendas" },
   { value: "marketplace", label: "Marketplace" },
   { value: "delivery", label: "Delivery" },
@@ -194,7 +194,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(
         error,
-        "Não foi possível carregar importacoes da empresa ativa.",
+        "Não foi possível carregar importações da empresa ativa.",
       );
       if (!handled) {
         const message = getErrorMessage(error, "Não foi possível carregar o histórico.");
@@ -256,7 +256,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Não foi possível analisar está importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível analisar esta importação."), "error");
       }
     } finally {
       setIsSubmitting(false);
@@ -273,7 +273,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Não foi possível abrir está importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível abrir esta importação."), "error");
       }
     }
   };
@@ -294,7 +294,7 @@ const AddData = () => {
   const handleConfirm = async () => {
     if (!selectedImport || !selectedCompanyId) return;
     if (!selectedImport.extracted && draftMetrics.length === 0 && draftEntities.length === 0) {
-      addToast("Essa importacao ainda não tem dados para confirmar.", "error");
+      addToast("Essa importação ainda não tem dados para confirmar.", "error");
       return;
     }
 
@@ -327,7 +327,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Não foi possível confirmar a importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível confirmar a importação."), "error");
       }
     } finally {
       setIsConfirming(false);
@@ -347,7 +347,7 @@ const AddData = () => {
     } catch (error) {
       const handled = await handleCompanyAccessError(error);
       if (!handled) {
-        addToast(getErrorMessage(error, "Não foi possível rejeitar a importacao."), "error");
+        addToast(getErrorMessage(error, "Não foi possível rejeitar a importação."), "error");
       }
     } finally {
       setIsConfirming(false);
@@ -355,21 +355,19 @@ const AddData = () => {
   };
 
   return (
-    <main className="min-w-0 space-y-7 overflow-x-hidden">
-      <section className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
-          Adicionar dados
-        </p>
-        <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-          Importação Inteligente
-        </h1>
-        <p className="max-w-3xl text-sm leading-6 text-zinc-400">
-          Envie prints, PDFs, planilhas ou textos e deixe a IA organizar os dados para a NEXT LEVEL.
-        </p>
+    <main className="nl-page min-w-0 space-y-7">
+      <section className="nl-page-header">
+        <div>
+          <p className="nl-eyebrow">Adicionar dados</p>
+          <h1 className="nl-title">Importação inteligente</h1>
+          <p className="nl-subtitle">
+            Envie prints, PDFs, planilhas ou textos e deixe a IA organizar os dados para a NEXT LEVEL.
+          </p>
+        </div>
       </section>
 
       <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="min-w-0 space-y-5 rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+        <div className="nl-card min-w-0 space-y-5 p-6">
           <div className="grid gap-3 md:grid-cols-2">
             {INPUT_MODES.map((item) => (
               <button
@@ -382,7 +380,7 @@ const AddData = () => {
                 className={`min-w-0 rounded-2xl border p-4 text-left transition ${
                   mode === item.mode
                     ? "border-lime-400/50 bg-lime-400/10"
-                    : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                    : "border-white/10 bg-white/[0.03] hover:border-white/20"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -408,7 +406,7 @@ const AddData = () => {
               <select
                 value={expectedCategory}
                 onChange={(event) => setExpectedCategory(event.target.value)}
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-lime-400/40"
+                className="nl-input"
               >
                 {CATEGORY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -418,7 +416,7 @@ const AddData = () => {
               </select>
             </label>
 
-            <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+            <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               {mode === "text" ? (
                 <label className="block space-y-2">
                   <span className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400">
@@ -428,11 +426,11 @@ const AddData = () => {
                     value={textValue}
                     onChange={(event) => setTextValue(event.target.value)}
                     placeholder="Cole aqui um relatório, resultado de campanha, resumo financeiro ou qualquer dado bruto..."
-                    className="min-h-[220px] w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 outline-none focus:border-lime-400/40"
+                    className="nl-input min-h-[220px] resize-y"
                   />
                 </label>
               ) : (
-                <label className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-700 bg-zinc-950/80 px-5 text-center">
+                <label className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-[#080D0B]/80 px-5 text-center">
                   <PlusIcon className="h-8 w-8 text-lime-300" />
                   <p className="mt-4 max-w-full break-words text-sm font-black text-zinc-100">
                     {selectedFile ? selectedFile.name : activeMode?.title}
@@ -454,7 +452,7 @@ const AddData = () => {
           </div>
 
           <div className="rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-            Revise os dados extraidos antes de confirmar.
+            Revise os dados extraídos antes de confirmar.
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -462,7 +460,7 @@ const AddData = () => {
               type="button"
               onClick={() => void handleAnalyze()}
               disabled={!canAnalyze || isSubmitting}
-              className="rounded-2xl bg-lime-400 px-6 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
+              className="nl-button-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? "Analisando..." : "Analisar com IA"}
             </button>
@@ -474,13 +472,13 @@ const AddData = () => {
           </div>
         </div>
 
-        <aside className="min-w-0 overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-6 xl:max-w-[360px]">
+        <aside className="nl-card min-w-0 overflow-hidden p-6 xl:max-w-[360px]">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-lime-300">
                 Histórico
               </p>
-              <h2 className="mt-2 text-2xl font-black text-zinc-50">Importacoes recentes</h2>
+              <h2 className="mt-2 text-2xl font-black text-zinc-50">Importações recentes</h2>
             </div>
             <span className="rounded-full border border-zinc-700 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
               {history.length} itens
@@ -539,10 +537,10 @@ const AddData = () => {
         </aside>
       </section>
 
-      <section className="min-w-0 overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+      <section className="nl-card min-w-0 overflow-hidden p-6">
         {!selectedImport ? (
-          <div className="rounded-2xl border border-dashed border-zinc-800 p-8 text-center">
-            <h2 className="text-2xl font-black text-zinc-100">Aguardando sua primeira importacao</h2>
+          <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center">
+            <h2 className="text-2xl font-black text-zinc-100">Aguardando sua primeira importação</h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-500">
               Envie um print, PDF, CSV ou texto e a IA vai montar uma leitura para sua revisão.
             </p>
@@ -585,7 +583,7 @@ const AddData = () => {
                   type="button"
                   onClick={() => void handleReject()}
                   disabled={isConfirming || selectedImport.status === "confirmed"}
-                  className="rounded-2xl border border-zinc-700 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-200 disabled:opacity-50"
+                  className="nl-button-secondary disabled:opacity-50"
                 >
                   Rejeitar
                 </button>
@@ -597,9 +595,9 @@ const AddData = () => {
                     selectedImport.status === "confirmed" ||
                     selectedImport.status === "failed"
                   }
-                  className="rounded-2xl bg-lime-400 px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-950 disabled:opacity-50"
+                  className="nl-button-primary disabled:opacity-50"
                 >
-                  {isConfirming ? "Confirmando..." : "Confirmar importacao"}
+                  {isConfirming ? "Confirmando..." : "Confirmar importação"}
                 </button>
               </div>
             </div>
@@ -657,7 +655,7 @@ const AddData = () => {
                   <h3 className="text-lg font-black text-zinc-100">Metricas extraidas</h3>
                 </div>
                 {draftMetrics.length === 0 ? (
-                  <p className="text-sm text-zinc-500">Nenhuma metrica clara foi detectada.</p>
+                  <p className="text-sm text-zinc-500">Nenhuma métrica clara foi detectada.</p>
                 ) : (
                   <div className="space-y-3">
                     {draftMetrics.map((metric, index) => (

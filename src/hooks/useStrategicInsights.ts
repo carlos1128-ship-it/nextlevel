@@ -52,15 +52,15 @@ function inferCategory(content: string): string {
   if (text.includes("risco")) return "Risco";
   if (text.includes("oportunidade")) return "Oportunidade";
   if (text.includes("crescimento")) return "Crescimento";
-  if (text.includes("acao") || text.includes("recomend")) return "Acao recomendada";
-  if (text.includes("atencao")) return "Atencao";
+  if (text.includes("acao") || text.includes("recomend")) return "Ação recomendada";
+  if (text.includes("atencao")) return "Atenção";
   return "Insight";
 }
 
 function inferColor(category: string): StrategicInsightCard["color"] {
   if (category === "Risco") return "red";
   if (category === "Oportunidade" || category === "Crescimento") return "green";
-  if (category === "Acao recomendada") return "purple";
+  if (category === "Ação recomendada") return "purple";
   return "blue";
 }
 

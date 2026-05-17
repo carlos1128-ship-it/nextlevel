@@ -511,7 +511,7 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
       const message =
         error instanceof Error && error.message === "billing_validation_timeout"
           ? "Tempo limite ao validar assinatura."
-          : "Nao foi possivel validar sua assinatura agora.";
+          : "Não foi possível validar sua assinatura agora.";
       setBillingError(message);
       if (!isBillingLoaded && !hasCachedBillingStatus) {
         setIsBillingLoaded(false);
@@ -608,8 +608,8 @@ const BillingValidationError = ({
   <div className="flex min-h-screen items-center justify-center bg-[#040507] px-5 text-zinc-100">
     <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-white/[0.04] p-7 text-center shadow-[0_0_70px_rgba(182,255,0,0.08)]">
       <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
-      <p className="mt-4 text-sm font-bold text-zinc-200">Nao foi possivel validar sua assinatura agora.</p>
-      <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessao continua protegida. Tente novamente ou saia para iniciar uma nova sessao.</p>
+      <p className="mt-4 text-sm font-bold text-zinc-200">Não foi possível validar sua assinatura agora.</p>
+      <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessão continua protegida. Tente novamente ou saia para iniciar uma nova sessão.</p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
@@ -741,10 +741,10 @@ const LockedFeature = ({
   const navigate = useNavigate();
   return (
     <div className="rounded-3xl border border-lime-400/20 bg-zinc-950 p-7 text-zinc-100">
-      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Upgrade disponivel</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Upgrade disponível</p>
       <h1 className="mt-3 text-3xl font-black tracking-tighter">{title}</h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
-        Este recurso esta disponivel a partir do plano {PLAN_LABELS[requiredPlan]}. Seu acesso ao restante do dashboard continua normal.
+        Este recurso está disponível a partir do plano {PLAN_LABELS[requiredPlan]}. Seu acesso ao restante do painel continua normal.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <button
@@ -937,7 +937,7 @@ const GoogleAuthCallback = () => {
         <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-white/[0.04] p-7 text-center shadow-[0_0_70px_rgba(182,255,0,0.08)]">
           <h1 className="text-3xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</h1>
           <p className="mt-4 text-sm font-bold text-zinc-200">{callbackError || "Não foi possível concluir seu login agora."}</p>
-          <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessao nao ficou presa. Tente novamente ou volte para iniciar um novo login.</p>
+          <p className="mt-2 text-xs leading-6 text-zinc-500">Sua sessão não ficou presa. Tente novamente ou volte para iniciar um novo login.</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
@@ -1070,7 +1070,7 @@ const AppContent = () => {
           <Route path="/chat" element={personalizedShell(<Chat />)} />
           <Route path="/settings" element={plainShell(<Settings />)} />
           <Route path="/profile" element={plainShell(<Profile />)} />
-          <Route path="/integrations" element={featureShell(<Integrations />, "PREMIUM", "Integracoes automaticas exigem Premium")} />
+          <Route path="/integrations" element={featureShell(<Integrations />, "PREMIUM", "Integrações automáticas exigem Premium")} />
           <Route path="/companies" element={<ProtectedRoute><Layout><Companies /></Layout></ProtectedRoute>} />
           <Route path="/insights" element={personalizedShell(<Insights />)} />
           <Route path="/financial-flow" element={personalizedShell(<FinancialFlow />)} />
@@ -1081,10 +1081,10 @@ const AppContent = () => {
           <Route path="/customers" element={personalizedShell(<Customers />)} />
           <Route path="/costs" element={personalizedShell(<Costs />)} />
           <Route path="/add-data" element={personalizedShell(<AddData />)} />
-          <Route path="/market-intel" element={featureShell(<MarketIntel />, "PRO_BUSINESS", "Market intelligence exige Pro Business")} />
+          <Route path="/market-intel" element={featureShell(<MarketIntel />, "PRO_BUSINESS", "Inteligência de mercado exige Pro Business")} />
           <Route path="/attendant" element={featureShell(<Attendant />, "PREMIUM", "Atendente IA exige Premium")} />
           <Route path="/admin/system-health" element={<AdminRoute><Layout><SystemHealth /></Layout></AdminRoute>} />
-          <Route path="/command-center" element={featureShell(<CommandCenter />, "PRO_BUSINESS", "Automacoes avancadas exigem Pro Business")} />
+          <Route path="/command-center" element={featureShell(<CommandCenter />, "PRO_BUSINESS", "Automações avançadas exigem Pro Business")} />
           <Route path="/plans" element={<Navigate to="/planos" replace />} />
           <Route path="/usage" element={personalizedShell(<PlanUsage />)} />
           <Route path="/plan-usage" element={<Navigate to="/usage" replace />} />

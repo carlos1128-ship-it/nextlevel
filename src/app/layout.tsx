@@ -28,23 +28,23 @@ const defaultSiteUrl =
     .replace(/\/+$/, "");
 
 export const metadata: Metadata = {
-  title: "Next Level | Lucro Real ou Colapso",
+  title: "NEXT LEVEL AI | ERP com IA para gestão empresarial",
   description:
-    "A linha que separa sua empresa do lucro real ou do colapso. Automatize vendas, conecte canais e enxergue margem verdadeira antes de perder dinheiro.",
+    "ERP com IA para centralizar vendas, financeiro, clientes, produtos, custos, atendimento, relatórios e decisões operacionais.",
   canonicalUrl: defaultSiteUrl,
   keywords: [
-    "Lucro Real",
-    "Margem Verdadeira",
-    "Automação de Vendas",
+    "ERP com IA",
+    "Gestão empresarial",
+    "Automação de vendas",
     "WhatsApp",
     "Mercado Livre",
-    "Operação Tática",
+    "Inteligência operacional",
     "Next Level",
   ],
   openGraph: {
-    title: "Next Level | Lucro Real ou Colapso",
+    title: "NEXT LEVEL AI | ERP com IA para gestão empresarial",
     description:
-      "O cérebro tático do seu negócio para enxergar a margem que sua operação queima sem saber.",
+      "Centralize sua operação empresarial e acompanhe vendas, margem, atendimento e relatórios com apoio de IA.",
     image: `${defaultSiteUrl}/og-sales-ai.svg`,
     url: defaultSiteUrl,
     type: "website",
@@ -52,9 +52,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Next Level | Lucro Real ou Colapso",
+    title: "NEXT LEVEL AI | ERP com IA",
     description:
-      "Automatize vendas, conecte canais e enxergue margem verdadeira antes de perder dinheiro.",
+      "ERP com IA para gestão empresarial, vendas, financeiro, atendimento e relatórios.",
     image: `${defaultSiteUrl}/og-sales-ai.svg`,
   },
 };
@@ -62,12 +62,12 @@ export const metadata: Metadata = {
 export function resolveMetadata(pathname: string): Metadata {
   const normalizedPath = pathname.trim() || "/";
   const pageTitleMap: Record<string, string> = {
-    "/": "Next Level | Lucro Real ou Colapso",
-    "/login": "Next Level | Lucro Real ou Colapso",
-    "/dashboard": "Dashboard | Next Level",
-    "/inicio": "Dashboard | Next Level",
-    "/home": "Dashboard | Next Level",
-    "/painel": "Dashboard | Next Level",
+    "/": "NEXT LEVEL AI | ERP com IA",
+    "/login": "NEXT LEVEL AI | ERP com IA",
+    "/dashboard": "Painel | Next Level",
+    "/inicio": "Painel | Next Level",
+    "/home": "Painel | Next Level",
+    "/painel": "Painel | Next Level",
     "/reports": "Relatórios | Next Level",
     "/chat": "Chat IA | Next Level",
     "/settings": "Configurações | Next Level",
@@ -96,7 +96,7 @@ export function resolveMetadata(pathname: string): Metadata {
 
   const title =
     pageTitleMap[normalizedPath] ||
-    (isNotFoundRoute ? "404 | Next Level" : "Next Level | Lucro Real ou Colapso");
+    (isNotFoundRoute ? "404 | Next Level" : "NEXT LEVEL AI | ERP com IA");
 
   const description =
     isNotFoundRoute

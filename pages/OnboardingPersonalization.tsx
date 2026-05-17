@@ -105,7 +105,7 @@ const METRIC_LABELS: Record<string, string> = {
 };
 
 const MODULE_LABELS: Record<string, string> = {
-  dashboard: "Dashboard",
+  dashboard: "Painel",
   products: "Produtos",
   customers: "Clientes",
   financial: "Financeiro",
@@ -121,9 +121,9 @@ const MODULE_LABELS: Record<string, string> = {
 const MODULE_PRIORITY_OPTIONS = [
   { key: "products", label: "Produtos/servicos" },
   { key: "attendant", label: "Atendente IA" },
-  { key: "integrations", label: "Integracoes" },
+  { key: "integrations", label: "Integrações" },
   { key: "market_intelligence", label: "Market intel" },
-  { key: "automations", label: "Projetos/automacoes" },
+  { key: "automations", label: "Projetos/automações" },
   { key: "customers", label: "Clientes" },
   { key: "costs", label: "Custos" },
   { key: "financial", label: "Financeiro" },
@@ -299,9 +299,9 @@ const OnboardingPersonalization = () => {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.32em] text-lime-300">NEXT LEVEL</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-6xl">Conte para a Next sobre seu negocio</h1>
+            <h1 className="mt-3 text-4xl font-black tracking-tighter md:text-6xl">Conte para a Next sobre seu negócio</h1>
             <p className="mt-4 max-w-3xl text-sm font-medium text-zinc-400 md:text-base">
-              Assim a plataforma organiza o painel e gera recomendacoes mais uteis para sua operacao.
+              Assim a plataforma organiza o painel e gera recomendações mais úteis para sua operação.
             </p>
           </div>
           <div className="hidden rounded-3xl border border-lime-400/20 bg-lime-400/10 px-5 py-4 text-right md:block">
@@ -346,7 +346,7 @@ const OnboardingPersonalization = () => {
                     Descrição livre
                   </span>
                   <span className="mt-2 block text-sm font-bold text-zinc-200">
-                    Descreva seu negocio
+                    Descreva seu negócio
                   </span>
                   <textarea
                     value={form.customBusinessDescription || form.originalBusinessDescription || ""}
@@ -423,7 +423,7 @@ const OnboardingPersonalization = () => {
                   onToggle={(value) => toggleListValue("priorityModules", value)}
                 />
                 <ModulePicker
-                  title="Nao e prioridade agora"
+                  title="Não é prioridade agora"
                   values={form.nonPriorityModules || []}
                   onToggle={(value) => toggleListValue("nonPriorityModules", value)}
                 />
