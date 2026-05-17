@@ -10,7 +10,6 @@ import {
   DollarSign,
   Eye,
   EyeOff,
-  Globe,
   LineChart,
   LockKeyhole,
   Mail,
@@ -158,7 +157,7 @@ function AuthAccessSection({
             {[
               { label: "Dados protegidos", value: "Sessão segura" },
               { label: "Operação guiada", value: "Sem complexidade" },
-              { label: "Plano preservado", value: "Checkout real" },
+              { label: "Plano preservado", value: "Assinatura segura" },
             ].map((item) => (
               <div key={item.label} className="rounded-2xl border border-[#2E3935] bg-[#0D1210] p-4 group hover:border-[#B6FF00]/30 transition-colors">
                 <div className="mb-4 h-2 w-2 rounded-full bg-[#B6FF00]" />
@@ -476,7 +475,7 @@ export function NextLevelLandingPage({
                           <p className="text-2xl font-bold text-gray-900">1.847</p>
                         </div>
                         <div className="flex items-center gap-1 text-emerald-600 text-[11px] font-semibold">
-                          <TrendingUp size={12} /><span>+12,4% vs mês ant.</span>
+                          <TrendingUp size={12} /><span>+12,4% no mês</span>
                         </div>
                       </div>
                     </div>
@@ -673,7 +672,7 @@ export function NextLevelLandingPage({
                   <div className="rounded-xl border border-[#2E3935] bg-[#1A221F] p-5">
                     <h4 className="mb-4 text-xs font-bold uppercase text-[#6B7470]">Status dos Canais</h4>
                     <div className="space-y-3">
-                      {["WhatsApp", "Instagram", "Mercado Livre", "Utmify"].map((channel) => (
+                      {["WhatsApp", "Instagram", "Mercado Livre"].map((channel) => (
                         <div key={channel} className="flex items-center justify-between text-xs">
                           <span className="text-[#E6EAE4]">{channel}</span>
                           <span className="rounded bg-[#B6FF00]/10 px-2 py-0.5 text-[10px] font-bold text-[#B6FF00]">ATIVO</span>
@@ -760,10 +759,10 @@ export function NextLevelLandingPage({
             <span className="nl-eyebrow mb-4 block text-[#6B7470]">INTEGRAÇÕES</span>
             <h2 className="nl-h2 mb-6 text-[#080D0B]">Conecte os canais que movem sua operação</h2>
             <p className="nl-body mb-8 text-[#6B7470]">
-              Traga dados de vendas, atendimento, campanhas, marketplaces e pagamentos para dentro da NEXT LEVEL e acompanhe tudo em uma visão centralizada.
+              Traga dados de atendimento, mensagens e vendas para dentro da NEXT LEVEL AI e acompanhe tudo em uma visão centralizada.
             </p>
             <button type="button" onClick={() => focusAuth(true)} className="inline-flex items-center gap-2 border-b-2 border-[#B6FF00] pb-1 font-bold text-[#080D0B] transition-colors hover:text-[#1C3F3A]">
-              Ver todas as integrações <ArrowRight size={16} />
+              Ver integrações disponíveis <ArrowRight size={16} />
             </button>
           </div>
 
@@ -772,16 +771,13 @@ export function NextLevelLandingPage({
               { name: "WhatsApp", label: "Atendimento e oportunidades", icon: MessageSquare },
               { name: "Instagram", label: "Mensagens e clientes", icon: Smartphone },
               { name: "Mercado Livre", label: "Marketplace e vendas", icon: Package },
-              { name: "Utmify", label: "Conversões e campanhas", icon: Activity },
-              { name: "Stripe", label: "Pagamentos e assinaturas", icon: CreditCard },
-              { name: "API própria", label: "Dados personalizados", icon: Globe, neon: true },
             ].map((integration) => (
               <div key={integration.name} className="group flex h-32 flex-col justify-between rounded-2xl border border-[#1A221F] bg-[#0D1210] p-5 transition-transform hover:-translate-y-1">
                 <div className="flex items-start justify-between">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1A221F] text-white transition-colors group-hover:text-[#B6FF00]">
                     <integration.icon size={20} />
                   </div>
-                  <div className={`h-2 w-2 rounded-full ${integration.neon ? "bg-[#B6FF00] shadow-[0_0_8px_rgba(182,255,0,0.8)]" : "bg-green-500"}`} />
+                  <div className="h-2 w-2 rounded-full bg-green-500" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-white">{integration.name}</h4>
