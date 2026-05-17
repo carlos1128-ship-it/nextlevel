@@ -14,7 +14,6 @@
 import {
   AnimatePresence,
   motion,
-  useReducedMotion,
 } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
@@ -322,7 +321,6 @@ export function SplashScreen({
   skipIfSeen = false,
   onComplete,
 }: SplashScreenProps) {
-  const prefersReduced = useReducedMotion();
   const [visible, setVisible] = useState(() => {
     if (skipIfSeen && typeof window !== 'undefined') {
       return !sessionStorage.getItem('nl-splash-shown');
@@ -344,27 +342,6 @@ export function SplashScreen({
   }, [done, skipIfSeen, onComplete]);
 
   if (!visible) return null;
-
-  // Reduced motion: show a static centered logo, no animation
-  if (prefersReduced) {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9999,
-          background: BG,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <span style={{ fontFamily: FONT, fontWeight: 700, fontSize: 'min(10vw, 88px)', letterSpacing: '0.06em', color: NEON }}>
-          NEXT LEVEL
-        </span>
-      </div>
-    );
-  }
 
   return (
     <AnimatePresence>
