@@ -9,6 +9,7 @@ import Companies from './pages/Companies';
 import LoginPage from './pages/LoginPage';
 import { ToastProvider } from './components/Toast';
 import NextLevelLoader from './components/NextLevelLoader';
+import { SplashScreen } from './src/components/ui/SplashScreen';
 import AppErrorBoundary from './src/components/AppErrorBoundary';
 import { DASHBOARD_ROUTE } from './src/app/routes';
 import { useDetailLevel } from './src/hooks/useDetailLevel';
@@ -594,7 +595,7 @@ const AdminRoute = ({ children }: { children?: ReactNode }) => {
 };
 
 const FullscreenLoading = (_props?: { label?: string }) => (
-  <NextLevelLoader />
+  <SplashScreen isLoading={true} minDuration={3500} />
 );
 
 const BillingValidationError = ({
@@ -815,6 +816,7 @@ const GoogleAuthCallback = () => {
   const [retryKey, setRetryKey] = useState(0);
   const [callbackState, setCallbackState] = useState<AuthCallbackState>("callbackLoading");
   const [callbackError, setCallbackError] = useState<string | null>(null);
+  const [targetRoute, setTargetRoute] = useState<string | null>(null);
 
   useEffect(() => {
     const runId = activeRunRef.current + 1;
@@ -903,11 +905,11 @@ const GoogleAuthCallback = () => {
         if (billing.hasActiveSubscription) {
           clearPendingSelectedPlan();
           setCallbackState("success");
-          navigate(DASHBOARD_ROUTE, { replace: true });
+          setTargetRoute(DASHBOARD_ROUTE);
           return;
         }
         setCallbackState("success");
-        navigate(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos', { replace: true });
+        setTargetRoute(selectedPlan ? buildPlanosSubscribeUrl(selectedPlan) : '/planos');
       } catch {
         fail();
       }
@@ -922,6 +924,12 @@ const GoogleAuthCallback = () => {
       window.clearTimeout(startTimer);
     };
   }, [login, navigate, retryKey, setSelectedCompanyId]);
+
+  const handleSplashComplete = () => {
+    if (targetRoute) {
+      navigate(targetRoute, { replace: true });
+    }
+  };
 
   if (callbackState === "error") {
     return (
@@ -958,7 +966,13 @@ const GoogleAuthCallback = () => {
     );
   }
 
-  return <FullscreenLoading />;
+  return (
+    <SplashScreen 
+      isLoading={callbackState !== "success"} 
+      minDuration={3500} 
+      onComplete={handleSplashComplete} 
+    />
+  );
 };
 
 const LoggedInLoginRedirect = () => {
@@ -989,7 +1003,8 @@ const LoggedInLoginRedirect = () => {
 };
 
 const AppContent = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isProfileReady } = useAuth();
+  const [bootSplashDone, setBootSplashDone] = useState(false);
   const personalizedShell = (page: ReactNode) => (
     <ProtectedRoute>
       <BillingGate>
@@ -1028,6 +1043,13 @@ const AppContent = () => {
   return (
     <BrowserRouter>
       <MetadataSync />
+      {!bootSplashDone && isLoggedIn && (
+        <SplashScreen
+          isLoading={!isProfileReady}
+          minDuration={3500}
+          onComplete={() => setBootSplashDone(true)}
+        />
+      )}
       <Suspense fallback={<FullscreenLoading />}>
         <Routes>
           <Route path="/auth/callback" element={<GoogleAuthCallback />} />
