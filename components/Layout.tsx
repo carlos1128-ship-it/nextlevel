@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import type { NavItem } from "../types";
 import {
   HomeIcon,
@@ -30,27 +30,72 @@ import { DASHBOARD_ROUTE } from "../src/app/routes";
 
 type SidebarNavItem = NavItem & { id: string };
 
-const navItems: SidebarNavItem[] = [
-  { id: "home", path: DASHBOARD_ROUTE, name: "Início", icon: HomeIcon, isPrimary: true },
-  { id: "reports", path: "/reports", name: "Relatórios", icon: BarChartIcon, isPrimary: true },
-  { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
-  { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },
-  { id: "insights", path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
-  { id: "market", path: "/market-intel", name: "Marketing", icon: RadarIcon },
-  { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
-  { id: "add-data", path: "/add-data", name: "Adicionar dados", icon: PlusIcon },
-  { id: "products", path: "/products", name: "Produtos e Serviços", icon: PackageIcon },
-  { id: "orders", path: "/orders", name: "Pedidos", icon: ReceiptIcon },
-  { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
-  { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
-  { id: "plans", path: "/plans", name: "Planos", icon: CreditCardIcon },
-  { id: "usage", path: "/usage", name: "Uso do plano", icon: ActivityIcon },
-  { id: "settings", path: "/settings", name: "Configurações", icon: SettingsIcon },
-  { id: "profile", path: "/profile", name: "Perfil", icon: UserIcon },
-  { id: "integrations", path: "/integrations", name: "Integrações", icon: PuzzleIcon },
-  { id: "companies", path: "/companies", name: "Empresas", icon: BuildingIcon },
-  { id: "financial-flow", path: "/financial-flow", name: "Fluxo financeiro", icon: DollarSignIcon },
+interface NavItemDef {
+  id: string;
+  path: string;
+  name: string;
+  icon: React.FC<{ className?: string }>;
+  isPrimary?: boolean;
+}
+
+interface NavGroup {
+  title: string;
+  items: NavItemDef[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    title: "Principal",
+    items: [
+      { id: "home", path: DASHBOARD_ROUTE, name: "Início", icon: HomeIcon, isPrimary: true },
+      { id: "reports", path: "/reports", name: "Relatórios", icon: BarChartIcon, isPrimary: true },
+    ],
+  },
+  {
+    title: "Inteligência",
+    items: [
+      { id: "chat", path: "/chat", name: "Chat IA", icon: MessageSquareIcon, isPrimary: true },
+      { id: "attendant", path: "/attendant", name: "Atendente IA", icon: MessageSquareIcon, isPrimary: true },
+      { id: "insights", path: "/insights", name: "Insights", icon: LightbulbIcon, isPrimary: true },
+    ],
+  },
+  {
+    title: "Dados",
+    items: [
+      { id: "add-data", path: "/add-data", name: "Adicionar dados", icon: PlusIcon },
+      { id: "integrations", path: "/integrations", name: "Integrações", icon: PuzzleIcon },
+    ],
+  },
+  {
+    title: "Negócios",
+    items: [
+      { id: "market", path: "/market-intel", name: "Marketing", icon: RadarIcon },
+      { id: "projects", path: "/command-center", name: "Projetos", icon: BarChartIcon },
+      { id: "products", path: "/products", name: "Produtos e Serviços", icon: PackageIcon },
+      { id: "orders", path: "/orders", name: "Pedidos", icon: ReceiptIcon },
+      { id: "customers", path: "/customers", name: "Clientes", icon: UsersIcon },
+    ],
+  },
+  {
+    title: "Financeiro",
+    items: [
+      { id: "costs", path: "/costs", name: "Custos", icon: ReceiptIcon },
+      { id: "financial-flow", path: "/financial-flow", name: "Fluxo financeiro", icon: DollarSignIcon },
+    ],
+  },
+  {
+    title: "Sistema",
+    items: [
+      { id: "companies", path: "/companies", name: "Empresas", icon: BuildingIcon },
+      { id: "usage", path: "/usage", name: "Uso do plano", icon: ActivityIcon },
+      { id: "plans", path: "/plans", name: "Planos", icon: CreditCardIcon },
+      { id: "settings", path: "/settings", name: "Configurações", icon: SettingsIcon },
+      { id: "profile", path: "/profile", name: "Perfil", icon: UserIcon },
+    ],
+  },
 ];
+
+const navItems: SidebarNavItem[] = navGroups.flatMap(g => g.items);
 
 const adminNavItem: SidebarNavItem = {
   id: "admin-system-health",
@@ -58,6 +103,7 @@ const adminNavItem: SidebarNavItem = {
   name: "Saúde do sistema",
   icon: ShieldIcon,
 };
+
 const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   home: "dashboard",
   reports: "reports",
@@ -79,6 +125,7 @@ const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   companies: "companies",
   "financial-flow": "financial",
 };
+
 const COMPANY_STAGE_STORAGE_KEY = "nextlevel:onboarding-company-stage";
 const NICHE_MODAL_DONE_PREFIX = "nextlevel:niche-modal-done:";
 const SIDEBAR_PREF_CACHE_PREFIX = "nextlevel:sidebar-module-preferences:";
@@ -195,80 +242,115 @@ function writeNicheModalDone(key: string) {
 }
 
 const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; moreItems: SidebarNavItem[] }) => {
-  const { username } = useAuth();
+  const { username, logout } = useAuth();
+  const location = useLocation();
+
+  const isItemActive = (path: string) => {
+    if (path === DASHBOARD_ROUTE) return location.pathname === DASHBOARD_ROUTE;
+    return location.pathname.startsWith(path);
+  };
+
+  const groupedPrimary = useMemo(() => {
+    return navGroups.map(group => ({
+      title: group.title,
+      items: group.items.filter(item => primaryItems.some(p => p.id === item.id))
+    })).filter(g => g.items.length > 0);
+  }, [primaryItems]);
+
   return (
-    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-72 flex-col border-r border-white/[0.08] bg-[#080D0B] p-5 text-zinc-100 shadow-[18px_0_50px_rgba(0,0,0,0.28)] lg:flex">
-      <div className="shrink-0">
-        <Link to={DASHBOARD_ROUTE} className="group mb-7 flex items-center gap-3" aria-label="Ir para o início">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-lime-300/25 bg-lime-300/10 shadow-[0_0_26px_rgba(182,255,0,0.12)]">
-            <span className="h-3 w-3 rounded-full bg-[#B6FF00] shadow-[0_0_16px_rgba(182,255,0,0.72)]" />
-          </span>
-          <span>
-            <span className="block text-xl font-black tracking-tight text-white transition group-hover:text-[#B6FF00]">NEXT LEVEL</span>
-            <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">ERP com IA</span>
-          </span>
+    <aside className="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col border-r border-white/[0.06] bg-[#080D0B] py-6 px-4 text-zinc-100 shadow-[18px_0_50px_rgba(0,0,0,0.18)] lg:flex">
+      <div className="mb-6 px-2">
+        <Link to={DASHBOARD_ROUTE} className="group inline-flex flex-col" aria-label="Ir para o início">
+          <span className="text-xl font-black tracking-tighter text-[#B6FF00]">NEXT LEVEL</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">Inteligência Operacional</span>
         </Link>
-        <p className="mb-4 px-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Central de gestão</p>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
-        <nav aria-label="Menu principal">
-          <ul className="space-y-1">
-            {(Array.isArray(primaryItems) ? primaryItems : []).map((item) => (
-              <li key={item.path}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `group relative flex items-center rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all ${
-                      isActive
-                        ? "border-lime-300/35 bg-lime-300/10 text-[#B6FF00] shadow-[inset_3px_0_0_#B6FF00]"
-                        : "border-transparent text-zinc-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-zinc-100"
-                    }`
-                  }
-                >
-                  <item.icon className="mr-3 h-5 w-5 shrink-0" />
-                  <span className="min-w-0 truncate">{item.name}</span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-          {moreItems.length > 0 ? (
-            <details className="mt-4 rounded-2xl border border-white/[0.08] bg-[#0D1210] p-2">
-              <summary className="cursor-pointer px-2 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 marker:text-[#B6FF00]">
-                Mais ferramentas
-              </summary>
-              <ul className="mt-2 space-y-1">
-                {moreItems.map((item) => (
-                  <li key={item.path}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) =>
-                        `group flex items-center rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all ${
-                          isActive
-                            ? "border-lime-300/35 bg-lime-300/10 text-[#B6FF00] shadow-[inset_3px_0_0_#B6FF00]"
-                            : "border-transparent text-zinc-500 hover:border-white/10 hover:bg-white/[0.04] hover:text-zinc-100"
-                        }`
-                      }
-                    >
-                      <item.icon className="mr-3 h-5 w-5 shrink-0" />
-                      <span className="min-w-0 truncate">{item.name}</span>
-                    </NavLink>
-                  </li>
-                ))}
+
+      <Link to="/add-data" className="mb-6">
+        <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B6FF00] py-2.5 text-xs font-black uppercase tracking-widest text-[#050706] transition-all hover:scale-[1.02] active:scale-[0.98]">
+          <PlusIcon className="h-4 w-4" />
+          <span>Novo Registro</span>
+        </button>
+      </Link>
+
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800">
+        <nav className="flex flex-col gap-5" aria-label="Menu principal">
+          {groupedPrimary.map((group) => (
+            <div key={group.title}>
+              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
+                {group.title}
+              </p>
+              <ul className="space-y-0.5">
+                {group.items.map((item) => {
+                  const active = isItemActive(item.path);
+                  return (
+                    <li key={item.path}>
+                      <NavLink
+                        to={item.path}
+                        className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+                          active
+                            ? "bg-white/[0.06] text-[#B6FF00] shadow-[inset_2px_0_0_#B6FF00]"
+                            : "text-zinc-400 hover:bg-white/[0.03] hover:text-zinc-100"
+                        }`}
+                      >
+                        <item.icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#B6FF00]" : "text-zinc-500 group-hover:text-zinc-300"}`} />
+                        <span className="truncate">{item.name}</span>
+                      </NavLink>
+                    </li>
+                  );
+                })}
               </ul>
-            </details>
-          ) : null}
+            </div>
+          ))}
+
+          {moreItems.length > 0 && (
+            <div>
+              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">
+                Outros
+              </p>
+              <ul className="space-y-0.5">
+                {moreItems.map((item) => {
+                  const active = isItemActive(item.path);
+                  return (
+                    <li key={item.path}>
+                      <NavLink
+                        to={item.path}
+                        className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+                          active
+                            ? "bg-white/[0.06] text-[#B6FF00] shadow-[inset_2px_0_0_#B6FF00]"
+                            : "text-zinc-400 hover:bg-white/[0.03] hover:text-zinc-100"
+                        }`}
+                      >
+                        <item.icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#B6FF00]" : "text-zinc-500 group-hover:text-zinc-300"}`} />
+                        <span className="truncate">{item.name}</span>
+                      </NavLink>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </nav>
       </div>
 
-      <Link to="/profile" className="group mt-5 flex shrink-0 items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#111613] p-3 transition hover:border-lime-300/35" aria-label="Acessar perfil">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-300/10 font-bold text-[#B6FF00] transition-all group-hover:border-lime-300/55">
-          {username?.charAt(0).toUpperCase() || "U"}
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-zinc-100">{username || "Usuário"}</p>
-          <p className="text-[10px] uppercase tracking-widest text-zinc-500">Ver perfil</p>
-        </div>
-      </Link>
+      <div className="mt-4 border-t border-white/[0.06] pt-4">
+        <Link to="/profile" className="group flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-white/[0.03]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-300/10 text-sm font-black text-[#B6FF00]">
+            {username?.charAt(0).toUpperCase() || "U"}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-bold text-zinc-100">{username || "Administrador"}</p>
+            <p className="text-[10px] uppercase tracking-widest text-zinc-500">Plano Estratégico</p>
+          </div>
+        </Link>
+        <button
+          onClick={logout}
+          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+        >
+          <PlusIcon className="h-4 w-4 rotate-45" />
+          <span>Sair</span>
+        </button>
+      </div>
     </aside>
   );
 };
@@ -277,30 +359,31 @@ const Header = () => {
   const { username, isAdmin } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/[0.08] bg-[#101418]/90 px-5 backdrop-blur-xl lg:px-8">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/[0.06] bg-[#101418]/80 px-5 backdrop-blur-xl lg:px-8">
       <div className="lg:hidden">
         <p className="text-lg font-black text-[#B6FF00]">NEXT LEVEL</p>
-        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500">ERP com IA</p>
+        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-500">Empowerment</p>
       </div>
       <div className="hidden min-w-0 lg:block">
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Inteligência operacional</p>
-        <p className="mt-0.5 text-sm font-semibold text-zinc-300">Centralize dados, acompanhe indicadores e decida com IA.</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Cérebro Operacional</p>
+        <p className="mt-0.5 text-[13px] font-medium text-zinc-400">Gerencie sua empresa com inteligência preditiva.</p>
       </div>
       <div className="flex items-center gap-4">
-        {isAdmin ? (
-          <Link to="/admin/system-health" className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-2 text-zinc-400 transition-colors hover:border-lime-300/35 hover:text-[#B6FF00]" aria-label="Painel admin">
-            <ShieldIcon className="h-5 w-5" />
+        {isAdmin && (
+          <Link to="/admin/system-health" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-zinc-400 transition-all hover:border-lime-300/35 hover:text-[#B6FF00]" title="Painel admin">
+            <ShieldIcon className="h-4 w-4" />
           </Link>
-        ) : null}
-        <Link to="/settings" className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-2 text-zinc-400 transition-colors hover:border-lime-300/35 hover:text-[#B6FF00]" aria-label="Configurações">
-          <SettingsIcon className="h-5 w-5" />
+        )}
+        <Link to="/settings" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-zinc-400 transition-all hover:border-lime-300/35 hover:text-[#B6FF00]" title="Configurações">
+          <SettingsIcon className="h-4 w-4" />
         </Link>
-        <Link to="/profile" className="group flex items-center gap-2.5" aria-label="Menu do usuário">
-          <div className="hidden text-right sm:block">
+        <div className="h-6 w-px bg-white/[0.06]" />
+        <Link to="/profile" className="group flex items-center gap-3 rounded-xl border border-transparent p-1 transition-all hover:bg-white/[0.03]" aria-label="Menu do usuário">
+          <div className="hidden text-right md:block">
             <p className="text-xs font-bold text-zinc-100 transition-colors group-hover:text-[#B6FF00]">{username || "Usuário"}</p>
             <p className="text-[9px] uppercase tracking-[0.16em] text-zinc-500">Estratégico</p>
           </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-lime-300/20 bg-lime-300/10 text-xs font-black text-[#B6FF00] transition-all group-hover:border-lime-300/55">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-300/10 text-xs font-black text-[#B6FF00]">
             {username?.charAt(0).toUpperCase() || "U"}
           </div>
         </Link>
@@ -471,7 +554,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         className={`transition duration-500 ${showNicheModal ? "pointer-events-none blur-[15px] saturate-[0.8] brightness-[0.76]" : ""}`}
       >
         <Sidebar primaryItems={primaryItems} moreItems={moreItems} />
-        <main className="min-h-screen min-h-0 flex-col lg:pl-72">
+        <main className="min-h-screen min-h-0 flex-col lg:pl-64">
           <Header />
           <div className="mx-auto min-h-0 w-full max-w-[1500px] flex-1 overflow-x-hidden p-4 pb-28 md:p-8 lg:pb-8">{children}</div>
         </main>

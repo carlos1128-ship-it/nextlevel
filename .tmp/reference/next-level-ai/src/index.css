@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-neon: #B6FF00;
+  --font-sans: var(--app-font-sans);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
+}
+
+:root {
+  --background: #050706;
+  --foreground: #e1e3de;
+  --border: #424a33;
+  --input: #424a33;
+  --ring: #B6FF00;
+  --card: #111613;
+  --card-foreground: #e1e3de;
+  --popover: #171D1A;
+  --popover-foreground: #e1e3de;
+  --primary: #B6FF00;
+  --primary-foreground: #050706;
+  --secondary: #454a46;
+  --secondary-foreground: #e1e3de;
+  --muted: #1d201e;
+  --muted-foreground: #c2caad;
+  --accent: #272b28;
+  --accent-foreground: #e1e3de;
+  --destructive: #ffb4ab;
+  --destructive-foreground: #690005;
+  --surface: #111412;
+  --surface-container-low: #191c1a;
+  --surface-container: #1d201e;
+  --surface-container-high: #272b28;
+  --surface-container-highest: #323632;
+  --surface-variant: #323632;
+  --outline-variant: #424a33;
+  --on-surface-variant: #c2caad;
+  --surface-tint: #9bd900;
+  --app-font-sans: 'Sora', sans-serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--app-font-sans);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.card-base {
+  background-color: #111613;
+  border-radius: 20px;
+  border: 1px solid #424a33;
+}
+
+.neon-accent {
+  color: #B6FF00;
+}
+
+.bg-neon-accent {
+  background-color: #B6FF00;
+  color: #050706;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #323632;
+  border-radius: 4px;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}

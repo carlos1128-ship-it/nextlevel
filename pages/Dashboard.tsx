@@ -22,6 +22,8 @@ import {
   LightbulbIcon,
   BuildingIcon,
   MessageSquareIcon,
+  SettingsIcon,
+  ActivityIcon,
 } from "../components/icons";
 import { useToast } from "../components/Toast";
 import AiDashboardPanel from "../components/AiDashboardPanel";
@@ -185,96 +187,46 @@ const KpiCard: React.FC<
     status?: DashboardMetricResult["status"];
     reason?: string;
     sourceLabel?: string;
+    highlighted?: boolean;
   }
-> = ({ title, value, change, changeType, icon: Icon, color, iconAccent, status = "ok", reason, sourceLabel }) => {
+> = ({ title, value, change, changeType, icon: Icon, color, iconAccent, status = "ok", reason, sourceLabel, highlighted }) => {
   const isMuted = status !== "ok";
   return (
-    <div className={`nl-card nl-card-interactive flex min-w-[260px] flex-col p-6 ${isMuted ? "border-amber-500/25" : ""}`}>
-      <div className="mb-4 flex items-start justify-between">
-        <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">
-          {title}
-        </span>
-        <div className="rounded-xl border border-zinc-800 bg-black/60 p-2">
-          <Icon className={`h-5 w-5 ${iconAccent || color}`} />
+    <div
+      className={`card-base p-6 flex flex-col justify-between transition-all duration-300 ${
+        highlighted ? "border-l-4 border-l-[#B6FF00]" : ""
+      } ${isMuted ? "opacity-90" : "hover:border-white/20 active:scale-[0.98]"}`}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${highlighted ? "bg-lime-300/10" : "bg-white/5"}`}>
+          <Icon className={`h-5 w-5 ${highlighted ? "text-[#B6FF00]" : iconAccent || color || "text-zinc-400"}`} />
+        </div>
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black tracking-tight ${
+          changeType === "increase" ? "bg-lime-300/10 text-lime-400" :
+          changeType === "decrease" ? "bg-red-500/10 text-red-400" :
+          "bg-white/5 text-zinc-500"
+        }`}>
+          {changeType === "increase" ? (
+            <ArrowUpRightIcon className="h-3 w-3" />
+          ) : changeType === "decrease" ? (
+            <ArrowDownRightIcon className="h-3 w-3" />
+          ) : null}
+          {change}
         </div>
       </div>
-      <p className={`text-[clamp(22px,2.4vw,32px)] md:text-[clamp(24px,2.2vw,36px)] font-black leading-none tracking-tighter whitespace-normal break-words ${isMuted ? "text-amber-200" : "text-zinc-100"}`}>
-        {value}
-      </p>
-      <div
-        className={`mt-2 flex items-center text-[11px] font-black ${
-          changeType === "increase" ? "text-lime-400" : changeType === "decrease" ? "text-red-500" : "text-zinc-500"
-        }`}
-      >
-        {changeType === "increase" ? (
-          <ArrowUpRightIcon className="mr-1 h-3.5 w-3.5" />
-        ) : changeType === "decrease" ? (
-          <ArrowDownRightIcon className="mr-1 h-3.5 w-3.5" />
-        ) : null}
-        {change} <span className="ml-1 font-medium text-zinc-500">no período selecionado</span>
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500 mb-1">
+          {title}
+        </p>
+        <h3 className={`text-3xl font-black tracking-tighter leading-none ${isMuted ? "text-amber-200/80" : "text-white"}`}>
+          {value}
+        </h3>
+        {reason && <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">{translateMetricReason(reason)}</p>}
+        {sourceLabel && <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#B6FF00]/80">{sourceLabel}</p>}
       </div>
-      {reason ? <p className="mt-3 text-[11px] leading-5 text-zinc-500">{translateMetricReason(reason)}</p> : null}
-      {sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{sourceLabel}</p> : null}
     </div>
   );
 };
-
-/* ─────────────────────────────────────────────────────────────
-   Legacy growth metric notes, kept out of the rendered dashboard.
-   Keys are stable for future backend integration.
-   Production values now come from /api/dashboard/metrics:
-   { ltv, averageTicket, cpc, cpa, conversionRate, cac }
-───────────────────────────────────────────────────────────── */
-const LEGACY_GROWTH_METRICS: Array<{
-  key: "ltv" | "averageTicket" | "cpc" | "cpa" | "conversionRate" | "cac";
-  title: string;
-  description: string;
-  legacyText: string;
-  accentColor: string;
-}> = [
-  {
-    key: "ltv",
-    title: "LTV",
-    description: "Valor médio estimado que um cliente gera ao longo do relacionamento.",
-    legacyText: "Aguardando histórico",
-    accentColor: "text-lime-400",
-  },
-  {
-    key: "averageTicket",
-    title: "Ticket Médio",
-    description: "Valor médio por venda no período selecionado.",
-    legacyText: "Dados insuficientes",
-    accentColor: "text-cyan-400",
-  },
-  {
-    key: "cpc",
-    title: "CPC",
-    description: "Custo médio por clique nas campanhas conectadas.",
-    legacyText: "Aguardando campanhas",
-    accentColor: "text-purple-400",
-  },
-  {
-    key: "cpa",
-    title: "CPA",
-    description: "Custo médio para adquirir uma ação ou conversão.",
-    legacyText: "Aguardando integrações",
-    accentColor: "text-amber-400",
-  },
-  {
-    key: "conversionRate",
-    title: "Taxa de Conversão",
-    description: "Percentual de visitantes ou leads que viraram venda.",
-    legacyText: "Em breve",
-    accentColor: "text-blue-400",
-  },
-  {
-    key: "cac",
-    title: "CAC",
-    description: "Custo médio para adquirir um novo cliente.",
-    legacyText: "Conecte campanhas",
-    accentColor: "text-rose-400",
-  },
-];
 
 const GrowthMetricCard: React.FC<{
   title: string;
@@ -282,15 +234,17 @@ const GrowthMetricCard: React.FC<{
   legacyText: string;
   accentColor: string;
 }> = ({ title, description, legacyText, accentColor }) => (
-  <div className="nl-card nl-card-interactive flex flex-col p-5">
+  <div className="card-base p-5 flex flex-col justify-between transition-all hover:border-white/10">
     <div className="flex items-start justify-between gap-2">
-      <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
-      <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
-        Em config.
+      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{title}</span>
+      <span className="shrink-0 rounded-full bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[8px] font-bold text-zinc-600">
+        CONFIG
       </span>
     </div>
-    <p className={`mt-4 text-2xl font-black tracking-tight ${accentColor}`}>{legacyText}</p>
-    <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
+    <div className="mt-4">
+      <p className={`text-2xl font-black tracking-tight ${accentColor}`}>{legacyText}</p>
+      <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">{description}</p>
+    </div>
   </div>
 );
 
@@ -339,19 +293,23 @@ const RealMetricCard: React.FC<{
   accentColor: string;
   metric?: DashboardMetricResult;
 }> = ({ title, description, accentColor, metric }) => (
-  <div className="nl-card nl-card-interactive flex flex-col p-5">
+  <div className="card-base p-5 flex flex-col justify-between transition-all hover:border-white/10">
     <div className="flex items-start justify-between gap-2">
-      <span className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">{title}</span>
-      <span className="shrink-0 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-zinc-600">
+      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{title}</span>
+      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase ${
+        metric?.status === "ok" ? "bg-lime-900/20 text-lime-400 border border-lime-400/20" : "bg-amber-900/20 text-amber-400 border border-amber-400/20"
+      }`}>
         {metric?.status === "ok" ? "Real" : "Honesto"}
       </span>
     </div>
-    <p className={`mt-4 text-2xl font-black tracking-tight ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
-      {metric?.formatted || "NEXT LEVEL"}
-    </p>
-    <p className="mt-2 text-[11px] leading-5 text-zinc-500">{description}</p>
-    {metric?.reason ? <p className="mt-2 text-[11px] leading-5 text-zinc-600">{translateMetricReason(metric.reason)}</p> : null}
-    {metric?.sourceLabel ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-lime-300">{metric.sourceLabel}</p> : null}
+    <div className="mt-4">
+      <p className={`text-2xl font-black tracking-tighter ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
+        {metric?.formatted || "NEXT LEVEL"}
+      </p>
+      <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">{description}</p>
+      {metric?.reason && <p className="mt-2 text-[11px] leading-relaxed text-zinc-600 italic">{translateMetricReason(metric.reason)}</p>}
+      {metric?.sourceLabel && <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#B6FF00]/60">{metric.sourceLabel}</p>}
+    </div>
   </div>
 );
 
@@ -721,50 +679,51 @@ const Dashboard = () => {
   };
 
   return (
-    <div ref={dashboardExportRef} className="nl-page space-y-7">
-      <header className="nl-page-header max-w-full">
+    <div ref={dashboardExportRef} className="max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-700">
+      <header className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div className="min-w-0">
-          <p className="nl-eyebrow">Painel executivo</p>
-          <h1 className="nl-title">Visão Geral</h1>
-          <p className="nl-subtitle">
-            Olá, {username || "Usuário"}. Acompanhe vendas, lucro real, fluxo de caixa e recomendações da IA para o período selecionado.
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#B6FF00] mb-2 px-0.5">Painel Executivo</p>
+          <h1 className="text-4xl font-black tracking-tighter text-white leading-tight">Painel de Controle</h1>
+          <p className="mt-2 text-zinc-400 text-sm max-w-2xl leading-relaxed">
+            Visão estratégica consolidada. Gerencie vendas, analise o lucro real e acompanhe as recomendações da inteligência operacional.
           </p>
         </div>
-        <div className="flex w-full max-w-full min-w-0 flex-wrap gap-3 xl:w-auto xl:justify-end">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             to="/settings#dashboard"
-            className="nl-button-secondary min-w-0 flex-[1_1_140px] text-center sm:flex-none"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-sm font-bold text-zinc-300 transition-all hover:bg-white/5 active:scale-[0.98]"
           >
-            Personalizar
+            <SettingsIcon className="h-4 w-4" />
+            <span>Personalizar</span>
           </Link>
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="nl-button-secondary min-w-0 flex-[1_1_170px] disabled:opacity-50 sm:flex-none"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-sm font-bold text-zinc-300 transition-all hover:bg-white/5 disabled:opacity-50 active:scale-[0.98]"
           >
-            {isExporting ? "Gerando PDF..." : "Exportar relatório"}
+            <BarChartIcon className="h-4 w-4" />
+            <span>{isExporting ? "Gerando PDF..." : "Exportar relatório"}</span>
           </button>
           <button
             onClick={() => void loadMetrics()}
             disabled={isUpdating}
-            className={`nl-button-primary min-w-0 flex-[1_1_132px] ${
-              isUpdating ? "opacity-50" : "hover:opacity-90"
-            } sm:flex-none`}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#B6FF00] text-sm font-black text-[#050706] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           >
-            {isUpdating ? "Atualizando..." : "Atualizar"}
+            <ActivityIcon className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`} />
+            <span>{isUpdating ? "Sincronizando..." : "Sincronizar"}</span>
           </button>
         </div>
       </header>
 
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-white/[0.08] bg-[#080D0B]/70 p-2">
+      <div className="flex items-center gap-2 mb-6 p-1 bg-[#111613] rounded-2xl border border-white/[0.06] w-fit">
         {PERIODS.map((period) => (
           <button
             key={period.value}
             onClick={() => setActivePeriod(period.value)}
-            className={`rounded-xl px-5 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
+            className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
               activePeriod === period.value
-                ? "bg-[#B6FF00] text-[#050706]"
-                : "border border-transparent text-zinc-500 hover:border-white/10 hover:bg-white/[0.04] hover:text-zinc-200"
+                ? "bg-[#B6FF00] text-[#050706] shadow-lg shadow-lime-300/10"
+                : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
             }`}
           >
             {period.label}
@@ -773,7 +732,7 @@ const Dashboard = () => {
       </div>
 
       {isCompanyReady && !selectedCompanyId ? (
-        <div className="nl-card nl-card-empty border-dashed p-8">
+        <div className="card-base nl-card-empty border-dashed p-8 text-center flex flex-col items-center">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Selecione uma empresa</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
             O dashboard carrega quando uma empresa ativa estiver definida para esta sessão.
@@ -788,7 +747,7 @@ const Dashboard = () => {
       ) : null}
 
       {!isLayoutLoading && !!selectedCompanyId && !hasSelectedMetrics ? (
-        <div className="nl-card nl-card-empty border-dashed border-lime-400/30 bg-lime-400/10 p-8">
+        <div className="card-base nl-card-empty border-dashed border-[#B6FF00]/30 bg-lime-400/5 p-8 text-center flex flex-col items-center">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Painel sem widgets ativos</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
             Escolha os indicadores que fazem sentido para esta empresa e salve uma visão mais limpa.
@@ -815,6 +774,7 @@ const Dashboard = () => {
               status={metric("revenue")?.status}
               reason={metric("revenue")?.reason}
               sourceLabel={metric("revenue")?.sourceLabel}
+              highlighted
             />
           ) : null}
           {isMetricEnabled("losses") ? (
@@ -887,48 +847,42 @@ const Dashboard = () => {
       ) : null}
 
       {isMetricEnabled("alerts_insights") ? (
-        <div className="nl-card flex flex-col items-start gap-6 p-7 md:flex-row md:items-center">
+        <div className="card-base flex flex-col items-start gap-6 p-7 md:flex-row md:items-center">
           <div className="min-w-0 flex-1">
             <div className="mb-3 flex flex-wrap items-center gap-3">
-              <div className="rounded-lg bg-lime-400/15 p-2 text-lime-400">
+              <div className="rounded-xl bg-[#B6FF00]/10 p-2 text-[#B6FF00]">
                 <LightbulbIcon className="h-5 w-5" />
               </div>
-              <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Insights estratégicos</h3>
+              <h3 className="text-2xl font-black tracking-tighter text-white md:text-3xl">Insights Estratégicos</h3>
               {strategicInsightError ? (
-                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
-                  Cache/Retry ativo
+                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-amber-300">
+                  Fallback Ativo
                 </span>
               ) : null}
             </div>
             <p className="whitespace-pre-line break-words text-sm leading-relaxed text-zinc-300 md:text-base">
-              {formattedInsight || "Ainda não há volume suficiente para um diagnóstico automático robusto. Cadastre movimentações financeiras, vendas e custos para liberar análises mais profundas."}
+              {formattedInsight || "Ainda não há volume suficiente para um diagnóstico automático robusto. Analisando dados..."}
             </p>
           </div>
           <Link
             to="/insights"
-            className="rounded-2xl border border-zinc-800 bg-zinc-900 px-8 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-zinc-100 transition hover:border-lime-400/40"
+            className="rounded-xl border border-white/10 bg-white/5 px-8 py-3 text-[11px] font-black uppercase tracking-widest text-white transition hover:bg-white/10"
           >
-            Ver insights completos
+            Relatório Completo
           </Link>
         </div>
       ) : null}
 
-      {/* ── Metricas de crescimento vindas do backend ── */}
       {visibleGrowthMetrics.length > 0 ? (
-      <section aria-label="Métricas de crescimento">
-        <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <section aria-label="Métricas de crescimento" className="space-y-6">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-zinc-500">LEITURA AVANÇADA</p>
-            <h2 className="mt-1.5 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
-              Métricas de Crescimento
-            </h2>
-            <p className="mt-1 max-w-xl text-sm text-zinc-500">
-              Indicadores preparados para cruzar vendas, clientes e campanhas quando as integrações estiverem ativas.
-            </p>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Métricas Avançadas</p>
+            <h2 className="mt-1 text-2xl font-black tracking-tighter text-white md:text-3xl"> Performance de Negócio </h2>
           </div>
-          <span className="mt-3 inline-flex w-max items-center gap-2 rounded-full border border-lime-400/20 bg-lime-400/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.22em] text-lime-300 sm:mt-0">
-            <span className="h-1.5 w-1.5 rounded-full bg-lime-400"></span>
-            Preparado para integrações
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+            <ActivityIcon className="h-3 w-3" />
+            Em Tempo Real
           </span>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -945,213 +899,139 @@ const Dashboard = () => {
       </section>
       ) : null}
 
-      {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && !hasChartData ? (
-        <div className="nl-card nl-card-empty grid place-items-center p-10 text-zinc-500">
-          Nenhum dado disponível ainda para este período.
-        </div>
-      ) : (isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) ? (
-        <div className="grid min-h-0 grid-cols-1 gap-5 xl:grid-cols-3">
-          {isMetricEnabled("cash_flow_summary") ? (
-          <div className="nl-card relative min-h-0 overflow-hidden p-7 xl:col-span-2">
-            <div className="relative z-10 mb-8 flex items-center justify-between">
-              <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Fluxo por Faixa</h3>
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">
-                Filtro ativo
-              </span>
-            </div>
-            <div className="relative z-10 min-h-0 min-w-0">
-              <ResponsiveContainer width="100%" minWidth={280} minHeight={260} height={320}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="5 5" stroke="#1f2937" vertical={false} />
-                  <XAxis
-                    dataKey="name"
-                    stroke="#52525b"
-                    fontSize={11}
-                    fontWeight="800"
-                    axisLine={false}
-                    tickLine={false}
-                    dy={10}
-                  />
-                  <YAxis
-                    stroke="#52525b"
-                    fontSize={11}
-                    fontWeight="800"
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: "#B6FF00", strokeDasharray: "4 4" }} />
-                  <Line
-                    type="monotone"
-                    dataKey="Saidas"
-                    stroke="#EF4444"
-                    strokeWidth={2}
-                    dot={false}
-                    strokeDasharray="4 6"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="Receitas"
-                    stroke="#B6FF00"
-                    strokeWidth={4}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          ) : null}
-
-          {isMetricEnabled("category_mix") ? (
-          <div className="nl-card flex flex-col items-center p-7">
-            <h3 className="mb-8 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">Mix do Período</h3>
-            <div className="w-full min-w-0">
-              <ResponsiveContainer width="100%" minWidth={240} minHeight={220} height={260}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={65}
-                    outerRadius={95}
-                    paddingAngle={7}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell
-                        key={`${entry.name}-${index}`}
-                        fill={PIE_COLORS[index % PIE_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-3 grid w-full grid-cols-2 gap-y-2 text-xs font-bold uppercase tracking-[0.1em] text-zinc-300">
-              {pieData.map((item, index) => (
-                <div key={item.name} className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }} />
-                  <span>{item.name}</span>
+      {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && (
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          {isMetricEnabled("cash_flow_summary") && (
+            <div className="card-base xl:col-span-2 p-6 overflow-hidden">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-black tracking-tight text-white leading-none">Fluxo por Faixa</h3>
+                  <p className="text-xs text-zinc-500 mt-1">Análise temporal de receitas e saídas</p>
                 </div>
+              </div>
+              <div className="h-[320px] w-full">
+                {hasChartData ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        stroke="#52525b"
+                        fontSize={10}
+                        fontWeight="700"
+                        axisLine={false}
+                        tickLine={false}
+                        dy={10}
+                      />
+                      <YAxis
+                        stroke="#52525b"
+                        fontSize={10}
+                        fontWeight="700"
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(v) => `R$${v/1000}k`}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Line type="monotone" dataKey="Saidas" stroke="#EF4444" strokeWidth={2} dot={false} strokeDasharray="4 4" />
+                      <Line type="monotone" dataKey="Receitas" stroke="#B6FF00" strokeWidth={3} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full grid place-items-center text-zinc-600 text-sm italic">Aguardando dados...</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {isMetricEnabled("category_mix") && (
+            <div className="card-base p-6 flex flex-col">
+              <h3 className="text-xl font-black tracking-tight text-white mb-6">Mix de Pedidos</h3>
+              <div className="flex-1 flex flex-col items-center justify-center">
+                {hasChartData ? (
+                  <>
+                    <div className="h-[200px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={pieData}
+                            cx="50%" cy="50%"
+                            innerRadius={60} outerRadius={85}
+                            paddingAngle={5} dataKey="value" stroke="none"
+                          >
+                            {pieData.map((_, index) => (
+                              <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="w-full mt-6 grid grid-cols-2 gap-3">
+                      {pieData.map((item, index) => (
+                        <div key={item.name} className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[index % PIE_COLORS.length] }} />
+                          <span className="text-[10px] font-bold text-zinc-400 truncate uppercase">{item.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="h-full grid place-items-center text-zinc-600 text-sm italic">Aguardando dados...</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {isMetricEnabled("revenue_forecast") && (
+        <div className="card-base p-7 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+             <ActivityIcon className="h-40 w-40" />
+          </div>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between mb-8">
+            <div className="max-w-xl">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#38bdf8] mb-1">Visão Preditiva</p>
+              <h3 className="text-2xl font-black tracking-tighter text-white md:text-3xl">Projeção Inteligente</h3>
+              <p className="text-sm text-zinc-500 mt-2">Simulação baseada em registros históricos. Previsão de faturamento bruto para o curto prazo.</p>
+            </div>
+            <div className="flex gap-2 p-1 bg-black/40 rounded-xl border border-white/5">
+              {FORECAST_HORIZONS.map((value) => (
+                <button
+                  key={value}
+                  onClick={() => handleHorizonChange(value)}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                    forecastHorizon === value
+                      ? "bg-white/10 text-white shadow-inner"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  {value} Dias
+                </button>
               ))}
             </div>
           </div>
-          ) : null}
-        </div>
-      ) : null}
 
-      {isMetricEnabled("revenue_forecast") ? (
-      <div className="nl-card p-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Modo futuro</p>
-            <h3 className="text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
-              Projeção simples de receita
-            </h3>
-            <p className="text-sm text-zinc-500">
-              Média móvel dos últimos registros reais para os próximos {forecastHorizon} dias.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {FORECAST_HORIZONS.map((value) => (
-              <button
-                key={value}
-                onClick={() => handleHorizonChange(value)}
-                className={`rounded-2xl px-4 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
-                  forecastHorizon === value
-                    ? "bg-lime-400 text-zinc-900"
-                    : "border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200"
-                }`}
-              >
-                Próx {value}d
-              </button>
-            ))}
+          <div className="h-[320px] w-full">
+            {isForecastLoading ? (
+              <div className="h-full grid place-items-center font-black text-lime-400 tracking-widest animate-pulse transition">SINCRONIZANDO...</div>
+            ) : hasForecast ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={forecastChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="date" stroke="#52525b" fontSize={10} fontWeight="700" axisLine={false} tickLine={false} tickFormatter={formatDateLabel} />
+                  <YAxis stroke="#52525b" fontSize={10} fontWeight="700" axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(v: any) => asCurrency(v)} labelFormatter={(l: any) => formatDateLabel(l)} />
+                  <Line type="monotone" dataKey="Real" stroke="#B6FF00" strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="Forecast" stroke="#38bdf8" strokeWidth={3} dot={false} strokeDasharray="6 6" />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+               <div className="h-full grid place-items-center text-zinc-600 text-sm italic">{forecastStatusMessage}</div>
+            )}
           </div>
         </div>
-
-        <div className="mt-6">
-          {isForecastLoading ? (
-            <div className="grid place-items-center rounded-2xl border border-dashed border-zinc-800 px-6 py-12">
-              <span className="text-2xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</span>
-            </div>
-          ) : forecast?.status === "insufficient_data" || forecast?.status === "not_enough_data" ? (
-            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 text-sm text-amber-200">
-              {forecastStatusMessage}
-            </div>
-          ) : !hasForecast ? (
-            <div className="grid place-items-center rounded-2xl border border-zinc-800 px-6 py-12 text-zinc-500">
-              Projeção indisponível no momento.
-            </div>
-          ) : (
-            <>
-              <div className="relative z-10 min-h-0 min-w-0">
-                <ResponsiveContainer width="100%" minWidth={280} minHeight={260} height={320}>
-                  <LineChart data={forecastChartData}>
-                    <CartesianGrid strokeDasharray="5 5" stroke="#1f2937" vertical={false} />
-                    <XAxis
-                      dataKey="date"
-                      stroke="#52525b"
-                      fontSize={11}
-                      fontWeight="800"
-                      axisLine={false}
-                      tickLine={false}
-                      tickFormatter={formatDateLabel}
-                      dy={10}
-                    />
-                    <YAxis
-                      stroke="#52525b"
-                      fontSize={11}
-                      fontWeight="800"
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      formatter={(value) => asCurrency(Number(value || 0))}
-                      labelFormatter={(label) => `Data: ${formatDateLabel(String(label))}`}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="Real"
-                      stroke="#B6FF00"
-                      strokeWidth={3}
-                      dot={false}
-                      name="Histórico"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="Forecast"
-                      stroke="#38bdf8"
-                      strokeWidth={3}
-                      dot={false}
-                      strokeDasharray="6 6"
-                      name="Previsto"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">
-                <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-2 text-[11px] text-zinc-300">
-                  {forecastStatusMessage}
-                </span>
-                {forecast?.accuracyScore !== undefined && (
-                  <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-2 text-[11px] text-zinc-300">
-                    Acurácia estimada: {(forecast.accuracyScore * 100).toFixed(1)}%
-                  </span>
-                )}
-                {forecast?.generatedAt && (
-                  <span className="text-[11px] text-zinc-500">
-                    Atualizado em {formatDateLabel(forecast.generatedAt)}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-      ) : null}
-
+      )}
     </div>
   );
 };
