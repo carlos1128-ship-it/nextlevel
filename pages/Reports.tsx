@@ -187,22 +187,12 @@ const Reports = () => {
   }, [chartData]);
 
   const lineData = useMemo(
-    () =>
-      monthlyData.length > 0
-        ? monthlyData
-        : [
-            { month: "Jan", Lucro: 4000, Perda: 2500 },
-            { month: "Fev", Lucro: 3000, Perda: 1500 },
-            { month: "Mar", Lucro: 2000, Perda: 10000 },
-            { month: "Abr", Lucro: 2800, Perda: 4000 },
-            { month: "Mai", Lucro: 1900, Perda: 4800 },
-            { month: "Jun", Lucro: 2400, Perda: 3800 },
-          ],
+    () => monthlyData,
     [monthlyData]
   );
 
   const projectionData = useMemo(() => {
-    const base = Math.max(totals.balance || 0, totals.income - totals.expense, 5000);
+    const base = Math.max(totals.balance || 0, totals.income - totals.expense, 0);
     return [
       { year: "2024", total: base },
       { year: "2025", total: Math.round(base * 1.2) },

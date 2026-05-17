@@ -20,10 +20,10 @@ function MiniCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <FeatureCard interactive className="min-h-[160px]">
+    <FeatureCard interactive className="min-h-[160px] bg-[#191c1a]">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-2 text-lime-400">
+          <div className="rounded-lg border border-[#B6FF00]/20 bg-[#B6FF00]/10 p-2 text-[#B6FF00]">
             <Icon className="h-4 w-4" />
           </div>
           <p className="truncate text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">{title}</p>
@@ -34,9 +34,9 @@ function MiniCard({
           </span>
         ) : null}
       </div>
-      <h3 className="text-lg font-black tracking-tight text-zinc-100">{card?.title || "Aguardando dados suficientes"}</h3>
-      <p className="mt-2 text-sm leading-6 text-zinc-400">
-        {card?.summary || "Conecte uma integracao ou adicione dados para liberar esta analise."}
+      <h3 className="text-lg font-bold tracking-tight text-[#f5f7f2]">{card?.title || "Dados insuficientes"}</h3>
+      <p className="mt-2 text-sm leading-6 text-[#B7C0BA]">
+        {card?.summary || "Conecte uma integração ou adicione dados para liberar esta análise."}
       </p>
       {card?.recommendation ? (
         <p className="mt-3 text-sm font-semibold leading-6 text-lime-200">{card.recommendation}</p>
@@ -64,13 +64,13 @@ export default function AiDashboardPanel({
     <AppCard className="space-y-5 p-7">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Camada inteligente</p>
-          <h2 className="mt-2 text-2xl font-black tracking-tighter text-zinc-100 md:text-3xl">
-            NEXT LEVEL entende o negocio inteiro
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#B6FF00]">Camada inteligente</p>
+          <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-[#f5f7f2] md:text-3xl">
+            NEXT LEVEL entende o negócio inteiro
           </h2>
         </div>
-        <span className="rounded-full border border-zinc-800 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">
-          Em analise continua
+        <span className="rounded-lg border border-white/[0.08] bg-[#0c0f0c] px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[#8c9479]">
+          Em análise contínua
         </span>
       </div>
 
@@ -83,7 +83,7 @@ export default function AiDashboardPanel({
 
       {data?.nextBestActions?.length ? (
         <FeatureCard>
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Proximas acoes</p>
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Próximas ações</p>
           <div className="grid gap-3 md:grid-cols-3">
             {data.nextBestActions.map((action) => (
               <div key={`${action.type}-${action.title}`} className="rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 transition hover:border-lime-400/25">
@@ -97,7 +97,7 @@ export default function AiDashboardPanel({
 
       {data?.missingData?.length ? (
         <p className="text-xs leading-5 text-zinc-500">
-          Para melhorar a precisao: {data.missingData.join(", ")}.
+          Para melhorar a precisão: {data.missingData.join(", ")}.
         </p>
       ) : null}
     </AppCard>
