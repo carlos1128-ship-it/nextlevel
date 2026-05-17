@@ -91,6 +91,79 @@ const asCurrency = (value: number) =>
     maximumFractionDigits: 2,
   })}`;
 
+const CURRENCY_METRIC_KEYS = new Set([
+  "revenue",
+  "losses",
+  "profit",
+  "net_profit",
+  "cash_flow",
+  "income_revenue",
+  "average_ticket",
+  "operational_costs",
+  "cac",
+  "ltv",
+  "mrr",
+  "real_profit",
+]);
+
+const PERCENTAGE_METRIC_KEYS = new Set([
+  "margin",
+  "roi",
+  "roas",
+  "waste_inefficiency",
+  "conversion_rate",
+  "churn",
+  "activation",
+  "retention",
+  "plan_conversion",
+  "average_gap",
+  "gap_average",
+]);
+
+const SCORE_METRIC_KEYS = new Set(["health_score", "system_health", "usage_health"]);
+
+const metricFallbackValue = (metricKey: string) => {
+  const key = metricKey.toLowerCase();
+  if (SCORE_METRIC_KEYS.has(key) || key.includes("score") || key.includes("health")) return "100";
+  if (
+    CURRENCY_METRIC_KEYS.has(key) ||
+    key.includes("revenue") ||
+    key.includes("profit") ||
+    key.includes("cash_flow") ||
+    key.includes("ticket") ||
+    key.includes("cost") ||
+    key.includes("expense") ||
+    key.includes("loss") ||
+    key.includes("mrr") ||
+    key.includes("ltv") ||
+    key.includes("cac")
+  ) {
+    return asCurrency(0);
+  }
+  if (
+    PERCENTAGE_METRIC_KEYS.has(key) ||
+    key.includes("margin") ||
+    key.includes("roas") ||
+    key.includes("roi") ||
+    key.includes("churn") ||
+    key.includes("retention") ||
+    key.includes("activation") ||
+    key.includes("conversion") ||
+    key.includes("gap")
+  ) {
+    return "0%";
+  }
+  return "0";
+};
+
+const metricDisplayValue = (metricKey: string, metric?: DashboardMetricResult) => {
+  const formatted = metric?.formatted?.trim();
+  const normalized = formatted?.toLowerCase() || "";
+  return formatted && !normalized.includes("dados insuficientes") && formatted !== "NEXT LEVEL"
+    ? formatted
+    : metricFallbackValue(metricKey);
+};
+
 const formatDateLabel = (value?: string) => {
   if (!value) return "";
   const date = new Date(`${value}T00:00:00Z`);
@@ -289,11 +362,12 @@ const DIRECT_RENDERED_METRIC_KEYS = new Set([
 const ADVANCED_METRIC_KEYS = new Set(ADVANCED_METRICS.map((item) => item.key));
 
 const RealMetricCard: React.FC<{
+  metricKey: string;
   title: string;
   description: string;
   accentColor: string;
   metric?: DashboardMetricResult;
-}> = ({ title, description, accentColor, metric }) => (
+}> = ({ metricKey, title, description, accentColor, metric }) => (
   <div className="card-base p-5 flex flex-col justify-between transition-all hover:border-white/10">
     <div className="flex items-start justify-between gap-2">
       <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{title}</span>
@@ -305,7 +379,7 @@ const RealMetricCard: React.FC<{
     </div>
     <div className="mt-4">
       <p className={`text-2xl font-black tracking-tighter ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
-        {metric?.formatted || "NEXT LEVEL"}
+        {metricDisplayValue(metricKey, metric)}
       </p>
       <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">{description}</p>
       {metric?.reason && <p className="mt-2 text-[11px] leading-relaxed text-zinc-600 italic">{translateMetricReason(metric.reason)}</p>}
@@ -419,7 +493,7 @@ const Dashboard = () => {
   const hasForecast = forecast?.status === "ok" && forecastChartData.length > 0;
 
   const forecastStatusMessage = useMemo(() => {
-    if (!forecast) return "NEXT LEVEL";
+    if (!forecast) return "Aguardando histórico";
     if (forecast.status === "insufficient_data" || forecast.status === "not_enough_data") {
       return forecast.message || "Histórico insuficiente para prever receita";
     }
@@ -763,7 +837,7 @@ const Dashboard = () => {
           {isMetricEnabled("revenue") ? (
             <KpiCard
               title="Faturamento"
-              value={metric("revenue")?.formatted || "NEXT LEVEL"}
+              value={metricDisplayValue("revenue", metric("revenue"))}
               change={metricChange(metric("revenue")).text}
               changeType={metricChange(metric("revenue")).type}
               icon={DollarSignIcon}
@@ -777,7 +851,7 @@ const Dashboard = () => {
           {isMetricEnabled("losses") ? (
             <KpiCard
               title="Perdas"
-              value={metric("losses")?.formatted || "NEXT LEVEL"}
+              value={metricDisplayValue("losses", metric("losses"))}
               change={metricChange(metric("losses")).text}
               changeType={metricChange(metric("losses")).type}
               icon={DollarSignIcon}
@@ -790,7 +864,7 @@ const Dashboard = () => {
           {isMetricEnabled("profit") || isMetricEnabled("net_profit") ? (
             <KpiCard
               title={isMetricEnabled("net_profit") ? "Lucro líquido" : "Lucro"}
-              value={(metric("net_profit") || metric("profit"))?.formatted || "NEXT LEVEL"}
+              value={metricDisplayValue(isMetricEnabled("net_profit") ? "net_profit" : "profit", metric("net_profit") || metric("profit"))}
               change={metricChange(metric("net_profit") || metric("profit")).text}
               changeType={metricChange(metric("net_profit") || metric("profit")).type || marginDirection}
               icon={BarChartIcon}
@@ -803,7 +877,7 @@ const Dashboard = () => {
           {isMetricEnabled("cash_flow") ? (
             <KpiCard
               title="Fluxo de caixa"
-              value={metric("cash_flow")?.formatted || "NEXT LEVEL"}
+              value={metricDisplayValue("cash_flow", metric("cash_flow"))}
               change={metricChange(metric("cash_flow")).text}
               changeType={metricChange(metric("cash_flow")).type}
               icon={BarChartIcon}
@@ -816,7 +890,7 @@ const Dashboard = () => {
           {isMetricEnabled("company_count") ? (
             <KpiCard
               title="Empresas"
-              value={metric("company_count")?.formatted || "NEXT LEVEL"}
+              value={metricDisplayValue("company_count", metric("company_count"))}
               change="Base vinculada"
               changeType="flat"
               icon={BuildingIcon}
@@ -974,6 +1048,7 @@ const Dashboard = () => {
           {visibleGrowthMetrics.map((item) => (
             <RealMetricCard
               key={item.key}
+              metricKey={item.key}
               title={item.title}
               description={item.description}
               accentColor={item.accentColor}

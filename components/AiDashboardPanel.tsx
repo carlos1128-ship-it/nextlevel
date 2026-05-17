@@ -34,7 +34,7 @@ function MiniCard({
           </span>
         ) : null}
       </div>
-      <h3 className="text-lg font-bold tracking-tight text-[#f5f7f2]">{card?.title || "Dados insuficientes"}</h3>
+      <h3 className="text-lg font-bold tracking-tight text-[#f5f7f2]">{card?.title || "Aguardando dados"}</h3>
       <p className="mt-2 text-sm leading-6 text-[#B7C0BA]">
         {card?.summary || "Conecte uma integração ou adicione dados para liberar esta análise."}
       </p>
@@ -55,7 +55,7 @@ export default function AiDashboardPanel({
   if (loading) {
     return (
       <AppCard className="grid min-h-[140px] place-items-center p-7">
-        <p className="text-2xl font-black tracking-[0.24em] text-[#B6FF00]">NEXT LEVEL</p>
+        <p className="text-sm font-black uppercase tracking-[0.24em] text-[#B6FF00]">Sincronizando IA...</p>
       </AppCard>
     );
   }

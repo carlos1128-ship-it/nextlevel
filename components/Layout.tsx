@@ -277,13 +277,9 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
   return (
     <aside className="fixed left-0 top-0 z-50 hidden h-screen w-[280px] flex-col border-r border-[#B6FF00]/10 bg-[#050706] px-4 py-6 text-zinc-100 shadow-[18px_0_50px_rgba(0,0,0,0.35)] lg:flex">
       <div className="mb-5 px-1">
-        <Link to={DASHBOARD_ROUTE} className="group inline-flex items-center gap-3" aria-label="Ir para o início">
-          <span className="grid h-9 w-9 place-items-center rounded-xl border border-[#B6FF00]/20 bg-[#B6FF00]/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-            <span className="h-4 w-4 rounded-[5px] border border-[#B6FF00]/70 bg-[radial-gradient(circle,#B6FF00_1px,transparent_1.7px)] bg-[length:5px_5px]" />
-          </span>
-          <span className="inline-flex flex-col">
-            <span className="text-[22px] font-extrabold uppercase leading-none tracking-[-0.03em] text-zinc-100">NEXT LEVEL</span>
-            <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[#8c9479]">ERP + IA</span>
+        <Link to={DASHBOARD_ROUTE} className="inline-flex items-center" aria-label="Ir para o início">
+          <span className="text-[24px] font-extrabold uppercase leading-none tracking-[0.04em] text-[#B6FF00]">
+            NEXT LEVEL
           </span>
         </Link>
       </div>
@@ -303,7 +299,7 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
         <nav className="flex flex-col gap-4" aria-label="Menu principal">
           {groupedPrimary.map((group) => (
             <div key={group.title}>
-              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#7D8782]">
+              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#AEB8B4]">
                 {group.title}
               </p>
               <ul className="space-y-0.5">
@@ -315,11 +311,11 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
                         to={item.path}
                         className={`group flex min-h-[48px] items-center gap-3 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                           active
-                            ? "bg-[#0D100D] text-[#B6FF00] shadow-[inset_4px_0_0_#B6FF00]"
-                            : "text-[#AEB8B4] hover:bg-[#0D100D] hover:text-zinc-100"
+                            ? "bg-[#0D100D] text-[#FFFFFF] shadow-[inset_4px_0_0_#B6FF00]"
+                            : "text-[#F5F7F2] hover:bg-[#0D100D] hover:text-white"
                         }`}
                       >
-                        <item.icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#B6FF00]" : "text-[#8c9479] group-hover:text-zinc-300"}`} />
+                        <item.icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#B6FF00]" : "text-[#C9D1CC] group-hover:text-white"}`} />
                         <span className="truncate">{item.name}</span>
                       </NavLink>
                     </li>
@@ -331,7 +327,7 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
 
           {filteredMoreItems.length > 0 && (
             <div>
-              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#7D8782]">
+              <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#AEB8B4]">
                 Outros
               </p>
               <ul className="space-y-0.5">
@@ -343,11 +339,11 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
                         to={item.path}
                         className={`group flex min-h-[48px] items-center gap-3 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                           active
-                            ? "bg-[#0D100D] text-[#B6FF00] shadow-[inset_4px_0_0_#B6FF00]"
-                            : "text-[#AEB8B4] hover:bg-[#0D100D] hover:text-zinc-100"
+                            ? "bg-[#0D100D] text-[#FFFFFF] shadow-[inset_4px_0_0_#B6FF00]"
+                            : "text-[#F5F7F2] hover:bg-[#0D100D] hover:text-white"
                         }`}
                       >
-                        <item.icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#B6FF00]" : "text-[#8c9479] group-hover:text-zinc-300"}`} />
+                        <item.icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-[#B6FF00]" : "text-[#C9D1CC] group-hover:text-white"}`} />
                         <span className="truncate">{item.name}</span>
                       </NavLink>
                     </li>
@@ -365,8 +361,8 @@ const Sidebar = ({ primaryItems, moreItems }: { primaryItems: SidebarNavItem[]; 
       </div>
 
       <div className="mt-4 border-t border-white/[0.06] pt-4">
-        <Link to="/settings" className="mb-3 flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-[#AEB8B4] transition-colors hover:bg-[#0D100D] hover:text-zinc-100">
-          <SettingsIcon className="h-4 w-4 text-[#8c9479]" />
+        <Link to="/settings" className="mb-3 flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-[#F5F7F2] transition-colors hover:bg-[#0D100D] hover:text-white">
+          <SettingsIcon className="h-4 w-4 text-[#C9D1CC]" />
           <span>Configurações</span>
         </Link>
         <Link to="/profile" className="group flex items-center gap-3 rounded-xl border border-[#B6FF00]/10 bg-[#080A08] p-3 transition-colors hover:border-[#B6FF00]/35 hover:bg-[#0D100D]">
