@@ -755,26 +755,22 @@ const Dashboard = () => {
     ...dynamicGrowthMetrics,
   ];
   const metricChange = (item?: DashboardMetricResult) => {
-    if (!item || item.status !== "ok") {
-      return { text: "0,00%", type: "flat" as const };
+    if (!item || item.status !== "ok" || typeof item.value !== "number" || !Number.isFinite(item.value)) {
+      return { text: "Sem comparação", type: "flat" as const };
     }
-    const comparison = item.comparison;
-    if (
-      !comparison ||
-      !Number.isFinite(comparison.changePercent) ||
-      !Number.isFinite(comparison.previousValue) ||
-      comparison.previousValue === 0
-    ) {
-      return { text: "0,00%", type: "flat" as const };
+    const previousValue = item.comparison?.previousValue;
+    if (typeof previousValue !== "number" || !Number.isFinite(previousValue)) {
+      return { text: "Sem comparação", type: "flat" as const };
     }
+    if (previousValue === 0) {
+      return item.value === 0
+        ? { text: "0,00%", type: "flat" as const }
+        : { text: "Sem comparação", type: "flat" as const };
+    }
+    const changePercent = ((item.value - previousValue) / Math.abs(previousValue)) * 100;
     return {
-      text: formatPercentChange(comparison.changePercent),
-      type:
-        comparison.direction === "up"
-          ? ("increase" as const)
-          : comparison.direction === "down"
-            ? ("decrease" as const)
-            : ("flat" as const),
+      text: formatPercentChange(changePercent),
+      type: changePercent > 0 ? ("increase" as const) : changePercent < 0 ? ("decrease" as const) : ("flat" as const),
     };
   };
 
