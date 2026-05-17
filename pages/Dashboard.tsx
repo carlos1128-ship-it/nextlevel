@@ -173,7 +173,7 @@ const CustomTooltip = ({
   const values = Object.fromEntries(payload.map((entry) => [entry.dataKey, entry.value]));
 
   return (
-    <div className="rounded-xl border border-white/[0.1] bg-[#111412]/95 px-3 py-2 text-xs text-zinc-200 shadow-2xl">
+    <div className="rounded-xl border border-[#B6FF00]/15 bg-[#080A08]/95 px-3 py-2 text-xs text-zinc-200 shadow-2xl">
       <p className="mb-1 text-[#8c9479]">{label}</p>
       <p className="font-bold text-lime-400">Receitas: {asCurrency(Number(values.Receitas || 0))}</p>
       <p className="font-bold text-red-400">Saídas: {asCurrency(Number(values.Saidas || 0))}</p>
@@ -199,13 +199,13 @@ const KpiCard: React.FC<
       } ${isMuted ? "opacity-90" : "hover:border-[#B6FF00]/25 active:scale-[0.99]"}`}
     >
       <div className="flex justify-between items-start mb-4">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${highlighted ? "bg-lime-300/10" : "bg-white/5"}`}>
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center border border-[#B6FF00]/10 ${highlighted ? "bg-[#0D100D]" : "bg-[#090C09]"}`}>
           <Icon className={`h-5 w-5 ${highlighted ? "text-[#B6FF00]" : iconAccent || color || "text-zinc-400"}`} />
         </div>
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-black tracking-tight ${
           changeType === "increase" ? "bg-lime-300/10 text-lime-400" :
           changeType === "decrease" ? "bg-red-500/10 text-red-400" :
-          "bg-white/5 text-zinc-500"
+          "bg-[#090C09] text-[#6F7A72]"
         }`}>
           {changeType === "increase" ? (
             <ArrowUpRightIcon className="h-3 w-3" />
@@ -690,7 +690,7 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-white/10 bg-[#191c1a] px-4 text-sm font-semibold text-[#dfe4de]">
+          <span className="inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-[#B6FF00]/12 bg-[#090C09] px-4 text-sm font-semibold text-[#AEB8B4]">
             Últimos 30 dias
           </span>
           <button
@@ -712,7 +712,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="flex w-fit flex-wrap items-center gap-2 rounded-xl border border-white/[0.06] bg-[#111412] p-1">
+      <div className="flex w-fit flex-wrap items-center gap-2 rounded-xl border border-[#B6FF00]/10 bg-[#080A08] p-1">
         {PERIODS.map((period) => (
           <button
             key={period.value}
@@ -720,7 +720,7 @@ const Dashboard = () => {
             className={`rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] transition-all ${
               activePeriod === period.value
                 ? "bg-[#B6FF00] text-[#050706]"
-                : "text-[#8c9479] hover:bg-white/[0.04] hover:text-zinc-200"
+                : "text-[#6F7A72] hover:bg-[#0D100D] hover:text-zinc-200"
             }`}
           >
             {period.label}
@@ -744,7 +744,7 @@ const Dashboard = () => {
       ) : null}
 
       {!isLayoutLoading && !!selectedCompanyId && !hasSelectedMetrics ? (
-        <div className="card-base nl-card-empty border-dashed border-[#B6FF00]/30 bg-lime-400/5 p-8 text-center flex flex-col items-center">
+        <div className="card-base nl-card-empty border-dashed border-[#B6FF00]/30 p-8 text-center flex flex-col items-center">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Painel sem widgets ativos</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
             Escolha os indicadores que fazem sentido para esta empresa e salve uma visão mais limpa.
@@ -951,7 +951,7 @@ const Dashboard = () => {
           </div>
           <Link
             to="/insights"
-            className="rounded-xl border border-white/10 bg-white/5 px-8 py-3 text-[11px] font-black uppercase tracking-widest text-white transition hover:bg-white/10"
+            className="rounded-xl border border-[#B6FF00]/12 bg-[#090C09] px-8 py-3 text-[11px] font-black uppercase tracking-widest text-white transition hover:border-[#B6FF00]/45 hover:bg-[#11170F]"
           >
             Relatório Completo
           </Link>
@@ -965,7 +965,7 @@ const Dashboard = () => {
             <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Métricas Avançadas</p>
             <h2 className="mt-1 text-2xl font-black tracking-tighter text-white md:text-3xl"> Performance de Negócio </h2>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#B6FF00]/10 bg-[#090C09] px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-[#6F7A72]">
             <ActivityIcon className="h-3 w-3" />
             Em Tempo Real
           </span>

@@ -154,7 +154,7 @@ const Chat = () => {
 
   return (
     <div className="card-base relative flex h-[calc(100vh-160px)] min-h-[680px] flex-col overflow-hidden">
-      <header className="z-10 border-b border-white/[0.06] bg-[#111412]/82 px-6 py-5 backdrop-blur-md">
+      <header className="z-10 border-b border-[#B6FF00]/10 bg-[#070A08]/88 px-6 py-5 backdrop-blur-md">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
@@ -179,7 +179,7 @@ const Chat = () => {
                 ]);
               }
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/5 bg-white/5 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+            className="flex items-center gap-2 rounded-xl border border-[#B6FF00]/10 bg-[#090C09] px-4 py-2 text-[11px] font-black uppercase tracking-widest text-[#AEB8B4] transition-all hover:border-[#B6FF00]/40 hover:bg-[#11170F] hover:text-white active:scale-95"
             type="button"
           >
             Resetar Sessão
@@ -200,7 +200,7 @@ const Chat = () => {
         </div>
       </header>
 
-      <div className="flex-1 space-y-6 overflow-y-auto bg-[radial-gradient(circle_at_50%_0%,_rgba(182,255,0,0.03),_transparent_40%)] p-6 scrollbar-hide">
+      <div className="flex-1 space-y-6 overflow-y-auto bg-[#050706] p-6 scrollbar-hide">
         {safeMessages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
             <LightbulbIcon className="h-12 w-12 mb-4 text-[#B6FF00]" />
@@ -215,7 +215,7 @@ const Chat = () => {
               <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border ${
                 msg.sender === "ai" 
                   ? "border-[#B6FF00]/20 bg-[#B6FF00]/10 text-[#B6FF00]" 
-                  : "border-white/10 bg-white/5 text-zinc-400"
+                  : "border-[#B6FF00]/10 bg-[#090C09] text-zinc-400"
               }`}>
                 {msg.sender === "ai" ? <LightbulbIcon className="h-4 w-4" /> : <UserIcon className="h-4 w-4" />}
               </div>
@@ -224,7 +224,7 @@ const Chat = () => {
                 className={`group relative max-w-[85%] md:max-w-[70%] p-4 rounded-2xl transition-all duration-300 ${
                   msg.sender === "user"
                     ? "bg-[#B6FF00] text-[#050706] rounded-tr-none shadow-lg shadow-lime-300/5 font-medium"
-                    : "bg-white/[0.03] border border-white/5 text-zinc-200 rounded-tl-none hover:bg-white/[0.05]"
+                    : "border border-[#B6FF00]/10 bg-[#090C09] text-zinc-200 rounded-tl-none hover:border-[#B6FF00]/35 hover:bg-[#11170F]"
                 }`}
               >
                 <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{msg.text}</p>
@@ -237,7 +237,7 @@ const Chat = () => {
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#B6FF00]/20 bg-[#B6FF00]/10 text-[#B6FF00]">
               <LightbulbIcon className="h-4 w-4" />
             </div>
-            <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-1 px-2">
+            <div className="rounded-2xl border border-[#B6FF00]/10 bg-[#090C09] p-1 px-2">
               <TypingIndicator />
             </div>
           </div>
@@ -245,7 +245,7 @@ const Chat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-white/[0.06] bg-[#111412]/82 p-6 backdrop-blur-md">
+      <div className="border-t border-[#B6FF00]/10 bg-[#070A08]/88 p-6 backdrop-blur-md">
         <div className="relative group max-w-4xl mx-auto">
           <input
             type="text"

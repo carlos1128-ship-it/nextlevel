@@ -20,7 +20,7 @@ function MiniCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <FeatureCard interactive className="min-h-[160px] bg-[#191c1a]">
+    <FeatureCard interactive className="min-h-[160px] bg-[#080A08]">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="rounded-lg border border-[#B6FF00]/20 bg-[#B6FF00]/10 p-2 text-[#B6FF00]">

@@ -54,7 +54,7 @@ const KpiCard = ({
   accent: "green" | "red" | "blue" | "white";
 }) => {
   const colors = {
-    green: "text-lime-400 border-lime-400/20 bg-lime-400/5",
+    green: "text-lime-400 border-lime-400/20 bg-[#080A08]",
     red: "text-red-400 border-red-400/20 bg-red-400/5",
     blue: "text-blue-400 border-blue-400/20 bg-blue-400/5",
     white: "text-zinc-100 border-zinc-700 bg-zinc-900",
@@ -71,7 +71,7 @@ const KpiCard = ({
 const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolean }) => {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
+      <div className="rounded-2xl border border-lime-400/20 bg-[#080A08] p-6">
         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
         <div className="mt-3 space-y-2">
           {[...Array(3)].map((_, i) => (
@@ -90,7 +90,7 @@ const AiSummaryCard = ({ text, loading }: { text: string | null; loading: boolea
     .filter(Boolean);
 
   return (
-    <div className="rounded-2xl border border-lime-400/20 bg-lime-400/5 p-6">
+    <div className="rounded-2xl border border-lime-400/20 bg-[#080A08] p-6">
       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-lime-400">Sumário executivo IA</p>
       <ul className="mt-3 space-y-2">
         {lines.map((line, i) => (
