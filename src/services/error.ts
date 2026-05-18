@@ -18,6 +18,9 @@ export function isActiveCompanyAccessError(error: unknown) {
 
 export function getErrorMessage(error: unknown, fallback = "Erro na requisicao.") {
   if (error instanceof AxiosError) {
+    if (error.code === "ECONNABORTED") {
+      return "A plataforma demorou mais que o normal. Tente novamente em instantes.";
+    }
     if (!error.response) {
       return "Não conseguimos falar com a plataforma agora. Verifique sua conexão e tente novamente.";
     }

@@ -23,6 +23,7 @@ type AuthUserPayload = {
 };
 
 type ApiErrorLike = {
+  code?: string;
   response?: {
     data?: {
       message?: string;
@@ -31,8 +32,14 @@ type ApiErrorLike = {
   };
 };
 
+const LOGIN_TIMEOUT_MS = 10000;
+const SLOW_LOGIN_FEEDBACK_MS = 4000;
+
 function getApiErrorMessage(error: unknown, fallback: string) {
   const apiError = error as ApiErrorLike;
+  if (apiError.code === "ECONNABORTED") {
+    return "A verificacao demorou demais. Tente novamente em instantes.";
+  }
   return apiError.response?.data?.message || apiError.response?.data?.error || fallback;
 }
 
@@ -187,8 +194,11 @@ const LoginPage: React.FC = () => {
     }
     setLoading(true);
     setError("");
+    const slowTimer = window.setTimeout(() => {
+      setError("Verificando credenciais... demorando mais que o normal.");
+    }, SLOW_LOGIN_FEEDBACK_MS);
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await api.post("/auth/login", { email, password }, { timeout: LOGIN_TIMEOUT_MS });
       const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
       const refreshToken =
         res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
@@ -202,6 +212,7 @@ const LoginPage: React.FC = () => {
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Credenciais inválidas."));
     } finally {
+      window.clearTimeout(slowTimer);
       setLoading(false);
     }
   };
@@ -218,8 +229,15 @@ const LoginPage: React.FC = () => {
     }
     setLoading(true);
     setError("");
+    const slowTimer = window.setTimeout(() => {
+      setError("Criando conta... demorando mais que o normal.");
+    }, SLOW_LOGIN_FEEDBACK_MS);
     try {
-      const res = await api.post("/auth/register", { name, email, password, companyName: name || "Minha Empresa" });
+      const res = await api.post(
+        "/auth/register",
+        { name, email, password, companyName: name || "Minha Empresa" },
+        { timeout: LOGIN_TIMEOUT_MS },
+      );
       const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
       const refreshToken =
         res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
@@ -233,6 +251,7 @@ const LoginPage: React.FC = () => {
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Erro ao criar conta."));
     } finally {
+      window.clearTimeout(slowTimer);
       setLoading(false);
     }
   };

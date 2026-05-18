@@ -9,6 +9,7 @@ const AUTH_CHANGED_EVENT = 'nextlevel:auth-changed';
 const BILLING_ACCESS_INVALID_EVENT = 'nextlevel:billing-access-invalid';
 const BILLING_CACHE_PREFIX = 'nextlevel:billing:';
 const DEFAULT_PRODUCTION_API_URL = 'https://next-level-backend.onrender.com';
+const DEFAULT_API_TIMEOUT_MS = 30000;
 
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
@@ -185,6 +186,7 @@ function dispatchFriendlyApiError(error: AxiosError) {
 
 const api = axios.create({
   baseURL,
+  timeout: DEFAULT_API_TIMEOUT_MS,
 });
 
 api.interceptors.request.use((config) => {
