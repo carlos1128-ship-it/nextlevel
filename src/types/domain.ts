@@ -411,19 +411,10 @@ export interface AgentConfig {
   agentName: string;
   companyDescription: string;
   welcomeMessage: string;
-  systemPrompt: string;
   toneOfVoice: string;
-  internetSearchEnabled: boolean;
-  speechToTextEnabled: boolean;
-  imageUnderstandingEnabled: boolean;
   pauseForHuman: boolean;
-  splitRepliesEnabled: boolean;
   messageBufferEnabled: boolean;
-  debounceSeconds: number;
-  maxContextMessages: number;
   isEnabled: boolean;
-  modelProvider: string;
-  modelName: string;
   createdAt?: string;
   updatedAt?: string;
 }

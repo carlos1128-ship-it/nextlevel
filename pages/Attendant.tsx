@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useAuth } from "../App";
 import { useToast } from "../components/Toast";
 import {
@@ -13,20 +13,10 @@ const emptyConfig: Partial<AgentConfig> = {
   agentName: "Atendente Next Level",
   welcomeMessage: "Oi! Sou o atendimento da empresa. Como posso ajudar?",
   companyDescription: "",
-  systemPrompt:
-    "Você e um atendente comercial claro, util e focado em gerar ROI para o cliente.",
   toneOfVoice: "consultivo",
-  internetSearchEnabled: false,
-  speechToTextEnabled: false,
-  imageUnderstandingEnabled: false,
-  splitRepliesEnabled: false,
   messageBufferEnabled: true,
   pauseForHuman: true,
-  debounceSeconds: 3,
-  maxContextMessages: 20,
   isEnabled: false,
-  modelProvider: "openai",
-  modelName: "gpt-4o-mini",
 };
 
 const booleanFields: Array<{
@@ -34,9 +24,9 @@ const booleanFields: Array<{
   label: string;
   description: string;
 }> = [
-  { key: "isEnabled", label: "Atendente ativo", description: "Permite respostas automáticas nos canais conectados." },
-  { key: "messageBufferEnabled", label: "Buffer ativo", description: "Agrupa mensagens próximas antes da IA responder." },
-  { key: "pauseForHuman", label: "Pausar para humano", description: "Mantém o controle humano quando uma conversa exigir atenção." },
+  { key: "isEnabled", label: "Atendente ativo", description: "Permite respostas automÃ¡ticas nos canais conectados." },
+  { key: "messageBufferEnabled", label: "Buffer ativo", description: "Agrupa mensagens prÃ³ximas antes da IA responder." },
+  { key: "pauseForHuman", label: "Pausar para humano", description: "MantÃ©m o controle humano quando uma conversa exigir atenÃ§Ã£o." },
 ];
 
 const channelLabel = (item: ConversationLiveFeedItem) =>
@@ -58,7 +48,7 @@ const Attendant = () => {
     getAgentConfig(selectedCompanyId)
       .then((data) => setConfig(data))
       .catch((error) => {
-        addToast(getErrorMessage(error, "Não foi possível carregar o atendente."), "error");
+        addToast(getErrorMessage(error, "NÃ£o foi possÃ­vel carregar o atendente."), "error");
       })
       .finally(() => setLoading(false));
   }, [addToast, selectedCompanyId]);
@@ -120,7 +110,7 @@ const Attendant = () => {
       setConfig(saved);
       addToast("Atendente IA salvo.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Não foi possível salvar o atendente."), "error");
+      addToast(getErrorMessage(error, "NÃ£o foi possÃ­vel salvar o atendente."), "error");
     } finally {
       setSaving(false);
     }
@@ -133,7 +123,7 @@ const Attendant = () => {
           Atendente IA
         </p>
         <h1 className="text-3xl font-black tracking-tight text-zinc-100 md:text-4xl">
-          Configuração do agente
+          ConfiguraÃ§Ã£o do agente
         </h1>
       </section>
 
@@ -181,7 +171,7 @@ const Attendant = () => {
               value={config.companyDescription || ""}
               onChange={(event) => updateField("companyDescription", event.target.value)}
               rows={4}
-              placeholder="Produtos principais, políticas comerciais, prazos, garantias e limites para transferir ao humano."
+              placeholder="Produtos principais, polÃ­ticas comerciais, prazos, garantias e limites para transferir ao humano."
               className="w-full resize-y rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none transition focus:border-lime-400"
             />
           </label>

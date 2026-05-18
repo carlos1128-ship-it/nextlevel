@@ -487,7 +487,6 @@ const OnboardingPersonalization = () => {
                   <div className="rounded-3xl border border-lime-400/25 bg-lime-400/10 p-5 lg:col-span-3">
                     <p className="text-[10px] font-black uppercase tracking-[0.24em] text-lime-300">Atendente IA</p>
                     <p className="mt-2 text-lg font-black">{preview.agent.tone}</p>
-                    <p className="mt-2 text-sm text-zinc-400">{preview.agent.systemPrompt}</p>
                   </div>
                 </div>
               ) : null}
