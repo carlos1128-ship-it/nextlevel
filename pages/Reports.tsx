@@ -43,6 +43,22 @@ const TOOLTIP_STYLE = {
   fontSize: 12,
 };
 
+function resolveReportPeriod(period: string) {
+  const end = new Date();
+  const start = new Date(end);
+  if (period === "90d") start.setDate(start.getDate() - 89);
+  else if (period === "12m") start.setMonth(start.getMonth() - 11, 1);
+  else start.setDate(start.getDate() - 29);
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  return {
+    start: start.toISOString(),
+    end: end.toISOString(),
+  };
+}
+
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 const KpiCard = ({
   label,
@@ -111,7 +127,6 @@ const Reports = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   const [period, setPeriod] = useState("30d");
-  const [sector, setSector] = useState("geral");
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [totals, setTotals] = useState({ income: 0, expense: 0, balance: 0 });
   const [loading, setLoading] = useState(true);
@@ -135,9 +150,10 @@ const Reports = () => {
       setLoading(true);
       setLoadError(null);
       setAiSummary(null);
+      const range = resolveReportPeriod(period);
       const [data, report] = await Promise.all([
-        getTransactions(selectedCompanyId),
-        getFinancialReport(selectedCompanyId),
+        getTransactions(selectedCompanyId, range),
+        getFinancialReport(selectedCompanyId, range),
       ]);
       setTransactions(Array.isArray(data) ? data : []);
       setTotals(report);
@@ -150,7 +166,7 @@ const Reports = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedCompanyId, addToast]);
+  }, [selectedCompanyId, period, addToast]);
 
   useEffect(() => {
     load();
@@ -234,7 +250,6 @@ const Reports = () => {
             margin,
           },
           period,
-          sector,
         },
         detailLevel ?? "medium"
       );
@@ -249,7 +264,7 @@ const Reports = () => {
     } finally {
       setAiLoading(false);
     }
-  }, [selectedCompanyId, totals, margin, period, sector, detailLevel, addToast]);
+  }, [selectedCompanyId, totals, margin, period, detailLevel, addToast]);
 
   // ── PDF Export ───────────────────────────────────────────────────────────────
   const handleExportPdf = useCallback(async () => {
@@ -330,17 +345,6 @@ const Reports = () => {
             <option value="30d">Últimos 30 dias</option>
             <option value="90d">Últimos 90 dias</option>
             <option value="12m">Últimos 12 meses</option>
-          </select>
-
-          <select
-            value={sector}
-            onChange={(e) => setSector(e.target.value)}
-            className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-300 outline-none transition hover:border-zinc-600"
-          >
-            <option value="geral">Todos os setores</option>
-            <option value="ecommerce">E-commerce</option>
-            <option value="serviços">Serviços</option>
-            <option value="industria">Industria</option>
           </select>
 
           <button

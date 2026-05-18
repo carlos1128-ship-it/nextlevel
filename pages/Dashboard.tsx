@@ -733,7 +733,6 @@ const Dashboard = () => {
     if (value === activePeriod) return;
     setActivePeriod(value);
     setMetricsData(null);
-    void loadMetrics(value);
   };
 
   const marginDirection = summary.profit >= 0 ? "increase" : "decrease";

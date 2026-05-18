@@ -724,9 +724,16 @@ export async function saveCompanyModulePreferences(
   return data;
 }
 
-export async function getTransactions(companyId?: string) {
+export async function getTransactions(
+  companyId?: string,
+  params?: { start?: string; end?: string },
+) {
   const { data } = await api.get<any[]>("/financial/transactions", {
-    params: companyId ? { companyId } : undefined,
+    params: {
+      companyId: companyId || undefined,
+      start: params?.start || undefined,
+      end: params?.end || undefined,
+    },
   });
   return Array.isArray(data) ? data.map((item) => normalizeTransaction(item)) : [];
 }
@@ -886,10 +893,13 @@ export async function chatWithAi(payload: {
   }
 }
 
-export async function getFinancialReport(companyId: string) {
+export async function getFinancialReport(
+  companyId: string,
+  params?: { start?: string; end?: string },
+) {
   const { data } = await api.get<{ income: number; expense: number; balance: number }>(
     "/financial/report",
-    { params: { companyId } }
+    { params: { companyId, start: params?.start || undefined, end: params?.end || undefined } }
   );
   return data;
 }

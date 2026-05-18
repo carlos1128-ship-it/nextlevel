@@ -35,6 +35,8 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 const RETRY_DELAY_MS = 2000;
 const STORAGE_PREFIX = "strategic_insights_cache_v1";
 const MAX_INSIGHT_CHARS = 420;
+const MIN_USEFUL_INSIGHT_CHARS = 24;
+const LOW_VALUE_INSIGHTS = new Set(["oi", "ola", "olá", "teste", "ok"]);
 
 const memoryCache = new Map<string, CachedStrategicInsightsResult>();
 const inFlightRequests = new Map<string, Promise<StrategicInsightsResult>>();
@@ -109,7 +111,10 @@ function parseInsightLines(value: string) {
   return sanitizeInsight(value)
     .split(/\n+/)
     .map((item) => normalizeInsightLine(item))
-    .filter(Boolean)
+    .filter((item) => {
+      const normalized = item.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+      return item.length >= MIN_USEFUL_INSIGHT_CHARS && !LOW_VALUE_INSIGHTS.has(normalized);
+    })
     .slice(0, 6);
 }
 
