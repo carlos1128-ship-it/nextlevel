@@ -45,6 +45,8 @@ const MarketIntel = lazy(() => import('./pages/MarketIntel'));
 const Attendant = lazy(() => import('./pages/Attendant'));
 const SystemHealth = lazy(() => import('./pages/SystemHealth'));
 const OnboardingPersonalization = lazy(() => import('./pages/OnboardingPersonalization'));
+const Help = lazy(() => import('./pages/Help'));
+const Alerts = lazy(() => import('./pages/Alerts'));
 
 // Authentication Context
 interface AuthContextType {
@@ -1068,6 +1070,8 @@ const AppContent = () => {
           />
           <Route path="/reports" element={personalizedShell(<Reports />)} />
           <Route path="/chat" element={personalizedShell(<Chat />)} />
+          <Route path="/help" element={plainShell(<Help />)} />
+          <Route path="/alerts" element={plainShell(<Alerts />)} />
           <Route path="/settings" element={plainShell(<Settings />)} />
           <Route path="/profile" element={plainShell(<Profile />)} />
           <Route path="/integrations" element={featureShell(<Integrations />, "PREMIUM", "Integracoes automaticas exigem Premium")} />

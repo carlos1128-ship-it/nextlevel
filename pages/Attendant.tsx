@@ -32,14 +32,11 @@ const emptyConfig: Partial<AgentConfig> = {
 const booleanFields: Array<{
   key: keyof AgentConfig;
   label: string;
+  description: string;
 }> = [
-  { key: "isEnabled", label: "Atendente ativo" },
-  { key: "internetSearchEnabled", label: "Pesquisa na internet" },
-  { key: "speechToTextEnabled", label: "Audio para texto" },
-  { key: "imageUnderstandingEnabled", label: "Leitura de imagem" },
-  { key: "splitRepliesEnabled", label: "Dividir respostas" },
-  { key: "messageBufferEnabled", label: "Buffer ativo" },
-  { key: "pauseForHuman", label: "Pausar para humano" },
+  { key: "isEnabled", label: "Atendente ativo", description: "Permite respostas automáticas nos canais conectados." },
+  { key: "messageBufferEnabled", label: "Buffer ativo", description: "Agrupa mensagens próximas antes da IA responder." },
+  { key: "pauseForHuman", label: "Pausar para humano", description: "Mantém o controle humano quando uma conversa exigir atenção." },
 ];
 
 const channelLabel = (item: ConversationLiveFeedItem) =>
@@ -111,7 +108,15 @@ const Attendant = () => {
 
     try {
       setSaving(true);
-      const saved = await saveAgentConfig(selectedCompanyId, config);
+      const saved = await saveAgentConfig(selectedCompanyId, {
+        agentName: config.agentName,
+        companyDescription: config.companyDescription,
+        welcomeMessage: config.welcomeMessage,
+        toneOfVoice: config.toneOfVoice,
+        isEnabled: Boolean(config.isEnabled),
+        messageBufferEnabled: Boolean(config.messageBufferEnabled),
+        pauseForHuman: Boolean(config.pauseForHuman),
+      });
       setConfig(saved);
       addToast("Atendente IA salvo.", "success");
     } catch (error) {
@@ -158,18 +163,6 @@ const Attendant = () => {
 
           <label className="space-y-2 lg:col-span-2">
             <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Descrição da empresa
-            </span>
-            <textarea
-              value={config.companyDescription || ""}
-              onChange={(event) => updateField("companyDescription", event.target.value)}
-              rows={3}
-              className="w-full resize-y rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none transition focus:border-lime-400"
-            />
-          </label>
-
-          <label className="space-y-2 lg:col-span-2">
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
               Mensagem inicial
             </span>
             <textarea
@@ -182,65 +175,28 @@ const Attendant = () => {
 
           <label className="space-y-2 lg:col-span-2">
             <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Prompt do sistema
+              Diretrizes de atendimento
             </span>
             <textarea
-              value={config.systemPrompt || ""}
-              onChange={(event) => updateField("systemPrompt", event.target.value)}
-              rows={7}
+              value={config.companyDescription || ""}
+              onChange={(event) => updateField("companyDescription", event.target.value)}
+              rows={4}
+              placeholder="Produtos principais, políticas comerciais, prazos, garantias e limites para transferir ao humano."
               className="w-full resize-y rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none transition focus:border-lime-400"
             />
           </label>
         </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <label className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Modelo
-            </span>
-            <input
-              value={config.modelName || ""}
-              onChange={(event) => updateField("modelName", event.target.value)}
-              className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none transition focus:border-lime-400"
-            />
-          </label>
-
-          <label className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Debounce
-            </span>
-            <input
-              type="number"
-              min={0}
-              max={300}
-              value={config.debounceSeconds ?? 3}
-              onChange={(event) => updateField("debounceSeconds", Number(event.target.value))}
-              className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none transition focus:border-lime-400"
-            />
-          </label>
-
-          <label className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-              Contexto
-            </span>
-            <input
-              type="number"
-              min={1}
-              max={200}
-              value={config.maxContextMessages ?? 20}
-              onChange={(event) => updateField("maxContextMessages", Number(event.target.value))}
-              className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none transition focus:border-lime-400"
-            />
-          </label>
-        </div>
-
-        <div className="mt-5 grid gap-3 md:grid-cols-4 xl:grid-cols-7">
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
           {booleanFields.map((field) => (
             <label
               key={field.key}
-              className="flex items-center justify-between gap-3 rounded-md border border-zinc-800 bg-zinc-900 p-3 text-sm font-semibold text-zinc-200"
+              className="flex min-h-[112px] items-start justify-between gap-3 rounded-md border border-zinc-800 bg-zinc-900 p-4 text-sm font-semibold text-zinc-200"
             >
-              <span>{field.label}</span>
+              <span>
+                <span className="block">{field.label}</span>
+                <span className="mt-2 block text-xs font-medium leading-5 text-zinc-500">{field.description}</span>
+              </span>
               <input
                 type="checkbox"
                 checked={Boolean(config[field.key])}

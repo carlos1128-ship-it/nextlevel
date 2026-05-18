@@ -405,10 +405,10 @@ const Header = () => {
             <ShieldIcon className="h-4 w-4" />
           </Link>
         )}
-        <Link to="/settings" className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-300 transition-all hover:bg-[#0D100D] hover:text-[#B6FF00]" title="Notificações">
+        <Link to="/alerts" className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-300 transition-all hover:bg-[#0D100D] hover:text-[#B6FF00]" title="Central de alertas">
           <Bell className="h-4 w-4" strokeWidth={2} />
         </Link>
-        <Link to="/settings" className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-300 transition-all hover:bg-[#0D100D] hover:text-[#B6FF00]" title="Ajuda">
+        <Link to="/help" className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-300 transition-all hover:bg-[#0D100D] hover:text-[#B6FF00]" title="Ajuda">
           <CircleHelp className="h-4 w-4" strokeWidth={2} />
         </Link>
         <div className="h-6 w-px bg-white/[0.06]" />
