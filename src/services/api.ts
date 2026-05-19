@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosHeaders, InternalAxiosRequestConfig } from 'axios';
 import { getErrorMessage } from './error';
 
 const ACCESS_TOKEN_KEY = 'access_token';
@@ -19,15 +19,44 @@ const rawBaseUrl = String(
 const baseURL = /\/api$/i.test(rawBaseUrl) ? rawBaseUrl : `${rawBaseUrl}/api`;
 
 let refreshPromise: Promise<boolean> | null = null;
+let accessToken: string | null = null;
+
+function readAccessToken(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const data = payload as { accessToken?: unknown; access_token?: unknown; data?: unknown };
+  const direct = data.accessToken || data.access_token;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
+  return readAccessToken(data.data);
+}
+
+function setAccessToken(nextAccessToken: string | null) {
+  accessToken = nextAccessToken?.trim() || null;
+}
+
+function captureAccessToken(payload: unknown) {
+  const nextAccessToken = readAccessToken(payload);
+  if (!nextAccessToken) return false;
+  setAccessToken(nextAccessToken);
+  return true;
+}
+
+function isAuthEndpoint(url: string) {
+  return url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh');
+}
 
 function removeLegacyTokenStorage() {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
-function clearAuthStorage() {
-  clearBillingStorage();
+export function clearAccessToken() {
+  setAccessToken(null);
   removeLegacyTokenStorage();
+}
+
+function clearAuthStorage() {
+  clearAccessToken();
+  clearBillingStorage();
   localStorage.removeItem('selectedCompanyId');
   localStorage.removeItem('auth_user');
 
@@ -49,7 +78,10 @@ async function refreshSession(): Promise<boolean> {
       timeout: DEFAULT_API_TIMEOUT_MS,
       withCredentials: true,
     });
-    await refreshClient.post('/auth/refresh', {});
+    const response = await refreshClient.post('/auth/refresh', {});
+    if (!captureAccessToken(response.data)) {
+      return false;
+    }
     removeLegacyTokenStorage();
     window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
     return true;
@@ -61,7 +93,7 @@ async function refreshSession(): Promise<boolean> {
 
 function shouldSkipAuthRetry(config: InternalAxiosRequestConfig) {
   const url = config.url || '';
-  return url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh');
+  return isAuthEndpoint(url);
 }
 
 function isCompanyAccessError(error: AxiosError) {
@@ -149,11 +181,25 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   removeLegacyTokenStorage();
+  const url = config.url || '';
+  if (accessToken && !isAuthEndpoint(url)) {
+    config.headers = AxiosHeaders.from(config.headers);
+    config.headers.set('Authorization', `Bearer ${accessToken}`);
+  }
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const url = response.config.url || '';
+    if (url.includes('/auth/logout')) {
+      setAccessToken(null);
+      removeLegacyTokenStorage();
+      return response;
+    }
+    captureAccessToken(response.data);
+    return response;
+  },
   async (error: AxiosError) => {
     const originalConfig = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 

@@ -18,7 +18,7 @@ import type { Company, DetailLevel, UserNiche } from './src/types/domain';
 import NotFound from './src/app/not-found';
 import { applyMetadata, resolveMetadata } from './src/app/layout';
 import { getBillingMe, getCompanies, getCompanyPersonalizationStatus, getUserProfile } from './src/services/endpoints';
-import api from './src/services/api';
+import api, { clearAccessToken } from './src/services/api';
 import {
   buildPlanosSubscribeUrl,
   clearPendingSelectedPlan,
@@ -318,6 +318,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
       // ignore logout API failure and clear local state anyway
     });
 
+    clearAccessToken();
     clearAllBillingCache();
     setIsLoggedIn(false);
     setAuthSessionKey(null);
