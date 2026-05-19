@@ -314,7 +314,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   }, [setSelectedCompanyId]);
 
   const logout = useCallback(() => {
-    void api.post('/auth/logout', {}).catch(() => {
+    void api.post('/auth/logout', {}, { withCredentials: true }).catch(() => {
       // ignore logout API failure and clear local state anyway
     });
 

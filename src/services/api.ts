@@ -13,31 +13,23 @@ const DEFAULT_API_TIMEOUT_MS = 30000;
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
 
-function shouldUseSameOriginApiProxy(configuredUrl: string) {
-  const candidate = String(configuredUrl || '').trim();
-  if (!candidate) return false;
-
-  try {
-    const apiUrl = new URL(candidate);
-    return (
-      apiUrl.hostname === 'next-level-backend.onrender.com' ||
-      apiUrl.hostname.endsWith('.onrender.com')
-    );
-  } catch {
-    return true;
-  }
+function normalizeApiBaseUrl(configuredUrl: string) {
+  const fallbackUrl = 'https://next-level-backend.onrender.com';
+  const candidate = String(configuredUrl || fallbackUrl).trim();
+  const httpsUrl = candidate.replace(/^http:\/\//i, 'https://');
+  return httpsUrl.replace(/\/+$/, '');
 }
 
-const rawBaseUrl = shouldUseSameOriginApiProxy(rawEnvBaseUrl)
-  ? ''
-  : String(rawEnvBaseUrl).trim().replace(/\/+$/, '');
+const rawBaseUrl = normalizeApiBaseUrl(rawEnvBaseUrl);
 export const apiBaseURL = rawBaseUrl
   ? (/\/api$/i.test(rawBaseUrl) ? rawBaseUrl : `${rawBaseUrl}/api`)
-  : '/api';
+  : 'https://next-level-backend.onrender.com/api';
 const baseURL = apiBaseURL;
 
 let refreshPromise: Promise<boolean> | null = null;
 let accessToken: string | null = null;
+
+axios.defaults.withCredentials = true;
 
 function readAccessToken(payload: unknown): string | null {
   if (!payload || typeof payload !== 'object') return null;
@@ -91,12 +83,7 @@ function clearBillingStorage() {
 
 async function refreshSession(): Promise<boolean> {
   try {
-    const refreshClient = axios.create({
-      baseURL,
-      timeout: DEFAULT_API_TIMEOUT_MS,
-      withCredentials: true,
-    });
-    const response = await refreshClient.post('/auth/refresh', {}, { withCredentials: true });
+    const response = await api.post('/auth/refresh', {}, { withCredentials: true });
     if (!captureAccessToken(response.data)) {
       return false;
     }

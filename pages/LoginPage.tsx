@@ -194,7 +194,10 @@ const LoginPage: React.FC = () => {
       setError("Verificando credenciais... demorando mais que o normal.");
     }, SLOW_LOGIN_FEEDBACK_MS);
     try {
-      const res = await api.post("/auth/login", { email, password }, { timeout: LOGIN_TIMEOUT_MS });
+      const res = await api.post("/auth/login", { email, password }, {
+        timeout: LOGIN_TIMEOUT_MS,
+        withCredentials: true,
+      });
       const user = res.data?.user || res.data?.data?.user || (await getUserProfile());
       if (res.data?.authenticated && user) {
         localStorage.removeItem("access_token");
@@ -230,7 +233,10 @@ const LoginPage: React.FC = () => {
       const res = await api.post(
         "/auth/register",
         { name, email, password, companyName: name || "Minha Empresa" },
-        { timeout: LOGIN_TIMEOUT_MS },
+        {
+          timeout: LOGIN_TIMEOUT_MS,
+          withCredentials: true,
+        },
       );
       const user = res.data?.user || res.data?.data?.user || (await getUserProfile());
       if (res.data?.authenticated && user) {
