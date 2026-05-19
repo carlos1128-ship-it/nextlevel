@@ -8,26 +8,21 @@ const COMPANY_ACCESS_INVALID_EVENT = 'nextlevel:company-access-invalid';
 const AUTH_CHANGED_EVENT = 'nextlevel:auth-changed';
 const BILLING_ACCESS_INVALID_EVENT = 'nextlevel:billing-access-invalid';
 const BILLING_CACHE_PREFIX = 'nextlevel:billing:';
-const DEFAULT_PRODUCTION_API_URL = 'https://next-level-backend.onrender.com';
 const DEFAULT_API_TIMEOUT_MS = 30000;
 
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
 
 function shouldUseSameOriginApiProxy(configuredUrl: string) {
-  if (!import.meta.env.PROD || typeof window === 'undefined') return false;
-
-  const appOrigin = window.location.origin;
-  const candidate = String(configuredUrl || DEFAULT_PRODUCTION_API_URL).trim();
-  if (!candidate) return true;
+  const candidate = String(configuredUrl || '').trim();
+  if (!candidate) return false;
 
   try {
-    const apiUrl = new URL(candidate, appOrigin);
-    const isRenderBackend =
+    const apiUrl = new URL(candidate);
+    return (
       apiUrl.hostname === 'next-level-backend.onrender.com' ||
-      apiUrl.hostname.endsWith('.onrender.com');
-
-    return apiUrl.origin !== appOrigin && isRenderBackend;
+      apiUrl.hostname.endsWith('.onrender.com')
+    );
   } catch {
     return true;
   }
@@ -35,9 +30,7 @@ function shouldUseSameOriginApiProxy(configuredUrl: string) {
 
 const rawBaseUrl = shouldUseSameOriginApiProxy(rawEnvBaseUrl)
   ? ''
-  : String(
-      rawEnvBaseUrl || (import.meta.env.PROD ? DEFAULT_PRODUCTION_API_URL : ''),
-    ).trim().replace(/\/+$/, '');
+  : String(rawEnvBaseUrl).trim().replace(/\/+$/, '');
 export const apiBaseURL = rawBaseUrl
   ? (/\/api$/i.test(rawBaseUrl) ? rawBaseUrl : `${rawBaseUrl}/api`)
   : '/api';
