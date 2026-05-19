@@ -376,14 +376,16 @@ const MarginCalculator = ({ className = "" }: MarginCalculatorProps) => {
                 <button
                   type="button"
                   onClick={async () => {
-                    const token = localStorage.getItem("@next-level:token");
-                    if (!token) return alert("Você precisa estar logado para exportar o relatório.");
                     try {
-                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/report/margin-pdf`, {
+                      const rawApiUrl = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || "http://localhost:3333/api")
+                        .trim()
+                        .replace(/\/+$/, "");
+                      const apiUrl = /\/api$/i.test(rawApiUrl) ? rawApiUrl : `${rawApiUrl}/api`;
+                      const res = await fetch(`${apiUrl}/report/margin-pdf`, {
                         method: "POST",
+                        credentials: "include",
                         headers: {
-                          "Content-Type": "application/json",
-                          Authorization: `Bearer ${token}`
+                          "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
                           companyName: "Minha Empresa", // Podia puxar do estado global/perfil

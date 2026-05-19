@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../App";
 import { api } from "../services/api";
-import { BillingCycle, BillingPlanKey, getBillingMe, getCompanies } from "../src/services/endpoints";
+import { BillingCycle, BillingPlanKey, getBillingMe, getCompanies, getUserProfile } from "../src/services/endpoints";
 import NextLevelLandingPage, { LandingPlan } from "../src/components/landing/NextLevelLandingPage";
 import {
   buildPlanosSubscribeUrl,
@@ -199,13 +199,11 @@ const LoginPage: React.FC = () => {
     }, SLOW_LOGIN_FEEDBACK_MS);
     try {
       const res = await api.post("/auth/login", { email, password }, { timeout: LOGIN_TIMEOUT_MS });
-      const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
-      const refreshToken =
-        res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
-      if (token) {
-        localStorage.setItem("access_token", token);
-        if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
-        await goAfterAuth(res.data?.user || res.data?.data?.user || {});
+      const user = res.data?.user || res.data?.data?.user || (await getUserProfile());
+      if (res.data?.authenticated && user) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        await goAfterAuth(user);
       } else {
         setError("Resposta inesperada do servidor.");
       }
@@ -238,13 +236,11 @@ const LoginPage: React.FC = () => {
         { name, email, password, companyName: name || "Minha Empresa" },
         { timeout: LOGIN_TIMEOUT_MS },
       );
-      const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
-      const refreshToken =
-        res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
-      if (token) {
-        localStorage.setItem("access_token", token);
-        if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
-        await goAfterAuth(res.data?.user || res.data?.data?.user || {});
+      const user = res.data?.user || res.data?.data?.user || (await getUserProfile());
+      if (res.data?.authenticated && user) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        await goAfterAuth(user);
       } else {
         setError("Erro ao criar conta.");
       }

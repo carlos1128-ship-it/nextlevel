@@ -6,24 +6,28 @@
 await fetch(`${API_BASE_URL}/auth/login`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
+  credentials: "include",
   body: JSON.stringify({ email, password }),
 });
 
 await fetch(`${API_BASE_URL}/companies`, {
   method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
   body: JSON.stringify({ name: "Minha Empresa", sector: "Servicos" }),
 });
 
 await fetch(`${API_BASE_URL}/financial/transactions`, {
   method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
   body: JSON.stringify({ type: "revenue", amount: 1000, description: "Venda" }),
 });
 
 await fetch(`${API_BASE_URL}/chat`, {
   method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
   body: JSON.stringify({ message: "Resumo financeiro", detailLevel: "medium" }),
 });
 ```
@@ -36,12 +40,7 @@ import axios from "axios";
 const http = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
-});
-
-http.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
+  withCredentials: true,
 });
 
 await http.post("/auth/login", { email, password });
@@ -61,6 +60,6 @@ const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
 ## Centralized client in this project
 
-- `src/services/api.ts` handles base URL, auth headers, JSON parsing, and errors.
+- `src/services/api.ts` handles base URL, HttpOnly cookie session, JSON parsing, and errors.
 - `src/services/endpoints.ts` exposes domain methods (`createCompany`, `createTransaction`, `chatWithAi`).
 - UI components call only endpoint methods, not raw `fetch`.

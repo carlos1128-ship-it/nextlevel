@@ -177,10 +177,9 @@ function readStoredUser() {
   }
 }
 
-function tokenFingerprint() {
-  const token = localStorage.getItem('access_token') || '';
-  if (!token) return null;
-  return `${token.length}:${token.slice(0, 16)}:${token.slice(-8)}`;
+function sessionFingerprint(email?: string | null) {
+  const normalizedEmail = email?.trim().toLowerCase();
+  return normalizedEmail ? `cookie:${normalizedEmail}` : `cookie:${Date.now()}`;
 }
 
 function billingUserKey(email: string | null, authSessionKey: string | null, companyId?: string | null) {
@@ -250,12 +249,16 @@ export const useBilling = () => {
 const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const storedUser = readStoredUser();
   const storedCompanyId = localStorage.getItem(COMPANY_ID_STORAGE_KEY);
-  const hasStoredToken = Boolean(localStorage.getItem('access_token'));
-  const [isLoggedIn, setIsLoggedIn] = useState(hasStoredToken);
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  const hasStoredSession = Boolean(storedUser.email || storedUser.name);
+  const [isLoggedIn, setIsLoggedIn] = useState(hasStoredSession);
   const [isAdmin, setIsAdmin] = useState(Boolean(storedUser.admin));
-  const [isProfileReady, setIsProfileReady] = useState(!hasStoredToken);
-  const [isCompanyReady, setIsCompanyReady] = useState(!hasStoredToken);
-  const [authSessionKey, setAuthSessionKey] = useState<string | null>(tokenFingerprint());
+  const [isProfileReady, setIsProfileReady] = useState(!hasStoredSession);
+  const [isCompanyReady, setIsCompanyReady] = useState(!hasStoredSession);
+  const [authSessionKey, setAuthSessionKey] = useState<string | null>(
+    hasStoredSession ? sessionFingerprint(storedUser.email) : null,
+  );
   const [username, setUsername] = useState<string | null>(storedUser.name);
   const [email, setEmail] = useState<string | null>(storedUser.email);
   const [niche, setNicheState] = useState<UserNiche | null>(storedUser.niche);
@@ -265,13 +268,10 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      setIsLoggedIn(true);
-      return;
-    }
-    setIsProfileReady(true);
-  }, []);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    if (!hasStoredSession) setIsProfileReady(true);
+  }, [hasStoredSession]);
 
   const setSelectedCompanyId = useCallback((value: string | null) => {
     setSelectedCompanyIdState(value);
@@ -294,7 +294,7 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
 
   const login = useCallback((user: { name?: string | null; email?: string | null; admin?: boolean; niche?: UserNiche | null }) => {
     clearAllBillingCache();
-    const nextSessionKey = tokenFingerprint();
+    const nextSessionKey = sessionFingerprint(user.email);
     setIsLoggedIn(true);
     setAuthSessionKey(nextSessionKey);
     setIsAdmin(Boolean(user.admin));
@@ -314,12 +314,9 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   }, [setSelectedCompanyId]);
 
   const logout = useCallback(() => {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (refreshToken) {
-      void api.post('/auth/logout', { refresh_token: refreshToken }).catch(() => {
-        // ignore logout API failure and clear local state anyway
-      });
-    }
+    void api.post('/auth/logout', {}).catch(() => {
+      // ignore logout API failure and clear local state anyway
+    });
 
     clearAllBillingCache();
     setIsLoggedIn(false);
@@ -339,11 +336,11 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
 
   useEffect(() => {
     const handleAuthChanged = () => {
-      setAuthSessionKey(tokenFingerprint());
+      setAuthSessionKey(sessionFingerprint(email));
     };
     window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
     return () => window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
-  }, []);
+  }, [email]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -582,17 +579,15 @@ const BillingProvider = ({ children }: { children?: ReactNode }) => {
 };
 
 const ProtectedRoute = ({ children }: { children?: ReactNode }) => {
-  const token = localStorage.getItem('access_token');
   const { isLoggedIn, isProfileReady } = useAuth();
   if (!isProfileReady) return <FullscreenLoading label="Validando acesso" />;
-  return isLoggedIn && token ? <>{children}</> : <Navigate to="/login" replace />;
+  return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const AdminRoute = ({ children }: { children?: ReactNode }) => {
-  const token = localStorage.getItem('access_token');
   const { isLoggedIn, isAdmin, isProfileReady } = useAuth();
   if (!isProfileReady) return <FullscreenLoading label="Validando acesso" />;
-  if (!isLoggedIn || !token) return <Navigate to="/login" replace />;
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
   return isAdmin ? <>{children}</> : <Navigate to={DASHBOARD_ROUTE} replace />;
 };
 
@@ -837,40 +832,21 @@ const GoogleAuthCallback = () => {
         setCallbackState("callbackLoading");
         setCallbackError(null);
 
-        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-        const searchParams = new URLSearchParams(window.location.search);
-        const readParam = (key: string) => hashParams.get(key) || searchParams.get(key);
-        const token = readParam("token") || readParam("access_token");
-        const refreshToken = readParam("refresh_token") || readParam("refreshToken");
-        const name = readParam("name");
-        const email = readParam("email");
-        const admin = readParam("admin") === "true";
         const selectedPlan = readPendingSelectedPlan();
         const preferredCompanyId = localStorage.getItem(COMPANY_ID_STORAGE_KEY);
 
-        if (token) {
-          localStorage.setItem("access_token", token);
-          if (refreshToken) {
-            localStorage.setItem("refresh_token", refreshToken);
-          }
-          window.history.replaceState({}, document.title, window.location.pathname);
-          login({ name, email, admin, niche: null });
-        } else {
-          const storedToken = localStorage.getItem("access_token");
-          if (!storedToken) {
-            navigate("/login", { replace: true });
-            return;
-          }
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.history.replaceState({}, document.title, window.location.pathname);
 
-          const profile = await withTimeout(getUserProfile(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
-          if (!isCurrentRun()) return;
-          login({
-            name: profile?.name || null,
-            email: profile?.email || null,
-            admin: Boolean(profile?.admin),
-            niche: profile?.niche || null,
-          });
-        }
+        const profile = await withTimeout(getUserProfile(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
+        if (!isCurrentRun()) return;
+        login({
+          name: profile?.name || null,
+          email: profile?.email || null,
+          admin: Boolean(profile?.admin),
+          niche: profile?.niche || null,
+        });
 
         if (!isCurrentRun()) return;
         setCallbackState("authResolved");

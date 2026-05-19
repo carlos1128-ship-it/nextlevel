@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosHeaders, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getErrorMessage } from './error';
 
 const ACCESS_TOKEN_KEY = 'access_token';
@@ -18,19 +18,16 @@ const rawBaseUrl = String(
 ).trim().replace(/\/+$/, '');
 const baseURL = /\/api$/i.test(rawBaseUrl) ? rawBaseUrl : `${rawBaseUrl}/api`;
 
-let refreshPromise: Promise<string | null> | null = null;
+let refreshPromise: Promise<boolean> | null = null;
 
-function getFirstString(values: unknown[]): string | null {
-  for (const value of values) {
-    if (typeof value === 'string' && value.trim()) return value;
-  }
-  return null;
+function removeLegacyTokenStorage() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
 function clearAuthStorage() {
   clearBillingStorage();
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  removeLegacyTokenStorage();
   localStorage.removeItem('selectedCompanyId');
   localStorage.removeItem('auth_user');
 
@@ -45,66 +42,26 @@ function clearBillingStorage() {
     .forEach((key) => sessionStorage.removeItem(key));
 }
 
-async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-  if (!refreshToken) {
-    clearAuthStorage();
-    return null;
-  }
-
+async function refreshSession(): Promise<boolean> {
   try {
-    const refreshClient = axios.create({ baseURL });
-    const { data } = await refreshClient.post<{
-      access_token?: string;
-      accessToken?: string;
-      token?: string;
-      refresh_token?: string;
-      refreshToken?: string;
-    }>('/auth/refresh', {
-      refresh_token: refreshToken,
+    const refreshClient = axios.create({
+      baseURL,
+      timeout: DEFAULT_API_TIMEOUT_MS,
+      withCredentials: true,
     });
-
-    const payload = data as Record<string, unknown>;
-    const nestedData = (payload.data || payload.result || payload.tokens || {}) as Record<string, unknown>;
-    const nextAccessToken = getFirstString([
-      payload.access_token,
-      payload.accessToken,
-      payload.token,
-      nestedData.access_token,
-      nestedData.accessToken,
-      nestedData.token,
-    ]);
-    const nextRefreshToken =
-      getFirstString([
-        payload.refresh_token,
-        payload.refreshToken,
-        nestedData.refresh_token,
-        nestedData.refreshToken,
-      ]) || refreshToken;
-
-    if (!nextAccessToken) {
-      clearAuthStorage();
-      return null;
-    }
-
-    localStorage.setItem(ACCESS_TOKEN_KEY, nextAccessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, nextRefreshToken);
+    await refreshClient.post('/auth/refresh', {});
+    removeLegacyTokenStorage();
     window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
-    return nextAccessToken;
+    return true;
   } catch {
     clearAuthStorage();
-    return null;
+    return false;
   }
 }
 
 function shouldSkipAuthRetry(config: InternalAxiosRequestConfig) {
   const url = config.url || '';
   return url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh');
-}
-
-function shouldAttachAuthHeader(config: InternalAxiosRequestConfig) {
-  const url = config.url || '';
-  return !(url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh'));
 }
 
 function isCompanyAccessError(error: AxiosError) {
@@ -187,16 +144,11 @@ function dispatchFriendlyApiError(error: AxiosError) {
 const api = axios.create({
   baseURL,
   timeout: DEFAULT_API_TIMEOUT_MS,
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-
-  config.headers = new AxiosHeaders(config.headers);
-  if (token && shouldAttachAuthHeader(config)) {
-    config.headers.set('Authorization', `Bearer ${token}`);
-  }
-
+  removeLegacyTokenStorage();
   return config;
 });
 
@@ -213,19 +165,16 @@ api.interceptors.response.use(
     originalConfig._retry = true;
 
     if (!refreshPromise) {
-      refreshPromise = refreshAccessToken().finally(() => {
+      refreshPromise = refreshSession().finally(() => {
         refreshPromise = null;
       });
     }
 
-    const nextToken = await refreshPromise;
-    if (!nextToken) {
+    const refreshed = await refreshPromise;
+    if (!refreshed) {
       dispatchFriendlyApiError(error);
       return Promise.reject(error);
     }
-
-    originalConfig.headers = new AxiosHeaders(originalConfig.headers);
-    originalConfig.headers.set('Authorization', `Bearer ${nextToken}`);
 
     return api.request(originalConfig);
   },
