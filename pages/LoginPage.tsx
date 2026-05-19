@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../App";
-import { api } from "../services/api";
+import { api, apiBaseURL } from "../services/api";
 import { BillingCycle, BillingPlanKey, getBillingMe, getCompanies, getUserProfile } from "../src/services/endpoints";
 import NextLevelLandingPage, { LandingPlan } from "../src/components/landing/NextLevelLandingPage";
 import {
@@ -179,11 +179,7 @@ const LoginPage: React.FC = () => {
     setError("");
     setGoogleLoading(true);
 
-    const raw = String(import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || "")
-      .trim()
-      .replace(/\/+$/, "");
-    const base = /\/api$/i.test(raw) ? raw : `${raw}/api`;
-    window.location.href = `${base}/auth/google`;
+    window.location.href = `${apiBaseURL}/auth/google`;
   };
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {

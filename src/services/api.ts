@@ -13,10 +13,35 @@ const DEFAULT_API_TIMEOUT_MS = 30000;
 
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
-const rawBaseUrl = String(
-  rawEnvBaseUrl || (import.meta.env.PROD ? DEFAULT_PRODUCTION_API_URL : ''),
-).trim().replace(/\/+$/, '');
-const baseURL = /\/api$/i.test(rawBaseUrl) ? rawBaseUrl : `${rawBaseUrl}/api`;
+
+function shouldUseSameOriginApiProxy(configuredUrl: string) {
+  if (!import.meta.env.PROD || typeof window === 'undefined') return false;
+
+  const appOrigin = window.location.origin;
+  const candidate = String(configuredUrl || DEFAULT_PRODUCTION_API_URL).trim();
+  if (!candidate) return true;
+
+  try {
+    const apiUrl = new URL(candidate, appOrigin);
+    const isRenderBackend =
+      apiUrl.hostname === 'next-level-backend.onrender.com' ||
+      apiUrl.hostname.endsWith('.onrender.com');
+
+    return apiUrl.origin !== appOrigin && isRenderBackend;
+  } catch {
+    return true;
+  }
+}
+
+const rawBaseUrl = shouldUseSameOriginApiProxy(rawEnvBaseUrl)
+  ? ''
+  : String(
+      rawEnvBaseUrl || (import.meta.env.PROD ? DEFAULT_PRODUCTION_API_URL : ''),
+    ).trim().replace(/\/+$/, '');
+export const apiBaseURL = rawBaseUrl
+  ? (/\/api$/i.test(rawBaseUrl) ? rawBaseUrl : `${rawBaseUrl}/api`)
+  : '/api';
+const baseURL = apiBaseURL;
 
 let refreshPromise: Promise<boolean> | null = null;
 let accessToken: string | null = null;

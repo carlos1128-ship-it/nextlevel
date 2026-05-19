@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://next-level-backend.onrender.com/api/:path*"
+    },
+    {
       "source": "/((?!api|assets|favicon.ico|favicon.svg|og-sales-ai.svg).*)",
       "destination": "/index.html"
     }
