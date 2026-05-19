@@ -15,9 +15,9 @@ const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
 
 function shouldUseSameOriginApiProxy(configuredUrl: string) {
-  if (!import.meta.env.PROD || typeof window === 'undefined') return false;
+  const appOrigin = globalThis.location?.origin;
+  if (!import.meta.env.PROD || !appOrigin) return false;
 
-  const appOrigin = window.location.origin;
   const candidate = String(configuredUrl || DEFAULT_PRODUCTION_API_URL).trim();
   if (!candidate) return true;
 
