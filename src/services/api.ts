@@ -96,7 +96,7 @@ async function refreshSession(): Promise<boolean> {
       timeout: DEFAULT_API_TIMEOUT_MS,
       withCredentials: true,
     });
-    const response = await refreshClient.post('/auth/refresh', {});
+    const response = await refreshClient.post('/auth/refresh', {}, { withCredentials: true });
     if (!captureAccessToken(response.data)) {
       return false;
     }
@@ -198,6 +198,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  config.withCredentials = true;
   removeLegacyTokenStorage();
   const url = config.url || '';
   if (accessToken && !isAuthEndpoint(url)) {
