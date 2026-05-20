@@ -116,10 +116,27 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
         variants={containerVariants}
         initial="hidden"
         animate={autoPlay ? "visible" : "hidden"}
-        style={{ position: "relative", width: "100%", maxWidth: 700 }}
+        style={{ position: "relative", width: "100%", maxWidth: 700, zIndex: 0 }}
         aria-label="Next Level AI Dashboard"
         role="img"
       >
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: embedded ? "-36px -42px -44px" : "-70px",
+            borderRadius: "50%",
+            background: `
+              radial-gradient(circle at 48% 45%, rgba(168,255,62,0.22), transparent 42%),
+              radial-gradient(circle at 64% 58%, rgba(28,63,58,0.34), transparent 58%)
+            `,
+            filter: "blur(62px)",
+            opacity: embedded ? 0.78 : 0.66,
+            pointerEvents: "none",
+            zIndex: -1,
+          }}
+        />
+
         {/* ── MAIN DASHBOARD CONTAINER ── */}
         <motion.div
           variants={itemVariants}
@@ -418,7 +435,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
             <span style={{ color: COLORS.neon, fontSize: 8.5, fontWeight: 700, letterSpacing: "0.05em" }}>ATENDIMENTO ATIVO</span>
           </div>
           <div style={{ background: COLORS.surface, borderRadius: 6, padding: "6px 8px", marginBottom: 5 }}>
-            <span style={{ color: COLORS.textMuted, fontSize: 8.5 }}>Qual o prazo para 3D?</span>
+            <span style={{ color: COLORS.textMuted, fontSize: 8.5 }}>Qual é o prazo para SP?</span>
           </div>
           <div style={{ background: COLORS.neonGlow, border: `1px solid ${COLORS.neonDim}`, borderRadius: 6, padding: "6px 8px" }}>
             <span style={{ color: COLORS.text, fontSize: 8.5 }}>1 a 2 dias úteis. Quer ver o catálogo? 😊</span>
