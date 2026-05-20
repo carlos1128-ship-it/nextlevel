@@ -79,9 +79,11 @@ function MiniBarChart({ values, color }: { values: number[]; color: string }) {
 interface HeroDashboardMotionProps {
   repeat?: boolean;
   autoPlay?: boolean;
+  embedded?: boolean;
+  className?: string;
 }
 
-export function HeroDashboardMotion({ autoPlay = true }: HeroDashboardMotionProps) {
+export function HeroDashboardMotion({ autoPlay = true, embedded = false, className }: HeroDashboardMotionProps) {
   const shouldReduce = useReducedMotion();
 
   const containerVariants: Variants = {
@@ -98,14 +100,15 @@ export function HeroDashboardMotion({ autoPlay = true }: HeroDashboardMotionProp
 
   return (
     <div
+      className={className}
       style={{
-        minHeight: "100vh",
-        background: COLORS.bg,
+        minHeight: embedded ? undefined : "100vh",
+        background: embedded ? "transparent" : COLORS.bg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "'Inter', system-ui, sans-serif",
-        padding: "24px 140px",
+        padding: embedded ? 0 : "24px 140px",
       }}
     >
       <motion.div

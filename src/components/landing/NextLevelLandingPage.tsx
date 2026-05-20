@@ -27,6 +27,7 @@ import {
 import "../../styles/landing-page-styles.css";
 import "../../styles/animations.css";
 import { useLandingReveal } from "../../hooks/useLandingReveal";
+import { HeroDashboardMotion } from "./HeroDashboardMotion";
 
 export type LandingPlanKey = "COMMON" | "PREMIUM" | "PRO_BUSINESS";
 
@@ -418,141 +419,10 @@ export function NextLevelLandingPage({
             </p>
           </div>
 
-          {/* RIGHT — Dashboard mockup */}
-          <div className="relative w-full nl-reveal-scale" style={{ perspective: "1000px" }}>
-            <div className="animate-dashboard-drop">
-              <div className="relative w-full" style={{ transform: "rotateY(-4deg) rotateX(2deg)", transformStyle: "preserve-3d" }}>
-
-                {/* Main dashboard */}
-                <div className="bg-[#080D0B] rounded-[24px] border border-[#2E3935] nl-shadow-floating flex overflow-hidden lg:min-h-[580px]">
-
-                  {/* Sidebar */}
-                  <div className="w-[180px] bg-[#0D1210] border-r border-[#2E3935] p-4 hidden lg:flex flex-col gap-1 shrink-0">
-                    <div className="flex items-center gap-2 mb-6 px-2 py-1 text-left">
-                      <div className="w-2 h-2 rounded-full bg-[#B6FF00]" />
-                      <span className="font-bold text-[11px] tracking-wide text-white">NEXT LEVEL</span>
-                    </div>
-                    {[
-                      { icon: Activity,      label: "Início",          active: true },
-                      { icon: ShoppingCart,  label: "Vendas" },
-                      { icon: DollarSign,    label: "Financeiro" },
-                      { icon: Users,         label: "Clientes" },
-                      { icon: Package,       label: "Produtos" },
-                      { icon: CreditCard,    label: "Custos" },
-                      { icon: MessageSquare, label: "Atendimento IA" },
-                      { icon: BarChart3,     label: "Relatórios" },
-                    ].map((item, i) => (
-                      <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                        item.active ? "bg-[#1A221F] text-[#B6FF00]" : "text-[#6B7470] hover:text-white"
-                      }`}>
-                        <item.icon size={14} />
-                        {item.label}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Dashboard content */}
-                  <div className="flex-1 bg-[#141B18] p-6 overflow-hidden">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-white font-semibold text-sm">Visão Geral</h3>
-                      <span className="text-[10px] bg-[#1A221F] px-2 py-1 rounded-full text-[#AEB8B4]">Hoje</span>
-                    </div>
-
-                    {/* KPI row */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="bg-white rounded-xl p-4 nl-shadow-soft">
-                        <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase tracking-wider text-left">Lucro real</p>
-                        <p className="text-2xl font-bold text-gray-900 mb-2 text-left">R$ 47.320</p>
-                        <div className="flex gap-0.5 h-8 items-end">
-                          {[40, 60, 45, 80, 55, 90, 100].map((h, i) => (
-                            <div key={i} className="flex-1 bg-[#B6FF00] rounded-t-sm" style={{ height: `${h}%` }} />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="bg-white rounded-xl p-4 nl-shadow-soft flex flex-col justify-between">
-                        <div className="text-left">
-                          <p className="text-[10px] text-gray-400 font-semibold mb-1 uppercase tracking-wider">Vendas do mês</p>
-                          <p className="text-2xl font-bold text-gray-900">1.847</p>
-                        </div>
-                        <div className="flex items-center gap-1 text-emerald-600 text-[11px] font-semibold">
-                          <TrendingUp size={12} /><span>+12,4% no mês</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="bg-[#1A221F] rounded-xl p-4 border border-[#2E3935] text-left">
-                        <p className="text-[10px] text-[#6B7470] font-semibold mb-1 uppercase tracking-wider">Margem</p>
-                        <p className="text-2xl font-bold text-white mb-2">34%</p>
-                        <div className="w-full bg-[#080D0B] h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-[#B6FF00] h-full rounded-full" style={{ width: "34%" }} />
-                        </div>
-                      </div>
-                      <div className="bg-[#1A221F] rounded-xl p-4 border border-[#2E3935] text-left">
-                        <p className="text-[10px] text-[#6B7470] font-semibold mb-1 uppercase tracking-wider">Clientes atendidos</p>
-                        <p className="text-2xl font-bold text-white mb-2">329</p>
-                        <div className="flex -space-x-2">
-                          {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="w-6 h-6 rounded-full bg-[#222C28] border-2 border-[#1A221F]" />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Mini chart */}
-                    <div className="bg-[#1A221F] rounded-xl p-4 border border-[#2E3935] text-left">
-                      <p className="text-[10px] text-[#6B7470] font-bold uppercase mb-3">Vendas — últimos 7 dias</p>
-                      <div className="flex gap-1.5 h-16 items-end">
-                        {[30, 50, 40, 70, 55, 85, 100].map((h, i) => (
-                          <div key={i} className="chart-bar flex-1 bg-[#2A3830] rounded-t" style={{ height: `${h}%` }} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating: AI insight */}
-                <div className="absolute -left-16 top-[30%] bg-[#0D1210] border border-[#B6FF00]/40 p-4 rounded-2xl nl-shadow-neon w-[260px] animate-float z-20 hidden lg:block text-left">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-full bg-[#1C3F3A] flex items-center justify-center text-[#B6FF00]">
-                      <Bot size={12} />
-                    </div>
-                    <span className="text-xs font-semibold text-[#B6FF00]">Recomendação da IA</span>
-                  </div>
-                  <p className="text-xs text-[#E6EAE4] leading-relaxed">
-                    Queda de margem em Produto Y detectada. Revise preço antes de escalar anúncios.
-                  </p>
-                </div>
-
-                {/* Floating: WhatsApp chat */}
-                <div className="absolute -right-12 bottom-16 bg-white p-3 rounded-2xl nl-shadow-floating w-[210px] animate-float-delayed z-20 hidden lg:block text-left">
-                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-[10px] font-bold text-gray-700 uppercase leading-none">Atendimento Ativo</span>
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <div className="bg-gray-100 p-2 rounded-lg rounded-tl-none text-[10px] text-gray-600 self-start max-w-[85%]">
-                      Qual o prazo para SP?
-                    </div>
-                    <div className="bg-[#1C3F3A] p-2 rounded-lg rounded-tr-none text-[10px] text-white self-end max-w-[85%]">
-                      1 a 2 dias úteis. Quer ver o catálogo? 😉
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating: Channels */}
-                <div className="absolute -right-8 top-6 bg-[#1A221F] border border-[#2E3935] p-3 rounded-xl nl-shadow-floating flex-col gap-2 z-10 hidden lg:flex animate-float text-left" style={{ animationDelay: "2s" }}>
-                  <div className="text-[9px] text-[#6B7470] font-bold uppercase tracking-wider mb-1">Canais conectados</div>
-                  {["WhatsApp", "Instagram", "Mercado Livre"].map((plat) => (
-                    <div key={plat} className="flex items-center gap-2 text-xs text-white">
-                      <div className="w-3 h-3 rounded-full bg-[#B6FF00] flex items-center justify-center">
-                        <Check size={8} className="text-[#080D0B]" />
-                      </div>
-                      {plat}
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* RIGHT — Dashboard motion */}
+          <div className="relative w-full nl-reveal-scale lg:pl-4">
+            <div className="mx-auto w-full max-w-[720px] origin-center overflow-visible lg:translate-x-0 lg:scale-[0.72] xl:-translate-x-12 xl:scale-[0.78] 2xl:translate-x-[70px] 2xl:scale-100">
+              <HeroDashboardMotion embedded />
             </div>
           </div>
         </div>
