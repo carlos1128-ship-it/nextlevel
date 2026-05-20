@@ -28,9 +28,7 @@ const FONT = "'Chakra Petch', sans-serif";
 const SCENE_DURATIONS: Record<string, number> = {
   dark_start: 350,
   graph_draw: 1650,
-  impact: 1200,
-  final_logo: 2600,
-  exit_bridge: 550,
+  impact: 2200,
   loader: 2200,
 };
 
@@ -43,49 +41,42 @@ const SCENE_ORDER = Object.keys(SCENE_DURATIONS);
 function useSplashSequence(minDuration: number, isLoading: boolean) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [done, setDone] = useState(false);
-  const elapsed = useRef(0);
-  const loadingDone = useRef(!isLoading);
-
-  useEffect(() => {
-    if (!isLoading) loadingDone.current = true;
-  }, [isLoading]);
+  const startedAt = useRef(Date.now());
 
   useEffect(() => {
     if (done) return;
 
     const key = SCENE_ORDER[sceneIndex];
+    if (key === 'loader') return;
+
     const dur = SCENE_DURATIONS[key] ?? 500;
 
     const id = setTimeout(() => {
-      elapsed.current += dur;
-      const isLast = sceneIndex >= SCENE_ORDER.length - 1;
-
-      if (isLast) {
-        if (loadingDone.current && elapsed.current >= minDuration) {
-          setDone(true);
-        } else {
-          // stay on last scene until loading finishes
-        }
-      } else {
-        setSceneIndex((i) => i + 1);
-      }
+      setSceneIndex((i) => i + 1);
     }, dur);
 
     return () => clearTimeout(id);
-  }, [sceneIndex, done, minDuration]);
+  }, [sceneIndex, done]);
 
-  // poll when on last scene waiting for loading
   useEffect(() => {
-    if (!done && sceneIndex === SCENE_ORDER.length - 1) {
-      const poll = setInterval(() => {
-        if (loadingDone.current && elapsed.current >= minDuration) {
-          setDone(true);
-          clearInterval(poll);
-        }
-      }, 100);
-      return () => clearInterval(poll);
+    if (done || SCENE_ORDER[sceneIndex] !== 'loader') return;
+
+    const canFinish = () => !isLoading && Date.now() - startedAt.current >= minDuration;
+
+    if (canFinish()) {
+      setDone(true);
+      return;
     }
-  }, [sceneIndex, done, minDuration]);
+
+    const poll = setInterval(() => {
+      if (canFinish()) {
+        setDone(true);
+        clearInterval(poll);
+      }
+    }, 100);
+
+    return () => clearInterval(poll);
+  }, [sceneIndex, done, minDuration, isLoading]);
 
   return { sceneKey: SCENE_ORDER[sceneIndex], done };
 }
@@ -224,26 +215,6 @@ function SceneImpact() {
   );
 }
 
-function LogoFrame({ sceneKey }: { sceneKey: string }) {
-  return (
-    <motion.div
-      key={sceneKey}
-      style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.55, ease: 'easeInOut' }}
-    >
-      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse 55% 35% at 50% 50%, rgba(182,255,0,0.05) 0%, transparent 65%)` }} />
-      <div style={{ position: 'relative' }}>
-        <div style={{ position: 'absolute', inset: 0, filter: 'blur(20px)', background: 'rgba(182,255,0,0.16)', borderRadius: 12 }} />
-        <span style={{ fontFamily: FONT, fontWeight: 700, fontSize: 'min(10vw, 88px)', letterSpacing: '0.06em', color: NEON, whiteSpace: 'nowrap', display: 'block', lineHeight: 1, position: 'relative', textShadow: `0 0 30px rgba(182,255,0,0.38), 0 0 80px rgba(182,255,0,0.1)` }}>NEXT LEVEL</span>
-      </div>
-      <div style={{ marginTop: '2rem', height: 1, width: 'min(24vw, 180px)', background: `linear-gradient(90deg, transparent, rgba(182,255,0,0.3), transparent)` }} />
-    </motion.div>
-  );
-}
-
 const R_LOADER = 60;
 const STROKE_LOADER = 3;
 const LOADER_SIZE = (R_LOADER + STROKE_LOADER) * 2 + 20;
@@ -291,8 +262,6 @@ function CurrentScene({ sceneKey }: { sceneKey: string }) {
   if (sceneKey === 'dark_start') return <SceneDarkStart />;
   if (sceneKey === 'graph_draw') return <SceneGraphDraw />;
   if (sceneKey === 'impact') return <SceneImpact />;
-  if (sceneKey === 'final_logo') return <LogoFrame sceneKey="final_logo" />;
-  if (sceneKey === 'exit_bridge') return <LogoFrame sceneKey="exit_bridge" />;
   if (sceneKey === 'loader') return <SceneLoader />;
   return null;
 }
@@ -366,7 +335,7 @@ export function SplashScreen({
                 background: `radial-gradient(ellipse 80% 60% at 50% 50%, rgba(182,255,0,0.03) 0%, transparent 70%)`,
               }}
               animate={{
-                opacity: sceneKey === 'dark_start' || sceneKey === 'loader' ? 0 : sceneKey === 'exit_bridge' ? 0.3 : 1,
+                opacity: sceneKey === 'dark_start' || sceneKey === 'loader' ? 0 : 1,
               }}
               transition={{ duration: 0.6 }}
             />
