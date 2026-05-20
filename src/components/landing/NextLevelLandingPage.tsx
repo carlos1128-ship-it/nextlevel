@@ -387,27 +387,31 @@ export function NextLevelLandingPage({
           <div className="absolute bottom-0 right-1/3 w-[500px] h-[500px] rounded-full bg-[#B6FF00] blur-[220px] opacity-[0.04]" />
         </div>
 
-        <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center relative z-10">
+        <div className="max-w-[1400px] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center relative z-10">
           {/* LEFT — Copy */}
-          <div className="flex flex-col items-start nl-reveal-left">
+          <div className="flex w-full min-w-0 flex-col items-start nl-reveal-left max-[480px]:max-w-[330px]">
             <div className="inline-flex items-center gap-2 bg-[#1A221F] border border-[#2E3935] px-4 py-1.5 rounded-full mb-8">
               <div className="w-1.5 h-1.5 rounded-full bg-[#B6FF00] animate-pulse-neon" />
               <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>
             </div>
 
-            <h1 className="nl-h1 text-white mb-7">
-              O{" "}
-              <span style={{ color: "rgba(182, 255, 0, 0.94)", textShadow: "0 0 16px rgba(182, 255, 0, 0.16)" }}>
-                sistema de gestão com IA
+            <h1 className="nl-h1 text-white mb-7 max-w-full break-words max-[480px]:text-[34px] max-[480px]:leading-[1.05]">
+              O sistema de{" "}
+              <br className="hidden max-[480px]:block" />
+              <span className="inline-block" style={{ color: "rgba(182, 255, 0, 0.94)", textShadow: "0 0 14px rgba(182, 255, 0, 0.14)" }}>
+                gestão com IA
               </span>{" "}
-              para controlar{" "}
-              <span style={{ color: "rgba(182, 255, 0, 0.78)", textShadow: "0 0 10px rgba(182, 255, 0, 0.08)" }}>
-                vendas, atendimento e financeiro
-              </span>{" "}
+              <br className="hidden max-[480px]:block" />
+              para controlar vendas,{" "}
+              <br className="hidden max-[480px]:block" />
+              atendimento e{" "}
+              <br className="hidden max-[480px]:block" />
+              financeiro{" "}
+              <br className="hidden max-[480px]:block" />
               em um só lugar
             </h1>
 
-            <p className="nl-body text-[#AEB8B4] mb-10 max-w-[560px]">
+            <p className="nl-body text-[#AEB8B4] mb-10 w-full max-w-[560px] break-words">
               A NEXT LEVEL centraliza vendas, clientes, produtos, custos, atendimento e relatórios em
               uma plataforma inteligente. Veja o lucro real e receba recomendações da IA para decidir
               melhor todos os dias.
