@@ -417,9 +417,6 @@ export function NextLevelLandingPage({
               <button type="button" onClick={() => focusAuth(true)} className="bg-[#B6FF00] text-[#080D0B] font-semibold px-8 py-4 rounded-full hover:bg-[#9BE600] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(182,255,0,0.25)]">
                 Começar agora <ArrowRight size={18} />
               </button>
-              <button type="button" onClick={() => scrollToSection("funcionalidades")} className="bg-transparent text-white border border-[#2E3935] font-semibold px-8 py-4 rounded-full hover:bg-[#1A221F] transition-all flex items-center justify-center">
-                Ver como funciona
-              </button>
             </div>
 
             <p className="text-xs text-[#6B7470] tracking-wide font-medium">
@@ -429,7 +426,7 @@ export function NextLevelLandingPage({
 
           {/* RIGHT — Dashboard motion */}
           <div className="relative w-full nl-reveal-scale lg:pl-4">
-            <div className="mx-auto w-full max-w-[720px] origin-center overflow-visible lg:translate-x-0 lg:scale-[0.72] xl:-translate-x-12 xl:scale-[0.78] 2xl:translate-x-[70px] 2xl:scale-100">
+            <div className="mx-auto w-full max-w-[780px] origin-center overflow-visible scale-[0.68] sm:scale-[0.82] md:scale-[0.92] lg:translate-x-0 lg:scale-[0.86] xl:-translate-x-1 xl:scale-[0.96] 2xl:translate-x-8 2xl:scale-[1.18]">
               <HeroDashboardMotion embedded />
             </div>
           </div>

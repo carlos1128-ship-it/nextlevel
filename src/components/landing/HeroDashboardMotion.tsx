@@ -97,6 +97,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
   };
 
   const salesData = [32, 48, 38, 62, 55, 71, 88, 74, 90, 83, 95, 78, 102, 96];
+  const floatingOffset = embedded ? 48 : 148;
 
   return (
     <div
@@ -335,7 +336,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           }}
           style={{
             position: "absolute",
-            left: -148,
+            left: -floatingOffset,
             top: 80,
             width: 178,
             background: COLORS.card,
@@ -368,7 +369,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           transition={{ delay: 3.9, duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position: "absolute",
-            right: -148,
+            right: -floatingOffset,
             top: 10,
             width: 148,
             background: COLORS.card,
@@ -401,7 +402,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           transition={{ delay: 4.2, duration: 3.9, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position: "absolute",
-            right: -148,
+            right: -floatingOffset,
             bottom: 30,
             width: 166,
             background: COLORS.card,
