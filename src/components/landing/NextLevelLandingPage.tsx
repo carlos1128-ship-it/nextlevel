@@ -396,7 +396,15 @@ export function NextLevelLandingPage({
             </div>
 
             <h1 className="nl-h1 text-white mb-7">
-              O sistema de gestão com IA para controlar vendas, atendimento e financeiro em um só lugar
+              O{" "}
+              <span style={{ color: "rgba(182, 255, 0, 0.94)", textShadow: "0 0 16px rgba(182, 255, 0, 0.16)" }}>
+                sistema de gestão com IA
+              </span>{" "}
+              para controlar{" "}
+              <span style={{ color: "rgba(182, 255, 0, 0.78)", textShadow: "0 0 10px rgba(182, 255, 0, 0.08)" }}>
+                vendas, atendimento e financeiro
+              </span>{" "}
+              em um só lugar
             </h1>
 
             <p className="nl-body text-[#AEB8B4] mb-10 max-w-[560px]">
