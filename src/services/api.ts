@@ -10,6 +10,15 @@ const BILLING_ACCESS_INVALID_EVENT = 'nextlevel:billing-access-invalid';
 const BILLING_CACHE_PREFIX = 'nextlevel:billing:';
 const DEFAULT_API_TIMEOUT_MS = 30000;
 
+type RestoredAuthProfile = {
+  name?: string | null;
+  email?: string | null;
+  admin?: boolean;
+  detailLevel?: string;
+  theme?: 'dark' | 'light';
+  niche?: string | null;
+};
+
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
 
@@ -107,7 +116,12 @@ function captureAccessToken(payload: unknown) {
 }
 
 function isAuthEndpoint(url: string) {
-  return url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh');
+  return (
+    url.includes('/auth/login') ||
+    url.includes('/auth/register') ||
+    url.includes('/auth/refresh') ||
+    url.includes('/auth/google/session')
+  );
 }
 
 function removeLegacyTokenStorage() {
@@ -304,15 +318,54 @@ export async function restoreAuthSession(options: { redirectOnFailure?: boolean 
 
   try {
     const { data } = await api.get('/profile');
-    return data as {
-      name?: string | null;
-      email?: string | null;
-      admin?: boolean;
-      detailLevel?: string;
-      theme?: 'dark' | 'light';
-      niche?: string | null;
-    };
+    return data as RestoredAuthProfile;
   } catch {
+    return null;
+  }
+}
+
+function readCallbackCode(hash: string, search: string) {
+  const rawHash = hash.startsWith('#') ? hash.slice(1) : hash;
+  const rawSearch = search.startsWith('?') ? search.slice(1) : search;
+  const hashParams = new URLSearchParams(rawHash);
+  const searchParams = new URLSearchParams(rawSearch);
+  return (
+    hashParams.get('code') ||
+    hashParams.get('sessionCode') ||
+    searchParams.get('code') ||
+    searchParams.get('sessionCode') ||
+    ''
+  ).trim();
+}
+
+async function readProfileAfterCallback(payload: unknown) {
+  try {
+    const { data } = await api.get('/profile');
+    return data as RestoredAuthProfile;
+  } catch {
+    const user = payload && typeof payload === 'object'
+      ? (payload as { user?: RestoredAuthProfile }).user
+      : null;
+    return user?.email ? user : null;
+  }
+}
+
+export async function restoreAuthSessionFromGoogleCallback(input: { hash: string; search: string }) {
+  const callbackCode = readCallbackCode(input.hash, input.search);
+  if (!callbackCode) {
+    return restoreAuthSessionFromCallbackHash(input.hash);
+  }
+
+  try {
+    const response = await api.post('/auth/google/session', { code: callbackCode });
+    if (!captureAccessToken(response.data)) {
+      return null;
+    }
+    removeLegacyTokenStorage();
+    window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
+    return readProfileAfterCallback(response.data);
+  } catch {
+    clearAccessToken();
     return null;
   }
 }
@@ -332,14 +385,7 @@ export async function restoreAuthSessionFromCallbackHash(hash: string) {
 
   try {
     const { data } = await api.get('/profile');
-    return data as {
-      name?: string | null;
-      email?: string | null;
-      admin?: boolean;
-      detailLevel?: string;
-      theme?: 'dark' | 'light';
-      niche?: string | null;
-    };
+    return data as RestoredAuthProfile;
   } catch {
     clearAccessToken();
     return null;

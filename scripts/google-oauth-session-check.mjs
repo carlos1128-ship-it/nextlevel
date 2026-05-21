@@ -17,16 +17,20 @@ const api = read('src/services/api.ts');
 const app = read('App.tsx');
 
 assert(
-  api.includes('restoreAuthSessionFromCallbackHash'),
-  'Google callback must accept the legacy token fragment while backend deployments converge.',
+  api.includes('restoreAuthSessionFromGoogleCallback') &&
+    api.includes("/auth/google/session") &&
+    api.includes('readCallbackCode'),
+  'Google callback must exchange the short-lived backend session code before cookie refresh fallback.',
 );
 assert(
   api.includes('legacyRefreshToken') && !api.includes("localStorage.setItem('refresh_token'"),
   'Legacy refresh fallback must be in-memory only, never localStorage.',
 );
 assert(
-  app.includes('restoreAuthSessionFromCallbackHash(callbackHash)'),
-  'Google callback route must try callback-fragment session before cookie refresh.',
+  app.includes('restoreAuthSessionFromGoogleCallback') &&
+    app.includes('callbackSearch') &&
+    app.includes('window.location.pathname === "/auth/callback"'),
+  'Google callback route must avoid the bootstrap refresh race and consume the callback session code.',
 );
 assert(
   api.includes('withCredentials: true'),

@@ -21,7 +21,7 @@ import { getBillingMe, getCompanies, getCompanyPersonalizationStatus, getUserPro
 import api, {
   clearAccessToken,
   restoreAuthSession,
-  restoreAuthSessionFromCallbackHash,
+  restoreAuthSessionFromGoogleCallback,
 } from './src/services/api';
 import {
   buildPlanosSubscribeUrl,
@@ -275,6 +275,15 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     let cancelled = false;
+
+    if (window.location.pathname === "/auth/callback") {
+      setIsLoggedIn(false);
+      setIsProfileReady(true);
+      setIsCompanyReady(true);
+      return () => {
+        cancelled = true;
+      };
+    }
 
     restoreAuthSession()
       .then((profile) => {
@@ -877,6 +886,7 @@ const GoogleAuthCallback = () => {
         const preferredCompanyId = localStorage.getItem(COMPANY_ID_STORAGE_KEY);
 
         const callbackHash = window.location.hash;
+        const callbackSearch = window.location.search;
 
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
@@ -884,8 +894,11 @@ const GoogleAuthCallback = () => {
 
         const profile = await withTimeout(
           (async () => {
-            const legacyProfile = await restoreAuthSessionFromCallbackHash(callbackHash);
-            return legacyProfile || restoreAuthSession({ redirectOnFailure: false });
+            const callbackProfile = await restoreAuthSessionFromGoogleCallback({
+              hash: callbackHash,
+              search: callbackSearch,
+            });
+            return callbackProfile || restoreAuthSession({ redirectOnFailure: false });
           })(),
           AUTH_CALLBACK_TIMEOUT_MS,
           "auth_restore_timeout",
