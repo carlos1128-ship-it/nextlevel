@@ -190,11 +190,8 @@ const LoginPage: React.FC = () => {
     try {
       const res = await api.post("/auth/login", { email, password });
       const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
-      const refreshToken =
-        res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
       if (token) {
         localStorage.setItem("access_token", token);
-        if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
         await goAfterAuth(res.data?.user || res.data?.data?.user || {});
       } else {
         setError("Resposta inesperada do servidor.");
@@ -221,11 +218,8 @@ const LoginPage: React.FC = () => {
     try {
       const res = await api.post("/auth/register", { name, email, password, companyName: name || "Minha Empresa" });
       const token = res.data?.access_token || res.data?.accessToken || res.data?.token || res.data?.data?.token;
-      const refreshToken =
-        res.data?.refresh_token || res.data?.refreshToken || res.data?.data?.refresh_token || res.data?.data?.refreshToken;
       if (token) {
         localStorage.setItem("access_token", token);
-        if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
         await goAfterAuth(res.data?.user || res.data?.data?.user || {});
       } else {
         setError("Erro ao criar conta.");

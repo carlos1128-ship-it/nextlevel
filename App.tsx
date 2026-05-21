@@ -25,6 +25,7 @@ import {
   readPendingSelectedPlan,
   readPlanSelectionFromSearch,
 } from './src/utils/billingSelection';
+import { restoreAuthSession } from './src/services/api';
 
 // Lazy load pages with heavy dependencies
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -251,8 +252,8 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const hasStoredToken = Boolean(localStorage.getItem('access_token'));
   const [isLoggedIn, setIsLoggedIn] = useState(hasStoredToken);
   const [isAdmin, setIsAdmin] = useState(Boolean(storedUser.admin));
-  const [isProfileReady, setIsProfileReady] = useState(!hasStoredToken);
-  const [isCompanyReady, setIsCompanyReady] = useState(!hasStoredToken);
+  const [isProfileReady, setIsProfileReady] = useState(false);
+  const [isCompanyReady, setIsCompanyReady] = useState(false);
   const [authSessionKey, setAuthSessionKey] = useState<string | null>(tokenFingerprint());
   const [username, setUsername] = useState<string | null>(storedUser.name);
   const [email, setEmail] = useState<string | null>(storedUser.email);
@@ -263,12 +264,49 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
+    let cancelled = false;
     const token = localStorage.getItem('access_token');
     if (token) {
       setIsLoggedIn(true);
+      setIsProfileReady(false);
       return;
     }
-    setIsProfileReady(true);
+
+    restoreAuthSession()
+      .then((profile) => {
+        if (cancelled) return;
+        if (!profile) {
+          setIsLoggedIn(false);
+          setIsProfileReady(true);
+          setIsCompanyReady(true);
+          return;
+        }
+
+        setIsLoggedIn(true);
+        setAuthSessionKey(tokenFingerprint());
+        setIsAdmin(Boolean(profile.admin));
+        setUsername(profile.name || null);
+        setEmail(profile.email || null);
+        setNicheState((profile.niche as UserNiche | null) || null);
+        writeStoredUser({
+          name: profile.name || null,
+          email: profile.email || null,
+          admin: Boolean(profile.admin),
+          niche: (profile.niche as UserNiche | null) || null,
+        });
+        setIsProfileReady(true);
+        setIsCompanyReady(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setIsLoggedIn(false);
+        setIsProfileReady(true);
+        setIsCompanyReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const setSelectedCompanyId = useCallback((value: string | null) => {
@@ -312,12 +350,9 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   }, [setSelectedCompanyId]);
 
   const logout = useCallback(() => {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (refreshToken) {
-      void api.post('/auth/logout', { refresh_token: refreshToken }).catch(() => {
-        // ignore logout API failure and clear local state anyway
-      });
-    }
+    void api.post('/auth/logout').catch(() => {
+      // ignore logout API failure and clear local state anyway
+    });
 
     clearAllBillingCache();
     setIsLoggedIn(false);
@@ -839,7 +874,6 @@ const GoogleAuthCallback = () => {
         const searchParams = new URLSearchParams(window.location.search);
         const readParam = (key: string) => hashParams.get(key) || searchParams.get(key);
         const token = readParam("token") || readParam("access_token");
-        const refreshToken = readParam("refresh_token") || readParam("refreshToken");
         const name = readParam("name");
         const email = readParam("email");
         const admin = readParam("admin") === "true";
@@ -848,19 +882,15 @@ const GoogleAuthCallback = () => {
 
         if (token) {
           localStorage.setItem("access_token", token);
-          if (refreshToken) {
-            localStorage.setItem("refresh_token", refreshToken);
-          }
           window.history.replaceState({}, document.title, window.location.pathname);
           login({ name, email, admin, niche: null });
         } else {
-          const storedToken = localStorage.getItem("access_token");
-          if (!storedToken) {
+          const profile = await withTimeout(restoreAuthSession(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
+          if (!profile) {
             navigate("/login", { replace: true });
             return;
           }
 
-          const profile = await withTimeout(getUserProfile(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
           if (!isCurrentRun()) return;
           login({
             name: profile?.name || null,

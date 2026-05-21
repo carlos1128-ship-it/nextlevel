@@ -2,7 +2,6 @@ import axios, { AxiosError, AxiosHeaders, InternalAxiosRequestConfig } from 'axi
 import { getErrorMessage } from './error';
 
 const ACCESS_TOKEN_KEY = 'access_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
 const GLOBAL_FEEDBACK_EVENT = 'nextlevel:error-feedback';
 const COMPANY_ACCESS_INVALID_EVENT = 'nextlevel:company-access-invalid';
 const AUTH_CHANGED_EVENT = 'nextlevel:auth-changed';
@@ -29,7 +28,7 @@ function getFirstString(values: unknown[]): string | null {
 function clearAuthStorage() {
   clearBillingStorage();
   localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem('refresh_token');
   localStorage.removeItem('selectedCompanyId');
   localStorage.removeItem('auth_user');
 
@@ -45,23 +44,14 @@ function clearBillingStorage() {
 }
 
 async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-  if (!refreshToken) {
-    clearAuthStorage();
-    return null;
-  }
-
   try {
-    const refreshClient = axios.create({ baseURL });
+    const refreshClient = axios.create({ baseURL, withCredentials: true });
     const { data } = await refreshClient.post<{
       access_token?: string;
       accessToken?: string;
       token?: string;
-      refresh_token?: string;
-      refreshToken?: string;
-    }>('/auth/refresh', {
-      refresh_token: refreshToken,
-    });
+      user?: Record<string, unknown>;
+    }>('/auth/refresh');
 
     const payload = data as Record<string, unknown>;
     const nestedData = (payload.data || payload.result || payload.tokens || {}) as Record<string, unknown>;
@@ -73,13 +63,6 @@ async function refreshAccessToken(): Promise<string | null> {
       nestedData.accessToken,
       nestedData.token,
     ]);
-    const nextRefreshToken =
-      getFirstString([
-        payload.refresh_token,
-        payload.refreshToken,
-        nestedData.refresh_token,
-        nestedData.refreshToken,
-      ]) || refreshToken;
 
     if (!nextAccessToken) {
       clearAuthStorage();
@@ -87,7 +70,6 @@ async function refreshAccessToken(): Promise<string | null> {
     }
 
     localStorage.setItem(ACCESS_TOKEN_KEY, nextAccessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, nextRefreshToken);
     window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
     return nextAccessToken;
   } catch {
@@ -185,6 +167,7 @@ function dispatchFriendlyApiError(error: AxiosError) {
 
 const api = axios.create({
   baseURL,
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
@@ -230,4 +213,22 @@ api.interceptors.response.use(
 );
 
 export { api };
+export async function restoreAuthSession() {
+  const nextToken = await refreshAccessToken();
+  if (!nextToken) return null;
+
+  try {
+    const { data } = await api.get('/profile');
+    return data as {
+      name?: string | null;
+      email?: string | null;
+      admin?: boolean;
+      detailLevel?: string;
+      theme?: 'dark' | 'light';
+      niche?: string | null;
+    };
+  } catch {
+    return null;
+  }
+}
 export default api;
