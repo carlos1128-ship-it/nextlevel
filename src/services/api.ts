@@ -28,6 +28,7 @@ const baseURL = apiBaseURL;
 
 let refreshPromise: Promise<boolean> | null = null;
 let accessToken: string | null = null;
+let legacyRefreshToken: string | null = null;
 
 axios.defaults.withCredentials = true;
 
@@ -46,12 +47,32 @@ function readAccessToken(payload: unknown): string | null {
   return readAccessToken(data.data || data.result || data.tokens);
 }
 
+function readRefreshToken(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const data = payload as {
+    refreshToken?: unknown;
+    refresh_token?: unknown;
+    data?: unknown;
+    result?: unknown;
+    tokens?: unknown;
+  };
+  const direct = data.refreshToken || data.refresh_token;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
+  return readRefreshToken(data.data || data.result || data.tokens);
+}
+
 function setAccessToken(nextAccessToken: string | null) {
   accessToken = nextAccessToken?.trim() || null;
 }
 
+function setLegacyRefreshToken(nextRefreshToken: string | null) {
+  legacyRefreshToken = nextRefreshToken?.trim() || null;
+}
+
 function captureAccessToken(payload: unknown) {
   const nextAccessToken = readAccessToken(payload);
+  const nextRefreshToken = readRefreshToken(payload);
+  if (nextRefreshToken) setLegacyRefreshToken(nextRefreshToken);
   if (!nextAccessToken) return false;
   setAccessToken(nextAccessToken);
   return true;
@@ -68,6 +89,7 @@ function removeLegacyTokenStorage() {
 
 export function clearAccessToken() {
   setAccessToken(null);
+  setLegacyRefreshToken(null);
   removeLegacyTokenStorage();
 }
 
@@ -88,9 +110,12 @@ function clearBillingStorage() {
     .forEach((key) => sessionStorage.removeItem(key));
 }
 
-async function refreshSession(): Promise<boolean> {
+async function refreshSession(options: { redirectOnFailure?: boolean } = {}): Promise<boolean> {
   try {
-    const response = await api.post('/auth/refresh');
+    const legacyPayload = legacyRefreshToken ? { refresh_token: legacyRefreshToken } : undefined;
+    const response = await api.post('/auth/refresh', legacyPayload, legacyRefreshToken
+      ? { headers: { 'x-refresh-token': legacyRefreshToken } }
+      : undefined);
     if (!captureAccessToken(response.data)) {
       return false;
     }
@@ -98,7 +123,11 @@ async function refreshSession(): Promise<boolean> {
     window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
     return true;
   } catch {
-    clearAuthStorage();
+    if (options.redirectOnFailure) {
+      clearAuthStorage();
+    } else {
+      clearAccessToken();
+    }
     return false;
   }
 }
@@ -224,7 +253,7 @@ api.interceptors.response.use(
     originalConfig._retry = true;
 
     if (!refreshPromise) {
-      refreshPromise = refreshSession().finally(() => {
+      refreshPromise = refreshSession({ redirectOnFailure: true }).finally(() => {
         refreshPromise = null;
       });
     }
@@ -241,8 +270,8 @@ api.interceptors.response.use(
 
 export { api };
 
-export async function restoreAuthSession() {
-  const refreshed = await refreshSession();
+export async function restoreAuthSession(options: { redirectOnFailure?: boolean } = {}) {
+  const refreshed = await refreshSession({ redirectOnFailure: options.redirectOnFailure ?? false });
   if (!refreshed) return null;
 
   try {
@@ -256,6 +285,35 @@ export async function restoreAuthSession() {
       niche?: string | null;
     };
   } catch {
+    return null;
+  }
+}
+
+export async function restoreAuthSessionFromCallbackHash(hash: string) {
+  const rawHash = hash.startsWith('#') ? hash.slice(1) : hash;
+  const params = new URLSearchParams(rawHash);
+  const callbackAccessToken =
+    params.get('accessToken') || params.get('access_token') || params.get('token');
+
+  if (!callbackAccessToken?.trim()) return null;
+
+  setAccessToken(callbackAccessToken);
+  setLegacyRefreshToken(params.get('refreshToken') || params.get('refresh_token'));
+  removeLegacyTokenStorage();
+  window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
+
+  try {
+    const { data } = await api.get('/profile');
+    return data as {
+      name?: string | null;
+      email?: string | null;
+      admin?: boolean;
+      detailLevel?: string;
+      theme?: 'dark' | 'light';
+      niche?: string | null;
+    };
+  } catch {
+    clearAccessToken();
     return null;
   }
 }

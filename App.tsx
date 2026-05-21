@@ -18,14 +18,17 @@ import type { Company, DetailLevel, UserNiche } from './src/types/domain';
 import NotFound from './src/app/not-found';
 import { applyMetadata, resolveMetadata } from './src/app/layout';
 import { getBillingMe, getCompanies, getCompanyPersonalizationStatus, getUserProfile } from './src/services/endpoints';
-import api, { clearAccessToken } from './src/services/api';
+import api, {
+  clearAccessToken,
+  restoreAuthSession,
+  restoreAuthSessionFromCallbackHash,
+} from './src/services/api';
 import {
   buildPlanosSubscribeUrl,
   clearPendingSelectedPlan,
   readPendingSelectedPlan,
   readPlanSelectionFromSearch,
 } from './src/utils/billingSelection';
-import { restoreAuthSession } from './src/services/api';
 
 // Lazy load pages with heavy dependencies
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -873,11 +876,20 @@ const GoogleAuthCallback = () => {
         const selectedPlan = readPendingSelectedPlan();
         const preferredCompanyId = localStorage.getItem(COMPANY_ID_STORAGE_KEY);
 
+        const callbackHash = window.location.hash;
+
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         window.history.replaceState({}, document.title, window.location.pathname);
 
-        const profile = await withTimeout(restoreAuthSession(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
+        const profile = await withTimeout(
+          (async () => {
+            const legacyProfile = await restoreAuthSessionFromCallbackHash(callbackHash);
+            return legacyProfile || restoreAuthSession({ redirectOnFailure: false });
+          })(),
+          AUTH_CALLBACK_TIMEOUT_MS,
+          "auth_restore_timeout",
+        );
         if (!profile) {
           navigate("/login", { replace: true });
           return;

@@ -11,6 +11,7 @@
     "test": "npm run typecheck",
     "test:release-gate:e2e": "node scripts/release-gate-e2e.mjs",
     "test:auth-refresh-storage": "node scripts/check-refresh-token-storage.mjs",
+    "test:google-oauth-session": "node scripts/google-oauth-session-check.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
