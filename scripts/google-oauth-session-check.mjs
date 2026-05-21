@@ -32,5 +32,9 @@ assert(
   api.includes('withCredentials: true'),
   'API client must keep credentials enabled for HttpOnly cookie refresh.',
 );
+assert(
+  api.includes('shouldPreferSameOriginApi') && api.includes('nextlevel.qzz.io'),
+  'Production frontend must prefer the same-origin /api proxy to avoid third-party cookie blocking.',
+);
 
 console.log('google-oauth-session-check: ok');

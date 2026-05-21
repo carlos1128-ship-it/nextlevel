@@ -13,9 +13,37 @@ const DEFAULT_API_TIMEOUT_MS = 30000;
 const rawEnvBaseUrl =
   import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || '';
 
+const RENDER_BACKEND_HOST = 'next-level-backend.onrender.com';
+
+function shouldPreferSameOriginApi(configuredUrl: string) {
+  if (typeof window === 'undefined') return false;
+
+  const appHost = window.location.hostname;
+  const isHostedApp =
+    appHost === 'nextlevel.qzz.io' || appHost.endsWith('.vercel.app');
+  if (!isHostedApp) return false;
+
+  const raw = configuredUrl.trim();
+  if (!raw) return true;
+
+  try {
+    const url = new URL(raw, window.location.origin);
+    return url.hostname === RENDER_BACKEND_HOST;
+  } catch {
+    return false;
+  }
+}
+
 function normalizeApiBaseUrl(configuredUrl: string) {
+  if (shouldPreferSameOriginApi(configuredUrl)) {
+    return window.location.origin;
+  }
+
   const fallbackUrl = 'https://next-level-backend.onrender.com';
   const candidate = String(configuredUrl || fallbackUrl).trim();
+  if (candidate.startsWith('/')) {
+    return candidate.replace(/\/+$/, '');
+  }
   const httpsUrl = candidate.replace(/^http:\/\//i, 'https://');
   return httpsUrl.replace(/\/+$/, '');
 }
