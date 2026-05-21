@@ -33,10 +33,17 @@ axios.defaults.withCredentials = true;
 
 function readAccessToken(payload: unknown): string | null {
   if (!payload || typeof payload !== 'object') return null;
-  const data = payload as { accessToken?: unknown; access_token?: unknown; data?: unknown };
-  const direct = data.accessToken || data.access_token;
+  const data = payload as {
+    accessToken?: unknown;
+    access_token?: unknown;
+    token?: unknown;
+    data?: unknown;
+    result?: unknown;
+    tokens?: unknown;
+  };
+  const direct = data.accessToken || data.access_token || data.token;
   if (typeof direct === 'string' && direct.trim()) return direct.trim();
-  return readAccessToken(data.data);
+  return readAccessToken(data.data || data.result || data.tokens);
 }
 
 function setAccessToken(nextAccessToken: string | null) {
@@ -83,7 +90,7 @@ function clearBillingStorage() {
 
 async function refreshSession(): Promise<boolean> {
   try {
-    const response = await api.post('/auth/refresh', {}, { withCredentials: true });
+    const response = await api.post('/auth/refresh');
     if (!captureAccessToken(response.data)) {
       return false;
     }
@@ -233,4 +240,24 @@ api.interceptors.response.use(
 );
 
 export { api };
+
+export async function restoreAuthSession() {
+  const refreshed = await refreshSession();
+  if (!refreshed) return null;
+
+  try {
+    const { data } = await api.get('/profile');
+    return data as {
+      name?: string | null;
+      email?: string | null;
+      admin?: boolean;
+      detailLevel?: string;
+      theme?: 'dark' | 'light';
+      niche?: string | null;
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default api;

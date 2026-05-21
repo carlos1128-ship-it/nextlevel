@@ -199,7 +199,8 @@ const LoginPage: React.FC = () => {
         withCredentials: true,
       });
       const user = res.data?.user || res.data?.data?.user || (await getUserProfile());
-      if (res.data?.authenticated && user) {
+      const authenticated = Boolean(res.data?.authenticated || res.data?.access_token || res.data?.accessToken);
+      if (authenticated && user) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         await goAfterAuth(user);
@@ -239,7 +240,8 @@ const LoginPage: React.FC = () => {
         },
       );
       const user = res.data?.user || res.data?.data?.user || (await getUserProfile());
-      if (res.data?.authenticated && user) {
+      const authenticated = Boolean(res.data?.authenticated || res.data?.access_token || res.data?.accessToken);
+      if (authenticated && user) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         await goAfterAuth(user);

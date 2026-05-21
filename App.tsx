@@ -25,6 +25,7 @@ import {
   readPendingSelectedPlan,
   readPlanSelectionFromSearch,
 } from './src/utils/billingSelection';
+import { restoreAuthSession } from './src/services/api';
 
 // Lazy load pages with heavy dependencies
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -254,8 +255,8 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const hasStoredSession = Boolean(storedUser.email || storedUser.name);
   const [isLoggedIn, setIsLoggedIn] = useState(hasStoredSession);
   const [isAdmin, setIsAdmin] = useState(Boolean(storedUser.admin));
-  const [isProfileReady, setIsProfileReady] = useState(!hasStoredSession);
-  const [isCompanyReady, setIsCompanyReady] = useState(!hasStoredSession);
+  const [isProfileReady, setIsProfileReady] = useState(false);
+  const [isCompanyReady, setIsCompanyReady] = useState(false);
   const [authSessionKey, setAuthSessionKey] = useState<string | null>(
     hasStoredSession ? sessionFingerprint(storedUser.email) : null,
   );
@@ -270,8 +271,44 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   useEffect(() => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-    if (!hasStoredSession) setIsProfileReady(true);
-  }, [hasStoredSession]);
+    let cancelled = false;
+
+    restoreAuthSession()
+      .then((profile) => {
+        if (cancelled) return;
+        if (!profile) {
+          setIsLoggedIn(false);
+          setIsProfileReady(true);
+          setIsCompanyReady(true);
+          return;
+        }
+
+        setIsLoggedIn(true);
+        setAuthSessionKey(sessionFingerprint(profile.email));
+        setIsAdmin(Boolean(profile.admin));
+        setUsername(profile.name || null);
+        setEmail(profile.email || null);
+        setNicheState((profile.niche as UserNiche | null) || null);
+        writeStoredUser({
+          name: profile.name || null,
+          email: profile.email || null,
+          admin: Boolean(profile.admin),
+          niche: (profile.niche as UserNiche | null) || null,
+        });
+        setIsProfileReady(true);
+        setIsCompanyReady(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setIsLoggedIn(false);
+        setIsProfileReady(true);
+        setIsCompanyReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setSelectedCompanyId = useCallback((value: string | null) => {
     setSelectedCompanyIdState(value);
@@ -840,7 +877,11 @@ const GoogleAuthCallback = () => {
         localStorage.removeItem("refresh_token");
         window.history.replaceState({}, document.title, window.location.pathname);
 
-        const profile = await withTimeout(getUserProfile(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
+        const profile = await withTimeout(restoreAuthSession(), AUTH_CALLBACK_TIMEOUT_MS, "auth_restore_timeout");
+        if (!profile) {
+          navigate("/login", { replace: true });
+          return;
+        }
         if (!isCurrentRun()) return;
         login({
           name: profile?.name || null,

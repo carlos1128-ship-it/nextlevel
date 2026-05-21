@@ -10,6 +10,7 @@
     "start": "vite preview --host 0.0.0.0 --port 3000",
     "test": "npm run typecheck",
     "test:release-gate:e2e": "node scripts/release-gate-e2e.mjs",
+    "test:auth-refresh-storage": "node scripts/check-refresh-token-storage.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
