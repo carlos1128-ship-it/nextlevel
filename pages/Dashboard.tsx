@@ -401,6 +401,7 @@ const Dashboard = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [layout, setLayout] = useState<DashboardResolvedLayoutItem[]>([]);
   const [isLayoutLoading, setIsLayoutLoading] = useState(true);
+  const [layoutLoadFailed, setLayoutLoadFailed] = useState(false);
   const [activePeriod, setActivePeriod] = useState<DashboardPeriod>("today");
   const [forecast, setForecast] = useState<ForecastResponse | null>(null);
   const [forecastHorizon, setForecastHorizon] = useState<7 | 15 | 30>(30);
@@ -410,8 +411,8 @@ const Dashboard = () => {
   const [attendantRoi, setAttendantRoi] = useState<AttendantRoi>({ iaSalesCount: 0, iaRevenue: 0 });
   const latestMetricsRequestRef = useRef(0);
   const enabledMetricKeys = useMemo(
-    () => (isLayoutLoading ? Array.from(DEFAULT_VISIBLE_METRICS) : layout.map((item) => item.metricKey)),
-    [isLayoutLoading, layout],
+    () => (isLayoutLoading || layoutLoadFailed ? Array.from(DEFAULT_VISIBLE_METRICS) : layout.map((item) => item.metricKey)),
+    [isLayoutLoading, layoutLoadFailed, layout],
   );
   const enabledMetricSet = useMemo(() => new Set(enabledMetricKeys), [enabledMetricKeys]);
   const isMetricEnabled = (metricKey: string) => enabledMetricSet.has(metricKey);
@@ -517,6 +518,7 @@ const Dashboard = () => {
     if (!isCompanyReady) return;
     if (!selectedCompanyId) {
       setLayout([]);
+      setLayoutLoadFailed(false);
       setMetricsData(null);
       setForecast(null);
       setAttendantRoi({ iaSalesCount: 0, iaRevenue: 0 });
@@ -527,8 +529,9 @@ const Dashboard = () => {
     try {
       const data = await getDashboardPreferences({ companyId: selectedCompanyId });
       setLayout(Array.isArray(data?.resolvedLayout) ? data.resolvedLayout : []);
+      setLayoutLoadFailed(false);
     } catch (error) {
-      setLayout([]);
+      setLayoutLoadFailed(true);
       addToast(getErrorMessage(error, "Não foi possível carregar sua personalização."), "error");
     } finally {
       setIsLayoutLoading(false);
@@ -834,7 +837,7 @@ const Dashboard = () => {
         </div>
       ) : null}
 
-      {!isLayoutLoading && !!selectedCompanyId && !hasSelectedMetrics ? (
+      {!isLayoutLoading && !layoutLoadFailed && !!selectedCompanyId && !hasSelectedMetrics ? (
         <div className="card-base nl-card-empty border-dashed border-[#B6FF00]/30 p-8 text-center flex flex-col items-center">
           <h2 className="text-2xl font-black tracking-tighter text-zinc-100">Painel sem widgets ativos</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-zinc-400">
