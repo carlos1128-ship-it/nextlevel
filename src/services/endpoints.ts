@@ -1105,17 +1105,17 @@ export async function getIntegrationDiagnostic(provider: string, companyId?: str
 }
 
 export async function startWhatsappConnection(companyId: string) {
-  const { data } = await api.post("/whatsapp/connection/connect", { companyId });
+  const { data } = await api.post("/whatsapp/connection/connect", {}, { params: { companyId } });
   return normalizeWhatsappConnection(data);
 }
 
 export async function requestWhatsappQr(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/qr", { companyId });
+  const { data } = await api.post("/whatsapp/connect/qr", {}, { params: { companyId } });
   return normalizeWhatsappConnection(data);
 }
 
 export async function restartWhatsappConnection(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/restart", { companyId });
+  const { data } = await api.post("/whatsapp/connect/restart", {}, { params: { companyId } });
   return normalizeWhatsappConnection(data);
 }
 
@@ -1127,7 +1127,7 @@ export async function getWhatsappConnectionStatus(companyId: string) {
 }
 
 export async function disconnectWhatsapp(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/disconnect", { companyId });
+  const { data } = await api.post("/whatsapp/connect/disconnect", {}, { params: { companyId } });
   return normalizeWhatsappConnection(data);
 }
 
@@ -1449,9 +1449,7 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
 // â”€â”€â”€ WhatsApp Instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function evolutionConnect(companyId: string) {
-  const { data } = await api.post("/whatsapp/connection/connect", {
-    companyId,
-  });
+  const { data } = await api.post("/whatsapp/connection/connect", {}, { params: { companyId } });
   return toWhatsappConnectionSnapshot(data);
 }
 
@@ -1470,9 +1468,7 @@ export async function evolutionGetStatus(companyId: string) {
 }
 
 export async function evolutionDisconnect(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/disconnect", {
-    companyId,
-  });
+  const { data } = await api.post("/whatsapp/connect/disconnect", {}, { params: { companyId } });
   return toWhatsappConnectionSnapshot(data);
 }
 
