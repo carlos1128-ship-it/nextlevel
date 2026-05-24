@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -276,18 +276,29 @@ const KpiCard: React.FC<
   const isMuted = status !== "ok";
   return (
     <div
-      className={`card-base min-h-[150px] p-6 flex flex-col justify-between transition-all duration-300 ${
-        highlighted ? "border-[#B6FF00]/35" : ""
-      } ${isMuted ? "opacity-90" : "hover:border-[#B6FF00]/25 active:scale-[0.99]"}`}
+      className={`group relative min-h-[164px] overflow-hidden rounded-2xl border bg-[linear-gradient(180deg,rgba(18,20,26,0.72),rgba(7,9,10,0.92))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.045),0_18px_54px_rgba(0,0,0,0.34)] transition-all duration-300 ${
+        highlighted
+          ? "border-[#c5ff1a]/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_22px_60px_rgba(197,255,26,0.045)]"
+          : "border-white/[0.055]"
+      } ${isMuted ? "opacity-90" : "hover:-translate-y-0.5 hover:border-[#c5ff1a]/25 active:translate-y-0"}`}
     >
-      <div className="flex justify-between items-start mb-4">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center border border-[#B6FF00]/10 ${highlighted ? "bg-[#0D100D]" : "bg-[#090C09]"}`}>
-          <Icon className={`h-5 w-5 ${highlighted ? "text-[#B6FF00]" : iconAccent || color || "text-zinc-400"}`} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      {highlighted ? (
+        <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-[#c5ff1a]/10 blur-3xl" />
+      ) : null}
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${highlighted ? "border-[#c5ff1a]/25 bg-[#c5ff1a]/10" : "border-white/[0.06] bg-white/[0.025]"}`}>
+            <Icon className={`h-5 w-5 ${highlighted ? "text-[#c5ff1a]" : iconAccent || color || "text-zinc-400"}`} />
+          </div>
+          <p className="truncate text-[12px] font-semibold text-[#94a3b8]">
+            {title}
+          </p>
         </div>
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-black tracking-tight ${
-          changeType === "increase" ? "bg-lime-300/10 text-lime-400" :
-          changeType === "decrease" ? "bg-red-500/10 text-red-400" :
-          "bg-[#090C09] text-[#6F7A72]"
+        <div className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-black tracking-tight ${
+          changeType === "increase" ? "bg-emerald-400/10 text-emerald-300" :
+          changeType === "decrease" ? "bg-red-400/10 text-red-300" :
+          "bg-white/[0.035] text-[#64748b]"
         }`}>
           {changeType === "increase" ? (
             <ArrowUpRightIcon className="h-3 w-3" />
@@ -297,15 +308,25 @@ const KpiCard: React.FC<
           {change}
         </div>
       </div>
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#c2caad] mb-3">
-          {title}
-        </p>
-        <h3 className={`text-[34px] font-extrabold tracking-[-0.02em] leading-none ${isMuted ? "text-amber-200/80" : "text-[#f5f7f2]"}`}>
+      <div className="relative mt-7">
+        <h3 className={`break-words text-[28px] font-extrabold leading-none tracking-[-0.02em] sm:text-[30px] ${isMuted ? "text-amber-200/85" : "text-[#f8fafc]"}`}>
           {value}
         </h3>
-        {reason && <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">{translateMetricReason(reason)}</p>}
-        {sourceLabel && <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#B6FF00]/80">{sourceLabel}</p>}
+        <div className="mt-4 flex min-h-[24px] items-end justify-between gap-4 border-t border-white/[0.035] pt-3">
+          <p className="min-w-0 text-[11px] leading-relaxed text-[#64748b]">
+            {reason ? translateMetricReason(reason) : sourceLabel || "Comparativo do período"}
+          </p>
+          <svg className="h-6 w-[70px] shrink-0 opacity-80" viewBox="0 0 100 30" aria-hidden="true">
+            <path
+              d={changeType === "decrease" ? "M0 6 Q18 18 34 14 T68 22 T100 18" : "M0 24 Q18 14 34 17 T68 7 T100 10"}
+              fill="none"
+              stroke={changeType === "decrease" ? "#f87171" : highlighted ? "#c5ff1a" : "#38bdf8"}
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+        {sourceLabel && reason ? <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#c5ff1a]/70">{sourceLabel}</p> : null}
       </div>
     </div>
   );
@@ -377,18 +398,55 @@ const RealMetricCard: React.FC<{
   accentColor: string;
   metric?: DashboardMetricResult;
 }> = ({ metricKey, title, description, accentColor, metric }) => (
-  <div className="card-base p-5 flex flex-col justify-between transition-all hover:border-white/10">
-    <div className="flex items-start justify-between gap-2">
-      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500">{title}</span>
+  <div className="group flex min-h-[124px] flex-col justify-between rounded-xl border border-white/[0.055] bg-[rgba(18,20,26,0.54)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-all hover:-translate-y-0.5 hover:border-[#c5ff1a]/20 hover:bg-[rgba(24,27,34,0.74)]">
+    <div className="flex items-start justify-between gap-3">
+      <span className="truncate text-[11px] font-semibold text-[#94a3b8]">{title}</span>
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${metric?.status === "ok" ? "bg-[#c5ff1a]" : "bg-amber-300"}`} />
     </div>
     <div className="mt-4">
-      <p className={`text-2xl font-black tracking-tighter ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
+      <p className={`break-words text-xl font-black tracking-[-0.02em] ${metric?.status === "ok" ? accentColor : "text-amber-200"}`}>
         {metricDisplayValue(metricKey, metric)}
       </p>
-      <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">{description}</p>
-      {metric?.reason && <p className="mt-2 text-[11px] leading-relaxed text-zinc-600 italic">{translateMetricReason(metric.reason)}</p>}
-      {metric?.sourceLabel && <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#B6FF00]/60">{metric.sourceLabel}</p>}
+      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-[#64748b]">{description}</p>
+      {metric?.reason && <p className="mt-2 text-[11px] leading-relaxed text-amber-200/70">{translateMetricReason(metric.reason)}</p>}
+      {metric?.sourceLabel && <p className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#c5ff1a]/60">{metric.sourceLabel}</p>}
     </div>
+  </div>
+);
+
+const DashboardLoadingSkeleton = () => (
+  <div className="space-y-7" aria-label="Carregando dashboard">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={`kpi-skeleton-${index}`}
+          className="min-h-[164px] animate-pulse rounded-2xl border border-white/[0.055] bg-[linear-gradient(180deg,rgba(18,20,26,0.64),rgba(7,9,10,0.86))] p-5"
+        >
+          <div className="flex items-center justify-between">
+            <div className="h-10 w-10 rounded-xl bg-white/[0.06]" />
+            <div className="h-6 w-20 rounded-md bg-white/[0.045]" />
+          </div>
+          <div className="mt-8 h-8 w-2/3 rounded-lg bg-white/[0.06]" />
+          <div className="mt-6 h-3 w-full rounded bg-white/[0.035]" />
+        </div>
+      ))}
+    </div>
+    <section className="grid grid-cols-1 gap-5 xl:grid-cols-[2fr_1fr]">
+      <div className="min-h-[430px] animate-pulse rounded-2xl border border-white/[0.055] bg-[rgba(18,20,26,0.58)] p-6">
+        <div className="h-5 w-48 rounded bg-white/[0.06]" />
+        <div className="mt-4 h-8 w-56 rounded bg-white/[0.05]" />
+        <div className="mt-10 h-[280px] rounded-xl border border-dashed border-[#c5ff1a]/10 bg-[linear-gradient(rgba(197,255,26,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(197,255,26,0.03)_1px,transparent_1px)] bg-[length:42px_42px]" />
+      </div>
+      <div className="min-h-[430px] animate-pulse rounded-2xl border border-white/[0.055] bg-[rgba(18,20,26,0.58)] p-6">
+        <div className="h-5 w-44 rounded bg-white/[0.06]" />
+        <div className="mx-auto mt-12 h-40 w-40 rounded-full border-[22px] border-white/[0.055]" />
+        <div className="mt-10 space-y-3">
+          <div className="h-3 rounded bg-white/[0.045]" />
+          <div className="h-3 rounded bg-white/[0.035]" />
+          <div className="h-3 rounded bg-white/[0.035]" />
+        </div>
+      </div>
+    </section>
   </div>
 );
 
@@ -756,6 +814,9 @@ const Dashboard = () => {
     ...ADVANCED_METRICS.filter((item) => isMetricEnabled(item.key)),
     ...dynamicGrowthMetrics,
   ];
+  const isInitialMetricsLoading = Boolean(
+    selectedCompanyId && hasSelectedMetrics && (isLayoutLoading || (isUpdating && !metricsData)),
+  );
   const metricChange = (item?: DashboardMetricResult) => {
     if (!item || item.status !== "ok" || typeof item.value !== "number" || !Number.isFinite(item.value)) {
       return { text: "Sem comparação", type: "flat" as const };
@@ -777,50 +838,64 @@ const Dashboard = () => {
   };
 
   return (
-    <div ref={dashboardExportRef} className="mx-auto max-w-[1440px] space-y-6 animate-in fade-in duration-700">
-      <header className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-        <div className="min-w-0">
-          <p className="hidden text-[10px] font-black uppercase tracking-[0.24em] text-[#B6FF00] mb-2 px-0.5">Painel Executivo</p>
-          <h1 className="text-[32px] font-bold leading-tight tracking-[-0.02em] text-[#f5f7f2] md:text-[38px]">Visão Geral</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#B7C0BA]">
-            Visão estratégica consolidada. Gerencie vendas, analise o lucro real e acompanhe as recomendações da inteligência operacional.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={handleExport}
-            disabled={isExporting}
-            className="nl-button-primary inline-flex items-center gap-2 disabled:opacity-50"
-          >
-            <BarChartIcon className="h-4 w-4" />
-            <span>{isExporting ? "Gerando PDF..." : "Exportar relatório"}</span>
-          </button>
-          <button
-            onClick={() => void loadMetrics()}
-            disabled={isUpdating}
-            className="nl-button-secondary inline-flex items-center gap-2 disabled:opacity-50"
-          >
-            <ActivityIcon className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`} />
-            <span>{isUpdating ? "Sincronizando..." : "Sincronizar"}</span>
-          </button>
+    <div ref={dashboardExportRef} className="relative mx-auto max-w-[1440px] animate-in space-y-7 overflow-hidden fade-in duration-700">
+      <div className="pointer-events-none absolute left-[8%] top-8 h-80 w-80 rounded-full bg-[#c5ff1a]/[0.035] blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[length:54px_54px] opacity-60" />
+
+      <header className="relative overflow-hidden rounded-[22px] border border-white/[0.055] bg-[linear-gradient(135deg,rgba(18,20,26,0.76),rgba(7,9,10,0.9))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_24px_80px_rgba(0,0,0,0.34)] md:p-6">
+        <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-[#c5ff1a]/[0.055] blur-3xl" />
+        <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="min-w-0">
+            <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#64748b]">
+              <span>NEXT LEVEL</span>
+              <span className="h-1 w-1 rounded-full bg-[#c5ff1a]" />
+              <span>Visão Geral</span>
+            </div>
+            <h1 className="text-[30px] font-extrabold leading-tight tracking-[-0.02em] text-[#f8fafc] md:text-[38px]">Visão Geral</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#94a3b8]">
+              Inteligência operacional em tempo real para decisões mais rápidas.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="flex flex-wrap items-center gap-1 rounded-xl border border-white/[0.055] bg-white/[0.025] p-1">
+              {PERIODS.map((period) => (
+                <button
+                  key={period.value}
+                  type="button"
+                  onClick={() => handlePeriodChange(period.value)}
+                  className={`rounded-lg px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-all ${
+                    activePeriod === period.value
+                      ? "border border-white/[0.06] bg-white/[0.07] text-[#f8fafc]"
+                      : "text-[#64748b] hover:bg-white/[0.035] hover:text-[#cbd5e1]"
+                  }`}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void loadMetrics()}
+                disabled={isUpdating}
+                className="inline-flex min-h-[42px] items-center gap-2 rounded-xl border border-white/[0.055] bg-white/[0.025] px-4 py-2 text-[12px] font-black uppercase tracking-[0.08em] text-[#f8fafc] transition hover:border-[#c5ff1a]/25 hover:bg-white/[0.05] disabled:opacity-50"
+              >
+                <ActivityIcon className={`h-4 w-4 ${isUpdating ? "animate-spin text-[#c5ff1a]" : ""}`} />
+                <span>{isUpdating ? "Sincronizando..." : "Sincronizar"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={isExporting}
+                className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-[#c5ff1a] px-4 py-2 text-[12px] font-black uppercase tracking-[0.08em] text-[#0f172a] shadow-[0_14px_30px_rgba(197,255,26,0.14)] transition hover:bg-[#d2ff4d] disabled:opacity-50"
+              >
+                <BarChartIcon className="h-4 w-4" />
+                <span>{isExporting ? "Gerando PDF..." : "Exportar relatório"}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </header>
-
-      <div className="flex w-fit flex-wrap items-center gap-2 rounded-xl border border-[#B6FF00]/10 bg-[#080A08] p-1">
-        {PERIODS.map((period) => (
-          <button
-            key={period.value}
-            onClick={() => handlePeriodChange(period.value)}
-            className={`rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] transition-all ${
-              activePeriod === period.value
-                ? "bg-[#B6FF00] text-[#050706]"
-                : "text-[#6F7A72] hover:bg-[#0D100D] hover:text-zinc-200"
-            }`}
-          >
-            {period.label}
-          </button>
-        ))}
-      </div>
 
       {isCompanyReady && !selectedCompanyId ? (
         <div className="card-base nl-card-empty border-dashed p-8 text-center flex flex-col items-center">
@@ -852,8 +927,10 @@ const Dashboard = () => {
         </div>
       ) : null}
 
-      {selectedCompanyId && hasSelectedMetrics ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      {isInitialMetricsLoading ? <DashboardLoadingSkeleton /> : null}
+
+      {selectedCompanyId && hasSelectedMetrics && !isInitialMetricsLoading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {isMetricEnabled("revenue") ? (
             <KpiCard
               title="Faturamento"
@@ -933,12 +1010,60 @@ const Dashboard = () => {
         </div>
       ) : null}
 
-      {selectedCompanyId && hasSelectedMetrics ? (
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.9fr]">
-          <div className="card-base p-6">
+      {selectedCompanyId && hasSelectedMetrics && !isInitialMetricsLoading ? (
+        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[2fr_1fr]">
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.055] bg-[rgba(18,20,26,0.62)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_54px_rgba(0,0,0,0.26)]">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#c5ff1a]/[0.04] blur-3xl" />
+            <div className="relative mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-[15px] font-bold tracking-tight text-[#f8fafc]">Receita por período</h2>
+                <p className="mt-1 text-xs text-[#64748b]">Entradas e saídas consolidadas de fluxo financeiro.</p>
+                <p className="mt-4 break-words text-[34px] font-extrabold leading-none tracking-[-0.03em] text-[#f8fafc]">
+                  {metricDisplayValue("revenue", metric("revenue"))}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#64748b]">
+                <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#c5ff1a]" />Receitas</span>
+                <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-300" />Saídas</span>
+              </div>
+            </div>
+            <div className="relative h-[360px] w-full">
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="dashboardRevenueGlow" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#c5ff1a" stopOpacity={0.22} />
+                        <stop offset="100%" stopColor="#c5ff1a" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="dashboardLossGlow" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f87171" stopOpacity={0.13} />
+                        <stop offset="100%" stopColor="#f87171" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="rgba(255,255,255,0.045)" vertical={false} />
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={11} fontWeight={700} axisLine={false} tickLine={false} dy={10} />
+                    <YAxis stroke="#64748b" fontSize={11} fontWeight={700} axisLine={false} tickLine={false} tickFormatter={(v) => `R$${Number(v) / 1000}k`} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="Saidas" stroke="#f87171" fill="url(#dashboardLossGlow)" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                    <Area type="monotone" dataKey="Receitas" stroke="#c5ff1a" fill="url(#dashboardRevenueGlow)" strokeWidth={3} dot={false} activeDot={{ r: 4, fill: "#c5ff1a", stroke: "#0f172a", strokeWidth: 2 }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="nl-chart-empty min-h-full">
+                  <div>
+                    <p className="font-bold text-[#f5f7f2]">Dados insuficientes</p>
+                    <p className="mt-1 text-sm">Cadastre vendas, produtos e custos para liberar esta análise.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.055] bg-[rgba(18,20,26,0.62)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_54px_rgba(0,0,0,0.24)]">
             <div className="mb-5">
-              <h2 className="text-lg font-bold tracking-tight text-[#f5f7f2]">Distribuição da operação</h2>
-              <p className="mt-1 text-xs text-[#8c9479]">Vendas, custos e canais em leitura consolidada.</p>
+              <h2 className="text-[15px] font-bold tracking-tight text-[#f8fafc]">Distribuição da operação</h2>
+              <p className="mt-1 text-xs text-[#64748b]">Percentual de alocação por grupo real.</p>
             </div>
             {pieData.length > 0 ? (
               <>
@@ -956,7 +1081,7 @@ const Dashboard = () => {
                   <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
                     <div>
                       <p className="text-2xl font-extrabold text-[#f5f7f2]">{pieData.length}</p>
-                      <p className="text-xs text-[#B7C0BA]">grupos</p>
+                      <p className="text-xs text-[#94a3b8]">grupos</p>
                     </div>
                   </div>
                 </div>
@@ -981,55 +1106,20 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-
-          <div className="card-base p-6">
-            <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div>
-                <h2 className="text-lg font-bold tracking-tight text-[#f5f7f2]">Receita por canal</h2>
-                <p className="mt-1 text-xs text-[#8c9479]">Entradas e saídas do período selecionado.</p>
-                <p className="mt-3 text-[34px] font-extrabold leading-none tracking-[-0.03em] text-[#f5f7f2]">
-                  {metricDisplayValue("revenue", metric("revenue"))}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8c9479]">
-                <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[#B6FF00]" />Receitas</span>
-                <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-zinc-500" />Saídas</span>
-              </div>
-            </div>
-            <div className="h-[340px] w-full">
-              {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} barGap={6}>
-                    <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis dataKey="name" stroke="#8c9479" fontSize={11} fontWeight={700} axisLine={false} tickLine={false} />
-                    <YAxis stroke="#8c9479" fontSize={11} fontWeight={700} axisLine={false} tickLine={false} tickFormatter={(v) => `R$${Number(v) / 1000}k`} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="Saidas" fill="#5f6660" radius={[8, 8, 0, 0]} maxBarSize={32} />
-                    <Bar dataKey="Receitas" fill="#B6FF00" radius={[8, 8, 0, 0]} maxBarSize={32} />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="nl-chart-empty">
-                  <div>
-                    <p className="font-bold text-[#f5f7f2]">Dados insuficientes</p>
-                    <p className="mt-1 text-sm">Cadastre vendas, produtos e custos para liberar esta análise.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </section>
       ) : null}
 
-      {selectedCompanyId ? (
+      {selectedCompanyId && !isInitialMetricsLoading ? (
         <AiDashboardPanel data={aiDashboard} loading={isAiDashboardLoading} />
       ) : null}
 
-      {isMetricEnabled("alerts_insights") ? (
-        <div className="card-base flex flex-col items-start gap-6 p-7 md:flex-row md:items-center">
+      {selectedCompanyId && !isInitialMetricsLoading && isMetricEnabled("alerts_insights") ? (
+        <div className="relative overflow-hidden rounded-2xl border border-[#c5ff1a]/10 bg-[radial-gradient(circle_at_0%_0%,rgba(197,255,26,0.05),rgba(18,20,26,0.72)_58%)] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c5ff1a]/40 to-transparent" />
+          <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
           <div className="min-w-0 flex-1">
             <div className="mb-3 flex flex-wrap items-center gap-3">
-              <div className="rounded-xl bg-[#B6FF00]/10 p-2 text-[#B6FF00]">
+              <div className="rounded-xl border border-[#c5ff1a]/15 bg-[#c5ff1a]/10 p-2 text-[#c5ff1a]">
                 <LightbulbIcon className="h-5 w-5" />
               </div>
               <h3 className="text-2xl font-black tracking-tighter text-white md:text-3xl">Insights Estratégicos</h3>
@@ -1049,22 +1139,23 @@ const Dashboard = () => {
           >
             Relatório Completo
           </Link>
+          </div>
         </div>
       ) : null}
 
-      {visibleGrowthMetrics.length > 0 ? (
-      <section aria-label="Métricas de crescimento" className="space-y-6">
+      {selectedCompanyId && !isInitialMetricsLoading && visibleGrowthMetrics.length > 0 ? (
+      <section aria-label="Métricas de crescimento" className="space-y-5">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-zinc-500">Métricas Avançadas</p>
-            <h2 className="mt-1 text-2xl font-black tracking-tighter text-white md:text-3xl"> Performance de Negócio </h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#64748b]">Métricas Avançadas</p>
+            <h2 className="mt-1 text-2xl font-black tracking-tighter text-white md:text-3xl">Performance de Negócio</h2>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#B6FF00]/10 bg-[#090C09] px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-[#6F7A72]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#c5ff1a]/10 bg-white/[0.025] px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-[#64748b]">
             <ActivityIcon className="h-3 w-3" />
             Em Tempo Real
           </span>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {visibleGrowthMetrics.map((item) => (
             <RealMetricCard
               key={item.key}
@@ -1079,7 +1170,7 @@ const Dashboard = () => {
       </section>
       ) : null}
 
-      {(isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && (
+      {selectedCompanyId && !isInitialMetricsLoading && (isMetricEnabled("cash_flow_summary") || isMetricEnabled("category_mix")) && (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           {isMetricEnabled("cash_flow_summary") && (
             <div className="card-base xl:col-span-2 p-6 overflow-hidden">
@@ -1164,7 +1255,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {isMetricEnabled("revenue_forecast") && (
+      {selectedCompanyId && !isInitialMetricsLoading && isMetricEnabled("revenue_forecast") && (
         <div className="card-base p-7 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
              <ActivityIcon className="h-40 w-40" />
