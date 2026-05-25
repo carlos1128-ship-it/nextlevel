@@ -98,12 +98,12 @@ const navGroups: NavGroup[] = [
 
 const navItems: SidebarNavItem[] = navGroups.flatMap(g => g.items);
 
-const adminNavItem: SidebarNavItem = {
+const adminNavItems: SidebarNavItem[] = [{
   id: "admin-system-health",
   path: "/admin/system-health",
   name: "Saúde do sistema",
   icon: ShieldIcon,
-};
+}];
 
 const MODULE_KEY_BY_NAV_ID: Record<string, string> = {
   home: "dashboard",
@@ -178,7 +178,7 @@ function resolveNavItems(isAdmin: boolean, niche: UserNiche | null): SidebarNavI
     items = moveItemsToFront(items, ["products", "orders", "market", "financial-flow"]);
   }
 
-  return isAdmin ? [...items, adminNavItem] : items;
+  return isAdmin ? [...items, ...adminNavItems] : items;
 }
 
 function splitNavItemsByModulePreferences(

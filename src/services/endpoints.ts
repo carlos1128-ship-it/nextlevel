@@ -1039,41 +1039,47 @@ export async function getIntegrationDiagnostic(provider: string, companyId?: str
   } as IntegrationDiagnostic;
 }
 
-export type WhatsappMetaStatus = {
+export type WhatsappEvolutionStatus = {
   connected: boolean;
-  provider: "META_CLOUD" | string;
+  provider: "EVOLUTION_GO" | string;
   status: string;
-  providerSetupRequired?: boolean;
-  phoneNumberId?: string | null;
-  wabaId?: string | null;
-  displayPhoneNumber?: string | null;
-  verifiedName?: string | null;
-  webhookSubscribed?: boolean;
+  instanceName?: string | null;
+  phoneNumber?: string | null;
+  qrCode?: string | null;
+  qrCodeText?: string | null;
+  pairingCode?: string | null;
+  webhookEnabled?: boolean;
+  webhookUrl?: string | null;
   connectedAt?: string | null;
   disconnectedAt?: string | null;
+  lastQrAt?: string | null;
   lastWebhookAt?: string | null;
+  lastError?: string | null;
   updatedAt?: string | null;
 };
 
-export async function getWhatsappMetaStatus() {
-  const { data } = await api.get<WhatsappMetaStatus>("/integrations/whatsapp-meta/status");
+export async function getWhatsappStatus() {
+  const { data } = await api.get<WhatsappEvolutionStatus>("/integrations/whatsapp/status");
   return data;
 }
 
-export async function completeWhatsappMetaSignup(payload: {
-  code: string;
-  wabaId: string;
-  phoneNumberId: string;
-}) {
-  const { data } = await api.post<WhatsappMetaStatus>(
-    "/integrations/whatsapp-meta/complete-signup",
-    payload,
-  );
+export async function connectWhatsapp() {
+  const { data } = await api.post<WhatsappEvolutionStatus>("/integrations/whatsapp/connect");
   return data;
 }
 
-export async function disconnectWhatsappMeta() {
-  const { data } = await api.post<WhatsappMetaStatus>("/integrations/whatsapp-meta/disconnect");
+export async function getWhatsappQr() {
+  const { data } = await api.get<WhatsappEvolutionStatus>("/integrations/whatsapp/qr");
+  return data;
+}
+
+export async function getWhatsappConnectionStatus() {
+  const { data } = await api.get<WhatsappEvolutionStatus>("/integrations/whatsapp/connection-status");
+  return data;
+}
+
+export async function disconnectWhatsapp() {
+  const { data } = await api.post<WhatsappEvolutionStatus>("/integrations/whatsapp/disconnect");
   return data;
 }
 
