@@ -1,50 +1,51 @@
-import React, { useEffect, useMemo, useState } from "react";
-import QRCode from "qrcode";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, useBilling } from "../App";
 import { LockIcon } from "../components/icons";
 import { useToast } from "../components/Toast";
 import {
   disconnectMercadoLivre,
-  disconnectWhatsapp,
+  disconnectWhatsappMeta,
   disconnectInstagram,
+  completeWhatsappMetaSignup,
   getMercadoLivreConnectUrl,
   getMercadoLivreDashboard,
   getMercadoLivreStatus,
   getInstagramConnectUrl,
   getInstagramStatus,
-  getWhatsappConnectionStatus,
-  restartWhatsappConnection,
-  startWhatsappConnection,
+  getWhatsappMetaStatus,
   syncMercadoLivre,
   type InstagramConnectionStatus,
   type MercadoLivreDashboard,
   type MercadoLivreStatus,
+  type WhatsappMetaStatus,
 } from "../src/services/endpoints";
 import { getErrorMessage } from "../src/services/error";
-import type { WhatsappConnection } from "../src/types/domain";
 
-function isConnected(status?: string | null) {
-  return status === "connected";
-}
+type WhatsappSignupData = {
+  code?: string;
+  wabaId?: string;
+  phoneNumberId?: string;
+};
 
-function isQrPending(status?: string | null) {
-  return status === "qr_required" || status === "qr_pending" || status === "waiting_qr";
-}
+type FacebookLoginResponse = {
+  authResponse?: { code?: string };
+  status?: string;
+};
 
-function hasQrData(connection?: WhatsappConnection | null) {
-  return Boolean(connection?.qrCode || connection?.code || connection?.pairingCode);
-}
+type FacebookSdk = {
+  init: (options: Record<string, unknown>) => void;
+  login: (
+    callback: (response: FacebookLoginResponse) => void,
+    options: Record<string, unknown>,
+  ) => void;
+};
 
-function isOperationStatus(status?: string | null) {
-  return (
-    status === "creating" ||
-    status === "creating_instance" ||
-    status === "qr_required" ||
-    status === "qr_pending" ||
-    status === "connecting" ||
-    status === "disconnecting"
-  );
+declare global {
+  interface Window {
+    FB?: FacebookSdk;
+    fbAsyncInit?: () => void;
+  }
 }
 
 function isInstagramTokenExpired(status?: InstagramConnectionStatus | null) {
@@ -59,18 +60,6 @@ function getInstagramStatusLabel(status?: InstagramConnectionStatus | null) {
   if (isInstagramTokenExpired(status)) return "Token expirado";
   if (status?.connected) return "Conectado";
   return "Desconectado";
-}
-
-function isCooldownStatus(status?: string | null) {
-  return status === "rate_limited" || status === "provider_warming_up" || status === "qr_not_ready";
-}
-
-function sanitizeCustomerConnectionMessage(message?: string | null) {
-  if (!message) return null;
-  return message
-    .replace(/Evolution API/gi, "conexão do WhatsApp")
-    .replace(/Evolution/gi, "conexão")
-    .replace(/(META|INSTAGRAM)_[A-Z_]+/gi, "configuração");
 }
 
 const integrationCardClass =
@@ -101,8 +90,7 @@ const Integrations = () => {
   const { selectedCompanyId } = useAuth();
   const { currentPlan } = useBilling();
   const { addToast } = useToast();
-  const [connection, setConnection] = useState<WhatsappConnection | null>(null);
-  const [qrImage, setQrImage] = useState<string | null>(null);
+  const [whatsappStatus, setWhatsappStatus] = useState<WhatsappMetaStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [instagramLoading, setInstagramLoading] = useState(false);
   const [instagramStatus, setInstagramStatus] = useState<InstagramConnectionStatus | null>(null);
@@ -110,47 +98,83 @@ const Integrations = () => {
   const [mercadoLivreDashboard, setMercadoLivreDashboard] = useState<MercadoLivreDashboard | null>(null);
   const [mercadoLivreLoading, setMercadoLivreLoading] = useState(false);
   const [mercadoLivreSyncing, setMercadoLivreSyncing] = useState(false);
-  const [retryRemaining, setRetryRemaining] = useState(0);
+  const [signupData, setSignupData] = useState<WhatsappSignupData>({});
+  const signupDataRef = useRef<WhatsappSignupData>({});
   const normalizedPlan = String(currentPlan || "").toUpperCase();
   const canUseMainIntegrations = normalizedPlan === "PREMIUM" || normalizedPlan === "PRO_BUSINESS";
   const canUseMarketplaces = normalizedPlan === "PREMIUM" || normalizedPlan === "PRO_BUSINESS";
 
   const statusLabel = useMemo(() => {
-    if (!connection) return "Desconectado";
-    if (connection.status === "not_configured") return "Desconectado";
-    if (connection.status === "qr_pending" && hasQrData(connection)) return "QR pendente";
-    if (isQrPending(connection.status)) return "QR indisponível";
-    if (connection.status === "creating" || connection.status === "creating_instance") return "Criando instância";
-    if (connection.status === "connecting") return "Conectando";
-    if (connection.status === "disconnecting") return "Desconectando";
-    if (connection.status === "connected") return "Conectado";
-    if (connection.status === "disconnected_pending_provider_cleanup") return "Desconectado na Next Level";
-    if (connection.status === "disconnect_pending") return "Limpeza pendente";
-    if (connection.status === "disconnected_requires_new_qr") return "Novo QR necessário";
-    if (connection.status === "rate_limited") return "Limite temporário";
-    if (connection.status === "provider_warming_up") return "Preparando conexão";
-    if (connection.status === "qr_not_ready") return "QR ainda não pronto";
-    if (connection.status === "repair_ready") return "Reparo pronto";
-    if (connection.status === "error") return "Erro";
-    if (connection.status === "idle") return "Pronto para conectar";
+    if (!whatsappStatus) return "Desconectado";
+    if (loading) return "Configurando";
+    if (whatsappStatus.connected) return "Conectado";
+    if (whatsappStatus.status === "setup_error") return "Erro de configuracao";
     return "Desconectado";
-  }, [connection]);
+  }, [loading, whatsappStatus]);
 
   const connectionHealthLabel =
-    connection?.webhookStatus === "configured" ? "Conexão ativa" : "Sincronizando";
+    whatsappStatus?.webhookSubscribed ? "Webhook assinado" : "Aguardando Meta";
   const automationLabel =
-    connection?.automationStatus === "configured" ? "Atendimento pronto" : "Aguardando conexão";
+    whatsappStatus?.connected ? "Atendimento pronto" : "Conecte para ativar";
+
+  const whatsappAppId = import.meta.env.VITE_WHATSAPP_META_APP_ID || "";
+  const whatsappConfigId = import.meta.env.VITE_WHATSAPP_META_CONFIG_ID || "";
+
+  const loadFacebookSdk = () => new Promise<FacebookSdk>((resolve, reject) => {
+    if (window.FB) {
+      resolve(window.FB);
+      return;
+    }
+
+    window.fbAsyncInit = () => {
+      if (!window.FB) {
+        reject(new Error("SDK da Meta indisponivel"));
+        return;
+      }
+      window.FB.init({
+        appId: whatsappAppId,
+        cookie: true,
+        xfbml: false,
+        version: "v25.0",
+      });
+      resolve(window.FB);
+    };
+
+    if (document.getElementById("facebook-jssdk")) {
+      window.setTimeout(() => {
+        if (window.FB) resolve(window.FB);
+        else reject(new Error("SDK da Meta indisponivel"));
+      }, 1000);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "facebook-jssdk";
+    script.async = true;
+    script.defer = true;
+    script.crossOrigin = "anonymous";
+    script.src = "https://connect.facebook.net/pt_BR/sdk.js";
+    script.onerror = () => reject(new Error("Nao foi possivel carregar o SDK da Meta"));
+    document.body.appendChild(script);
+  });
+
+  const waitForSignupData = async () => {
+    for (let index = 0; index < 12; index += 1) {
+      if (signupDataRef.current.wabaId && signupDataRef.current.phoneNumberId) return signupDataRef.current;
+      await new Promise((resolve) => window.setTimeout(resolve, 250));
+    }
+    return signupDataRef.current;
+  };
 
   useEffect(() => {
     if (!selectedCompanyId || !canUseMainIntegrations) {
-      setConnection(null);
+      setWhatsappStatus(null);
       setInstagramStatus(null);
       setMercadoLivreStatus(null);
       setMercadoLivreDashboard(null);
       return;
     }
-    getWhatsappConnectionStatus(selectedCompanyId)
-      .then(setConnection)
+    getWhatsappMetaStatus()
+      .then(setWhatsappStatus)
       .catch(() => undefined);
     getInstagramStatus(selectedCompanyId)
       .then(setInstagramStatus)
@@ -187,130 +211,70 @@ const Integrations = () => {
     }
   }, [addToast, canUseMarketplaces, selectedCompanyId]);
 
-  useEffect(() => {
-    if (!selectedCompanyId || !canUseMainIntegrations) return;
-    const shouldPoll =
-      connection?.status === "creating" ||
-      connection?.status === "creating_instance" ||
-      isQrPending(connection?.status) ||
-      connection?.status === "connecting" ||
-      isCooldownStatus(connection?.status);
-    if (!shouldPoll) return;
-
-    const timer = window.setInterval(() => {
-      getWhatsappConnectionStatus(selectedCompanyId)
-        .then(setConnection)
-        .catch(() => undefined);
-    }, 3000);
-
-    return () => window.clearInterval(timer);
-  }, [canUseMainIntegrations, connection?.status, selectedCompanyId]);
 
   useEffect(() => {
-    if (!isCooldownStatus(connection?.status)) {
-      setRetryRemaining(0);
-      return;
-    }
-
-    const initial = Math.max(0, Number(connection?.retryAfterSeconds || 0));
-    setRetryRemaining(initial);
-    if (!initial) return;
-
-    const timer = window.setInterval(() => {
-      setRetryRemaining((current) => Math.max(0, current - 1));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [connection?.retryAfterSeconds, connection?.status]);
-
-  useEffect(() => {
-    const rawQr = connection?.qrCode;
-    if (!rawQr) {
-      setQrImage(null);
-      return;
-    }
-
-    if (rawQr.startsWith("data:image")) {
-      setQrImage(rawQr);
-      console.info("whatsapp.qr.frontend.rendered", {
-        source: "base64",
-      });
-      return;
-    }
-
-    QRCode.toDataURL(rawQr, {
-      margin: 1,
-      width: 280,
-      color: {
-        dark: "#050505",
-        light: "#f7fee7",
-      },
-    })
-      .then((image) => {
-        setQrImage(image);
-        console.info("whatsapp.qr.frontend.rendered", {
-          source: "code",
-        });
-      })
-      .catch(() => setQrImage(null));
-  }, [connection?.qrCode]);
+    const listener = (event: MessageEvent) => {
+      const origin = event.origin || "";
+      if (!origin.includes("facebook.com")) return;
+      const payload = typeof event.data === "string" ? (() => {
+        try { return JSON.parse(event.data); } catch { return null; }
+      })() : event.data;
+      if (!payload || payload.type !== "WA_EMBEDDED_SIGNUP") return;
+      const data = payload.data || payload;
+      const next = {
+        wabaId: data.waba_id || data.wabaId,
+        phoneNumberId: data.phone_number_id || data.phoneNumberId,
+      };
+      signupDataRef.current = { ...signupDataRef.current, ...next };
+      setSignupData(signupDataRef.current);
+    };
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
+  }, []);
 
   const handleConnect = async () => {
     if (!selectedCompanyId) {
       addToast("Selecione uma empresa antes de conectar.", "error");
       return;
     }
-
-    try {
-      setLoading(true);
-      const next = await startWhatsappConnection(selectedCompanyId);
-      setConnection(next);
-      if (isConnected(next.status)) {
-        addToast("WhatsApp conectado.", "success");
-      } else if (next.status === "qr_pending" && hasQrData(next)) {
-        addToast("QR Code gerado.", "success");
-      } else if (next.status === "provider_warming_up") {
-        addToast(
-          sanitizeCustomerConnectionMessage(next.message) || "Preparando conexão com WhatsApp...",
-          "info",
-        );
-      } else if (next.status === "rate_limited") {
-        addToast(
-          sanitizeCustomerConnectionMessage(next.message) || "Muitas tentativas agora. Aguarde alguns segundos.",
-          "info",
-        );
-      } else if (next.status === "qr_not_ready") {
-        addToast(sanitizeCustomerConnectionMessage(next.message) || "QR ainda não está pronto. Tente novamente em alguns segundos.", "info");
-      } else {
-        addToast(sanitizeCustomerConnectionMessage(next.message || next.lastError) || "Erro ao gerar QR Code.", "error");
-      }
-    } catch (error) {
-      addToast(getErrorMessage(error, "Não foi possível iniciar o WhatsApp."), "error");
-    } finally {
-      setLoading(false);
+    if (!whatsappAppId || !whatsappConfigId) {
+      addToast("Configuracao Meta do WhatsApp ausente.", "error");
+      return;
     }
-  };
-
-  const handleRepair = async () => {
-    if (!selectedCompanyId) return;
 
     try {
       setLoading(true);
-      const next = await restartWhatsappConnection(selectedCompanyId);
-      setConnection(next);
-      if (isConnected(next.status)) {
-        addToast("Conexão verificada.", "success");
-      } else if (next.status === "qr_pending" && hasQrData(next)) {
-        addToast("QR Code gerado.", "success");
-      } else if (next.status === "provider_warming_up" || next.status === "rate_limited") {
-        addToast(sanitizeCustomerConnectionMessage(next.message) || "Conexão indisponível agora.", "info");
-      } else if (next.status === "qr_not_ready" || next.status === "repair_ready") {
-        addToast(sanitizeCustomerConnectionMessage(next.message) || "Clique em Conectar WhatsApp para gerar o QR.", "info");
-      } else {
-        addToast(sanitizeCustomerConnectionMessage(next.message) || "Conexão ainda precisa de novo QR.", "info");
+      signupDataRef.current = {};
+      setSignupData({});
+      const fb = await loadFacebookSdk();
+      const loginResponse = await new Promise<FacebookLoginResponse>((resolve) => {
+        fb.login(resolve, {
+          config_id: whatsappConfigId,
+          response_type: "code",
+          override_default_response_type: true,
+          extras: {
+            feature: "whatsapp_embedded_signup",
+            sessionInfoVersion: "3",
+            featureType: "whatsapp_business_app_onboarding",
+          },
+        });
+      });
+
+      const code = loginResponse.authResponse?.code;
+      const metaData = await waitForSignupData();
+      if (!code || !metaData.wabaId || !metaData.phoneNumberId) {
+        throw new Error("A Meta nao retornou todos os dados do Embedded Signup.");
       }
+
+      const next = await completeWhatsappMetaSignup({
+        code,
+        wabaId: metaData.wabaId,
+        phoneNumberId: metaData.phoneNumberId,
+      });
+      setWhatsappStatus(next);
+      addToast("WhatsApp Business conectado pela Meta.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Não foi possível reparar a conexão."), "error");
+      addToast(getErrorMessage(error, "Nao foi possivel conectar o WhatsApp pela Meta."), "error");
     } finally {
       setLoading(false);
     }
@@ -321,16 +285,16 @@ const Integrations = () => {
 
     try {
       setLoading(true);
-      const next = await disconnectWhatsapp(selectedCompanyId);
-      setConnection(next);
+      await disconnectWhatsappMeta();
+      const next = await getWhatsappMetaStatus();
+      setWhatsappStatus(next);
       addToast("WhatsApp desconectado.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Não foi possível desconectar."), "error");
+      addToast(getErrorMessage(error, "Nao foi possivel desconectar."), "error");
     } finally {
       setLoading(false);
     }
   };
-
   const refreshInstagramStatus = async () => {
     if (!selectedCompanyId) return;
     const next = await getInstagramStatus(selectedCompanyId);
@@ -349,7 +313,7 @@ const Integrations = () => {
       const session = await getInstagramConnectUrl(selectedCompanyId, returnTo);
       window.location.assign(session.authUrl);
     } catch (error) {
-      addToast(getErrorMessage(error, "Não foi possível iniciar o Instagram."), "error");
+      addToast(getErrorMessage(error, "NÃ£o foi possÃ­vel iniciar o Instagram."), "error");
       setInstagramLoading(false);
     }
   };
@@ -363,7 +327,7 @@ const Integrations = () => {
       await refreshInstagramStatus();
       addToast("Instagram desconectado.", "success");
     } catch (error) {
-      addToast(getErrorMessage(error, "Não foi possível desconectar o Instagram."), "error");
+      addToast(getErrorMessage(error, "NÃ£o foi possÃ­vel desconectar o Instagram."), "error");
     } finally {
       setInstagramLoading(false);
     }
@@ -406,7 +370,7 @@ const Integrations = () => {
       setMercadoLivreSyncing(true);
       await syncMercadoLivre(selectedCompanyId);
       await refreshMercadoLivre();
-      addToast("Integração Mercado Livre reprocessada.", "success");
+      addToast("IntegraÃ§Ã£o Mercado Livre reprocessada.", "success");
     } catch (error) {
       addToast(getErrorMessage(error, "Falha ao sincronizar Mercado Livre."), "error");
     } finally {
@@ -433,7 +397,7 @@ const Integrations = () => {
       <main className="mx-auto max-w-[1080px] space-y-6">
         <section className="space-y-2">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2caad]">
-            Integrações
+            IntegraÃ§Ãµes
           </p>
           <h1 className="text-4xl font-black tracking-[-0.04em] text-[#B6FF00] md:text-5xl">
             Canais conectados ao lucro
@@ -448,13 +412,13 @@ const Integrations = () => {
               </div>
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.24em] text-red-300">
-                  Disponível no Premium
+                  DisponÃ­vel no Premium
                 </p>
                 <h2 className="mt-2 text-2xl font-black text-zinc-50">
-                  Assine Premium para ter integrações e mais.
+                  Assine Premium para ter integraÃ§Ãµes e mais.
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-300">
-                  As integrações automáticas liberam conexão com canais de venda, atendimento e dados em tempo real para sua empresa.
+                  As integraÃ§Ãµes automÃ¡ticas liberam conexÃ£o com canais de venda, atendimento e dados em tempo real para sua empresa.
                 </p>
               </div>
             </div>
@@ -475,7 +439,7 @@ const Integrations = () => {
     <main className="mx-auto max-w-[1080px] space-y-6">
       <section className="space-y-2">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-[#c2caad]">
-          Integrações
+          IntegraÃ§Ãµes
         </p>
         <h1 className="text-4xl font-black tracking-[-0.04em] text-[#B6FF00] md:text-5xl">
           Canais conectados ao lucro
@@ -488,12 +452,12 @@ const Integrations = () => {
             <div className="flex items-start gap-4">
               <IntegrationMark label="WA" />
               <div>
-              <h2 className="text-3xl font-black tracking-tight text-[#F5F7F2]">
-                WhatsApp
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-                Conecte o atendimento da sua empresa ao WhatsApp para centralizar comunicações e automatizar respostas com IA.
-              </p>
+                <h2 className="text-3xl font-black tracking-tight text-[#F5F7F2]">
+                  WhatsApp Business
+                </h2>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
+                  Integracao oficial da Meta Cloud API, sem QR Code e com atendimento IA por empresa.
+                </p>
               </div>
             </div>
             <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 xl:grid-cols-3">
@@ -502,7 +466,17 @@ const Integrations = () => {
                 <p className="mt-1 font-bold text-zinc-100">{statusLabel}</p>
               </div>
               <div className="rounded-xl border border-[#B6FF00]/15 bg-[#121512] px-4 py-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Saúde</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Numero</p>
+                <p className="mt-1 font-bold text-zinc-100">
+                  {whatsappStatus?.displayPhoneNumber || whatsappStatus?.verifiedName || "Aguardando conexao"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#B6FF00]/15 bg-[#121512] px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Provedor</p>
+                <p className="mt-1 font-bold text-zinc-100">Meta Cloud API</p>
+              </div>
+              <div className="rounded-xl border border-[#B6FF00]/15 bg-[#121512] px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Webhook</p>
                 <p className="mt-1 font-bold text-zinc-100">{connectionHealthLabel}</p>
               </div>
               <div className="rounded-xl border border-[#B6FF00]/15 bg-[#121512] px-4 py-4">
@@ -510,109 +484,40 @@ const Integrations = () => {
                 <p className="mt-1 font-bold text-zinc-100">{automationLabel}</p>
               </div>
             </div>
+            {whatsappStatus?.providerSetupRequired ? (
+              <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
+                Variaveis do WhatsApp Meta ainda nao estao configuradas no ambiente.
+              </p>
+            ) : null}
+            {whatsappStatus?.status === "setup_error" ? (
+              <p className="rounded-md border border-red-500/30 bg-red-950/30 p-3 text-sm font-semibold text-red-200">
+                A conexao foi iniciada, mas a assinatura de webhook da WABA precisa ser concluida.
+              </p>
+            ) : null}
           </div>
 
           <div className="flex shrink-0 gap-3">
-            {isConnected(connection?.status) ? (
+            {whatsappStatus?.connected ? (
               <button
                 type="button"
-                onClick={handleRepair}
-                disabled={loading || !selectedCompanyId || isOperationStatus(connection?.status)}
-                className={integrationButtonClass}
+                onClick={handleDisconnect}
+                disabled={loading}
+                className={secondaryButtonClass}
               >
-                {loading ? "Verificando..." : "Reparar conexão"}
+                {loading ? "Desconectando..." : "Desconectar"}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={handleConnect}
-                disabled={
-                  loading ||
-                  !selectedCompanyId ||
-                  !canUseMainIntegrations ||
-                  isOperationStatus(connection?.status) ||
-                  retryRemaining > 0
-                }
+                disabled={loading || !selectedCompanyId || !canUseMainIntegrations || Boolean(whatsappStatus?.providerSetupRequired)}
                 className={integrationButtonClass}
               >
-                  {loading
-                  ? "Preparando conexão..."
-                  : !canUseMainIntegrations
-                    ? "Disponivel no Premium"
-                  : connection?.status === "provider_warming_up"
-                    ? "Preparando conexão..."
-                  : retryRemaining > 0
-                    ? `Aguarde ${retryRemaining}s`
-                  : isQrPending(connection?.status)
-                    ? "Aguardando leitura"
-                    : "Conectar WhatsApp"}
+                {loading ? "Configurando..." : "Conectar com Meta"}
               </button>
             )}
-            {isConnected(connection?.status) ? (
-              <button
-                type="button"
-                onClick={handleDisconnect}
-                disabled={loading || isOperationStatus(connection?.status)}
-                className={secondaryButtonClass}
-              >
-                Desconectar
-              </button>
-            ) : null}
           </div>
         </div>
-
-        {(connection?.status === "qr_pending" && hasQrData(connection)) || qrImage ? (
-          <div className="mt-6 grid gap-5 border-t border-zinc-900 pt-5 lg:grid-cols-[320px_1fr]">
-            <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-zinc-800 bg-lime-50 p-5">
-              {qrImage ? (
-                <img src={qrImage} alt="QR Code do WhatsApp" className="h-72 w-72" />
-              ) : (
-                <p className="text-center text-sm font-bold text-zinc-900">
-                  QR indisponível no momento
-                </p>
-              )}
-            </div>
-            <div className="space-y-4">
-              {connection?.pairingCode ? (
-                <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    Código de pareamento
-                  </p>
-                  <p className="mt-2 font-mono text-2xl font-black text-lime-300">
-                    {connection.pairingCode}
-                  </p>
-                </div>
-              ) : null}
-              <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                  Próximo passo
-                </p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-200">
-                  Leia o QR Code com o WhatsApp da empresa para concluir a conexão.
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {connection?.status === "provider_warming_up" ||
-        connection?.status === "rate_limited" ||
-        connection?.status === "qr_not_ready" ||
-        connection?.status === "error" ? (
-          <p className={`mt-4 rounded-md border p-3 text-sm font-semibold ${
-            connection.status === "error"
-              ? "border-red-500/30 bg-red-950/30 text-red-200"
-              : "border-amber-500/30 bg-amber-500/10 text-amber-100"
-          }`}>
-            {sanitizeCustomerConnectionMessage(connection.message || connection.lastError) || "Não foi possível gerar o QR Code agora."}
-            {retryRemaining > 0 ? ` Tente novamente em ${retryRemaining}s.` : ""}
-          </p>
-        ) : null}
-        {!canUseMainIntegrations ? (
-          <p className="mt-4 rounded-md border border-lime-400/25 bg-lime-400/10 p-3 text-sm font-semibold text-lime-100">
-            Integracoes com WhatsApp e Instagram estao disponiveis a partir do plano Premium.
-          </p>
-        ) : null}
       </section>
 
       <section className={integrationCardClass}>
@@ -640,7 +545,7 @@ const Integrations = () => {
               <div className="rounded-xl border border-[#B6FF00]/15 bg-[#121512] px-4 py-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Conta</p>
                 <p className="mt-1 font-bold text-zinc-100">
-                  {instagramStatus?.connected ? "Conta profissional conectada" : "Aguardando conexão"}
+                  {instagramStatus?.connected ? "Conta profissional conectada" : "Aguardando conexÃ£o"}
                 </p>
               </div>
               <div className="rounded-xl border border-[#B6FF00]/15 bg-[#121512] px-4 py-4">
@@ -653,12 +558,12 @@ const Integrations = () => {
 
             {instagramStatus?.provider_setup_required ? (
               <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
-                A conexão com Instagram está temporariamente indisponível. Tente novamente em instantes.
+                A conexÃ£o com Instagram estÃ¡ temporariamente indisponÃ­vel. Tente novamente em instantes.
               </p>
             ) : null}
             {isInstagramTokenExpired(instagramStatus) ? (
               <p className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm font-semibold text-amber-100">
-                Token expirado / Reconexão necessária.
+                Token expirado / ReconexÃ£o necessÃ¡ria.
               </p>
             ) : null}
           </div>
@@ -740,9 +645,9 @@ const Integrations = () => {
                 <p className="mt-1 font-bold text-zinc-100">{mercadoLivreDashboard?.pendingQuestions || 0} pendentes</p>
               </div>
               <div className="rounded-xl border border-[#B6FF00]/15 bg-[#121512] px-4 py-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Última sync</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">Ãšltima sync</p>
                 <p className="mt-1 font-bold text-zinc-100">
-                  {mercadoLivreStatus?.lastSyncAt ? new Date(mercadoLivreStatus.lastSyncAt).toLocaleString("pt-BR") : "Ainda não sincronizado"}
+                  {mercadoLivreStatus?.lastSyncAt ? new Date(mercadoLivreStatus.lastSyncAt).toLocaleString("pt-BR") : "Ainda nÃ£o sincronizado"}
                 </p>
               </div>
             </div>
@@ -763,7 +668,7 @@ const Integrations = () => {
                   disabled={mercadoLivreSyncing || !canUseMarketplaces}
                   className={integrationButtonClass}
                 >
-                  {mercadoLivreSyncing ? "Reprocessando..." : "Reprocessar integração"}
+                  {mercadoLivreSyncing ? "Reprocessando..." : "Reprocessar integraÃ§Ã£o"}
                 </button>
                 <button
                   type="button"
@@ -803,3 +708,13 @@ const Integrations = () => {
 };
 
 export default Integrations;
+
+
+
+
+
+
+
+
+
+

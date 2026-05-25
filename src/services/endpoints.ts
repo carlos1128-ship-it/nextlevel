@@ -1,4 +1,4 @@
-import api from "./api";
+﻿import api from "./api";
 import type {
   Company,
   DashboardPreference,
@@ -28,7 +28,6 @@ import type {
   MarketTrend,
   BotConfig,
   ConversationThread,
-  WhatsappConnectionSnapshot,
   Lead,
   LeadStatus,
   AdminErrorLog,
@@ -38,7 +37,6 @@ import type {
   AuditFeedItem,
   SubscriptionTier,
   AgentConfig,
-  WhatsappConnection,
   ConversationLiveFeedItem,
   IntelligentImportRecord,
   ImportedMetricRecord,
@@ -197,7 +195,7 @@ function normalizeBotConfig(data: any): BotConfig {
     agentName: data?.agentName || data?.botName || "Atendente IA",
     welcomeMessage: data?.welcomeMessage ?? null,
     toneOfVoice: data?.toneOfVoice || "amigavel",
-    tone: data?.tone || data?.toneOfVoice || "AmigÃ¡vel",
+    tone: data?.tone || data?.toneOfVoice || "AmigÃƒÂ¡vel",
     instructions: data?.instructions ?? null,
     isActive: Boolean(data?.isActive ?? true),
     isOnline: Boolean(data?.isOnline ?? data?.isActive ?? true),
@@ -374,69 +372,6 @@ function normalizeAdminQuota(data: any): AdminQuota {
       name: data?.company?.name || "Empresa",
       sector: data?.company?.sector ?? null,
     },
-  };
-}
-
-function normalizeWhatsappConnection(data: any): WhatsappConnection {
-  const qrCode = data?.qrCode ?? data?.code ?? data?.qrcode ?? data?.base64 ?? null;
-  return {
-    id: data?.id ?? null,
-    companyId: data?.companyId ?? null,
-    provider: data?.provider || "evolution",
-    instanceName: data?.instanceName ?? null,
-    status: data?.status || "disconnected",
-    statusCode: data?.statusCode ?? null,
-    connectionState: data?.connectionState ?? null,
-    qrCode,
-    code: data?.code ?? qrCode,
-    pairingCode: data?.pairingCode ?? null,
-    phoneNumber: data?.phoneNumber ?? null,
-    webhookUrl: data?.webhookUrl ?? null,
-    webhookStatus: data?.webhookStatus ?? "pending",
-    automationStatus: data?.automationStatus ?? "pending",
-    lastError: data?.lastError ?? null,
-    message: data?.message ?? null,
-    retryAfterSeconds:
-      data?.retryAfterSeconds === undefined || data?.retryAfterSeconds === null
-        ? null
-        : Number(data.retryAfterSeconds),
-    expiresInSeconds:
-      data?.expiresInSeconds === undefined || data?.expiresInSeconds === null
-        ? null
-        : Number(data.expiresInSeconds),
-    sessionGeneration: data?.sessionGeneration ?? null,
-    userRequestedDisconnect: Boolean(data?.userRequestedDisconnect),
-    lastConnectionAt: data?.lastConnectionAt ?? null,
-    lastDisconnectedAt: data?.lastDisconnectedAt ?? null,
-    createdAt: data?.createdAt ?? null,
-    updatedAt: data?.updatedAt ?? null,
-  };
-}
-
-function toWhatsappConnectionSnapshot(data: any): WhatsappConnectionSnapshot {
-  const connection = normalizeWhatsappConnection(data);
-  const qrRequired =
-    connection.status === "qr_required" ||
-    connection.status === "qr_pending" ||
-    connection.status === "qr_not_ready";
-
-  return {
-    instanceName: connection.instanceName,
-    qrCode: connection.qrCode,
-    qrcode: connection.qrCode,
-    pairingCode: connection.pairingCode,
-    ready: connection.status === "connected",
-    status: connection.status,
-    state: connection.connectionState || connection.status,
-    lifecycleState: connection.status,
-    connected: connection.status === "connected",
-    method: "evolution",
-    phoneNumber: connection.phoneNumber,
-    qrRequired,
-    webhookStatus: connection.webhookStatus,
-    automationStatus: connection.automationStatus,
-    retryAfterSeconds: connection.retryAfterSeconds,
-    failureReason: connection.lastError || connection.message || null,
   };
 }
 
@@ -1104,31 +1039,42 @@ export async function getIntegrationDiagnostic(provider: string, companyId?: str
   } as IntegrationDiagnostic;
 }
 
-export async function startWhatsappConnection(companyId: string) {
-  const { data } = await api.post("/whatsapp/connection/connect", {}, { params: { companyId } });
-  return normalizeWhatsappConnection(data);
+export type WhatsappMetaStatus = {
+  connected: boolean;
+  provider: "META_CLOUD" | string;
+  status: string;
+  providerSetupRequired?: boolean;
+  phoneNumberId?: string | null;
+  wabaId?: string | null;
+  displayPhoneNumber?: string | null;
+  verifiedName?: string | null;
+  webhookSubscribed?: boolean;
+  connectedAt?: string | null;
+  disconnectedAt?: string | null;
+  lastWebhookAt?: string | null;
+  updatedAt?: string | null;
+};
+
+export async function getWhatsappMetaStatus() {
+  const { data } = await api.get<WhatsappMetaStatus>("/integrations/whatsapp-meta/status");
+  return data;
 }
 
-export async function requestWhatsappQr(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/qr", {}, { params: { companyId } });
-  return normalizeWhatsappConnection(data);
+export async function completeWhatsappMetaSignup(payload: {
+  code: string;
+  wabaId: string;
+  phoneNumberId: string;
+}) {
+  const { data } = await api.post<WhatsappMetaStatus>(
+    "/integrations/whatsapp-meta/complete-signup",
+    payload,
+  );
+  return data;
 }
 
-export async function restartWhatsappConnection(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/restart", {}, { params: { companyId } });
-  return normalizeWhatsappConnection(data);
-}
-
-export async function getWhatsappConnectionStatus(companyId: string) {
-  const { data } = await api.get("/whatsapp/connection/status", {
-    params: { companyId },
-  });
-  return normalizeWhatsappConnection(data);
-}
-
-export async function disconnectWhatsapp(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/disconnect", {}, { params: { companyId } });
-  return normalizeWhatsappConnection(data);
+export async function disconnectWhatsappMeta() {
+  const { data } = await api.post<WhatsappMetaStatus>("/integrations/whatsapp-meta/disconnect");
+  return data;
 }
 
 export async function getAgentConfig(companyId: string) {
@@ -1446,35 +1392,7 @@ export async function exportFinancialCsv(params?: { companyId?: string | null })
   return data;
 }
 
-// â”€â”€â”€ WhatsApp Instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-export async function evolutionConnect(companyId: string) {
-  const { data } = await api.post("/whatsapp/connection/connect", {}, { params: { companyId } });
-  return toWhatsappConnectionSnapshot(data);
-}
-
-export async function evolutionGetQRCode(companyId: string) {
-  const { data } = await api.get("/whatsapp/connection/status", {
-    params: { companyId },
-  });
-  return toWhatsappConnectionSnapshot(data);
-}
-
-export async function evolutionGetStatus(companyId: string) {
-  const { data } = await api.get("/whatsapp/connection/status", {
-    params: { companyId },
-  });
-  return toWhatsappConnectionSnapshot(data);
-}
-
-export async function evolutionDisconnect(companyId: string) {
-  const { data } = await api.post("/whatsapp/connect/disconnect", {}, { params: { companyId } });
-  return toWhatsappConnectionSnapshot(data);
-}
-
-
-
-// â”€â”€â”€ Shopee Scraper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Shopee Scraper Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 export async function initializeShopeeLogin(companyId: string, credentials?: { user?: string, pass?: string }) {
   const { data } = await api.post("/integrations/shopee/initialize-login", credentials || {}, {
@@ -1498,55 +1416,6 @@ export async function getShopeeOrders(companyId: string) {
   const { data } = await api.get("/integrations/shopee/orders", {
     params: { companyId },
   });
-  return data;
-}
-
-export async function saveMetaAPIConfig(
-  companyId: string,
-  payload: {
-    metaAccessToken: string;
-    phoneNumber?: string;
-  }
-) {
-  // Map frontend field names â†’ DTO field names expected by the backend
-  const { data } = await api.post(
-    "/whatsapp/config", // Corrected path to match controller @Controller('whatsapp')
-    {
-      accessToken: payload.metaAccessToken,
-      phoneNumber: payload.phoneNumber,
-    },
-    { params: { companyId } },
-  );
-  return data;
-}
-
-export async function disconnectMetaAPIConfig(companyId: string) {
-  const { data } = await api.delete("/whatsapp/config", {
-    params: { companyId },
-  });
-  return data;
-}
-
-export async function getWhatsappOAuthUrl(companyId: string): Promise<string> {
-  const { data } = await api.get<{ url: string }>("/meta/oauth/url", {
-    params: { companyId },
-  });
-  return data.url;
-}
-
-export async function getMetaWhatsappStatus(companyId: string) {
-  const { data } = await api.get<{
-    connected: boolean;
-    method: "meta" | null;
-    status: string;
-    phoneNumberId: string | null;
-    phoneNumber: string | null;
-    whatsappBusinessId?: string | null;
-    updatedAt?: string | null;
-  }>(
-    "/meta/status",
-    { params: { companyId } }
-  );
   return data;
 }
 
@@ -1989,3 +1858,4 @@ export async function createBillingPortal(payload?: { companyId?: string | null 
   const { data } = await api.post<{ portalUrl: string }>("/billing/portal", payload || {});
   return data;
 }
+

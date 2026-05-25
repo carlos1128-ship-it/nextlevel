@@ -1,4 +1,4 @@
-export type DetailLevel = "low" | "medium" | "high";
+﻿export type DetailLevel = "low" | "medium" | "high";
 export type UserNiche = "ECOMMERCE" | "MEDICINA" | "SERVICOS" | "EDUCACAO" | "OUTROS";
 export type DashboardPeriod = "today" | "yesterday" | "week" | "month" | "year" | "7d" | "30d" | "custom";
 
@@ -357,54 +357,6 @@ export interface OperationalCost {
 
 export type IntegrationProvider = "WHATSAPP" | "INSTAGRAM" | "MERCADOLIVRE" | "SHOPEE";
 
-export type WhatsappConnectionStatus =
-  | "not_configured"
-  | "creating_instance"
-  | "qr_required"
-  | "qr_pending"
-  | "qr_not_ready"
-  | "repair_ready"
-  | "idle"
-  | "creating"
-  | "waiting_qr"
-  | "connecting"
-  | "connected"
-  | "disconnected"
-  | "disconnected_requires_new_qr"
-  | "disconnected_pending_provider_cleanup"
-  | "disconnect_pending"
-  | "disconnecting"
-  | "rate_limited"
-  | "provider_warming_up"
-  | "error";
-
-export interface WhatsappConnection {
-  id: string | null;
-  companyId: string | null;
-  provider: "evolution" | string;
-  instanceName: string | null;
-  status: WhatsappConnectionStatus;
-  statusCode?: "EVOLUTION_WARMING_UP" | "RATE_LIMITED" | "QR_PENDING" | "CONNECTED" | "ERROR" | string | null;
-  connectionState?: string | null;
-  qrCode: string | null;
-  code?: string | null;
-  pairingCode: string | null;
-  phoneNumber: string | null;
-  webhookUrl: string | null;
-  webhookStatus?: "configured" | "pending" | "error";
-  automationStatus?: "configured" | "pending" | "error";
-  lastError?: string | null;
-  message?: string | null;
-  retryAfterSeconds?: number | null;
-  expiresInSeconds?: number | null;
-  sessionGeneration?: number | null;
-  userRequestedDisconnect?: boolean;
-  lastConnectionAt: string | null;
-  lastDisconnectedAt?: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
-}
-
 export interface AgentConfig {
   id: string;
   companyId: string;
@@ -504,50 +456,12 @@ export interface BotConfig {
   isActive: boolean;
   isOnline?: boolean;
   isConnected?: boolean;
-  connectionMethod?: "meta" | "evolution" | null;
+  connectionMethod?: "meta_cloud" | "meta" | null;
   metaPhoneNumberId?: string | null;
   metaWabaId?: string | null;
   phoneNumber?: string | null;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface WhatsappConnectionSnapshot {
-  instanceName?: string | null;
-  qrCode?: string | null;
-  qrcode?: string | null;
-  pairingCode?: string | null;
-  ready?: boolean;
-  status: string;
-  state?: string;
-  lifecycleState?: string;
-  connected?: boolean;
-  method?: "meta" | "evolution" | null;
-  phoneNumber?: string | null;
-  qrRequired?: boolean;
-  webhookStatus?: "configured" | "pending" | "error";
-  automationStatus?: "configured" | "pending" | "error";
-  retryAfterSeconds?: number | null;
-  failureReason?: string | null;
-  diagnosticSnapshot?: {
-    companyId: string;
-    sessionName: string | null;
-    correlationId: string | null;
-    currentState: string;
-    status: string;
-    hasClient: boolean;
-    hasBrowser: boolean;
-    hasPage: boolean;
-    hasQr: boolean;
-    qrAgeMs: number | null;
-    qrExpiresAt: string | null;
-    lastEvent: string | null;
-    lastError: string | null;
-    lastTransitionAt: string;
-  };
-  updatedAt?: string | null;
-  quotaUsed?: number | null;
-  quotaLimit?: number | null;
 }
 
 export interface ChatConversation {
@@ -904,3 +818,5 @@ export interface AIUsageLimitsResponse {
   planKey: string;
   limits: AIUsageLimitItem[];
 }
+
+

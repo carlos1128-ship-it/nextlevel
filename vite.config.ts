@@ -35,7 +35,6 @@ export default defineConfig({
           if (id.includes('jspdf')) return 'vendor-jspdf';
           if (id.includes('html2canvas')) return 'vendor-html2canvas';
           if (id.includes('dompurify')) return 'vendor-purify';
-          if (id.includes('qrcode')) return 'vendor-qrcode';
           if (id.includes('socket.io-client') || id.includes('engine.io-client')) {
             return 'vendor-realtime';
           }

@@ -202,13 +202,6 @@ function dispatchFriendlyApiError(error: AxiosError) {
   }
 
   const status = error.response?.status || 0;
-  const isRecoverableWhatsappConnectionError =
-    (url.includes('/whatsapp/connection') || url.includes('/whatsapp/connect/')) &&
-    ([409, 429, 502, 503, 504].includes(status) || !error.response);
-  if (isRecoverableWhatsappConnectionError) {
-    return;
-  }
-
   if (isCompanyAccessError(error)) {
     localStorage.removeItem('selectedCompanyId');
     window.dispatchEvent(new CustomEvent(COMPANY_ACCESS_INVALID_EVENT));
