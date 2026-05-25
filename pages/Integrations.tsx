@@ -402,7 +402,12 @@ const Integrations = () => {
                 Nao foi possivel conectar. Tente gerar um novo QR Code.
               </p>
             ) : null}
-            {whatsappStatus?.status === "WAITING_QR" || whatsappStatus?.qrCode || whatsappStatus?.qrCodeText || whatsappStatus?.pairingCode ? (
+            {!whatsappStatus?.connected && (
+              whatsappStatus?.status === "WAITING_QR" ||
+              whatsappStatus?.qrCode ||
+              whatsappStatus?.qrCodeText ||
+              whatsappStatus?.pairingCode
+            ) ? (
               <div className="rounded-xl border border-[#B6FF00]/20 bg-[#121512] p-4">
                 <p className="text-sm font-bold text-zinc-100">
                   Escaneie o QR Code com o WhatsApp para conectar.
