@@ -195,10 +195,24 @@ const Integrations = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const provider = params.get("integration_provider");
-    if (provider !== "instagram" && provider !== "mercadolivre") return;
+    if (provider !== "instagram" && provider !== "mercadolivre" && provider !== "whatsapp_meta") return;
 
     const status = params.get("integration_status");
     const message = params.get("integration_message");
+    if (provider === "whatsapp_meta") {
+      const code = params.get("whatsapp_meta_code");
+      if (code) {
+        signupDataRef.current = { ...signupDataRef.current, code };
+        setSignupData(signupDataRef.current);
+      }
+      addToast(
+        message || (status === "error" ? "Nao foi possivel concluir o OAuth do WhatsApp." : "Callback OAuth do WhatsApp recebido."),
+        status === "error" ? "error" : "success",
+      );
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+
     const providerLabel = provider === "mercadolivre" ? "Mercado Livre" : "Instagram";
     addToast(
       message || (status === "connected" ? `${providerLabel} conectado.` : `Nao foi possivel conectar o ${providerLabel}.`),
@@ -260,7 +274,7 @@ const Integrations = () => {
         });
       });
 
-      const code = loginResponse.authResponse?.code;
+      const code = loginResponse.authResponse?.code || signupDataRef.current.code;
       const metaData = await waitForSignupData();
       if (!code || !metaData.wabaId || !metaData.phoneNumberId) {
         throw new Error("A Meta nao retornou todos os dados do Embedded Signup.");
