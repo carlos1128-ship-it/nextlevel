@@ -87,6 +87,290 @@
   border-bottom: 1px solid rgba(46, 57, 53, 0.5);
 }
 
+.nl-landing-page {
+  position: relative;
+  background: #030504;
+  isolation: isolate;
+}
+
+.nl-landing-page > :not(.landingBackground) {
+  position: relative;
+  z-index: 1;
+}
+
+.landingBackground {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 76% 14%, rgba(170, 255, 0, 0.04), transparent 24%),
+    radial-gradient(circle at 20% 48%, rgba(44, 97, 58, 0.09), transparent 36%),
+    linear-gradient(180deg, #040605 0%, #030504 46%, #020302 100%);
+}
+
+.landingBackground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
+
+.landingBackground > * {
+  position: absolute;
+  inset: 0;
+}
+
+.backgroundGrid {
+  opacity: 0.45;
+  background-image:
+    linear-gradient(rgba(170, 255, 0, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(170, 255, 0, 0.11) 1px, transparent 1px);
+  background-size: 88px 88px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.25));
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.25));
+  z-index: 2;
+}
+
+.backgroundContours {
+  opacity: 0.58;
+  background-image: url("data:image/svg+xml,%3Csvg width='1600' height='2200' viewBox='0 0 1600 2200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23aaff00' stroke-opacity='.14' stroke-width='1.2'%3E%3Cpath d='M-120 310C180 170 350 435 620 300s430-120 760 20 420 120 620-20'/%3E%3Cpath d='M-80 380C215 245 385 505 655 370s430-112 748 30 418 120 600-18'/%3E%3Cpath d='M900 -120c-80 260 160 350 70 610s-50 510 270 700 260 420 95 680'/%3E%3Cpath d='M1040 -80c-70 230 140 330 62 565s-25 440 250 610 228 390 80 600'/%3E%3Ccircle cx='1280' cy='520' r='310'/%3E%3Ccircle cx='1280' cy='520' r='420'/%3E%3Cpath d='M-140 1500c260-155 425-20 610-110s310-290 590-140 340 220 670 90'/%3E%3Cpath d='M-120 1605c300-170 465-25 650-120s330-285 600-130 365 210 690 74'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 1600px 2200px;
+  background-position: center top;
+  z-index: 3;
+}
+
+.backgroundCircuitLines {
+  opacity: 0.65;
+  background-image: url("data:image/svg+xml,%3Csvg width='1440' height='1800' viewBox='0 0 1440 1800' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23aaff00' stroke-opacity='.13' stroke-width='1'%3E%3Cpath d='M120 210h180v90h210'/%3E%3Cpath d='M930 165h170v120h210'/%3E%3Cpath d='M1030 725h-220v130H640'/%3E%3Cpath d='M180 980h180v-110h145'/%3E%3Cpath d='M1120 1220h-240v150h-170'/%3E%3Cpath d='M240 1470h260v95h210'/%3E%3C/g%3E%3Cg fill='%23aaff00' fill-opacity='.22'%3E%3Ccircle cx='120' cy='210' r='3'/%3E%3Ccircle cx='510' cy='300' r='3'/%3E%3Ccircle cx='930' cy='165' r='3'/%3E%3Ccircle cx='1310' cy='285' r='3'/%3E%3Ccircle cx='1030' cy='725' r='3'/%3E%3Ccircle cx='640' cy='855' r='3'/%3E%3Ccircle cx='180' cy='980' r='3'/%3E%3Ccircle cx='505' cy='870' r='3'/%3E%3Ccircle cx='1120' cy='1220' r='3'/%3E%3Ccircle cx='710' cy='1370' r='3'/%3E%3Ccircle cx='240' cy='1470' r='3'/%3E%3Ccircle cx='710' cy='1565' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 1440px 1800px;
+  background-position: center top;
+  z-index: 4;
+}
+
+.backgroundNodes {
+  opacity: 0.65;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(170, 255, 0, 0.22) 0 2px, transparent 3px),
+    radial-gradient(circle at 83% 28%, rgba(170, 255, 0, 0.22) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 52%, rgba(170, 255, 0, 0.20) 0 2px, transparent 3px),
+    radial-gradient(circle at 24% 66%, rgba(170, 255, 0, 0.22) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 82%, rgba(170, 255, 0, 0.18) 0 2px, transparent 3px);
+  filter: drop-shadow(0 0 6px rgba(170, 255, 0, 0.4));
+  z-index: 5;
+}
+
+.backgroundAtmosphere {
+  opacity: 0.4;
+  background:
+    radial-gradient(circle at 78% 22%, rgba(170, 255, 0, 0.05), transparent 28%),
+    radial-gradient(circle at 46% 72%, rgba(30, 74, 50, 0.12), transparent 38%);
+  z-index: 0;
+}
+
+.nl-hero-depth {
+  background: transparent;
+}
+
+.nl-hero-depth::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 28%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(8, 13, 11, 0), rgba(8, 35, 22, 0.08) 48%, rgba(5, 7, 6, 0.18));
+}
+
+.nl-hero-visual {
+  margin-right: -1rem;
+  padding-block: 2rem;
+}
+
+.nl-hero-dashboard-frame {
+  --nl-dashboard-height: clamp(430px, 38vw, 590px);
+  aspect-ratio: 1.32 / 1;
+  width: min(100%, calc(var(--nl-dashboard-height) * 1.32));
+  height: var(--nl-dashboard-height);
+  max-width: 760px;
+  max-height: 590px;
+  transform: translate3d(1rem, 0, 0) scale(1.12);
+  filter: drop-shadow(0 38px 90px rgba(0, 0, 0, 0.42));
+}
+
+.nl-hero-dashboard-art {
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 1280px) {
+  .nl-hero-visual {
+    margin-right: -2rem;
+  }
+
+  .nl-hero-dashboard-frame {
+    --nl-dashboard-height: clamp(470px, 37vw, 610px);
+    max-width: 780px;
+    max-height: 610px;
+    transform: translate3d(1.5rem, 0.2rem, 0) scale(1.12);
+  }
+}
+
+@media (min-width: 1536px) {
+  .nl-hero-dashboard-frame {
+    --nl-dashboard-height: clamp(500px, 34vw, 630px);
+    max-width: 800px;
+    max-height: 630px;
+    transform: translate3d(2rem, 0.2rem, 0) scale(1.12);
+  }
+}
+
+@media (max-width: 1023px) {
+  .nl-hero-visual {
+    margin-right: 0;
+    padding-block: 0.5rem 0;
+  }
+
+  .nl-hero-dashboard-frame {
+    --nl-dashboard-height: clamp(380px, 72vw, 520px);
+    width: min(100%, calc(var(--nl-dashboard-height) * 1.24));
+    max-width: 680px;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .nl-hero-dashboard-frame {
+    --nl-dashboard-height: clamp(330px, 88vw, 430px);
+    width: min(100%, calc(var(--nl-dashboard-height) * 1.08));
+    max-width: 390px;
+  }
+}
+
+.nl-unified-section {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+.nl-unified-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: transparent;
+  opacity: 0;
+}
+
+.nl-unified-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.integrationsTicker {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 16px 0;
+  background: transparent;
+}
+
+.integrationsTrack {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.integrationsTicker .item {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.22);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.integrationsTicker .dot {
+  color: #aaff00;
+  font-size: 14px;
+  flex-shrink: 0;
+  text-shadow: 0 0 6px #aaff00, 0 0 12px #aaff00;
+}
+
+.tickerFade {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 28%;
+  z-index: 2;
+}
+
+.tickerFadeLeft {
+  left: 0;
+  background: linear-gradient(to right, #0a0a0a 30%, transparent 100%);
+}
+
+.tickerFadeRight {
+  right: 0;
+  background: linear-gradient(to left, #0a0a0a 30%, transparent 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .integrationsTrack {
+    transform: none;
+  }
+}
+
+.heroTitle {
+  font-family: "Inter", sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0;
+  letter-spacing: -0.04em;
+}
+
+.typedWord,
+.typedCursor {
+  color: #aaff00;
+}
+
+.typedWord {
+  display: inline-block;
+  min-width: 12ch;
+  text-shadow: 0 0 14px rgba(170, 255, 0, 0.16);
+}
+
+.typedCursor {
+  animation: blink 0.7s step-end infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typedCursor {
+    animation: none;
+  }
+}
+
 /* ─── Noise texture (trust section background) ─────────────────────────────── */
 .nl-noise {
   position: relative;

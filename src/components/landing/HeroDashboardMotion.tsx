@@ -97,13 +97,20 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
   };
 
   const salesData = [32, 48, 38, 62, 55, 71, 88, 74, 90, 83, 95, 78, 102, 96];
-  const floatingOffset = embedded ? 48 : 148;
+  const floatingOffset = embedded ? 46 : 148;
+  const dashboardMaxWidth = embedded ? 620 : 700;
+  const mainPanelMinHeight = embedded ? 420 : undefined;
+  const contentPadding = embedded ? 18 : 14;
+  const metricCardPadding = embedded ? 14 : 12;
+  const salesChartHeight = embedded ? 76 : 44;
 
   return (
     <div
       className={className}
       style={{
         minHeight: embedded ? undefined : "100vh",
+        width: embedded ? "100%" : undefined,
+        height: embedded ? "100%" : undefined,
         background: embedded ? "transparent" : COLORS.bg,
         display: "flex",
         alignItems: "center",
@@ -116,7 +123,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
         variants={containerVariants}
         initial="hidden"
         animate={autoPlay ? "visible" : "hidden"}
-        style={{ position: "relative", width: "100%", maxWidth: 700, zIndex: 0 }}
+        style={{ position: "relative", width: "100%", maxWidth: dashboardMaxWidth, zIndex: 0 }}
         aria-label="Next Level AI Dashboard"
         role="img"
       >
@@ -124,14 +131,14 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           aria-hidden="true"
           style={{
             position: "absolute",
-            inset: embedded ? "-36px -42px -44px" : "-70px",
+            inset: embedded ? "-58px -76px -68px" : "-70px",
             borderRadius: "50%",
             background: `
-              radial-gradient(circle at 48% 45%, rgba(168,255,62,0.22), transparent 42%),
-              radial-gradient(circle at 64% 58%, rgba(28,63,58,0.34), transparent 58%)
+              radial-gradient(circle at 48% 45%, rgba(168,255,62,0.24), transparent 42%),
+              radial-gradient(circle at 64% 58%, rgba(28,63,58,0.42), transparent 58%)
             `,
-            filter: "blur(62px)",
-            opacity: embedded ? 0.78 : 0.66,
+            filter: "blur(74px)",
+            opacity: embedded ? 0.84 : 0.66,
             pointerEvents: "none",
             zIndex: -1,
           }}
@@ -149,19 +156,20 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
             overflow: "hidden",
             boxShadow: "0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(168,255,62,0.05)",
             display: "flex",
+            minHeight: mainPanelMinHeight,
           }}
         >
           {/* ── SIDEBAR ── */}
           <motion.div
             variants={itemVariants}
             style={{
-              width: 140,
+              width: embedded ? 132 : 140,
               flexShrink: 0,
               background: COLORS.card,
               borderRight: `1px solid ${COLORS.border}`,
               display: "flex",
               flexDirection: "column",
-              padding: "18px 0",
+              padding: embedded ? "22px 0" : "18px 0",
             }}
           >
             <div style={{ padding: "0 14px 16px", borderBottom: `1px solid ${COLORS.border}` }}>
@@ -197,7 +205,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           </motion.div>
 
           {/* ── MAIN CONTENT ── */}
-          <div style={{ flex: 1, padding: 14 }}>
+          <div style={{ flex: 1, padding: contentPadding }}>
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <span style={{ color: COLORS.textMuted, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em" }}>Visão Geral</span>
@@ -208,13 +216,13 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
             </div>
 
             {/* ── METRIC CARDS ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: embedded ? 10 : 8, marginBottom: embedded ? 12 : 8 }}>
               {/* Lucro Real */}
               <motion.div variants={itemVariants}>
                 <motion.div
                   animate={{ boxShadow: [`0 0 0px ${COLORS.neonGlow}`, `0 0 10px ${COLORS.neonGlow}`, `0 0 0px ${COLORS.neonGlow}`] }}
                   transition={{ delay: 3.5, duration: 3, repeat: Infinity }}
-                  style={{ background: COLORS.card, border: `1px solid ${COLORS.borderAccent}`, borderRadius: 9, padding: 12 }}
+                  style={{ background: COLORS.card, border: `1px solid ${COLORS.borderAccent}`, borderRadius: 9, padding: metricCardPadding }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
@@ -234,7 +242,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
 
               {/* Vendas do Mês */}
               <motion.div variants={itemVariants}>
-                <div style={{ background: COLORS.neon, borderRadius: 9, padding: 12 }}>
+                <div style={{ background: COLORS.neon, borderRadius: 9, padding: metricCardPadding }}>
                   <div style={{ color: "rgba(0,0,0,0.5)", fontSize: 8, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: 5 }}>
                     Vendas do Mês
                   </div>
@@ -247,7 +255,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
 
               {/* Margem */}
               <motion.div variants={itemVariants}>
-                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 9, padding: 12 }}>
+                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 9, padding: metricCardPadding }}>
                   <div style={{ color: COLORS.textMuted, fontSize: 8, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: 5 }}>
                     Margem
                   </div>
@@ -265,7 +273,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
 
               {/* Clientes Atendidos */}
               <motion.div variants={itemVariants}>
-                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 9, padding: 12 }}>
+                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 9, padding: metricCardPadding }}>
                   <div style={{ color: COLORS.textMuted, fontSize: 8, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: 5 }}>
                     Clientes Atendidos
                   </div>
@@ -293,7 +301,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
 
             {/* ── SALES CHART ── */}
             <motion.div variants={itemVariants}>
-              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 9, padding: "10px 12px" }}>
+              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, borderRadius: 9, padding: embedded ? "14px 14px" : "10px 12px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 9 }}>
                   <span style={{ color: COLORS.textMuted, fontSize: 8, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase" }}>
                     Vendas — Últimos 7 dias
@@ -306,7 +314,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
                     +15.2%
                   </motion.span>
                 </div>
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 44 }}>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: salesChartHeight }}>
                   {salesData.map((v, i) => {
                     const max = Math.max(...salesData);
                     const isLast = i === salesData.length - 1;
@@ -318,7 +326,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
                         transition={{ delay: 2.5 + i * 0.05, duration: 0.45, ease: "easeOut" }}
                         style={{
                           flex: 1,
-                          height: `${(v / max) * 44}px`,
+                          height: `${(v / max) * salesChartHeight}px`,
                           background: isLast ? COLORS.neon : COLORS.borderAccent,
                           borderRadius: "3px 3px 0 0",
                           originY: 1,
@@ -354,7 +362,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           style={{
             position: "absolute",
             left: -floatingOffset,
-            top: 80,
+            top: embedded ? 122 : 80,
             width: 178,
             background: COLORS.card,
             border: `1px solid ${COLORS.borderAccent}`,
@@ -387,7 +395,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           style={{
             position: "absolute",
             right: -floatingOffset,
-            top: 10,
+            top: embedded ? 40 : 10,
             width: 148,
             background: COLORS.card,
             border: `1px solid ${COLORS.border}`,
@@ -420,7 +428,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
           style={{
             position: "absolute",
             right: -floatingOffset,
-            bottom: 30,
+            bottom: embedded ? 66 : 30,
             width: 166,
             background: COLORS.card,
             border: `1px solid ${COLORS.border}`,

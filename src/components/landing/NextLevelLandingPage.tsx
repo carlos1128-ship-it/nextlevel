@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState, type ReactNode } from "react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
@@ -6,6 +7,7 @@ import {
   BarChart3,
   Bot,
   Check,
+  ChevronDown,
   CreditCard,
   DollarSign,
   Eye,
@@ -88,6 +90,217 @@ function scrollToSection(id: string) {
 const authFieldCls =
   "min-h-[52px] w-full rounded-2xl border border-[#2E3935] bg-[#080D0B] px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#6B7470] focus:border-[#B6FF00]/70 focus:bg-[#0D1210] focus:shadow-[inset_0_0_0_1px_rgba(182,255,0,0.1)]";
 
+const tickerSequence = [
+  "WHATSAPP",
+  "INSTAGRAM",
+  "MERCADO LIVRE",
+  "WHATSAPP",
+  "INSTAGRAM",
+  "MERCADO LIVRE",
+  "WHATSAPP",
+  "INSTAGRAM",
+  "MERCADO LIVRE",
+  "WHATSAPP",
+  "INSTAGRAM",
+  "MERCADO LIVRE",
+];
+
+const typewriterWords = ["vendas", "atendimento", "financeiro"];
+const TYPE_SPEED = 90;
+const DELETE_SPEED = 55;
+const PAUSE_AFTER = 1800;
+const PAUSE_BEFORE = 300;
+
+export function IntegrationsTicker() {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const shouldReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (shouldReduce) {
+      track.style.transform = "none";
+      return;
+    }
+
+    let x = 0;
+    const speed = 0.6;
+    const totalW = track.scrollWidth / 2;
+    let frameId: number;
+
+    function animate() {
+      x -= speed;
+
+      if (Math.abs(x) >= totalW) {
+        x = 0;
+      }
+
+      track.style.transform = `translateX(${x}px)`;
+      frameId = requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  return (
+    <div className="integrationsTicker">
+      <div ref={trackRef} className="integrationsTrack">
+        <span className="item">WHATSAPP</span>
+        <span className="dot">•</span>
+        <span className="item">INSTAGRAM</span>
+        <span className="dot">•</span>
+        <span className="item">MERCADO LIVRE</span>
+        <span className="dot">•</span>
+        <span className="item">WHATSAPP</span>
+        <span className="dot">•</span>
+        <span className="item">INSTAGRAM</span>
+        <span className="dot">•</span>
+        <span className="item">MERCADO LIVRE</span>
+        <span className="dot">•</span>
+        <span className="item">WHATSAPP</span>
+        <span className="dot">•</span>
+        <span className="item">INSTAGRAM</span>
+        <span className="dot">•</span>
+        <span className="item">MERCADO LIVRE</span>
+        <span className="dot">•</span>
+        <span className="item">WHATSAPP</span>
+        <span className="dot">•</span>
+        <span className="item">INSTAGRAM</span>
+        <span className="dot">•</span>
+        <span className="item">MERCADO LIVRE</span>
+      </div>
+
+      <div className="tickerFade tickerFadeLeft" />
+      <div className="tickerFade tickerFadeRight" />
+    </div>
+  );
+}
+
+function TypewriterHeroTitle() {
+  const shouldReduce = useReducedMotion();
+  const [wordIndex, setWordIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    if (shouldReduce) {
+      setStarted(true);
+      setCharIndex(typewriterWords[0].length);
+      return;
+    }
+
+    const startTimeout = window.setTimeout(() => setStarted(true), 600);
+    return () => window.clearTimeout(startTimeout);
+  }, [shouldReduce]);
+
+  useEffect(() => {
+    if (!started || shouldReduce) return;
+
+    const currentWord = typewriterWords[wordIndex];
+    const timeout = window.setTimeout(() => {
+      if (!deleting) {
+        if (charIndex < currentWord.length) {
+          setCharIndex((value) => value + 1);
+        } else {
+          setDeleting(true);
+        }
+      } else if (charIndex > 0) {
+        setCharIndex((value) => value - 1);
+      } else {
+        setDeleting(false);
+        setWordIndex((value) => (value + 1) % typewriterWords.length);
+      }
+    }, !deleting ? (charIndex === currentWord.length ? PAUSE_AFTER : TYPE_SPEED) : charIndex === 0 ? PAUSE_BEFORE : DELETE_SPEED);
+
+    return () => window.clearTimeout(timeout);
+  }, [started, shouldReduce, wordIndex, charIndex, deleting]);
+
+  const typedText = shouldReduce ? typewriterWords[0] : started ? typewriterWords[wordIndex].slice(0, charIndex) : "";
+
+  return (
+    <h1 className="heroTitle">
+      O sistema de gestão com IA
+      <br />
+      para controlar <span className="typedWord">{typedText}</span>
+      <span className="typedCursor">|</span>
+    </h1>
+  );
+}
+
+type RevealProps = {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  amount?: number;
+};
+
+const revealEase = [0.22, 1, 0.36, 1] as const;
+
+function Reveal({ children, className, delay = 0, amount = 0.18 }: RevealProps) {
+  const shouldReduce = useReducedMotion();
+
+  return (
+    <motion.div
+      className={className}
+      initial={shouldReduce ? { opacity: 1 } : { opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount }}
+      transition={{
+        duration: shouldReduce ? 0 : 0.58,
+        delay: shouldReduce ? 0 : delay,
+        ease: revealEase,
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function RevealGrid({ children, className }: { children: ReactNode; className?: string }) {
+  const shouldReduce = useReducedMotion();
+
+  return (
+    <motion.div
+      className={className}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.14 }}
+      variants={{
+        hidden: {},
+        visible: {
+          transition: {
+            staggerChildren: shouldReduce ? 0 : 0.08,
+          },
+        },
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function RevealCard({ children }: { children: ReactNode; key?: React.Key }) {
+  const shouldReduce = useReducedMotion();
+
+  const variants: Variants = {
+    hidden: shouldReduce ? { opacity: 1 } : { opacity: 0, y: 22 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: shouldReduce ? 0 : 0.5,
+        ease: revealEase,
+      },
+    },
+  };
+
+  return <motion.div variants={variants}>{children}</motion.div>;
+}
+
 function AuthAccessSection({
   isRegisterView,
   setIsRegisterView,
@@ -136,7 +349,7 @@ function AuthAccessSection({
   };
 
   return (
-    <section id="login" className="scroll-mt-24 bg-[#080D0B] px-4 py-24 md:px-8">
+    <section id="login" className="nl-unified-section scroll-mt-24 px-4 py-24 md:px-8">
       <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
         <div className="reveal">
           <span className="nl-eyebrow mb-5 block text-[#B6FF00] reveal-delay-1">ACESSO À PLATAFORMA</span>
@@ -311,6 +524,7 @@ export function NextLevelLandingPage({
 }: NextLevelLandingPageProps) {
   useLandingReveal();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [expandedPlans, setExpandedPlans] = useState<Partial<Record<LandingPlanKey, boolean>>>({});
 
   const focusAuth = (register: boolean) => {
     setIsRegisterView(register);
@@ -324,6 +538,10 @@ export function NextLevelLandingPage({
     action();
   };
 
+  const togglePlanBenefits = (planKey: LandingPlanKey) => {
+    setExpandedPlans((current) => ({ ...current, [planKey]: !current[planKey] }));
+  };
+
   const navItems = [
     { label: "Produto", action: () => scrollToSection("produto") },
     { label: "Funcionalidades", action: () => scrollToSection("funcionalidades") },
@@ -333,7 +551,14 @@ export function NextLevelLandingPage({
   ];
 
   return (
-    <div className="font-inter bg-[#080D0B] text-white min-h-screen overflow-x-hidden selection:bg-[#B6FF00] selection:text-black">
+    <div className="nl-landing-page font-inter text-white min-h-screen overflow-x-hidden selection:bg-[#B6FF00] selection:text-black">
+      <div className="landingBackground" aria-hidden="true">
+        <div className="backgroundGrid" />
+        <div className="backgroundContours" />
+        <div className="backgroundCircuitLines" />
+        <div className="backgroundNodes" />
+        <div className="backgroundAtmosphere" />
+      </div>
       {/* ─── NAVBAR ─────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 h-[76px] z-50 nl-glass-panel flex items-center px-6 md:px-12">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
@@ -380,14 +605,9 @@ export function NextLevelLandingPage({
       </nav>
 
       {/* ─── SECTION 1 — HERO (full-bleed, full-height) ─────────────── */}
-      <section id="topo" className="relative min-h-screen flex items-center pt-24 pb-16 px-6 md:px-12 bg-[#080D0B] overflow-hidden">
-        {/* Ambient glows */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[900px] h-[900px] rounded-full bg-[#1C3F3A] blur-[220px] opacity-[0.18]" />
-          <div className="absolute bottom-0 right-1/3 w-[500px] h-[500px] rounded-full bg-[#B6FF00] blur-[220px] opacity-[0.04]" />
-        </div>
+      <section id="topo" className="nl-hero-depth relative min-h-[100dvh] flex items-center pt-24 pb-16 px-6 md:px-12 bg-transparent overflow-hidden">
 
-        <div className="max-w-[1400px] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center relative z-10">
+        <div className="max-w-[1480px] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-[0.84fr_1.16fr] gap-10 xl:gap-12 items-center relative z-10">
           {/* LEFT — Copy */}
           <div className="flex w-full min-w-0 flex-col items-start nl-reveal-left max-[480px]:max-w-[330px]">
             <div className="inline-flex items-center gap-2 bg-[#1A221F] border border-[#2E3935] px-4 py-1.5 rounded-full mb-8">
@@ -395,21 +615,9 @@ export function NextLevelLandingPage({
               <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>
             </div>
 
-            <h1 className="nl-h1 text-white mb-7 max-w-full break-words max-[480px]:text-[34px] max-[480px]:leading-[1.05]">
-              O sistema de{" "}
-              <br className="hidden max-[480px]:block" />
-              <span className="inline-block" style={{ color: "rgba(182, 255, 0, 0.94)", textShadow: "0 0 14px rgba(182, 255, 0, 0.14)" }}>
-                gestão com IA
-              </span>{" "}
-              <br className="hidden max-[480px]:block" />
-              para controlar vendas,{" "}
-              <br className="hidden max-[480px]:block" />
-              atendimento e{" "}
-              <br className="hidden max-[480px]:block" />
-              financeiro{" "}
-              <br className="hidden max-[480px]:block" />
-              em um só lugar
-            </h1>
+            <div className="mb-7 max-w-full">
+              <TypewriterHeroTitle />
+            </div>
 
             <p className="nl-body text-[#AEB8B4] mb-10 w-full max-w-[560px] break-words">
               A NEXT LEVEL centraliza vendas, clientes, produtos, custos, atendimento e relatórios em
@@ -429,53 +637,57 @@ export function NextLevelLandingPage({
           </div>
 
           {/* RIGHT — Dashboard motion */}
-          <div className="relative w-full nl-reveal-scale lg:pl-4">
-            <div className="mx-auto w-full max-w-[780px] origin-center overflow-visible scale-[0.68] sm:scale-[0.82] md:scale-[0.92] lg:translate-x-0 lg:scale-[0.86] xl:-translate-x-1 xl:scale-[0.96] 2xl:translate-x-8 2xl:scale-[1.18]">
-              <HeroDashboardMotion embedded />
+          <div className="nl-hero-visual relative w-full nl-reveal-scale">
+            <div className="nl-hero-dashboard-frame mx-auto origin-center overflow-visible">
+              <HeroDashboardMotion embedded className="nl-hero-dashboard-art" />
             </div>
           </div>
         </div>
       </section>
 
-      <section id="produto" className="bg-white px-4 py-24 text-[#080D0B] md:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="mx-auto mb-16 max-w-3xl text-center">
-            <span className="nl-eyebrow mb-4 block text-[#6B7470]">SISTEMA DE GESTÃO EMPRESARIAL</span>
-            <h2 className="nl-h2 mb-6">A NEXT LEVEL é um ERP simples, inteligente e conectado</h2>
-            <p className="nl-body text-[#6B7470]">
-              Controle financeiro, vendas, clientes, produtos, custos e atendimento em uma central feita para empresários que precisam de clareza sem depender de planilhas.
-            </p>
-          </div>
+      <IntegrationsTicker />
 
-          <div className="grid gap-8 md:grid-cols-3">
+      <section id="produto" className="nl-unified-section px-4 py-24 text-white md:px-8">
+        <div className="mx-auto max-w-6xl">
+          <Reveal className="mx-auto mb-16 max-w-3xl text-center">
+            <span className="nl-eyebrow mb-4 block text-[#B6FF00]">SISTEMA DE GESTÃO EMPRESARIAL</span>
+            <h2 className="nl-h2 mb-6 text-white">A NEXT LEVEL é um ERP simples, inteligente e conectado</h2>
+            <p className="nl-body text-[#AEB8B4]">
+              Controle financeiro, vendas, clientes, produtos, custos e atendimento in uma central feita para empresários que precisam de clareza sem depender de planilhas.
+            </p>
+          </Reveal>
+
+          <RevealGrid className="grid gap-8 md:grid-cols-3">
             {[
               { icon: BarChart3, title: "Controle vendas e financeiro", desc: "Acompanhe faturamento, lucro real, custos, margem e movimentações importantes em dashboards claros e atualizados." },
               { icon: Users, title: "Organize clientes e atendimento", desc: "Centralize conversas, oportunidades e dados de clientes para não perder vendas no meio da rotina." },
               { icon: Bot, title: "Decida com apoio da IA", desc: "Receba alertas, relatórios e recomendações práticas para ajustar preços, reduzir perdas e priorizar as ações certas." },
             ].map((feature) => (
-              <div key={feature.title} className="rounded-[28px] border border-gray-100 bg-white p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition-transform duration-300 hover:-translate-y-2">
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#080D0B] text-[#B6FF00]">
-                  <feature.icon size={24} />
+              <RevealCard key={feature.title}>
+                <div className="rounded-[28px] border border-[#2E3935] bg-[#0D1210] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.34)] transition-transform duration-300 hover:-translate-y-2 hover:border-[#6FAF2A]/40">
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#B6FF00]/15 bg-[#1A221F] text-[#B6FF00]">
+                    <feature.icon size={24} />
+                  </div>
+                  <h3 className="mb-4 text-xl font-bold text-white">{feature.title}</h3>
+                  <p className="leading-relaxed text-[#AEB8B4]">{feature.desc}</p>
                 </div>
-                <h3 className="mb-4 text-xl font-bold">{feature.title}</h3>
-                <p className="leading-relaxed text-[#6B7470]">{feature.desc}</p>
-              </div>
+              </RevealCard>
             ))}
-          </div>
+          </RevealGrid>
         </div>
       </section>
 
-      <section id="funcionalidades" className="relative overflow-hidden bg-[#080D0B] px-4 py-24 md:px-8">
+      <section id="funcionalidades" className="nl-unified-section px-4 py-24 md:px-8">
         <div className="relative z-10 mx-auto max-w-6xl">
-          <div className="mx-auto mb-16 max-w-3xl text-center">
+          <Reveal className="mx-auto mb-16 max-w-3xl text-center">
             <span className="nl-eyebrow mb-4 block text-[#B6FF00]">GESTÃO DE PONTA A PONTA</span>
             <h2 className="nl-h2 mb-6">Da venda ao relatório: sua operação conectada em uma única plataforma</h2>
             <p className="nl-body text-[#AEB8B4]">
               A NEXT LEVEL organiza os dados do negócio, cruza informações de vendas, custos, produtos e atendimento, e transforma tudo em indicadores, relatórios e próximos passos.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="relative mx-auto max-w-5xl">
+          <Reveal className="relative mx-auto max-w-5xl" amount={0.12}>
             <div className="overflow-hidden rounded-b-[16px] rounded-t-[32px] border border-[#2E3935] bg-[#0D1210] shadow-[0_30px_100px_rgba(0,0,0,0.8)]">
               <div className="flex h-16 items-center justify-between border-b border-[#2E3935] bg-[#141B18] px-4 md:px-6">
                 <div className="flex items-center gap-4">
@@ -515,7 +727,7 @@ export function NextLevelLandingPage({
                     <div className="flex h-full items-end gap-2">
                       {[30, 45, 60, 50, 75, 65, 90].map((height, index) => (
                         <div key={index} className="group relative flex-1 cursor-pointer rounded-t-md bg-[#222C28] transition-colors hover:bg-[#B6FF00]" style={{ height: `${height}%` }}>
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-white px-2 py-1 text-[10px] font-bold text-black opacity-0 transition-opacity group-hover:opacity-100">
+                           <div className="absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-white px-2 py-1 text-[10px] font-bold text-black opacity-0 transition-opacity group-hover:opacity-100">
                             {height * 120}
                           </div>
                         </div>
@@ -579,20 +791,20 @@ export function NextLevelLandingPage({
               <Check size={16} className="text-green-500" />
               <span className="text-xs font-medium text-white">Relatório inteligente pronto</span>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      <section id="chat-ia" className="bg-gradient-to-b from-[#1C3F3A] to-[#0F2420] px-4 py-24 md:px-8">
-        <div className="mx-auto mb-16 max-w-4xl text-center">
+      <section id="chat-ia" className="nl-unified-section px-4 py-24 md:px-8">
+        <Reveal className="mx-auto mb-16 max-w-4xl text-center">
           <span className="nl-eyebrow mb-4 block text-[#B6FF00]/70">ASSISTENTE DE GESTÃO COM IA</span>
           <h2 className="nl-h2 mb-6 text-white">Um analista de negócios dentro do seu ERP</h2>
           <p className="nl-body mx-auto max-w-2xl text-[#AEB8B4]">
             Pergunte sobre vendas, custos, clientes, produtos, margem e atendimento. A IA responde com base nos dados da operação e mostra o que merece atenção.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mx-auto max-w-3xl">
+        <Reveal className="mx-auto max-w-3xl" delay={0.08}>
           <div className="nl-shadow-neon overflow-hidden rounded-[24px] border border-[#1C3F3A] bg-[#0D1210]">
             <div className="flex items-center justify-between border-b border-[#2E3935] bg-[#141B18] p-4">
               <div className="flex items-center gap-3">
@@ -629,105 +841,111 @@ export function NextLevelLandingPage({
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
-      <section id="integracoes" className="bg-white px-4 py-24 md:px-8">
+      <section id="integracoes" className="nl-unified-section px-4 py-24 md:px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-16 lg:flex-row">
-          <div className="lg:w-1/3">
-            <span className="nl-eyebrow mb-4 block text-[#6B7470]">INTEGRAÇÕES</span>
-            <h2 className="nl-h2 mb-6 text-[#080D0B]">Conecte os canais que movem sua operação</h2>
-            <p className="nl-body mb-8 text-[#6B7470]">
+          <Reveal className="lg:w-1/3">
+            <span className="nl-eyebrow mb-4 block text-[#B6FF00]">INTEGRAÇÕES</span>
+            <h2 className="nl-h2 mb-6 text-white">Conecte os canais que movem sua operação</h2>
+            <p className="nl-body mb-8 text-[#AEB8B4]">
               Traga dados de atendimento, mensagens e vendas para dentro da NEXT LEVEL AI e acompanhe tudo em uma visão centralizada.
             </p>
-            <button type="button" onClick={() => focusAuth(true)} className="inline-flex items-center gap-2 border-b-2 border-[#B6FF00] pb-1 font-bold text-[#080D0B] transition-colors hover:text-[#1C3F3A]">
-              Ver integrações disponíveis <ArrowRight size={16} />
+            <button type="button" onClick={() => focusAuth(true)} className="inline-flex items-center gap-2 border-b-2 border-[#B6FF00] pb-1 font-bold text-white transition-colors hover:text-[#B6FF00]">
+              Veja como funciona <ArrowRight size={16} />
             </button>
-          </div>
+          </Reveal>
 
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:w-2/3">
+          <RevealGrid className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:w-2/3">
             {[
               { name: "WhatsApp", label: "Atendimento e oportunidades", icon: MessageSquare },
               { name: "Instagram", label: "Mensagens e clientes", icon: Smartphone },
               { name: "Mercado Livre", label: "Marketplace e vendas", icon: Package },
             ].map((integration) => (
-              <div key={integration.name} className="group flex h-32 flex-col justify-between rounded-2xl border border-[#1A221F] bg-[#0D1210] p-5 transition-transform hover:-translate-y-1">
-                <div className="flex items-start justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1A221F] text-white transition-colors group-hover:text-[#B6FF00]">
-                    <integration.icon size={20} />
+              <RevealCard key={integration.name}>
+                <div className="group flex h-32 flex-col justify-between rounded-2xl border border-[#1A221F] bg-[#0D1210] p-5 transition-transform hover:-translate-y-1">
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1A221F] text-white transition-colors group-hover:text-[#B6FF00]">
+                      <integration.icon size={20} />
+                    </div>
+                    <div className="h-2 w-2 rounded-full bg-green-500" />
                   </div>
-                  <div className="h-2 w-2 rounded-full bg-green-500" />
+                  <div>
+                    <h4 className="text-sm font-bold text-white">{integration.name}</h4>
+                    <p className="text-xs text-[#6B7470]">{integration.label}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">{integration.name}</h4>
-                  <p className="text-xs text-[#6B7470]">{integration.label}</p>
-                </div>
-              </div>
+              </RevealCard>
             ))}
-          </div>
+          </RevealGrid>
         </div>
       </section>
 
-      <section className="bg-[#0D1210] px-4 py-24 md:px-8">
+      <section className="nl-unified-section px-4 py-24 md:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mx-auto mb-16 max-w-3xl text-center">
+          <Reveal className="mx-auto mb-16 max-w-3xl text-center">
             <span className="nl-eyebrow mb-4 block text-[#B6FF00]">INTELIGÊNCIA OPERACIONAL</span>
             <h2 className="nl-h2 mb-6 text-white">Além de registrar dados, a NEXT LEVEL mostra o que fazer com eles</h2>
             <p className="nl-body text-[#AEB8B4]">
               A plataforma identifica padrões, riscos e oportunidades na operação para ajudar o empresário a vender melhor, controlar custos e proteger margem.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <RevealGrid className="grid gap-6 md:grid-cols-2">
             {[
               { icon: TrendingUp, title: "Previsão de vendas", desc: "Antecipe períodos fortes e fracos com base no histórico de vendas e no comportamento da operação." },
               { icon: LineChart, title: "Análise de margem", desc: "Veja quais produtos vendem bem, mas deixam pouco lucro, e ajuste antes de escalar campanhas." },
               { icon: AlertTriangle, title: "Alertas proativos", desc: "Receba avisos sobre queda de margem, aumento de custos, baixa conversão ou clientes sem retorno." },
               { icon: BarChart3, title: "Relatórios inteligentes", desc: "Gere análises visuais com explicações claras sobre vendas, custos, clientes e pontos de atenção." },
             ].map((card) => (
-              <div key={card.title} className="rounded-3xl border border-[#2E3935] bg-[#141B18] p-8 transition-all duration-300 hover:-translate-y-2 hover:border-[#1C3F3A]">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-[#2E3935] bg-[#080D0B] text-[#B6FF00]">
-                  <card.icon size={20} />
+              <RevealCard key={card.title}>
+                <div className="rounded-3xl border border-[#2E3935] bg-[#141B18] p-8 transition-all duration-300 hover:-translate-y-2 hover:border-[#1C3F3A]">
+                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-[#2E3935] bg-[#080D0B] text-[#B6FF00]">
+                    <card.icon size={20} />
+                  </div>
+                  <h3 className="mb-3 text-xl font-bold text-white">{card.title}</h3>
+                  <p className="leading-relaxed text-[#AEB8B4]">{card.desc}</p>
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-white">{card.title}</h3>
-                <p className="leading-relaxed text-[#AEB8B4]">{card.desc}</p>
-              </div>
+              </RevealCard>
             ))}
-          </div>
+          </RevealGrid>
         </div>
       </section>
 
-      <section id="seguranca" className="nl-noise bg-[#EBE8D8] px-4 py-24 text-[#080D0B] md:px-8">
+      <section id="seguranca" className="nl-unified-section nl-noise px-4 py-24 text-white md:px-8">
         <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-16 md:flex-row">
-          <div className="md:w-1/2">
-            <span className="nl-eyebrow mb-4 block text-[#1C3F3A]">SEGURANÇA E CONFIANÇA</span>
-            <h2 className="nl-h2 mb-6">Gestão empresarial exige dados bem protegidos</h2>
-            <p className="nl-body text-[#4A5450]">
+          <Reveal className="md:w-1/2">
+            <span className="nl-eyebrow mb-4 block text-[#B6FF00]">SEGURANÇA E CONFIANÇA</span>
+            <h2 className="nl-h2 mb-6 text-white">Gestão empresarial exige dados bem protegidos</h2>
+            <p className="nl-body text-[#AEB8B4]">
               A NEXT LEVEL organiza informações sensíveis da empresa com foco em segurança, controle de acesso e clareza para tomada de decisão.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="space-y-4 md:w-1/2">
+          <RevealGrid className="space-y-4 md:w-1/2">
             {[
               "Dados separados por empresa em estrutura multi-tenant",
               "Acesso protegido por autenticação e sessões seguras",
               "Integrações com controle e rastreabilidade",
               "Relatórios e análises voltados para decisão empresarial",
             ].map((item) => (
-              <div key={item} className="flex items-center gap-4 rounded-2xl border border-white bg-white/60 p-6 shadow-sm backdrop-blur-sm transition-colors hover:bg-white">
-                <div className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1C3F3A] text-[#B6FF00]">
-                  <Check size={12} />
+              <RevealCard key={item}>
+                <div className="flex items-center gap-4 rounded-2xl border border-[#2E3935] bg-[#0D1210]/80 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.25)] backdrop-blur-sm transition-colors hover:border-[#6FAF2A]/40 hover:bg-[#141B18]">
+                  <div className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1C3F3A] text-[#B6FF00]">
+                    <Check size={12} />
+                  </div>
+                  <span className="font-semibold text-[#E6EAE4]">{item}</span>
                 </div>
-                <span className="font-semibold text-[#1C3F3A]">{item}</span>
-              </div>
+              </RevealCard>
             ))}
-          </div>
+          </RevealGrid>
         </div>
       </section>
 
-      <section id="planos" className="scroll-mt-24 bg-[#080D0B] px-4 py-24 md:px-8">
+      <section id="planos" className="nl-unified-section scroll-mt-24 px-4 py-24 md:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-12 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <Reveal className="mb-12 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <span className="nl-eyebrow mb-4 block text-[#B6FF00]">PLANOS</span>
               <h2 className="nl-h2 mb-5 text-white">Escolha o plano ideal para o momento da sua empresa</h2>
@@ -746,11 +964,16 @@ export function NextLevelLandingPage({
               </div>
               {billingAnnual && <span className="rounded-full border border-[#B6FF00]/25 bg-[#B6FF00]/10 px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#B6FF00]">Economize no anual</span>}
             </div>
-          </div>
+          </Reveal>
 
-          <div className="grid gap-5 lg:grid-cols-3">
-            {plans.map((plan) => (
-              <div key={plan.key} className={`relative flex flex-col rounded-[30px] border p-6 transition-transform duration-300 hover:-translate-y-2 ${plan.recommended ? "border-[#B6FF00]/40 bg-[#0D1210] nl-shadow-neon" : "border-[#2E3935] bg-[#0D1210]"}`}>
+          <RevealGrid className="grid gap-5 lg:grid-cols-3">
+            {plans.map((plan) => {
+              const isExpanded = Boolean(expandedPlans[plan.key]);
+              const visibleFeatures = isExpanded ? plan.features : plan.features.slice(0, 5);
+
+              return (
+              <RevealCard key={plan.key}>
+              <div className={`relative flex flex-col rounded-[30px] border p-6 transition-transform duration-300 hover:-translate-y-2 ${plan.recommended ? "border-[#B6FF00]/40 bg-[#0D1210] nl-shadow-neon" : "border-[#2E3935] bg-[#0D1210]"}`}>
                 {plan.recommended && (
                   <div className="absolute -top-4 right-6 rounded-full bg-[#B6FF00] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#080D0B]">
                     Mais escolhido
@@ -776,8 +999,8 @@ export function NextLevelLandingPage({
                   <p className="mt-3 text-xs leading-5 text-[#AEB8B4]">{plan.aiDescription}</p>
                 </div>
 
-                <ul className="mt-6 flex-1 space-y-3">
-                  {plan.features.map((feature) => (
+                <ul id={`plan-features-${plan.key}`} className="mt-6 flex-1 space-y-3">
+                  {visibleFeatures.map((feature) => (
                     <li key={feature} className="flex gap-3 text-sm leading-5 text-[#E6EAE4]">
                       <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${plan.recommended ? "bg-[#B6FF00] text-[#080D0B]" : "border border-[#2E3935] text-[#B6FF00]"}`}>
                         <Check size={12} />
@@ -787,6 +1010,19 @@ export function NextLevelLandingPage({
                   ))}
                 </ul>
 
+                {plan.features.length > 5 && (
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={`plan-features-${plan.key}`}
+                    onClick={() => togglePlanBenefits(plan.key)}
+                    className="mt-4 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-[#AEB8B4] transition-colors hover:text-[#B6FF00]"
+                  >
+                    Ver mais benefícios
+                    <ChevronDown size={14} className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                  </button>
+                )}
+
                 <button type="button" onClick={() => onSelectPlan(plan.key)} className={`mt-7 rounded-2xl px-5 py-4 text-sm font-bold transition-all hover:scale-[1.01] active:scale-[0.98] ${plan.recommended ? "bg-[#B6FF00] text-[#080D0B] hover:bg-[#9BE600]" : "border border-[#2E3935] bg-[#141B18] text-white hover:border-[#B6FF00]/40"}`}>
                   {plan.cta}
                 </button>
@@ -795,8 +1031,10 @@ export function NextLevelLandingPage({
                   {plan.microcopy}
                 </p>
               </div>
-            ))}
-          </div>
+              </RevealCard>
+              );
+            })}
+          </RevealGrid>
         </div>
       </section>
 
@@ -822,9 +1060,9 @@ export function NextLevelLandingPage({
         onGoogleLogin={onGoogleLogin}
       />
 
-      <section id="comece" className="relative overflow-hidden bg-[#080D0B] px-4 py-32 md:px-8">
+      <section id="comece" className="nl-unified-section px-4 py-32 md:px-8">
         <div className="relative z-10 mx-auto max-w-5xl">
-          <div className="nl-shadow-neon relative overflow-hidden rounded-[48px] border border-[#1C3F3A] bg-[#0D1210] p-10 text-center md:p-20">
+          <Reveal className="nl-shadow-neon relative overflow-hidden rounded-[48px] border border-[#1C3F3A] bg-[#0D1210] p-10 text-center md:p-20">
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-[80%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#B6FF00]/5 blur-[120px]" />
 
             <span className="nl-eyebrow relative z-10 mb-6 block text-[#B6FF00]/70">COMECE COM CONTROLE</span>
@@ -860,7 +1098,7 @@ export function NextLevelLandingPage({
                 Entrar na minha conta
               </button>
             </div>
-          </div>
+          </Reveal>
         </div>
 
         {[
@@ -875,7 +1113,7 @@ export function NextLevelLandingPage({
         ))}
       </section>
 
-      <footer className="border-t border-[#2E3935] bg-[#080D0B] px-4 pb-10 pt-20 md:px-8">
+      <footer className="border-t border-[#2E3935] bg-transparent px-4 pb-10 pt-20 md:px-8">
         <div className="mx-auto mb-16 flex max-w-7xl flex-col justify-between gap-12 md:flex-row">
           <div className="md:w-1/3">
             <div className="mb-6 flex items-center gap-2">
