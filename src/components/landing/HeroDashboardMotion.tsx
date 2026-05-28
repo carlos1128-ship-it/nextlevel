@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion, useReducedMotion, Variants } from "framer-motion";
 
 const COLORS = {
@@ -85,6 +86,7 @@ interface HeroDashboardMotionProps {
 
 export function HeroDashboardMotion({ autoPlay = true, embedded = false, className }: HeroDashboardMotionProps) {
   const shouldReduce = useReducedMotion();
+  const [hoveredSalesBar, setHoveredSalesBar] = useState<number | null>(null);
 
   const containerVariants: Variants = {
     hidden: {},
@@ -318,21 +320,61 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
                   {salesData.map((v, i) => {
                     const max = Math.max(...salesData);
                     const isLast = i === salesData.length - 1;
+                    const isHovered = hoveredSalesBar === i;
+                    const tooltipValue = (v * 100).toLocaleString("pt-BR");
                     return (
-                      <motion.div
+                      <div
                         key={i}
-                        initial={{ scaleY: 0 }}
-                        animate={{ scaleY: 1 }}
-                        transition={{ delay: 2.5 + i * 0.05, duration: 0.45, ease: "easeOut" }}
+                        onMouseEnter={() => setHoveredSalesBar(i)}
+                        onMouseLeave={() => setHoveredSalesBar(null)}
                         style={{
                           flex: 1,
-                          height: `${(v / max) * salesChartHeight}px`,
-                          background: isLast ? COLORS.neon : COLORS.borderAccent,
-                          borderRadius: "3px 3px 0 0",
-                          originY: 1,
+                          height: "100%",
+                          display: "flex",
+                          alignItems: "flex-end",
+                          position: "relative",
                           minWidth: 0,
+                          cursor: "pointer",
                         }}
-                      />
+                      >
+                        {isHovered && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              bottom: `${(v / max) * salesChartHeight + 8}px`,
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              borderRadius: 4,
+                              background: "#ffffff",
+                              color: "#080D0B",
+                              padding: "4px 7px",
+                              fontSize: 9,
+                              fontWeight: 800,
+                              lineHeight: 1,
+                              boxShadow: "0 8px 18px rgba(0,0,0,0.28)",
+                              zIndex: 20,
+                              pointerEvents: "none",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {tooltipValue}
+                          </div>
+                        )}
+                        <motion.div
+                          initial={{ scaleY: 0 }}
+                          animate={{ scaleY: 1 }}
+                          transition={{ delay: 2.5 + i * 0.05, duration: 0.45, ease: "easeOut" }}
+                          style={{
+                            width: "100%",
+                            height: `${(v / max) * salesChartHeight}px`,
+                            background: isHovered || isLast ? COLORS.neon : COLORS.borderAccent,
+                            boxShadow: isHovered ? `0 0 12px ${COLORS.neonGlowStrong}` : "none",
+                            borderRadius: "3px 3px 0 0",
+                            originY: 1,
+                            transition: "background 160ms ease, box-shadow 160ms ease",
+                          }}
+                        />
+                      </div>
                     );
                   })}
                 </div>
