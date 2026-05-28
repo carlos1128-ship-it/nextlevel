@@ -203,8 +203,12 @@
   aspect-ratio: 1.32 / 1;
   height: clamp(570px, 40vw, 740px);
   width: min(100%, calc(clamp(570px, 40vw, 740px) * 1.32));
-  transform: none;
-  filter: drop-shadow(0 38px 90px rgba(0, 0, 0, 0.42));
+  transform: perspective(1500px) translateX(-1.5%) rotateX(1.2deg) rotateY(-4.8deg) rotateZ(1.35deg) scale(0.96);
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+  filter: none;
 }
 
 .nl-hero-dashboard-art {

@@ -412,6 +412,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
             padding: 11,
             boxShadow: `0 16px 40px rgba(0,0,0,0.55)`,
             zIndex: 10,
+            pointerEvents: "none",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7 }}>
@@ -445,6 +446,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
             padding: 11,
             boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
             zIndex: 10,
+            pointerEvents: "none",
           }}
         >
           <div style={{ color: COLORS.textMuted, fontSize: 8, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 8 }}>
@@ -478,6 +480,7 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
             padding: 11,
             boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
             zIndex: 10,
+            pointerEvents: "none",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 8 }}>
