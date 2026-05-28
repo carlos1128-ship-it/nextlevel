@@ -97,9 +97,9 @@ export function HeroDashboardMotion({ autoPlay = true, embedded = false, classNa
   };
 
   const salesData = [32, 48, 38, 62, 55, 71, 88, 74, 90, 83, 95, 78, 102, 96];
-  const floatingOffset = embedded ? 46 : 148;
-  const dashboardMaxWidth = embedded ? 620 : 700;
-  const mainPanelMinHeight = embedded ? 420 : undefined;
+  const floatingOffset = embedded ? 0 : 148;
+  const dashboardMaxWidth = embedded ? 860 : 700;
+  const mainPanelMinHeight = embedded ? 470 : undefined;
   const contentPadding = embedded ? 18 : 14;
   const metricCardPadding = embedded ? 14 : 12;
   const salesChartHeight = embedded ? 76 : 44;

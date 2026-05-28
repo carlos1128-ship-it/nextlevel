@@ -68,7 +68,7 @@ const HeroTitle = ({ loaded = true }: { loaded?: boolean }) => (
     }}
   >
     <span className="nl-title-line">O sistema de gestão</span>
-    <span className="nl-title-line">com ia para controlar</span>
+    <span className="nl-title-line">com IA para controlar</span>
     <span className="nl-title-line nl-title-line-typed">
       <HeroTyped />
     </span>

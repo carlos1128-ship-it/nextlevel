@@ -422,7 +422,7 @@ export function NextLevelLandingPage({
         <div className="backgroundAtmosphere" />
       </div>
       {/* ─── NAVBAR ─────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 h-[76px] z-50 nl-glass-panel flex items-center px-6 md:px-12">
+      <nav className="nlHeader fixed top-0 left-0 right-0 h-[76px] nl-glass-panel flex items-center px-6 md:px-12">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <button type="button" onClick={() => scrollToSection("topo")} className="flex items-center gap-2 cursor-pointer group">
             <div className="w-3 h-3 rounded-full bg-[#B6FF00] shadow-[0_0_12px_rgba(182,255,0,0.6)] group-hover:scale-110 transition-transform" />
@@ -467,11 +467,11 @@ export function NextLevelLandingPage({
       </nav>
 
       {/* ─── SECTION 1 — HERO (full-bleed, full-height) ─────────────── */}
-      <section id="topo" className="nl-hero-depth relative min-h-[100dvh] flex items-center pt-24 pb-16 px-6 md:px-12 bg-transparent overflow-hidden">
+      <section id="topo" className="nlHero nl-hero-depth relative flex items-center px-6 md:px-12 bg-transparent overflow-hidden">
 
-        <div className="max-w-[1480px] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-[0.94fr_1.06fr] gap-10 xl:gap-16 items-center relative z-10">
+        <div className="nlHeroInner max-w-[1480px] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-[minmax(560px,0.9fr)_minmax(620px,1.1fr)] gap-10 xl:gap-16 items-center relative z-10">
           {/* LEFT — Copy */}
-          <div className="flex w-full min-w-0 flex-col items-start nl-reveal-left max-[480px]:max-w-[330px]">
+          <div className="nlHeroContent flex w-full min-w-0 flex-col items-start nl-reveal-left max-[480px]:max-w-[330px]">
             <div className="inline-flex items-center gap-2 bg-[#1A221F] border border-[#2E3935] px-4 py-1.5 rounded-full mb-8">
               <div className="w-1.5 h-1.5 rounded-full bg-[#B6FF00] animate-pulse-neon" />
               <span className="nl-eyebrow text-[#B6FF00]">ERP COM IA PARA O SEU NEGÓCIO</span>

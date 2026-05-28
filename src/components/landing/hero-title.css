@@ -5,18 +5,34 @@
   --nl-bg:     #070c09;
   --nl-white:  #f4f6f2;
   --nl-lime:   #aaff00;
+  --nl-header-height: 76px;
 }
 
 /* ── h1 title ─────────────────────────────────────────────── */
 .nl-hero-title {
+  position: relative;
+  z-index: 8;
   font-family: 'Inter', sans-serif;
   font-weight: 900;
-  line-height: 1.08;
-  letter-spacing: -0.035em;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
   margin-bottom: 1.5rem;
   color: var(--nl-white);
-  font-size: 3.85rem;
+  font-size: clamp(2.8rem, 3.35vw, 4.1rem);
   transition: opacity 0.7s ease, transform 0.7s ease;
+  text-shadow:
+    0 2px 18px rgba(3, 5, 4, 0.96),
+    0 0 34px rgba(3, 5, 4, 0.9);
+}
+
+.nl-hero-title::before {
+  content: "";
+  position: absolute;
+  inset: -0.14em -0.18em;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 42% 50%, rgba(3, 5, 4, 0.86), rgba(3, 5, 4, 0.42) 54%, transparent 78%);
+  filter: blur(10px);
 }
 
 .nl-title-line {
@@ -61,45 +77,27 @@
   .nl-hero-title   { transition: none !important; }
 }
 
-@media (min-width: 1536px) {
-  .nl-hero-title {
-    font-size: 4.35rem;
-  }
-}
-
-@media (max-width: 1279px) {
-  .nl-hero-title {
-    font-size: 3.25rem;
-  }
-}
-
-@media (min-width: 1024px) and (max-width: 1350px) {
-  .nl-hero-title {
-    font-size: 3.4rem;
-  }
-}
-
 @media (max-width: 1023px) {
   .nl-hero-title {
-    font-size: 3.55rem;
+    font-size: clamp(2.7rem, 8vw, 3.8rem);
   }
 }
 
 @media (max-width: 640px) {
   .nl-hero-title {
-    font-size: 2.25rem;
+    font-size: clamp(2.05rem, 9.8vw, 2.8rem);
     letter-spacing: -0.03em;
   }
 }
 
 @media (max-width: 480px) {
   .nl-hero-title {
-    font-size: 1.96rem;
+    font-size: clamp(1.72rem, 9.2vw, 2.1rem);
   }
 }
 
 @media (max-width: 380px) {
   .nl-hero-title {
-    font-size: 1.78rem;
+    font-size: 1.66rem;
   }
 }
