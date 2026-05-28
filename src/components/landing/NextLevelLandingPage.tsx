@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState, type ReactNode } from "react";
+"use client";
+
+import React, { useState, type ReactNode } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import {
   Activity,
@@ -30,6 +32,7 @@ import "../../styles/landing-page-styles.css";
 import "../../styles/animations.css";
 import { useLandingReveal } from "../../hooks/useLandingReveal";
 import { HeroDashboardMotion } from "./HeroDashboardMotion";
+import HeroTitle from "./HeroTitle";
 
 export type LandingPlanKey = "COMMON" | "PREMIUM" | "PRO_BUSINESS";
 
@@ -89,147 +92,6 @@ function scrollToSection(id: string) {
 
 const authFieldCls =
   "min-h-[52px] w-full rounded-2xl border border-[#2E3935] bg-[#080D0B] px-4 py-3 text-sm text-white outline-none transition placeholder:text-[#6B7470] focus:border-[#B6FF00]/70 focus:bg-[#0D1210] focus:shadow-[inset_0_0_0_1px_rgba(182,255,0,0.1)]";
-
-const tickerSequence = [
-  "WHATSAPP",
-  "INSTAGRAM",
-  "MERCADO LIVRE",
-  "WHATSAPP",
-  "INSTAGRAM",
-  "MERCADO LIVRE",
-  "WHATSAPP",
-  "INSTAGRAM",
-  "MERCADO LIVRE",
-  "WHATSAPP",
-  "INSTAGRAM",
-  "MERCADO LIVRE",
-];
-
-const typewriterWords = ["vendas", "atendimento", "financeiro"];
-const TYPE_SPEED = 90;
-const DELETE_SPEED = 55;
-const PAUSE_AFTER = 1800;
-const PAUSE_BEFORE = 300;
-
-export function IntegrationsTicker() {
-  const trackRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    const shouldReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (shouldReduce) {
-      track.style.transform = "none";
-      return;
-    }
-
-    let x = 0;
-    const speed = 0.6;
-    const totalW = track.scrollWidth / 2;
-    let frameId: number;
-
-    function animate() {
-      x -= speed;
-
-      if (Math.abs(x) >= totalW) {
-        x = 0;
-      }
-
-      track.style.transform = `translateX(${x}px)`;
-      frameId = requestAnimationFrame(animate);
-    }
-
-    animate();
-
-    return () => cancelAnimationFrame(frameId);
-  }, []);
-
-  return (
-    <div className="integrationsTicker">
-      <div ref={trackRef} className="integrationsTrack">
-        <span className="item">WHATSAPP</span>
-        <span className="dot">•</span>
-        <span className="item">INSTAGRAM</span>
-        <span className="dot">•</span>
-        <span className="item">MERCADO LIVRE</span>
-        <span className="dot">•</span>
-        <span className="item">WHATSAPP</span>
-        <span className="dot">•</span>
-        <span className="item">INSTAGRAM</span>
-        <span className="dot">•</span>
-        <span className="item">MERCADO LIVRE</span>
-        <span className="dot">•</span>
-        <span className="item">WHATSAPP</span>
-        <span className="dot">•</span>
-        <span className="item">INSTAGRAM</span>
-        <span className="dot">•</span>
-        <span className="item">MERCADO LIVRE</span>
-        <span className="dot">•</span>
-        <span className="item">WHATSAPP</span>
-        <span className="dot">•</span>
-        <span className="item">INSTAGRAM</span>
-        <span className="dot">•</span>
-        <span className="item">MERCADO LIVRE</span>
-      </div>
-
-      <div className="tickerFade tickerFadeLeft" />
-      <div className="tickerFade tickerFadeRight" />
-    </div>
-  );
-}
-
-function TypewriterHeroTitle() {
-  const shouldReduce = useReducedMotion();
-  const [wordIndex, setWordIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    if (shouldReduce) {
-      setStarted(true);
-      setCharIndex(typewriterWords[0].length);
-      return;
-    }
-
-    const startTimeout = window.setTimeout(() => setStarted(true), 600);
-    return () => window.clearTimeout(startTimeout);
-  }, [shouldReduce]);
-
-  useEffect(() => {
-    if (!started || shouldReduce) return;
-
-    const currentWord = typewriterWords[wordIndex];
-    const timeout = window.setTimeout(() => {
-      if (!deleting) {
-        if (charIndex < currentWord.length) {
-          setCharIndex((value) => value + 1);
-        } else {
-          setDeleting(true);
-        }
-      } else if (charIndex > 0) {
-        setCharIndex((value) => value - 1);
-      } else {
-        setDeleting(false);
-        setWordIndex((value) => (value + 1) % typewriterWords.length);
-      }
-    }, !deleting ? (charIndex === currentWord.length ? PAUSE_AFTER : TYPE_SPEED) : charIndex === 0 ? PAUSE_BEFORE : DELETE_SPEED);
-
-    return () => window.clearTimeout(timeout);
-  }, [started, shouldReduce, wordIndex, charIndex, deleting]);
-
-  const typedText = shouldReduce ? typewriterWords[0] : started ? typewriterWords[wordIndex].slice(0, charIndex) : "";
-
-  return (
-    <h1 className="heroTitle">
-      O sistema de gestão com IA
-      <br />
-      para controlar <span className="typedWord">{typedText}</span>
-      <span className="typedCursor">|</span>
-    </h1>
-  );
-}
 
 type RevealProps = {
   children: ReactNode;
@@ -607,7 +469,7 @@ export function NextLevelLandingPage({
       {/* ─── SECTION 1 — HERO (full-bleed, full-height) ─────────────── */}
       <section id="topo" className="nl-hero-depth relative min-h-[100dvh] flex items-center pt-24 pb-16 px-6 md:px-12 bg-transparent overflow-hidden">
 
-        <div className="max-w-[1480px] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-[0.84fr_1.16fr] gap-10 xl:gap-12 items-center relative z-10">
+        <div className="max-w-[1480px] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-[0.94fr_1.06fr] gap-10 xl:gap-16 items-center relative z-10">
           {/* LEFT — Copy */}
           <div className="flex w-full min-w-0 flex-col items-start nl-reveal-left max-[480px]:max-w-[330px]">
             <div className="inline-flex items-center gap-2 bg-[#1A221F] border border-[#2E3935] px-4 py-1.5 rounded-full mb-8">
@@ -616,7 +478,7 @@ export function NextLevelLandingPage({
             </div>
 
             <div className="mb-7 max-w-full">
-              <TypewriterHeroTitle />
+              <HeroTitle />
             </div>
 
             <p className="nl-body text-[#AEB8B4] mb-10 w-full max-w-[560px] break-words">
@@ -638,14 +500,12 @@ export function NextLevelLandingPage({
 
           {/* RIGHT — Dashboard motion */}
           <div className="nl-hero-visual relative w-full nl-reveal-scale">
-            <div className="nl-hero-dashboard-frame mx-auto origin-center overflow-visible">
+            <div className="nl-hero-dashboard-frame mx-auto lg:mx-0 lg:ml-auto origin-center overflow-visible">
               <HeroDashboardMotion embedded className="nl-hero-dashboard-art" />
             </div>
           </div>
         </div>
       </section>
-
-      <IntegrationsTicker />
 
       <section id="produto" className="nl-unified-section px-4 py-24 text-white md:px-8">
         <div className="mx-auto max-w-6xl">

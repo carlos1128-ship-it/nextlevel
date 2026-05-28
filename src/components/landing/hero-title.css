@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  --nl-bg:     #070c09;
+  --nl-white:  #f4f6f2;
+  --nl-lime:   #aaff00;
+}
+
+/* ── h1 title ─────────────────────────────────────────────── */
+.nl-hero-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin-bottom: 1.5rem;
+  color: var(--nl-white);
+  font-size: 3.85rem;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.nl-title-line {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.nl-title-line-typed {
+  min-height: 1.08em;
+}
+
+/* ── Typewriter wrapper ──────────────────────────────────── */
+.nl-typed-wrapper {
+  display: inline-flex;
+  min-width: 12ch;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.nl-typed-word {
+  color: var(--nl-lime);
+}
+
+.nl-typed-cursor {
+  color: var(--nl-lime);
+}
+
+/* ── Blinking cursor ─────────────────────────────────────── */
+@keyframes nl-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.nl-cursor-blink {
+  animation: nl-blink 1s step-end infinite;
+}
+
+/* ── Respect reduced motion ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .nl-cursor-blink { animation: none; }
+  .nl-hero-title   { transition: none !important; }
+}
+
+@media (min-width: 1536px) {
+  .nl-hero-title {
+    font-size: 4.35rem;
+  }
+}
+
+@media (max-width: 1279px) {
+  .nl-hero-title {
+    font-size: 3.25rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1350px) {
+  .nl-hero-title {
+    font-size: 3.4rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .nl-hero-title {
+    font-size: 3.55rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .nl-hero-title {
+    font-size: 2.25rem;
+    letter-spacing: -0.03em;
+  }
+}
+
+@media (max-width: 480px) {
+  .nl-hero-title {
+    font-size: 1.96rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .nl-hero-title {
+    font-size: 1.78rem;
+  }
+}
